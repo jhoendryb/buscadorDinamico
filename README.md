@@ -2,7 +2,7 @@
 
 # OBJETIVOS
 
-1- ✅ Crear estructura html por defecto
+1- ✅ Crear estructura html por defecto # <br>
 2- ✅ Crear funcion que cargue contenedor de items con un objeto data
 3- ✅ Crear funcion que sea capaz de indexar las busquedas en caso de que no existan datos en el objeto data
 4- ✅ Crear paginacion
