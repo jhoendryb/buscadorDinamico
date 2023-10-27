@@ -1,5 +1,9 @@
 # <span style="font-size: 32px; text-align: center;">Buscador Dinamico</span>
 
+# V1 BETA
+
+![Texto alternativo](./src/image/buscadorV1.png)
+
 # OBJETIVOS
 
 1- ✅ Crear estructura html por defecto <br>
