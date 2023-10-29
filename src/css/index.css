@@ -12,6 +12,7 @@ html {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    flex-direction: row;
 }
 
 .app {
@@ -87,8 +88,9 @@ html {
     cursor: pointer;
 }
 
-.app-search .content-index ul li:nth-child(1) {
-    width: 35px;
+.app-search .content-index ul li.active {
+    height: 102%;
+    background-color: rgb(207, 206, 206);
 }
 
 /* --- */

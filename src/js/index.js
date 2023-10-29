@@ -12,7 +12,7 @@
 // });
 
 const contentSearch = {
-    onSearch: async function (params) {
+    onSearch: function (params) {
         const { search, pagination, personalError, element } = params;
         let { data, dataElement, dataOrigin, pageInitial } = params;
 
@@ -38,20 +38,6 @@ const contentSearch = {
                 parent_container.appendChild(main);
             }
 
-            if (data || dataOrigin) {
-                main.innerHTML = "";
-            }
-
-            if (data) {
-                let keys = Object.keys(data);
-
-                keys.forEach(function (key) {
-                    let row = data[key];
-                    let item = contentSearch.itemPrinter(row, params);
-                    main.appendChild(item);
-                });
-            }
-
             if (!dataElement) {
                 let dataSearch = main.querySelectorAll('.search');
                 dataSearch.forEach(elementIndexado => {
@@ -72,18 +58,8 @@ const contentSearch = {
                 dataElement = dataSearch;
             }
 
-            if (typeof element == "undefined") {
-                function handleKeyUp() {
-                    if (data || dataOrigin) {
-                        contentSearch.searchIndex(params);
-                    } else {
-                        contentSearch.searchDataSet(params);
-                    }
-                }
-
-                el.addEventListener("keyup", handleKeyUp);
-
-                params.element = el;
+            if (data || dataOrigin) {
+                main.innerHTML = "";
             }
 
             if (pagination) {
@@ -101,64 +77,103 @@ const contentSearch = {
 
                 if (typeof pageInitial == "undefined") {
                     function handleClick() {
-                        let { pageInitial } = params;
-                        let pageStart = 1;
-                        if (typeof pageInitial != "undefined") {
-                            pageStart = event.target.dataset.page;
-                            console.log(pageStart);
-                        }
-                        ul.innerHTML = "";
-                        let items = data || dataElement;
-                        let countPage = Math.ceil((items.length || Object.keys(items).length) / 10);
+                        let evento = 1;
 
-                        let li = document.createElement("li");
-                        li.innerHTML = `<i class="fa fa-chevron-left" aria-hidden="true"></i>`;
-                        ul.appendChild(li);
-                        let index = 1;
-                        while (index <= countPage) {
-                            if (index < 4) {
-                                li = document.createElement("li");
-                                li.innerHTML = index;
-                                li.dataset.page = index;
-                                ul.appendChild(li);
-                                li.addEventListener("click", handleClick);
-                            }
-                            index++;
-                        }
-                        li = document.createElement("li");
-                        li.innerHTML = `<span>...</span>`;
-                        ul.appendChild(li);
-                        li = document.createElement("li");
-                        li.innerHTML = `<i class="fa fa-chevron-right" aria-hidden="true"></i>`;
-                        ul.appendChild(li);
-                        const indexStart = ((pageStart - 1) * 10);
-                        const indexEnd = (pageStart * 10);
-                        console.log(indexStart, indexEnd);
-                        let dataIndexado = Object.values(items).slice(indexStart, indexEnd);
+                        if (event) evento = parseInt(event.target.dataset.page);
+
+                        let newData = contentSearch.paginationDinamica(params, evento);
 
                         if (data || dataOrigin) {
                             main.innerHTML = "";
                         }
 
-                        let keysIndexado = Object.keys(dataIndexado);
-                        console.log(keysIndexado);
+                        let keysIndexado = Object.keys(newData);
                         keysIndexado.forEach(function (key) {
-                            let row = dataIndexado[key];
+                            let row = newData[key];
                             let item = contentSearch.itemPrinter(row, params);
                             main.appendChild(item);
                         });
 
+                        ul.innerHTML = "";
+                        let items = data || dataElement;
+                        let countPage = Math.ceil((items.length || Object.keys(items).length) / 10);
 
-                        console.log("Me dieron click ?");
+                        let index = (evento == 1 ? evento : (evento == countPage ? (evento - 2) : (evento - 1))) || 1;
+                        let contadorPage = 1;
+                        while (index <= countPage) {
 
-                        params.pageInitial = pageStart;
+                            if (contadorPage < 4) {
+                                li = document.createElement("li");
+                                li.innerHTML = index;
+                                li.dataset.page = index;
+
+                                if (index == evento) {
+                                    li.classList.add("active");
+                                }
+
+                                ul.appendChild(li);
+
+                                if (index != evento) {
+                                    li.addEventListener("click", handleClick);
+                                }
+                            }
+                            index++;
+                            contadorPage++;
+                        }
+
+                        if (countPage > 3) {
+                            li = document.createElement("li");
+                            li.innerHTML = `<span>...</span>`;
+                            ul.appendChild(li);
+                        }
+
                     }
-                    console.log("Si?");
-                    handleClick();
+
+                    params.funcionPagination = () => handleClick();
                 }
 
+                let { funcionPagination } = params;
+                funcionPagination();
+            }
+
+            if (typeof element == "undefined") {
+                function handleKeyUp() {
+                    if (data || dataOrigin) {
+                        contentSearch.searchIndex(params);
+                    } else {
+                        contentSearch.searchDataSet(params);
+                    }
+                }
+
+                el.addEventListener("keyup", handleKeyUp);
+
+                params.element = el;
+            }
+
+            if (data && !pagination) {
+                let keys = Object.keys(data);
+
+                keys.forEach(function (key) {
+                    let row = data[key];
+                    let item = contentSearch.itemPrinter(row, params);
+                    main.appendChild(item);
+                });
             }
         });
+
+        contentSearch.ejemplo();
+    },
+    paginationDinamica: function (params, pageActual) {
+        let { data, dataElement } = params;
+
+        let pageStart = pageActual || 1;
+        const indexStart = ((pageStart - 1) * 10);
+        const indexEnd = (pageStart * 10);
+
+        let items = data || dataElement;
+        let dataIndexado = Object.values(items).slice(indexStart, indexEnd);
+
+        return dataIndexado;
     },
     ajax: function () { },
     itemPrinter: function (row, params) {
@@ -224,10 +239,9 @@ const contentSearch = {
         dataElement.forEach(element => {
             let dataSet = element.dataset;
             let keys = Object.keys(dataSet);
-            let isSearch = keys.findIndex(key => {
-                if (dataSet[key].indexOf(search) != -1)
-                    return true
-            });
+            let isSearch = keys.findIndex(key => dataSet[key].toLowerCase().indexOf(search) != -1);
+
+            console.log(isSearch);
 
             if (isSearch === -1)
                 element.style.display = "none";
@@ -235,6 +249,8 @@ const contentSearch = {
             if (isSearch != -1)
                 element.style.display = "flex";
         });
+
+        contentSearch.ejemplo();
     },
     onError: function (err, personalError) {
         let errors = {
@@ -250,24 +266,30 @@ const contentSearch = {
 
         return errors
     },
+    ejemplo: function () {
+        console.log("prueba");
+    }
 };
 
 // SOLO ESTO
-// contentSearch.onSearch({
-//     search: "#input-search",
-//     pagination: true
-// })
+contentSearch.onSearch({
+    search: "#input-search",
+    pagination: false
+});
+
+contentSearch.ejemplo = function () {
+    console.log("prueba2");
+}
 
 let datos = {};
 for (let s = 0; s < 50; s++) {
     datos[s] = {
-        name: `nombre${(s+1)}`,
+        name: `nombre${(s + 1)}`,
         descripcion: `descripcion${(s + 1)}`
     };
 }
-
 contentSearch.onSearch({
-    search: "#input-search", // el elemento del input
+    search: "#input-search2",
     pagination: true,
     // personalError: {
     //     [1]: "Input Search no encontrado, mensaje modificado"
@@ -276,14 +298,39 @@ contentSearch.onSearch({
         let card;
         if (row) {
             card = `
-                <div class="card">
-                    <img src="https://unavatar.io/banner" alt="#perfil" class="img">
-                    <div class="title">${row.name}</div>
-                    <div class="content">${row.descripcion}</div>
-                </div>
-            `;
+                    <div class="card">
+                        <img src="https://unavatar.io/banner" alt="#perfil" class="img">
+                        <div class="title">${row.name}</div>
+                        <div class="content">${row.descripcion}</div>
+                    </div>
+                `;
         }
         return card;
     },
     data: datos
 });
+
+
+
+// contentSearch.onSearch({
+//     search: "#input-search", // el elemento del input
+//     pagination: true,
+//     // personalError: {
+//     //     [1]: "Input Search no encontrado, mensaje modificado"
+//     // },
+//     personalItems: function (row) { // la card personalizada
+//         let card;
+//         if (row) {
+//             card = `
+//                 <div class="card">
+//                     <img src="https://unavatar.io/banner" alt="#perfil" class="img">
+//                     <div class="title">${row.name}</div>
+//                     <div class="content">${row.descripcion}</div>
+//                 </div>
+//             `;
+//         }
+//         return card;
+//     },
+//     data: datos
+// });
+
