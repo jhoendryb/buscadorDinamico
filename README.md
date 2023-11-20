@@ -14,7 +14,7 @@
 6- ✅ Que la paginación pueda permitir un mínimo de 3 paginas iterables <br>
 7- ✅ Que al darle click a los números de cada pagina se visualicen solo esos items <br>
 8- ✅ Que sea 10 items por pagina <br>
-9- ✅ Que la paginación permita desplazar entre paginas si es que hay mas de 3 paginas para indexar <br>
+9- ✅ Que la paginación permita desplazar entre paginas si es que hay mas de 3 paginas para indexar en el DOM <br>
 ?- Optimizar <br>
 ?- Trabajar el ajax <br>
 ?- Montarlo en un CDN <br>
