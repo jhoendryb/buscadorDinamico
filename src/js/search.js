@@ -1,7 +1,7 @@
 class Search {
     constructor(searchSelector, options = {}) {
-        let { personalError, ...newOptions } = options;
-
+        let { personalError, customAjax, ...newOptions } = options;
+        this.customAjax = customAjax;
         this.searchInput = document.querySelector(searchSelector);
         this.options = { ...newOptions };
         this.personalError = personalError;
@@ -80,29 +80,117 @@ class Search {
         this.onSearch();
     }
     onSearch() {
-        // OBTENEMOS LOS ITEMS A RENDERIZAR
-        this.createSearchableData();
-
-        // ACTIVAREMOS EL BUSCADOR CON LOS ITEMS INDEXADOS
-        let { searchInput, options, searchData } = this;
-        let { data, pagination } = options;
+        let { customAjax, searchInput } = this;
 
         searchInput.addEventListener("keyup", (event) => this.Search(event));
+
+        // OBTENEMOS LOS ITEMS A RENDERIZAR
+        if (customAjax) {
+            this.ajax();
+            return;
+        } else {
+            this.createSearchableData();
+        }
+
+        // ACTIVAREMOS EL BUSCADOR CON LOS ITEMS INDEXADOS
+        let { options, searchData } = this;
+        let { data, pagination } = options;
 
         if (pagination) { // SI ES TRUE APLICAMOS LA PAGINACION
             this.Search({ target: { value: '' } });
         } else if (data) { // SI TIENE DATOS RENDERIZAMOS LOS ITEMS
             this.renderData(searchData);
         }
+    }
+    async ajax() {
+        let { searchInput, customAjax, options, paginationCache } = this;
+        let { url, page, countPage, ...newCustomAjax } = customAjax;
+        let { pagination } = options;
 
-        console.log(this);
+        const params = new URLSearchParams();
+        params.append('search', searchInput.value || '');
+        params.append('page', page || 1);
+        params.append('countPage', countPage || 0);
+        newCustomAjax.body = params;
+
+        if (pagination) {
+            // PETICION AJAX CON JQUERY
+            // let response = await $.ajax({
+            //     url: url,
+            //     type: newCustomAjax.method,
+            //     data: {
+            //         search: searchInput.value || '',
+            //         page: page || 1,
+            //         countPage: countPage || 0
+            //     },
+            //     dataType: "json",
+            //     success: function (response) {
+
+            //     }
+            // });
+
+            // console.log(response);
+            // let { data, ...newCounts } = response;
+
+            // this.options.data = data;
+
+            // this.customAjax = {
+            //     ...customAjax,
+            //     ...newCounts
+            // }
+
+            // this.createSearchableData();
+            // let { searchData: newSearchData } = this;
+
+            // if (!paginationCache) {
+            //     this.renderPaginacion(newSearchData);
+            // } else {
+            //     this.renderPaginacion(newSearchData);
+            //     this.renderData(newSearchData);
+            // }
+
+            // OBTENEMOS TODOS LOS ELEMENTOS CON UN AJAX
+            fetch(url, newCustomAjax).then(res => res.json()).then(data => {
+                let { data: newData, ...newCounts } = data;
+
+                this.options.data = newData;
+
+                this.customAjax = {
+                    ...customAjax,
+                    ...newCounts
+                }
+
+                this.createSearchableData();
+
+                let { searchData: newSearchData } = this;
+
+                if (paginationCache) this.renderData(newSearchData);
+
+                this.renderPaginacion(newSearchData);
+
+            }).catch(err => {
+                // console.log(err);
+            })
+        } else {
+            this.onError(2);
+        }
+
     }
     Search(event) {
-        let searchText = event.target.value.toLowerCase();
-
         // Obtener los datos de búsqueda y las opciones
-        let { searchData, options } = this;
+        let { searchData, options, customAjax } = this;
         let { pagination } = options;
+
+        if (customAjax) {
+            this.customAjax.page = 1;
+            this.ajax();
+            return;
+        }
+
+        if (!searchData) return; // EN CASO DE QUE CORRA SIN DATOS
+
+
+        let searchText = event.target.value.toLowerCase();
 
         // Recorrer los datos de búsqueda
         let newSearchData = searchData.filter(element => {
@@ -125,12 +213,19 @@ class Search {
     }
     renderPaginacion(newSearchData) {
         let { footer, ul } = this.paginationElements;
-        let { paginationCache } = this;
+        let { paginationCache, customAjax } = this;
+
+        if (customAjax && paginationCache) paginationCache.page = customAjax.page;
 
         ul.innerHTML = "";
 
+
         // Calcular la cantidad de páginas necesarias
         let countPage = Math.ceil(newSearchData.length / 10);
+        if (customAjax) {
+            let { countPage: countPageAjax } = customAjax;
+            countPage = Math.ceil(countPageAjax / 10);
+        }
 
         const renderBtn = (event) => {
             let { page } = event.target.dataset;
@@ -158,6 +253,30 @@ class Search {
                 this.renderPaginacion(newSearchData);
             }
         }
+        const renderBtnAjax = (event) => {
+            let { page } = event.target.dataset;
+            let { paginationCache, customAjax } = this;
+
+            if (customAjax && paginationCache) paginationCache.page = customAjax.page;
+
+            if (page != paginationCache.page) {
+                // Remover la clase "active" de todos los elementos de paginación
+                ul.querySelectorAll("li").forEach(element => element.classList.remove("active"));
+
+                // Agregar la clase "active" al botón seleccionado
+                event.target.classList.add("active");
+
+                // Renderizar los nuevos datos en la página
+                this.customAjax.page = page;
+
+                // Actualizar la cache de paginación
+                this.paginationCache = {
+                    page: page
+                }
+
+                this.ajax();
+            }
+        }
 
         // Renderizar los botones de página inicial y "..."
         if (paginationCache?.page >= 3 && countPage > 3) {
@@ -165,7 +284,7 @@ class Search {
             li.innerHTML = 1;
             li.dataset.page = 1;
 
-            li.addEventListener("click", renderBtn);
+            li.addEventListener("click", (customAjax ? renderBtnAjax : renderBtn));
 
             ul.appendChild(li);
 
@@ -191,11 +310,7 @@ class Search {
                     li.classList.add("active");
                 }
 
-                li.addEventListener("click", renderBtn);
-
-                this.paginationCache = {
-                    page: paginationCache?.page ?? 1
-                }
+                li.addEventListener("click", (customAjax ? renderBtnAjax : renderBtn));
 
                 ul.appendChild(li);
             }
@@ -211,13 +326,18 @@ class Search {
             li.innerHTML = countPage;
             li.dataset.page = countPage;
 
-            li.addEventListener("click", renderBtn);
+            li.addEventListener("click", (customAjax ? renderBtnAjax : renderBtn));
 
             ul.appendChild(li);
         }
 
         // Renderizar la primera página si no hay página seleccionada
         if (!paginationCache?.page) {
+
+            this.paginationCache = {
+                page: paginationCache?.page || 1
+            }
+
             this.renderData(newSearchData.slice(0, 10));
         }
     }
@@ -244,8 +364,9 @@ class Search {
     }
     createSearchableData() {
         // OBTENEMOS EL CONTENEDOR DE LOS ITEMS
-        let { mainElement, options } = this;
+        let { mainElement, options, searchInput } = this;
         let { data, personalItems } = options;
+
         // OBTENEMOS TODOS LOS ITEMS
         let searchAll = mainElement.querySelectorAll(".search");
         // CREAMOS LA ESTRUCTURA DE LOS DATOS INDEXADOS
@@ -306,7 +427,7 @@ class Search {
     onError(err) {
         const errors = {
             1: "Input Search no encontrado",
-            2: "No es posible crear el contenedor de items",
+            2: "Para que las peticiones por ajax funcionen, la paginacion debe estar activada.",
             3: "No se puede procesar el dato",
             ...this.personalError,
         };
@@ -327,7 +448,7 @@ const mySearch = new Search(".input-search", {
 });
 
 let datos = {};
-for (let s = 0; s < 10000; s++) {
+for (let s = 0; s < 3000; s++) {
     datos[s] = {
         name: `nombre${(s + 1)}`,
         descripcion: `descripcion${(s + 1)}`
@@ -354,24 +475,55 @@ const mySearch2 = new Search("#input-search2", {
     data: datos
 });
 
+// const mySearch3 = new Search("#input-search3", {
+//     data: Object.values(datos).slice(0, 100),
+//     personalItems: function (row) { // la card personalizada
+//         let card;
+//         if (row) {
+//             card = `
+//                 <div class="card">
+//                     <img src="https://unavatar.io/banner" alt="#perfil" class="img">
+//                     <div class="title">${row.name}</div>
+//                     <div class="content">${row.descripcion}</div>
+//                 </div>
+//             `;
+//         }
+//         return card;
+//     },
+//     personaliceElements: (params) => {
+//         let {
+//             mainElement
+//         } = params;
+
+//         if (mainElement) {
+//             mainElement.style.display = "grid";
+//             mainElement.style.gridTemplateColumns = "repeat(3, 1fr)";
+//             mainElement.style.alignContent = "start";
+//         }
+//     }
+// });
 const mySearch3 = new Search("#input-search3", {
-    // personalError: {
-    //     [1]: "Modificado error"
-    // },
+    customAjax: {
+        url: './src/php/responseAjax.php',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+    },
+    pagination: true,
     personalItems: function (row) { // la card personalizada
         let card;
         if (row) {
             card = `
                 <div class="card">
-                    <img src="https://unavatar.io/banner" alt="#perfil" class="img">
-                    <div class="title">${row.name}</div>
-                    <div class="content">${row.descripcion}</div>
+                    <img src="https://flagsapi.com/${row.country_code}/flat/64.png" alt="#perfil" class="img">
+                    <div class="title">${row.pais}</div>
+                    <div class="content" style="padding:0; padding-left:5px">${row.name}</div>
                 </div>
             `;
         }
         return card;
     },
-    data: Object.values(datos).slice(0, 100),
     personaliceElements: (params) => {
         let {
             mainElement
@@ -379,7 +531,7 @@ const mySearch3 = new Search("#input-search3", {
 
         if (mainElement) {
             mainElement.style.display = "grid";
-            mainElement.style.gridTemplateColumns = "repeat(3, 1fr)";
+            mainElement.style.gridTemplateColumns = "repeat(2, 1fr)";
             mainElement.style.alignContent = "start";
         }
     }
