@@ -82,14 +82,27 @@ class Search {
     onSearch() {
         let { customAjax, searchInput } = this;
 
-        searchInput.addEventListener("keyup", (event) => this.Search(event));
+        const timeSearch = (event) => { // TEMPORIZADOR DE BUSQUEDA
+            let { timeSearch } = this;
+
+            if (typeof timeSearch != "undefined")
+                clearInterval(timeSearch);
+
+            timeSearch = setTimeout(() => {
+                this.Search(event);
+            }, 500);
+
+            this.timeSearch = timeSearch;
+        }
+
+        searchInput.addEventListener("keyup", timeSearch); // EVENTO BUSCADOR
 
         // OBTENEMOS LOS ITEMS A RENDERIZAR
         if (customAjax) {
-            this.ajax();
+            this.ajax(); // RENDER DATA AJAX
             return;
         } else {
-            this.createSearchableData();
+            this.createSearchableData(); // PREPARE RENDER DATA
         }
 
         // ACTIVAREMOS EL BUSCADOR CON LOS ITEMS INDEXADOS
@@ -114,41 +127,6 @@ class Search {
         newCustomAjax.body = params;
 
         if (pagination) {
-            // PETICION AJAX CON JQUERY
-            // let response = await $.ajax({
-            //     url: url,
-            //     type: newCustomAjax.method,
-            //     data: {
-            //         search: searchInput.value || '',
-            //         page: page || 1,
-            //         countPage: countPage || 0
-            //     },
-            //     dataType: "json",
-            //     success: function (response) {
-
-            //     }
-            // });
-
-            // console.log(response);
-            // let { data, ...newCounts } = response;
-
-            // this.options.data = data;
-
-            // this.customAjax = {
-            //     ...customAjax,
-            //     ...newCounts
-            // }
-
-            // this.createSearchableData();
-            // let { searchData: newSearchData } = this;
-
-            // if (!paginationCache) {
-            //     this.renderPaginacion(newSearchData);
-            // } else {
-            //     this.renderPaginacion(newSearchData);
-            //     this.renderData(newSearchData);
-            // }
-
             // OBTENEMOS TODOS LOS ELEMENTOS CON UN AJAX
             fetch(url, newCustomAjax).then(res => res.json()).then(data => {
                 let { data: newData, ...newCounts } = data;
@@ -181,14 +159,13 @@ class Search {
         let { searchData, options, customAjax } = this;
         let { pagination } = options;
 
-        if (customAjax) {
+        if (customAjax) { // SI ES TRUE APLICAMOS LA PAGINACION
             this.customAjax.page = 1;
             this.ajax();
             return;
         }
 
         if (!searchData) return; // EN CASO DE QUE CORRA SIN DATOS
-
 
         let searchText = event.target.value.toLowerCase();
 
@@ -212,13 +189,15 @@ class Search {
         this.renderData(newSearchData);
     }
     renderPaginacion(newSearchData) {
+        console.time();
+
         let { footer, ul } = this.paginationElements;
         let { paginationCache, customAjax } = this;
 
-        if (customAjax && paginationCache) paginationCache.page = customAjax.page;
+        if (customAjax && paginationCache)
+            paginationCache.page = customAjax.page;
 
         ul.innerHTML = "";
-
 
         // Calcular la cantidad de páginas necesarias
         let countPage = Math.ceil(newSearchData.length / 10);
@@ -294,7 +273,9 @@ class Search {
         }
 
         // Calcular el rango de páginas a mostrar
-        let start = (paginationCache?.page >= 3 ? (parseInt(paginationCache.page) - (paginationCache?.page == countPage ? 2 : 1)) : 1);
+        let start = (paginationCache?.page >= 3 ?
+            ( parseInt(paginationCache.page) - (paginationCache?.page == countPage ? 2 : 1) ) : 1
+        );
         let end = (paginationCache?.page >= 3 ? (parseInt(paginationCache.page) + 1) : 3);
 
         // Renderizar los botones de las páginas
@@ -340,9 +321,11 @@ class Search {
 
             this.renderData(newSearchData.slice(0, 10));
         }
+        console.timeEnd();
     }
     renderData(searchData) {
-        let { mainElement } = this;
+        let { mainElement, options } = this;
+        let { personalItems, data } = options;
 
         // Verificar si no hay datos para indexar
         if (searchData.length == 0) {
@@ -357,14 +340,24 @@ class Search {
 
         mainElement.innerHTML = ""; // Limpiar el contenido actual
 
-        // Renderizar cada elemento en el DOM
         searchData.forEach(element => {
-            mainElement.appendChild(element.element);
-        });
+            if (!data) {
+                mainElement.appendChild(element.element);
+            } else {
+                let { dataSet } = element;
+                let div = document.createElement("div");
+                div.classList.add("search");
+                div.innerHTML = (typeof personalItems === "function" ?
+                    personalItems(dataSet) :
+                    `<span>${Object.values(dataSet).join(" ")}</span>`
+                );
+                mainElement.appendChild(div);
+            }
+        })
     }
     createSearchableData() {
         // OBTENEMOS EL CONTENEDOR DE LOS ITEMS
-        let { mainElement, options, searchInput } = this;
+        let { mainElement, options } = this;
         let { data, personalItems } = options;
 
         // OBTENEMOS TODOS LOS ITEMS
@@ -381,19 +374,7 @@ class Search {
         ]
 
         if (data) {
-            Object.values(data).forEach(dataSet => {
-                let element = document.createElement("div");
-                element.classList.add("search");
-                element.innerHTML = (typeof personalItems === "function" ?
-                    personalItems(dataSet) :
-                    `<span>${Object.values(dataSet).join(" ")}</span>`
-                );
-
-                searchData.push({
-                    element: element,
-                    dataSet: dataSet
-                });
-            });
+            searchData = data.map(item => ({ dataSet: { ...item } }))
         } else {
             // RECORREMOS TODOS LOS ELEMENTOS
             searchAll.forEach(element => {
@@ -447,13 +428,15 @@ const mySearch = new Search(".input-search", {
     }, /* objeto de errores personalizados */
 });
 
-let datos = {};
-for (let s = 0; s < 3000; s++) {
-    datos[s] = {
+let datos = [];
+for (let s = 0; s < 150454; s++) {
+    datos.push({
         name: `nombre${(s + 1)}`,
         descripcion: `descripcion${(s + 1)}`
-    };
+    });
 }
+
+console.log(datos, "A ver");
 const mySearch2 = new Search("#input-search2", {
     pagination: true,
     personalError: {
@@ -502,6 +485,7 @@ const mySearch2 = new Search("#input-search2", {
 //         }
 //     }
 // });
+// console.time();
 const mySearch3 = new Search("#input-search3", {
     customAjax: {
         url: './src/php/responseAjax.php',
@@ -510,16 +494,17 @@ const mySearch3 = new Search("#input-search3", {
             'Content-Type': 'application/x-www-form-urlencoded',
         }
     },
+
     pagination: true,
     personalItems: function (row) { // la card personalizada
         let card;
         if (row) {
             card = `
-                <div class="card">
-                    <img src="https://flagsapi.com/${row.country_code}/flat/64.png" alt="#perfil" class="img">
-                    <div class="title">${row.pais}</div>
-                    <div class="content" style="padding:0; padding-left:5px">${row.name}</div>
-                </div>
+            <div class="card">
+                <img src="https://flagsapi.com/${row.country_code}/flat/64.png" alt="#perfil" class="img">
+                <div class="title">${row.pais}</div>
+                <div class="content" style="padding:0; padding-left:5px">${row.name}</div>
+            </div>
             `;
         }
         return card;
@@ -536,3 +521,4 @@ const mySearch3 = new Search("#input-search3", {
         }
     }
 });
+// console.timeEnd();
