@@ -1,0 +1,64 @@
+{
+    "search[0]": {
+        "attribute": {
+            "class": "input-search"
+        },
+        "innerText": "",
+        "label[0]": {
+            "attribute": {
+                "for": "filter-search"
+            },
+            "innerText": "Filtrar por Busqueda"
+        },
+        "input[0]": {
+            "attribute": {
+                "type": "text",
+                "name": "filterSearch",
+                "id": "filter-search",
+                "class": "form-control input-lg",
+                "placeholder": "Ingrese palabra clave..."
+            },
+            "innerText": ""
+        }
+    },
+    "main[0]": {
+        "attribute": {
+            "class": "items-search scroll-personalize"
+        },
+        "innerText": "",
+        "section[0]": {
+            "attribute": {
+                "class": "items"
+            },
+            "innerText": "Esto es un item de busqueda"
+        }
+    },
+    "footer[0]": {
+        "attribute": {
+            "class": "index-search"
+        },
+        "innerText": "",
+        "ul[0]": {
+            "attribute": {
+                "class": "pagination"
+            },
+            "innerText": "",
+            "li[0]": {
+                "attribute": {},
+                "innerText": "1"
+            },
+            "li[1]": {
+                "attribute": {},
+                "innerText": "2"
+            },
+            "li[2]": {
+                "attribute": {},
+                "innerText": "3"
+            },
+            "li[3]": {
+                "attribute": {},
+                "innerText": "4"
+            }
+        }
+    }
+}

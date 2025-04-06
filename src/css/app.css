@@ -1,0 +1,209 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: antiquewhite;
+}
+
+:root {
+    --header-color: #d4dce2;
+}
+
+/* Estilos para el contenedor que tendrá la barra de desplazamiento */
+.scroll-personalize {
+    position: relative;
+    scrollbar-color: var(--header-color) transparent;
+}
+
+.scroll-personalize::-webkit-scrollbar {
+    width: 8px;
+    background-color: transparent;
+}
+
+.scroll-personalize::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.scroll-personalize::-webkit-scrollbar-thumb {
+    background-color: var(--header-color);
+    border-radius: 4px;
+}
+
+.scroll-personalize::-webkit-scrollbar-thumb:hover {
+    background-color: var(--header-color);
+}
+
+.scroll-personalize::-webkit-scrollbar-thumb:active {
+    background-color: var(--header-color);
+}
+/* Estilos para el contenedor que tendrá la barra de desplazamiento */
+
+.app-search {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    width: 40%;
+    height: 90%;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+    position: relative;
+}
+
+.input-search,
+.items-search,
+.index-search {
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+}
+
+.input-search {
+    /* background-color: red; */
+    min-height: 80px;
+    max-height: 80px;
+}
+
+.items-search {
+    height: 100%;
+    max-height: calc(100% - (80px + 30px));
+    overflow-x: auto;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+    background-color: rgb(255, 255, 255);
+    gap: 5px;
+}
+
+.items-search .items {
+    width: 100%;
+    height: auto;
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: #000F5950;
+    padding: 5px;
+}
+
+.index-search {
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0;
+}
+
+.index-search ul {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    list-style: none;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    gap: 5px;
+}
+
+.index-search ul li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(255, 255, 255);
+    min-width: 30px;
+    height: 100%;
+    padding: 0 3px 0 3px;
+    margin: 0;
+    border-radius: 1px;
+    -webkit-border-radius: 1px;
+    -moz-border-radius: 1px;
+    -ms-border-radius: 1px;
+    -o-border-radius: 1px;
+    box-shadow: 0 0 0 1px rgb(0, 0, 0);
+    -webkit-box-shadow: 0 0 0 1px rgb(0, 0, 0);
+    -moz-box-shadow: 0 0 0 1px rgb(0, 0, 0);
+    cursor: pointer;
+    font-size: 1.1em;
+    user-select: none;
+}
+
+.index-search ul li.page-disabled {
+    /* Estilos para el objeto deshabilitado */
+    opacity: 0.5;
+    /* Opacidad del 50% */
+    pointer-events: none;
+    /* Evita que se puedan interactuar con el objeto */
+    cursor: not-allowed;
+    /* Cambia el cursor a "no permitido" */
+    background-color: unset;
+    box-shadow: none;
+    min-width: 0;
+    padding: 0;
+}
+
+.index-search ul li.page-selected {
+    opacity: 0.6;
+    /* background-color: rgba(255, 255, 255, 0.773); */
+    pointer-events: none;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* ESTILOS PARA EL CONTENEDOR DE LOS ITEMS */
+
+.items-search .items {
+    width: 100%;
+    height: auto;
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: #000F5950;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+
+.items-search .items .img-head{
+    padding: 5px;
+}
+.items-search .items .info-item{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* gap: 5px; */
+}
+
+.items-search .items .info-item h5{
+    margin: 0;
+    padding: 0;
+}
+.items-search .items .info-item p{
+    margin: 0;
+    padding: 0;
+}
