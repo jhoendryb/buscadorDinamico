@@ -1,32 +1,16 @@
-/* 
-# Contexto para el proyecto
-
-Mi proyecto se trata de un buscador utilizado segun la necesidad mostrando items como un select2 o un datatable. Mi objetivo no es reinventar la rueda, es solo que estas herramientas mecionadas aunque completas estan limitados en algunos casos y yo quiero explorar esos casos de uso.
-
-En principio ya he creado una class Search.
-Defini en el contructor un asignador de objetos con Object.assign(this, config);
-Defni this.cajaPadre.
-Y por ultimo inicialice el .init()
-
-En el Init inicializamos.
-    - metodo configurarElementos obtengo o creo los items de cajaPadre; header, body, footer.
-    - metodo buscarEImprimir para obtener los datos filtrados si hay o no hay una busqueda.
-    - metodos filtrarDatos y imprimirDatos encargados de busqueda y pintar items en el body de la cajaPadre, solo son utilizados por el metodo buscarEImprimir
-    - metodo renderPagination para pintar la paginacion en el footer de la cajaPadre, solo es utilizado por el metodo buscarEImprimir
-    - metodo extraerItemsData para extraer los items de la cajaPadre, solo es utilizado por el metodo init()
-    - metodo renderizarItem para personalizar el item, solo es utilizado por el metodo imprimirDatos
-
-Me aconsejaste utilizar los patrones de diseño Strategy y Observar.
-*/
-
 class search {
     #data;
     #changeStatus;
+    #pagination = {  // Un solo objeto para toda la paginación
+        totalPages: 0,
+        currentPage: 1,
+        startIndex: 0,
+        endIndex: 0
+    };
+    #cache = new Map();
+    #cacheTimeout = 5 * 60 * 1000; // 5 minutos
 
     constructor(config) {
-
-        // PAGINACION ACTUAL
-        this.currentPage = 1;
 
         this.itemsPerPage = config.itemsPerPage || 10;
 
@@ -49,10 +33,15 @@ class search {
         this.configurarElementos();
 
         if (this.procesServer) {
-            console.log("paso por aqui?");
+
             this.ajax(this.data).then(response => {
-                console.log('Primer then:', response);
+
+                this.calcularPaginacion(response.countPage);
                 this.actualizarDatos(response.data);
+                if (this.#changeStatus.changed) {
+                    this.#changeStatus.data = this.#data;
+                    this.#changeStatus.changed = false;
+                }
                 this.initializeWithData();
             });
 
@@ -67,8 +56,6 @@ class search {
     }
 
     initializeWithData() {
-        console.log(this.#data, "Estoy vacio realmente");
-
         if (!this.#data || this.#data.length === 0) {
             throw new Error('El arreglo de datos no puede estar vacío');
         }
@@ -84,7 +71,7 @@ class search {
             clearTimeout(timeOut);
 
             timeOut = setTimeout(() => {
-                this.currentPage = 1;
+                this.#pagination.currentPage = 1;
 
                 this.#changeStatus.changed = true;
 
@@ -156,6 +143,40 @@ class search {
     buscarEImprimir(searchTerm) {
         this.body.innerHTML = "";
 
+        if (this.procesServer && this.#changeStatus.changed) {
+            const cacheKey = `${searchTerm}-${this.#pagination.currentPage}`;
+
+            // Verificar si hay en caché
+            const cachedData = this.#cache.get(cacheKey);
+            if (cachedData && ((Date.now() - cachedData.timestamp) < this.#cacheTimeout)) {
+                this.actualizarDatos(cachedData.data);
+                this.#changeStatus.changed = false;
+                this.#changeStatus.data = this.#data;
+                this.buscarEImprimir(searchTerm);
+                return;
+            }
+
+            this.data.body.page = this.#pagination.currentPage || 1;
+            this.data.body.searchTerm = searchTerm;
+            this.ajax(this.data).then(response => {
+                // Guardar en caché
+                this.#cache.set(cacheKey, {
+                    data: response.data,
+                    timestamp: Date.now()
+                });
+
+                this.calcularPaginacion(response.countPage);
+                this.actualizarDatos(response.data);
+                this.#changeStatus.changed = false;
+                this.#changeStatus.data = this.#data;
+
+                this.buscarEImprimir(searchTerm);
+            }).catch(error => {
+                console.error('Error en la búsqueda:', error);
+            });
+            return;
+        }
+
         const filteredData = !this.#changeStatus.changed
             ? this.#changeStatus.data
             : this.filtrarDatos(this.#data, searchTerm);
@@ -165,18 +186,36 @@ class search {
             this.#changeStatus.changed = false;
         }
 
-        const totalPages = Math.ceil(filteredData.length / this.itemsPerPage);
-        const currentPage = this.currentPage ?? 1; // Página actual (se puede cambiar con un evento de clic en la paginación)
-        const startIndex = (currentPage - 1) * this.itemsPerPage;
-        const endIndex = startIndex + this.itemsPerPage;
+        console.log(typeof filteredData);
 
-        const paginatedData = filteredData.slice(startIndex, endIndex);
+        if (!this.procesServer)
+            this.calcularPaginacion(filteredData);
+
+        const { startIndex, endIndex, totalPages } = this.#pagination;
+
+        console.log(this.#pagination);
+        
+        const paginatedData = !this.procesServer ? filteredData.slice(startIndex, endIndex) : filteredData;
+        console.log(paginatedData);
 
         // Renderizar los items de la página actual
         this.imprimirDatos(paginatedData);
 
         // Renderizar la paginación
         this.renderPagination(totalPages);
+    }
+
+    calcularPaginacion(totalItems) {
+        const itemCount = typeof totalItems === 'object'
+            ? totalItems.length
+            : parseInt(totalItems);
+
+        this.#pagination.totalPages = Math.ceil(itemCount / this.itemsPerPage);
+        this.#pagination.currentPage = this.#pagination.currentPage ?? 1;
+        this.#pagination.startIndex = (this.#pagination.currentPage - 1) * this.itemsPerPage;
+        this.#pagination.endIndex = this.#pagination.startIndex + this.itemsPerPage;
+
+        return this.#pagination;
     }
 
     filtrarDatos(data, searchTerm) {
@@ -206,30 +245,17 @@ class search {
 
         let buttonsPaginations = {
             start: 1,
-            prev: this.currentPage - 1,
-            current: this.currentPage,
-            next: this.currentPage + 1,
+            prev: this.#pagination.currentPage - 1,
+            current: this.#pagination.currentPage,
+            next: this.#pagination.currentPage + 1,
             end: totalPages,
         };
-
-        // console.log(buttonsPaginations);
 
         for (const key in buttonsPaginations) {
             if (Object.prototype.hasOwnProperty.call(buttonsPaginations, key)) {
                 if (key === "prev" && buttonsPaginations[key] <= 1) continue;
-
-                if (
-                    key === "start" &&
-                    buttonsPaginations[key] === buttonsPaginations.current
-                )
-                    continue;
-
-                if (
-                    key === "end" &&
-                    buttonsPaginations[key] === buttonsPaginations.current
-                )
-                    continue;
-
+                if (key === "start" && buttonsPaginations[key] === buttonsPaginations.current) continue;
+                if (key === "end" && buttonsPaginations[key] === buttonsPaginations.current) continue;
                 if (key === "next" && buttonsPaginations[key] >= totalPages) continue;
 
                 const pageLink = document.createElement("li");
@@ -241,7 +267,10 @@ class search {
                 if (key !== "current") {
                     pageLink.addEventListener("click", (e) => {
                         e.preventDefault();
-                        this.currentPage = buttonsPaginations[key];
+                        this.#pagination.currentPage = buttonsPaginations[key];
+
+                        if (this.procesServer) this.#changeStatus.changed = true;
+
                         this.buscarEImprimir(this.inputSearch.value.trim().toLowerCase());
                     });
                 }
@@ -279,7 +308,8 @@ class search {
                 Object.entries(resp.body).forEach(([key, value]) => {
                     formData.append(key, value);
                 });
-                resp.body = formData.toString();
+
+                let parseBody = formData.toString();
 
                 // Establecemos el header para form-urlencoded
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -291,16 +321,12 @@ class search {
                 }
 
                 // Enviamos el body
-                xhr.send(resp.body);
+                xhr.send(parseBody);
             } else {
                 // Para GET/DELETE, construimos la URL con parámetros
-                const params = new URLSearchParams({
-                    page: resp.page,
-                    search: resp.searchTerm
-                });
-
-                const fullUrl = `${resp.url}?${params.toString()}`;
-                xhr.open(resp.method, fullUrl, true);
+                const params = new URLSearchParams(config.body);
+                const fullUrl = `${config.url}?${params.toString()}`;
+                xhr.open(config.method, fullUrl, true);
                 xhr.send();
             }
 
@@ -328,6 +354,7 @@ class search {
         });
 
     }
+
     actualizarDatos(data) {
         this.#data = data;
     }
@@ -338,6 +365,16 @@ let data = [
         descripcion: "Hola que hace, tu mekiere? miel de abejas",
         name: "Hola",
     },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Holasss", },
 ];
 
 let prueba = new search({
@@ -347,7 +384,6 @@ let prueba = new search({
         url: "./src/php/responseAjax.php",
         method: "POST",
         body: {
-            prueba: "prueba",
             page: 1,
             searchTerm: ""
         },
@@ -366,11 +402,11 @@ let prueba = new search({
     //     if (element) {
     //         return `
     //             <div class="img-head">
-    //                 <img src="https://flagsapi.com/${element.country}/flat/64.png">
+    //                 <img src="https://flagsapi.com/${element.country_code}/flat/64.png">
     //             </div>
     //             <div class="info-item">
     //                 <h5>${element.name}</h5>
-    //                 <p>${element.descripcion}</p>
+    //                 <p>${element.pais}</p>
     //             </div>
     //         `;
     //     }

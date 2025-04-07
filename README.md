@@ -19,11 +19,33 @@ Una clase JavaScript flexible para crear buscadores dinámicos con soporte para 
 ## Uso Básico
 
 ```javascript
-const buscador = new search({
+// Buscador con datos locales
+const buscadorLocal = **new** search({
+    element: ".app-search",
+    itemsPerPage: 10,
+    data: [
+        {
+            name: "Item 1",
+            descripcion: "Descripción 1"
+        },
+        // ... más items
+    ]
+});
+
+// Buscador con datos HTML existentes
+const buscadorHTML = new search({
+    element: ".app-search",
+    itemsPerPage: 10
+    // No se necesita data ya que lee los items del HTML
+});
+
+// Buscador con AJAX
+const buscadorAJAX = new search({
     element: ".app-search",
     procesServer: true,
+    itemsPerPage: 10,
     data: {
-        url: "./api/endpoint.php",
+        url: "./api/search.php",
         method: "POST",
         body: {
             page: 1,
@@ -77,6 +99,10 @@ Configura los eventos y realiza la búsqueda inicial.
 Realiza la búsqueda y muestra los resultados.
 - `searchTerm`: Término de búsqueda
 
+### calcularPaginacion(totalItems)
+Calcula la paginación basada en el número total de items.
+- `totalItems`: Número total de items o array de items
+
 ### filtrarDatos(data, searchTerm)
 Filtra los datos según el término de búsqueda.
 - `data`: Array de datos a filtrar
@@ -98,9 +124,17 @@ Personaliza el renderizado de cada item.
 Realiza peticiones AJAX.
 - config: Objeto de configuración AJAX
 
+## Cache
+
+La clase implementa un sistema de caché automático que:
+- Almacena resultados de búsquedas previas
+- Evita peticiones innecesarias
+- Tiempo de expiración: 5 minutos por defecto
+- Se limpia automáticamente al hacer nuevas búsquedas
+
 ## Eventos
 
-El buscador incluye un debounce de 500ms en el input de búsqueda para optimizar el rendimiento.
+El buscador incluye un debounce de 300ms en el input de búsqueda para optimizar el rendimiento.
 
 ## Ejemplos
 
@@ -159,6 +193,32 @@ const buscadorPersonalizado = new search({
         `;
     }
 });
+```
+
+### Buscador con HTML Existente
+
+```html
+<div class="app-search">
+    <search class="input-search">
+        <!-- Input de búsqueda -->
+    </search>
+    <div class="body">
+        <section class="items" data-name="Item 1" data-descripcion="Descripción 1">
+            Contenido del item
+        </section>
+        <!-- ... más items -->
+    </div>
+    <footer>
+        <!-- Paginación -->
+    </footer>
+</div>
+
+<script>
+const buscadorHTML = new search({
+    element: ".app-search",
+    itemsPerPage: 10
+});
+</script>
 ```
 
 ## Estructura HTML Requerida
