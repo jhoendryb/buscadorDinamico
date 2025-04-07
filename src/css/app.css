@@ -10,15 +10,16 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: row;
 }
 
 
 body {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    background-color: antiquewhite;
+    gap: 10px;
+    background-color: rgb(215, 242, 250);
 }
 
 :root {
@@ -55,12 +56,13 @@ body {
 /* Estilos para el contenedor que tendrá la barra de desplazamiento */
 
 .app-search {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    padding: 5px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     gap: 10px;
-    width: 40%;
-    height: 90%;
     border-radius: 5px;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;

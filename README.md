@@ -7,8 +7,11 @@ Una clase JavaScript flexible para crear buscadores dinámicos con soporte para 
 - [Uso Básico](#uso-básico)
 - [Configuración](#configuración)
 - [Métodos](#métodos)
+- [Sistema de Caché](#sistema-de-caché)
 - [Eventos](#eventos)
 - [Ejemplos](#ejemplos)
+- [Respuesta del Servidor](#respuesta-del-servidor)
+- [Estructura HTML](#estructura-html)
 
 ## Instalación
 
@@ -20,7 +23,7 @@ Una clase JavaScript flexible para crear buscadores dinámicos con soporte para 
 
 ```javascript
 // Buscador con datos locales
-const buscadorLocal = **new** search({
+const buscadorLocal = new search({
     element: ".app-search",
     itemsPerPage: 10,
     data: [
@@ -65,6 +68,7 @@ const buscadorAJAX = new search({
 | `itemsPerPage` | Number | 10 | Número de items por página |
 | `procesServer` | Boolean | false | Habilita peticiones AJAX |
 | `data` | Array/Object | - | Datos locales o configuración AJAX |
+| `renderizarItem` | Function | - | Función para personalizar el renderizado de items |
 
 ### Configuración AJAX
 
@@ -74,15 +78,11 @@ const buscadorAJAX = new search({
     method: "POST",  // GET, POST, PUT, PATCH
     body: {
         // Parámetros a enviar
+        page: 1,
+        searchTerm: ""
     },
     headers: {
         // Headers personalizados
-    },
-    success: function(response, instance) {
-        // Callback de éxito
-    },
-    error: function(error) {
-        // Callback de error
     }
 }
 ```
@@ -98,6 +98,7 @@ Configura los eventos y realiza la búsqueda inicial.
 ### buscarEImprimir(searchTerm)
 Realiza la búsqueda y muestra los resultados.
 - `searchTerm`: Término de búsqueda
+- Utiliza el sistema de caché para optimizar búsquedas repetidas
 
 ### calcularPaginacion(totalItems)
 Calcula la paginación basada en el número total de items.
@@ -124,13 +125,21 @@ Personaliza el renderizado de cada item.
 Realiza peticiones AJAX.
 - config: Objeto de configuración AJAX
 
-## Cache
+## Sistema de Caché
 
-La clase implementa un sistema de caché automático que:
+La clase implementa un sistema de caché unificado que funciona tanto para datos locales como para peticiones al servidor:
+
+### Características
 - Almacena resultados de búsquedas previas
-- Evita peticiones innecesarias
+- Funciona automáticamente para datos locales y del servidor
 - Tiempo de expiración: 5 minutos por defecto
 - Se limpia automáticamente al hacer nuevas búsquedas
+- Optimiza el rendimiento evitando recálculos innecesarios
+
+### Funcionamiento
+- Para datos locales: Cachea los resultados filtrados
+- Para datos del servidor: Cachea las respuestas de las peticiones
+- La clave del caché se genera usando: tipo (server/local) + término de búsqueda + página actual
 
 ## Eventos
 
@@ -138,64 +147,7 @@ El buscador incluye un debounce de 300ms en el input de búsqueda para optimizar
 
 ## Ejemplos
 
-### Buscador Local
-
-```javascript
-const buscadorLocal = new search({
-    element: ".app-search",
-    data: [
-        {
-            name: "Item 1",
-            descripcion: "Descripción 1"
-        },
-        // ... más items
-    ]
-});
-```
-
-### Buscador con AJAX
-
-```javascript
-const buscadorAJAX = new search({
-    element: ".app-search",
-    procesServer: true,
-    data: {
-        url: "./api/search.php",
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: {
-            page: 1,
-            searchTerm: ""
-        },
-        success: function(response, instance) {
-            console.log('Datos recibidos:', response);
-        },
-        error: function(error) {
-            console.error('Error:', error);
-        }
-    }
-});
-```
-
-### Personalización del Renderizado
-
-```javascript
-const buscadorPersonalizado = new search({
-    element: ".app-search",
-    renderizarItem: function(element) {
-        return `
-            <div class="item-personalizado">
-                <h3>${element.name}</h3>
-                <p>${element.descripcion}</p>
-            </div>
-        `;
-    }
-});
-```
-
-### Buscador con HTML Existente
+### Buscador con HTML Existente y Renderizado Personalizado
 
 ```html
 <div class="app-search">
@@ -214,28 +166,60 @@ const buscadorPersonalizado = new search({
 </div>
 
 <script>
-const buscadorHTML = new search({
+const buscador = new search({
     element: ".app-search",
-    itemsPerPage: 10
+    itemsPerPage: 10,
+    renderizarItem: function(element) {
+        return `
+            <div class="item-personalizado">
+                <h3>${element.name}</h3>
+                <p>${element.descripcion}</p>
+            </div>
+        `;
+    }
 });
 </script>
 ```
 
-## Estructura HTML Requerida
+### Buscador con Datos Locales
 
-```html
-<div class="app-search">
-    <!-- El buscador generará automáticamente: -->
-    <search class="input-search">
-        <!-- Input de búsqueda -->
-    </search>
-    <div class="body">
-        <!-- Resultados -->
-    </div>
-    <footer>
-        <!-- Paginación -->
-    </footer>
-</div>
+```javascript
+const data = [
+    { name: "Item 1", descripcion: "Descripción 1" },
+    { name: "Item 2", descripcion: "Descripción 2" }
+];
+
+const buscador = new search({
+    element: ".app-search",
+    itemsPerPage: 10,
+    data: data
+});
+```
+
+### Buscador con AJAX y Renderizado Personalizado
+
+```javascript
+const buscador = new search({
+    element: ".app-search",
+    procesServer: true,
+    itemsPerPage: 10,
+    data: {
+        url: "./api/search.php",
+        method: "POST",
+        body: {
+            page: 1,
+            searchTerm: ""
+        }
+    },
+    renderizarItem: function(element) {
+        return `
+            <div class="item-card">
+                <h3>${element.title}</h3>
+                <p>${element.description}</p>
+            </div>
+        `;
+    }
+});
 ```
 
 ## Respuesta del Servidor Esperada
@@ -246,3 +230,19 @@ const buscadorHTML = new search({
     "page": 1,  // Página actual
     "countPage": 10 // Total de páginas
 }
+```
+
+## Estructura HTML Requerida
+
+```html
+<div class="app-search">
+    <search class="input-search">
+        <!-- El buscador generará automáticamente el input -->
+    </search>
+    <div class="body">
+        <!-- Resultados -->
+    </div>
+    <footer>
+        <!-- Paginación -->
+    </footer>
+</div>

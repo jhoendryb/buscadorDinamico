@@ -1,6 +1,5 @@
 class search {
     #data;
-    #changeStatus;
     #pagination = {  // Un solo objeto para toda la paginación
         totalPages: 0,
         currentPage: 1,
@@ -14,12 +13,6 @@ class search {
 
         this.itemsPerPage = config.itemsPerPage || 10;
 
-        // PERSISTENCIA DE DATOS
-        this.#changeStatus = {
-            changed: true,
-            data: [],
-        };
-
         Object.assign(this, config);
 
         // OBTENEMOS LA CAJA PADRE
@@ -29,19 +22,38 @@ class search {
         this.init();
     }
 
+    #getCacheKey(searchTerm, page = 1, isServer = false) {
+        return `${isServer ? 'server' : 'local'}-${searchTerm}-${page}`;
+    }
+
+    #setCacheData(searchTerm, data, page = 1) {
+        const cacheKey = this.#getCacheKey(searchTerm, page, this.procesServer);
+        this.#cache.set(cacheKey, {
+            data,
+            timestamp: Date.now(),
+            filteredCount: data.length
+        });
+    }
+
+    #getCacheData(searchTerm, page = 1) {
+        const cacheKey = this.#getCacheKey(searchTerm, page, this.procesServer);
+        const cachedData = this.#cache.get(cacheKey);
+
+        if (cachedData && (Date.now() - cachedData.timestamp) < this.#cacheTimeout) {
+            return cachedData;
+        }
+
+        return null;
+    }
+
     init() {
         this.configurarElementos();
 
         if (this.procesServer) {
 
             this.ajax(this.data).then(response => {
-
                 this.calcularPaginacion(response.countPage);
                 this.actualizarDatos(response.data);
-                if (this.#changeStatus.changed) {
-                    this.#changeStatus.data = this.#data;
-                    this.#changeStatus.changed = false;
-                }
                 this.initializeWithData();
             });
 
@@ -72,8 +84,6 @@ class search {
 
             timeOut = setTimeout(() => {
                 this.#pagination.currentPage = 1;
-
-                this.#changeStatus.changed = true;
 
                 this.buscarEImprimir(searchTerm);
             }, 500);
@@ -143,66 +153,55 @@ class search {
     buscarEImprimir(searchTerm) {
         this.body.innerHTML = "";
 
-        if (this.procesServer && this.#changeStatus.changed) {
-            const cacheKey = `${searchTerm}-${this.#pagination.currentPage}`;
+        // Intentar obtener datos del caché
+        const cachedData = this.#getCacheData(searchTerm, this.#pagination.currentPage);
 
-            // Verificar si hay en caché
-            const cachedData = this.#cache.get(cacheKey);
-            if (cachedData && ((Date.now() - cachedData.timestamp) < this.#cacheTimeout)) {
+        if (cachedData) {
+            if (this.procesServer) {
                 this.actualizarDatos(cachedData.data);
-                this.#changeStatus.changed = false;
-                this.#changeStatus.data = this.#data;
-                this.buscarEImprimir(searchTerm);
+                this.imprimirDatos(cachedData.data);
+                this.renderPagination(this.#pagination.totalPages);
+                return;
+            } else {
+                this.calcularPaginacion(cachedData.data);
+
+                const paginatedData = cachedData.data.slice(
+                    this.#pagination.startIndex,
+                    this.#pagination.endIndex
+                );
+
+                this.imprimirDatos(paginatedData);
+                this.renderPagination(Math.ceil(cachedData.filteredCount / this.itemsPerPage));
                 return;
             }
+        }
 
-            this.data.body.page = this.#pagination.currentPage || 1;
+        if (this.procesServer) {
+            // Datos del servidor
             this.data.body.searchTerm = searchTerm;
+            this.data.body.page = this.#pagination.currentPage;
+
             this.ajax(this.data).then(response => {
-                // Guardar en caché
-                this.#cache.set(cacheKey, {
-                    data: response.data,
-                    timestamp: Date.now()
-                });
-
-                this.calcularPaginacion(response.countPage);
                 this.actualizarDatos(response.data);
-                this.#changeStatus.changed = false;
-                this.#changeStatus.data = this.#data;
-
-                this.buscarEImprimir(searchTerm);
-            }).catch(error => {
-                console.error('Error en la búsqueda:', error);
+                this.calcularPaginacion(response.countPage);
+                this.#setCacheData(searchTerm, response.data, this.#pagination.currentPage);
+                this.imprimirDatos(response.data);
+                this.renderPagination(this.#pagination.totalPages);
             });
-            return;
-        }
-
-        const filteredData = !this.#changeStatus.changed
-            ? this.#changeStatus.data
-            : this.filtrarDatos(this.#data, searchTerm);
-
-        if (this.#changeStatus.changed) {
-            this.#changeStatus.data = filteredData;
-            this.#changeStatus.changed = false;
-        }
-
-        console.log(typeof filteredData);
-
-        if (!this.procesServer)
+        } else {
+            // Datos locales
+            const filteredData = this.filtrarDatos(this.#data, searchTerm);
             this.calcularPaginacion(filteredData);
+            this.#setCacheData(searchTerm, filteredData);
 
-        const { startIndex, endIndex, totalPages } = this.#pagination;
+            const paginatedData = filteredData.slice(
+                this.#pagination.startIndex,
+                this.#pagination.endIndex
+            );
 
-        console.log(this.#pagination);
-        
-        const paginatedData = !this.procesServer ? filteredData.slice(startIndex, endIndex) : filteredData;
-        console.log(paginatedData);
-
-        // Renderizar los items de la página actual
-        this.imprimirDatos(paginatedData);
-
-        // Renderizar la paginación
-        this.renderPagination(totalPages);
+            this.imprimirDatos(paginatedData);
+            this.renderPagination(this.#pagination.totalPages);
+        }
     }
 
     calcularPaginacion(totalItems) {
@@ -269,7 +268,7 @@ class search {
                         e.preventDefault();
                         this.#pagination.currentPage = buttonsPaginations[key];
 
-                        if (this.procesServer) this.#changeStatus.changed = true;
+                        // if (this.procesServer) this.#changeStatus.changed = true;
 
                         this.buscarEImprimir(this.inputSearch.value.trim().toLowerCase());
                     });
@@ -352,30 +351,12 @@ class search {
                 reject(new Error('Error en la petición AJAX'));
             };
         });
-
     }
 
     actualizarDatos(data) {
         this.#data = data;
     }
 }
-
-let data = [
-    {
-        descripcion: "Hola que hace, tu mekiere? miel de abejas",
-        name: "Hola",
-    },
-    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
-    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
-    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
-    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
-    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
-    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
-    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
-    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
-    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
-    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Holasss", },
-];
 
 let prueba = new search({
     element: ".app-search",
@@ -411,4 +392,41 @@ let prueba = new search({
     //         `;
     //     }
     // }
+});
+
+let prueba2 = new search({
+    element: ".app-search2",
+    renderizarItem: function (element) {
+        if (element) {
+            return `
+                <div class="img-head">
+                    <img src="https://flagsapi.com/${element.country}/flat/64.png">
+                </div>
+                <div class="info-item">
+                    <h5>${element.name}</h5>
+                    <p>${element.descripcion}</p>
+                </div>
+            `;
+        }
+    }
+});
+
+
+let data = [
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola" },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Hola", },
+    { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Holasss", },
+];
+
+let prueba3 = new search({
+    element: ".app-search3",
+    data: data
 });
