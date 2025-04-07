@@ -242,7 +242,7 @@ const buscador = new search({
     <div class="body">
         <!-- Resultados -->
     </div>
-    <footer>
+    <footer class="index-search">
         <!-- Paginación -->
     </footer>
 </div>
