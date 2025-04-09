@@ -10,7 +10,7 @@ $page = $_POST['page'];
 $start = ($page - 1) * 10;
 
 $busqueda = (!empty($busqueda) ? "WHERE name LIKE '%{$busqueda}%'" : "");
-$consulta = mysqli_query($conexion, "SELECT id, name, country_code, country_id FROM paisesciudades {$busqueda} ORDER BY id ASC LIMIT $start, 10");
+$consulta = mysqli_query($conexion, "SELECT id, name, country_code, country_id FROM paisesciudades {$busqueda} ORDER BY id ASC LIMIT $start, {$_POST['itemsPerPage']}");
 $consultaRow = mysqli_query($conexion, "SELECT COUNT(*) AS totalCount FROM paisesciudades {$busqueda} ORDER BY id ASC");
 $consultaRow = mysqli_fetch_assoc($consultaRow);
 

@@ -22,9 +22,9 @@ let extraJsonChildren = (element, arrayChildren = {}) => {
     });
 
     let text = Array.from(element.childNodes)
-    .filter(node => node.nodeType === Node.TEXT_NODE)
-    .map(node => node.textContent)
-    .join('');
+        .filter(node => node.nodeType === Node.TEXT_NODE)
+        .map(node => node.textContent)
+        .join('');
 
     json[tagName]["innerText"] = text.trim();
 
@@ -32,7 +32,6 @@ let extraJsonChildren = (element, arrayChildren = {}) => {
     let newJson = {};
 
     children.forEach(child => {
-        console.log(newJson);
         newJson = {
             ...newJson,
             ...extraJsonChildren(child, newJson)
@@ -62,6 +61,8 @@ let extraJson = (indice) => {
     return jsonExtract;
 }
 
-// let jsonExtract = extraJson(".app-search");
-// console.log(jsonExtract, "extraJson");
-// console.log(JSON.stringify(jsonExtract), "stringJson");
+// window.addEventListener("DOMContentLoaded", () => {
+    // let jsonExtract = extraJson(".app-search");
+    // console.log(jsonExtract, "extraJson");
+    // console.log(jsonExtract, "stringJson");
+// });

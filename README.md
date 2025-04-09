@@ -65,7 +65,7 @@ const buscadorAJAX = new search({
 | Opción | Tipo | Default | Descripción |
 |--------|------|---------|-------------|
 | `element` | String | - | Selector CSS del contenedor del buscador |
-| `itemsPerPage` | Number | 10 | Número de items por página |
+| `itemsPerPage` | Number | 10 | Cantidad máxima de resultados que se mostrarán por página. Este valor se usa para dividir los resultados en páginas y controlar la paginación |
 | `procesServer` | Boolean | false | Habilita peticiones AJAX |
 | `data` | Array/Object | - | Datos locales o configuración AJAX |
 | `renderizarItem` | Function | - | Función para personalizar el renderizado de items |
@@ -79,13 +79,19 @@ const buscadorAJAX = new search({
     body: {
         // Parámetros a enviar
         page: 1,
-        searchTerm: ""
+        searchTerm: "",
+        itemsPerPage: this.itemsPerPage  // Se envía automáticamente el valor de itemsPerPage
     },
     headers: {
         // Headers personalizados
     }
 }
 ```
+
+**Nota importante sobre `itemsPerPage`:**
+- Aunque el valor se envía en el `body` de la petición AJAX, este valor siempre se toma del parámetro `itemsPerPage` de la clase `search`.
+- Si se especifica un valor diferente en el `body` de la petición, este será ignorado y se usará el valor configurado en la instancia de `search`.
+- Esto asegura que la paginación sea consistente tanto para las peticiones AJAX como para el manejo de datos locales.
 
 ## Métodos
 

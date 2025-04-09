@@ -46,19 +46,10 @@ class search {
         return null;
     }
 
-    #getUniqueClassName(baseClass) {
-        // Obtener el selector del padre sin el punto inicial
-        const parentSelector = this.element.replace(/^\.|^\#/, '');
-        // Crear clase única combinando la base con el selector del padre
-        return `${baseClass}-${parentSelector}`;
-    }
-
     init() {
         this.configurarElementos();
 
         if (this.procesServer) {
-
-            this.data.body.itemsPerPage = this.itemsPerPage;
 
             this.ajax(this.data).then(response => {
                 this.calcularPaginacion(response.countPage);
@@ -104,6 +95,13 @@ class search {
         console.log("hola me inicie");
     }
 
+    #getUniqueClassName(baseClass) {
+        // Obtener el selector del padre sin el punto inicial
+        const parentSelector = this.element.replace(/^\.|^\#/, '');
+        // Crear clase única combinando la base con el selector del padre
+        return `${baseClass}-${parentSelector}`;
+    }
+
     configurarElementos() {
         this.header = this.cajaPadre.querySelector(".input-search");
 
@@ -113,33 +111,29 @@ class search {
             this.header.classList.add("input-search");
             this.header.classList.add(this.#getUniqueClassName("input-search"));
             this.cajaPadre.appendChild(this.header);
-        }
 
-        let label = this.header.querySelector("label");
-        console.log(label, "Peuba", !label);
-        if (!label) {
             // label
-            label = document.createElement("label");
+            let label = document.createElement("label");
             label.setAttribute("for", this.#getUniqueClassName("filter-search"));
             label.innerText = "Filtrar por Busqueda";
-            this.header.appendChild(label);
-        }
 
-        let input = this.header.querySelector("input");
-        if (!input) {
             // input
-            input = document.createElement("input");
+            let input = document.createElement("input");
             input.setAttribute("type", "text");
             input.setAttribute("name", this.#getUniqueClassName("filterSearch"));
             input.setAttribute("id", this.#getUniqueClassName("filter-search"));
             input.setAttribute("class", "form-control input-lg");
             input.setAttribute("placeholder", "Ingrese palabra clave...");
+
             // insertamos
+            this.header.appendChild(label);
             this.header.appendChild(input);
         }
 
-        this.inputSearch = this.header.querySelector("input");
-
+        console.log(this.header);
+        this.inputSearch = this.header.querySelector("input")
+            // this.inputSearch = this.header.querySelector(`#${this.#getUniqueClassName("filter-search")}`);
+            ;
         this.body = this.cajaPadre.querySelector(".items-search");
 
         if (!this.body) {
@@ -159,21 +153,20 @@ class search {
             this.footer.classList.add("index-search");
             this.footer.classList.add(this.#getUniqueClassName("index-search"));
             this.cajaPadre.appendChild(this.footer);
-        }
 
-        this.paginationContainer = this.footer.querySelector("ul");
-        if (!this.paginationContainer) {
             // ul
             this.paginationContainer = document.createElement("ul");
             this.paginationContainer.classList.add("pagination");
             this.paginationContainer.classList.add(this.#getUniqueClassName("pagination"));
+
             // insertamos
             this.footer.appendChild(this.paginationContainer);
         }
-
     }
 
     buscarEImprimir(searchTerm) {
+        this.body.innerHTML = "";
+
         // Intentar obtener datos del caché
         const cachedData = this.#getCacheData(searchTerm, this.#pagination.currentPage);
 
@@ -252,7 +245,6 @@ class search {
     }
 
     imprimirDatos(data) {
-        this.body.innerHTML = "";
         data.forEach((element) => {
             let item = document.createElement("section");
             item.classList.add("items");
@@ -380,26 +372,26 @@ class search {
     }
 }
 
-let prueba = new search({
-    element: ".app-search",
-    procesServer: true,
-    data: {
-        url: "./src/php/responseAjax.php",
-        method: "POST",
-        body: {
-            page: 1,
-            searchTerm: ""
-        },
-        // sucess: function (resp, instance) {
-        //     if (resp) {
-        //         console.log(resp)
-        //     }
-        // },
-        // error: function (error) {
-        //     console.log(error);
-        // }
-    },
-});
+// let prueba = new search({
+//     element: ".app-search",
+//     procesServer: true,
+//     data: {
+//         url: "./src/php/responseAjax.php",
+//         method: "POST",
+//         body: {
+//             page: 1,
+//             searchTerm: ""
+//         },
+//         // sucess: function (resp, instance) {
+//         //     if (resp) {
+//         //         console.log(resp)
+//         //     }
+//         // },
+//         // error: function (error) {
+//         //     console.log(error);
+//         // }
+//     },
+// });
 
 let prueba2 = new search({
     element: ".app-search2",
@@ -432,7 +424,7 @@ let data = [
     { descripcion: "Hola que hace, tu mekiere? miel de abejas", name: "Holasss", },
 ];
 
-let prueba3 = new search({
-    element: ".app-search3",
-    data: data
-});
+// let prueba3 = new search({
+//     element: ".app-search3",
+//     data: data
+// });
