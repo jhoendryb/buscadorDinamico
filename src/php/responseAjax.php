@@ -1,28 +1,29 @@
 <?php
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+// error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+
+header("Content-Type: application/json; charset=UTF-8");
 
 include "./modelo.php";
-header("Content-Type: application/json; charset=UTF-8");
 
 $busqueda = $_POST['searchTerm'];
 $page = $_POST['page'];
 
 $start = ($page - 1) * 10;
 
-$busqueda = (!empty($busqueda) ? "WHERE name LIKE '%{$busqueda}%'" : "");
-$consulta = mysqli_query($conexion, "SELECT id, name, country_code, country_id FROM paisesciudades {$busqueda} ORDER BY id ASC LIMIT $start, {$_POST['itemsPerPage']}");
-$consultaRow = mysqli_query($conexion, "SELECT COUNT(*) AS totalCount FROM paisesciudades {$busqueda} ORDER BY id ASC");
+$busqueda = (!empty($busqueda) ? "WHERE ciudad LIKE '%{$busqueda}%'" : "");
+$consulta = mysqli_query($conexion, "SELECT id_ciudad, ciudad AS name FROM ciudades {$busqueda} ORDER BY id_ciudad ASC LIMIT $start, {$_POST['itemsPerPage']}");
+$consultaRow = mysqli_query($conexion, "SELECT COUNT(*) AS totalCount FROM ciudades {$busqueda} ORDER BY id_ciudad ASC");
 $consultaRow = mysqli_fetch_assoc($consultaRow);
+
 
 $newDatos = array();
 while ($filas = mysqli_fetch_assoc($consulta)) {
-    $consultaPais = mysqli_query($conexion, "SELECT name FROM paises WHERE id = '{$filas['country_id']}' LIMIT 1");
-    $filas['pais'] = mysqli_fetch_assoc($consultaPais)['name'];
+    $filas['name'] = utf8_encode($filas['name']);
     $newDatos[] = $filas;
 }
 
 $response = [
-    "test" => "SELECT id, name, country_code, country_id FROM paisesciudades {$busqueda} ORDER BY name ASC LIMIT $start, 10",
+    "test" => "SELECT id_ciudad, ciudad AS name FROM ciudades {$busqueda} ORDER BY id_ciudad ASC LIMIT $start, {$_POST['itemsPerPage']}",
     "data" => $newDatos,
     "page" => (int) $page,
     "countPage" => $consultaRow['totalCount']
