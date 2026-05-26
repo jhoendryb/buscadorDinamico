@@ -241,7 +241,7 @@ Configuración de conexión a la base de datos:
 <?php
 $HOST = "localhost";
 $USER = "root";
-$PASS = "usbw";
+$PASS = "xample";
 $DB = "venezuela";
 $conexion = mysqli_connect($HOST, $USER, $PASS, $DB) or die("Error de conexion");
 ```
