@@ -283,12 +283,7 @@ echo json_encode($response);
 
 **Puedes implementar esto con:**
 
-- Node.js con Express, Fastify, Koa, etc.
-- Python con Flask, Django, FastAPI
-- Java con Spring Boot
-- C# con ASP.NET
-- Ruby on Rails
-- Cualquier otro framework o lenguaje de tu preferencia
+- Cualquier cosa de tu preferencia.
 
 ### Parámetros Esperados por el Servidor
 
