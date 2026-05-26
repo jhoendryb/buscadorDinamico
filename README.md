@@ -227,7 +227,13 @@ search.init();
 
 ## Archivos PHP del Servidor
 
-### modelo.php
+**Nota importante:** La implementación de los archivos PHP del servidor es a discreción del usuario. Los ejemplos mostrados a continuación son solo referencias. Puedes usar cualquier lenguaje de programación, framework o método de tu preferencia, siempre y cuando respetes la respuesta JSON esperada por la clase Search.
+
+### Ejemplo de Implementación
+
+A continuación se muestra un ejemplo de implementación en PHP con MySQL, pero puedes adaptarlo según tus necesidades:
+
+#### modelo.php (Ejemplo)
 
 Configuración de conexión a la base de datos:
 
@@ -240,7 +246,7 @@ $DB = "venezuela";
 $conexion = mysqli_connect($HOST, $USER, $PASS, $DB) or die("Error de conexion");
 ```
 
-### responseAjax.php
+#### responseAjax.php (Ejemplo)
 
 Endpoint para paginación del lado del servidor:
 
@@ -274,6 +280,15 @@ $response = [
 mysqli_close($conexion);
 echo json_encode($response);
 ```
+
+**Puedes implementar esto con:**
+
+- Node.js con Express, Fastify, Koa, etc.
+- Python con Flask, Django, FastAPI
+- Java con Spring Boot
+- C# con ASP.NET
+- Ruby on Rails
+- Cualquier otro framework o lenguaje de tu preferencia
 
 ### Parámetros Esperados por el Servidor
 
