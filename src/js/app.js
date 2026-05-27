@@ -12,6 +12,8 @@ class Search {
         this._cache = new Map();
         this.cacheEnabled = false;
         this.cacheMaxSize = 50; // Máximo 50 entradas
+        this.sortBy = null;
+        this.sortOrder = 'asc';
 
         Object.assign(this, params);
 
@@ -301,7 +303,6 @@ class Search {
     getCacheKey(searchTerm, page) {
         return `${searchTerm}_${page}`;
     }
-
     addToCache(key, data) {
         if (this._cache.size >= this.cacheMaxSize) {
             // Remover el menos usado recientemente (primera entrada)
@@ -310,7 +311,6 @@ class Search {
         }
         this._cache.set(key, data);
     }
-
     getFromCache(key) {
         if (this._cache.has(key)) {
             // Mover al final (más recientemente usado)
@@ -321,8 +321,46 @@ class Search {
         }
         return null;
     }
-
     clearCache() {
+        this._cache.clear();
+    }
+    destroy() {
+        this.emit('destroy', { timestamp: new Date().toISOString() });
+        if (this._body.inputSearch) {
+            const newInput = this._body.inputSearch.cloneNode(true);
+            this._body.inputSearch.parentNode.replaceChild(newInput, this._body.inputSearch);
+        }
+        this._body = null;
+        this._data = null;
+        this.data = null;
+        this._pagination = null;
+        this._events = null;
+    }
+    sort(field, order = 'asc') {
+        this.sortBy = field;
+        this.sortOrder = order;
+
+        if (this.procesServer) {
+            // Modo servidor: re-hacer la búsqueda con nuevo ordenamiento
+            this.searching(this.searchTerm, true);
+        } else {
+            // Modo local: ordenar en el cliente
+            this._data.sort((a, b) => {
+                const valA = a[field];
+                const valB = b[field];
+
+                if (valA < valB) return order === 'asc' ? -1 : 1;
+                if (valA > valB) return order === 'asc' ? 1 : -1;
+                return 0;
+            });
+            this.processPagination();
+        }
+
+        this.emit('sortChange', { field, order });
+    }
+    clearSort() {
+        this.sortBy = null;
+        this.sortOrder = 'asc';
         this._cache.clear();
     }
 }

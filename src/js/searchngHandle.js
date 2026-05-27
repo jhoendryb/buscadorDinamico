@@ -31,6 +31,17 @@ const searchingLocal = {
             );
         });
 
+        if (this.sortBy) {
+            this._data.sort((a, b) => {
+                const valA = a[this.sortBy];
+                const valB = b[this.sortBy];
+
+                if (valA < valB) return this.sortOrder === 'asc' ? -1 : 1;
+                if (valA > valB) return this.sortOrder === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
         this.searchTerm = searchTerm;
 
         if (this.cacheEnabled) {
@@ -74,6 +85,11 @@ const searchingServer = {
             this._data = cachedData;
             this.processPagination();
             return;
+        }
+
+        if (this.sortBy && (this.sortBy.length !== this.fetch.body.sortBy?.length)) {
+            this.fetch.body.sortBy = this.sortBy;
+            this.fetch.body.sortOrder = this.sortOrder;
         }
 
         const { data, ...rest } = await this.ajax(this.fetch);
