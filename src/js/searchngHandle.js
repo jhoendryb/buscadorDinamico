@@ -1,5 +1,3 @@
-import { createElement } from './renderElement.js'
-
 const searchingLocal = {
     isExtractData() {
         if (this.data.length > 0) return false;
@@ -13,10 +11,18 @@ const searchingLocal = {
         this._data = newData;
         return true;
     },
-    searching(searchTerm) {
+    searching(searchTerm, isEvent = false) {
         if (this.searchTerm === searchTerm && searchTerm != "") return;
 
-        this.showLoading();
+        this._pagination.page = 1;
+
+        const cacheKey = this.getCacheKey(searchTerm, this._pagination.page);
+        const cachedData = this.getFromCache(cacheKey);
+        if (this.cacheEnabled && cachedData) {
+            this._data = cachedData;
+            this.processPagination();
+            return;
+        }
 
         this._data = this.data.filter((element) => {
             const values = Object.values(element);
@@ -25,22 +31,27 @@ const searchingLocal = {
             );
         });
 
-        this._pagination.page = 1;
         this.searchTerm = searchTerm;
 
-        this.emit('search', {
-            searchTerm,
-            results: this._data,
-            totalResults: this._data.length,
-            timestamp: new Date().toISOString()
-        });
+        if (this.cacheEnabled) {
+            this.addToCache(cacheKey, this._data);
+        }
+
+        if (isEvent) {
+            this.emit('search', {
+                searchTerm,
+                results: this._data,
+                totalResults: this._data.length,
+                timestamp: new Date().toISOString()
+            });
+        }
 
         this.processPagination();
     }
 }
 
 const searchingServer = {
-    async searching(searchTerm) {
+    async searching(searchTerm, isEvent = false) {
         this.showLoading();
 
         if (searchTerm != this.searchTerm) {
@@ -55,18 +66,32 @@ const searchingServer = {
         if (this.itemsPerPage != this.fetch.body.itemsPerPage || !this.fetch.body.itemsPerPage)
             this.fetch.body.itemsPerPage = this.itemsPerPage;
 
+        this.searchTerm = searchTerm;
+
+        const cacheKey = this.getCacheKey(searchTerm, this._pagination.page);
+        const cachedData = this.getFromCache(cacheKey);
+        if (this.cacheEnabled && cachedData && !isEvent) {
+            this._data = cachedData;
+            this.processPagination();
+            return;
+        }
+
         const { data, ...rest } = await this.ajax(this.fetch);
         this._data = data;
         this._ajaxResponse.success = rest;
 
-        this.searchTerm = searchTerm;
+        if (this.cacheEnabled) {
+            this.addToCache(cacheKey, data);
+        }
 
-        this.emit('search', {
-            searchTerm,
-            results: this._data,
-            totalResults: this._data.length,
-            timestamp: new Date().toISOString()
-        });
+        if (isEvent) {
+            this.emit('search', {
+                searchTerm,
+                results: this._data,
+                totalResults: this._data.length,
+                timestamp: new Date().toISOString()
+            });
+        }
 
         this.processPagination();
     },

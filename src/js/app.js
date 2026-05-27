@@ -7,7 +7,11 @@ class Search {
         this.procesServer = false;
         this.searchTerm = "";
         this.itemsPerPage = 10;
-        this._ajaxResponse = {}
+        this._ajaxResponse = {};
+        this.debounceTime = 500;
+        this._cache = new Map();
+        this.cacheEnabled = false;
+        this.cacheMaxSize = 50; // Máximo 50 entradas
 
         Object.assign(this, params);
 
@@ -153,8 +157,8 @@ class Search {
                     const searchTerm = e.target.value.trim().toLowerCase();
                     clearTimeout(timeOut);
                     timeOut = setTimeout(() => {
-                        this.searching(searchTerm);
-                    }, 500);
+                        this.searching(searchTerm, e instanceof Event);
+                    }, this.debounceTime);
                 }
             },
             ...(!inputSearch ? {
@@ -237,11 +241,12 @@ class Search {
             };
 
             if (key !== "current") jsonElement.event = {
-                click: async () => {
+                click: () => {
                     this._pagination.page = buttonsPaginations[key];
                     if (this.procesServer) {
                         this.fetch.body.page = buttonsPaginations[key];
-                        await this.loadAjax();
+                        this.searching(this.searchTerm);
+                        return;
                     }
                     this.processPagination()
                 }
@@ -292,6 +297,33 @@ class Search {
             });
             this._body.renderItems.innerHTML = loading.outerHTML;
         }
+    }
+    getCacheKey(searchTerm, page) {
+        return `${searchTerm}_${page}`;
+    }
+
+    addToCache(key, data) {
+        if (this._cache.size >= this.cacheMaxSize) {
+            // Remover el menos usado recientemente (primera entrada)
+            const oldestKey = this._cache.keys().next().value;
+            this._cache.delete(oldestKey);
+        }
+        this._cache.set(key, data);
+    }
+
+    getFromCache(key) {
+        if (this._cache.has(key)) {
+            // Mover al final (más recientemente usado)
+            const data = this._cache.get(key);
+            this._cache.delete(key);
+            this._cache.set(key, data);
+            return data;
+        }
+        return null;
+    }
+
+    clearCache() {
+        this._cache.clear();
     }
 }
 
