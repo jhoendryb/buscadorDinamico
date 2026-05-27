@@ -24,12 +24,13 @@ La clase Search se importa como módulo ES6:
 <script src="./src/js/app.js" type="module"></script>
 ```
 
-**Dependencias requeridas:**
+**Dependencias opcionales:**
 
-- Bootstrap CSS y JS (para estilos)
-- Popper.js (para componentes de Bootstrap)
+- Bootstrap CSS y JS (para estilos - opcional, solo para mejorar la visualización del ejemplo)
+- Popper.js (para componentes de Bootstrap - opcional, solo para mejorar la visualización del ejemplo)
 
 ```html
+<!-- Opcional: Solo si deseas usar los estilos de Bootstrap para mejorar la visualización -->
 <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
 <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="./node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
