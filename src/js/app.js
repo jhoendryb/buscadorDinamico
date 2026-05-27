@@ -7,9 +7,30 @@ class Search {
         this.procesServer = false;
         this.searchTerm = "";
         this.itemsPerPage = 10;
-        this._fetch = {}
+        this._ajaxResponse = {}
 
         Object.assign(this, params);
+
+        if (!this.element) {
+            throw new Error("El parámetro 'element' es requerido");
+        }
+
+        if (typeof this.element !== 'string') {
+            throw new Error("El parámetro 'element' debe ser un string con el selector CSS");
+        }
+
+        if (this.procesServer && !this.fetch?.url) {
+            throw new Error("El parámetro 'fetch.url' es requerido cuando procesServer es true");
+        }
+
+        if (this.itemsPerPage) {
+            if (typeof this.itemsPerPage !== 'number') {
+                throw new Error("El parámetro 'itemsPerPage' debe ser un número");
+            }
+            if (this.itemsPerPage < 1) {
+                throw new Error("El parámetro 'itemsPerPage' debe ser mayor a 0");
+            }
+        }
 
         this._data = this.data;
         this._body = {
@@ -39,14 +60,23 @@ class Search {
         this._pagination = {
             page: 1, // página actual
             countPage: () => Math.ceil(this._pagination.countItems() / this.itemsPerPage) || 1, // cantidad de páginas
-            countItems: () => (this.procesServer ? this._fetch.success.countPage : this._data.length) || 0,
+            countItems: () => (this.procesServer ? this._ajaxResponse.success.countPage : this._data.length) || 0,
             next: () => {
+                if (this.procesServer) return this._data;
                 return {
                     start: ((this._pagination.page - 1) * this.itemsPerPage),
                     end: (this._pagination.page * this.itemsPerPage)
                 }
             }
         }
+
+        this._events = {}
+
+        this.emit('init', {
+            searchTerm: this.searchTerm,
+            itemsPerPage: this.itemsPerPage,
+            procesServer: this.procesServer
+        });
 
         if (this.procesServer)
             console.log(this, "vamos a ver");
@@ -69,8 +99,14 @@ class Search {
         // Crear clase única combinando la base con el selector del padre
         return `${baseClass}-${parentSelector}`;
     }
-    _renderItems(data, callback = undefined) {
+    _renderItems(data, callback) {
         const container = this._body.renderItems;
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<div class="items">No se encontraron resultados</div>';
+            return;
+        }
+
         container.innerHTML = data.map((item) => {
             return (callback ? callback(item) : `<div class="items">${Object.values(item).join(' ')}</div>`);
         }).join('');
@@ -175,120 +211,88 @@ class Search {
 
         this._body.paginationItems = paginationItems
     }
+    processPagination() {
+        const contentPagination = this._body.paginationItems;
+        const pagination = contentPagination.querySelector(".pagination");
+
+        pagination.innerHTML = "";
+        const buttonsPaginations = {
+            start: 1,
+            prev: this._pagination.page - 1,
+            current: this._pagination.page,
+            next: this._pagination.page + 1,
+            end: this._pagination.countPage(),
+        };
+
+        Object.keys(buttonsPaginations).forEach((key) => {
+            if (key === "prev" && buttonsPaginations[key] <= 1) return;
+            if (key === "start" && buttonsPaginations[key] === buttonsPaginations.current) return;
+            if (key === "end" && buttonsPaginations[key] === buttonsPaginations.current) return;
+            if (key === "next" && buttonsPaginations[key] >= this._pagination.countPage()) return;
+
+            const jsonElement = {
+                element: "li",
+                textContent: buttonsPaginations[key],
+                className: key === "current" ? `page-selected ${key}` : key
+            };
+
+            if (key !== "current") jsonElement.event = {
+                click: async () => {
+                    this._pagination.page = buttonsPaginations[key];
+                    if (this.procesServer) {
+                        this.fetch.body.page = buttonsPaginations[key];
+                        await this.loadAjax();
+                    }
+                    this.processPagination()
+                }
+            }
+
+            const li = createElement(jsonElement);
+            pagination.appendChild(li);
+        });
+
+        const next = this._pagination.next();
+        const dataNext = (this.procesServer ? next : this._data.slice(next.start, next.end));
+
+        this._renderItems(dataNext);
+
+        this.emit('pageChange', {
+            page: this._pagination.page,
+            totalPages: this._pagination.countPage(),
+            itemsOnPage: dataNext.length
+        });
+    }
+    on(eventName, callback) {
+        if (!this._events[eventName]) this._events[eventName] = [];
+        this._events[eventName].push(callback);
+    }
+    off(eventName, callback) {
+        if (!this._events[eventName]) return;
+        this._events[eventName] = this._events[eventName].filter(cb => cb !== callback);
+    }
+    emit(eventName, data) {
+        if (!this._events[eventName]) return;
+        this._events[eventName].forEach(callback => callback(data));
+    }
+    showLoading() {
+        if (this._body.renderItems) {
+            const loading = createElement({
+                element: "div",
+                className: `search-loading`,
+                children: [
+                    {
+                        element: "div",
+                        className: `spinner`
+                    },
+                    {
+                        element: "p",
+                        textContent: "Buscando..."
+                    }
+                ]
+            });
+            this._body.renderItems.innerHTML = loading.outerHTML;
+        }
+    }
 }
 
-const search1 = new Search({
-    element: '.app-search1',
-    procesServer: true,
-    fetch: {
-        url: "./src/php/responseAjax.php",
-        method: "POST",
-        body: {
-            page: 2,
-            searchTerm: "c"
-        },
-        // sucess: function (resp, instance) {
-        //     if (resp) {
-        //         console.log(resp)
-        //     }
-        // },
-        // error: function (error) {
-        //     console.log(error);
-        // }
-    },
-});
-
-const search2 = new Search({
-    element: '.app-search2',
-});
-
-const search3 = new Search({
-    element: '.app-search3',
-});
-
-const search4 = new Search({
-    element: '.app-search4',
-    data: [
-        {
-            country: 'VE',
-            name: 'Venezuela',
-            descripcion: 'El pais mas rico en petroleo.'
-        },
-        {
-            country: 'CO',
-            name: 'Colombia',
-            descripcion: 'El pais mas rico en cafe.'
-        },
-        {
-            country: 'MX',
-            name: 'Mexico',
-            descripcion: 'El pais mas rico en tacos.'
-        },
-        {
-            country: 'AR',
-            name: 'Argentina',
-            descripcion: 'El pais mas rico en empanadas.'
-        },
-        {
-            country: 'CL',
-            name: 'Chile',
-            descripcion: 'El pais mas rico en vino.'
-        },
-        {
-            country: 'PE',
-            name: 'Peru',
-            descripcion: 'El pais mas rico en machi.'
-        },
-        {
-            country: 'EC',
-            name: 'Ecuador',
-            descripcion: 'El pais mas rico en cacao.'
-        },
-        {
-            country: 'BO',
-            name: 'Bolivia',
-            descripcion: 'El pais mas rico en plata.'
-        },
-        {
-            country: 'CO',
-            name: 'Colombia',
-            descripcion: 'El pais mas rico en cafe.'
-        },
-        {
-            country: 'MX',
-            name: 'Mexico',
-            descripcion: 'El pais mas rico en tacos.'
-        },
-        {
-            country: 'AR',
-            name: 'Argentina',
-            descripcion: 'El pais mas rico en empanadas.'
-        },
-        {
-            country: 'CL',
-            name: 'Chile',
-            descripcion: 'El pais mas rico en vino.'
-        },
-        {
-            country: 'PE',
-            name: 'Peru',
-            descripcion: 'El pais mas rico en machi.'
-        },
-        {
-            country: 'EC',
-            name: 'Ecuador',
-            descripcion: 'El pais mas rico en cacao.'
-        },
-        {
-            country: 'BO',
-            name: 'Bolivia',
-            descripcion: 'El pais mas rico en plata.'
-        },
-    ]
-});
-
-
-search1.init();
-search2.init();
-search3.init();
-search4.init();
+export { Search };

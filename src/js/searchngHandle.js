@@ -14,8 +14,9 @@ const searchingLocal = {
         return true;
     },
     searching(searchTerm) {
-        const input = this._body.inputSearch;
         if (this.searchTerm === searchTerm && searchTerm != "") return;
+
+        this.showLoading();
 
         this._data = this.data.filter((element) => {
             const values = Object.values(element);
@@ -26,51 +27,22 @@ const searchingLocal = {
 
         this._pagination.page = 1;
         this.searchTerm = searchTerm;
-        this.processPagination();
-    },
-    processPagination() {
-        const contentPagination = this._body.paginationItems;
-        const pagination = contentPagination.querySelector(".pagination");
 
-        pagination.innerHTML = "";
-        const buttonsPaginations = {
-            start: 1,
-            prev: this._pagination.page - 1,
-            current: this._pagination.page,
-            next: this._pagination.page + 1,
-            end: this._pagination.countPage(),
-        };
-
-        Object.keys(buttonsPaginations).forEach((key) => {
-            if (key === "prev" && buttonsPaginations[key] <= 1) return;
-            if (key === "start" && buttonsPaginations[key] === buttonsPaginations.current) return;
-            if (key === "end" && buttonsPaginations[key] === buttonsPaginations.current) return;
-            if (key === "next" && buttonsPaginations[key] >= this._pagination.countPage()) return;
-
-            const jsonElement = {
-                element: "li",
-                textContent: buttonsPaginations[key],
-                className: key === "current" ? `page-selected ${key}` : key
-            };
-
-            if (key !== "current") jsonElement.event = {
-                click: () => {
-                    this._pagination.page = buttonsPaginations[key];
-                    this.processPagination();
-                }
-            }
-
-            const li = createElement(jsonElement);
-            pagination.appendChild(li);
+        this.emit('search', {
+            searchTerm,
+            results: this._data,
+            totalResults: this._data.length,
+            timestamp: new Date().toISOString()
         });
-        const { start, end } = this._pagination.next();
-        const dataNext = this._data.slice(start, end);
-        this._renderItems(dataNext);
+
+        this.processPagination();
     }
 }
 
 const searchingServer = {
     async searching(searchTerm) {
+        this.showLoading();
+
         if (searchTerm != this.searchTerm) {
             this._pagination.page = 1;
             this.fetch.body.page = 1;
@@ -85,9 +57,17 @@ const searchingServer = {
 
         const { data, ...rest } = await this.ajax(this.fetch);
         this._data = data;
-        this._fetch.success = rest;
+        this._ajaxResponse.success = rest;
 
         this.searchTerm = searchTerm;
+
+        this.emit('search', {
+            searchTerm,
+            results: this._data,
+            totalResults: this._data.length,
+            timestamp: new Date().toISOString()
+        });
+
         this.processPagination();
     },
     async ajax(resp) {
@@ -124,9 +104,9 @@ const searchingServer = {
                 xhr.send(parseBody);
             } else {
                 // Para GET/DELETE, construimos la URL con parámetros
-                const params = new URLSearchParams(config.body);
-                const fullUrl = `${config.url}?${params.toString()}`;
-                xhr.open(config.method, fullUrl, true);
+                const params = new URLSearchParams(resp.body);
+                const fullUrl = `${resp.url}?${params.toString()}`;
+                xhr.open(resp.method, fullUrl, true);
                 xhr.send();
             }
 
@@ -134,63 +114,41 @@ const searchingServer = {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     try {
                         const response = JSON.parse(xhr.responseText);
+                        this.emit('ajaxSuccess', {
+                            response,
+                            status: xhr.status,
+                            url: resp.url
+                        });
                         sucess(response, this);
                         resolve(response);
-
                     } catch (error) {
+                        this.emit('ajaxError', {
+                            error: 'Error al parsear JSON',
+                            originalError: error
+                        });
                         error('Error al parsear la respuesta JSON');
                         reject(new Error('Error al parsear la respuesta JSON'));
                     }
                 } else {
+                    this.emit('ajaxError', {
+                        error: `Error HTTP: ${xhr.status}`,
+                        status: xhr.status,
+                        url: resp.url
+                    });
                     error(`Error HTTP: ${xhr.status}`);
                     reject(new Error(`Error HTTP: ${xhr.status}`));
                 }
             };
 
             xhr.onerror = () => {
+                this.emit('ajaxError', {
+                    error: 'Error en la petición AJAX',
+                    type: 'network'
+                });
                 error('Error en la petición AJAX');
                 reject(new Error('Error en la petición AJAX'));
             };
         });
-    },
-    processPagination() {
-        const contentPagination = this._body.paginationItems;
-        const pagination = contentPagination.querySelector(".pagination");
-
-        pagination.innerHTML = "";
-        const buttonsPaginations = {
-            start: 1,
-            prev: this._pagination.page - 1,
-            current: this._pagination.page,
-            next: this._pagination.page + 1,
-            end: this._pagination.countPage(),
-        };
-
-        Object.keys(buttonsPaginations).forEach((key) => {
-            if (key === "prev" && buttonsPaginations[key] <= 1) return;
-            if (key === "start" && buttonsPaginations[key] === buttonsPaginations.current) return;
-            if (key === "end" && buttonsPaginations[key] === buttonsPaginations.current) return;
-            if (key === "next" && buttonsPaginations[key] >= this._pagination.countPage()) return;
-
-            const jsonElement = {
-                element: "li",
-                textContent: buttonsPaginations[key],
-                className: key === "current" ? `page-selected ${key}` : key
-            };
-
-            if (key !== "current") jsonElement.event = {
-                click: () => {
-                    this._pagination.page = buttonsPaginations[key];
-                    this.fetch.body.page = buttonsPaginations[key];
-                    this.searching(this.searchTerm);
-                }
-            }
-
-            const li = createElement(jsonElement);
-            pagination.appendChild(li);
-        });
-
-        this._renderItems(this._data);
     }
 }
 
