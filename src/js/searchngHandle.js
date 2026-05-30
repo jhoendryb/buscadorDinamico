@@ -35,7 +35,6 @@ const searchingLocal = {
             this._data.sort((a, b) => {
                 const valA = a[this.sortBy];
                 const valB = b[this.sortBy];
-
                 if (valA < valB) return this.sortOrder === 'asc' ? -1 : 1;
                 if (valA > valB) return this.sortOrder === 'asc' ? 1 : -1;
                 return 0;

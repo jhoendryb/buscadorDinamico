@@ -230,12 +230,18 @@
             element: '.app-search1',
             procesServer: true,
             cacheEnabled: true,
+            keyboardEnabled: true,
+            translation: {
+                searchPlaceholder: 'Escribe la busqueda aqui.'
+            },
             fetch: {
                 url: "./src/php/responseAjax.php",
                 method: "POST",
                 body: {
                     page: 2,
-                    searchTerm: "c"
+                    searchTerm: "c",
+                    sortBy: "id_ciudad",
+                    sortOrder: "asc"
                 },
                 // sucess: function (resp, instance) {
                 //     if (resp) {
@@ -246,6 +252,10 @@
                 //     console.log(error);
                 // }
             },
+        });
+
+        search1.on('itemSelected', (data) => {
+            console.log('Item seleccionado:', data.item);
         });
 
         const search2 = new Search({

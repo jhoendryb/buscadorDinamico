@@ -2,7 +2,16 @@ import { createElement } from './renderElement.js'
 import { searchingLocal, searchingServer } from './searchngHandle.js'
 
 class Search {
+    #defaultTranslations = {
+        searchLabel: 'Filtrar por Búsqueda',
+        searchPlaceholder: 'Ingrese palabra clave...',
+        noResults: 'No se encontraron resultados',
+        loading: 'Buscando...'
+    };
+
     constructor(params) {
+        const { translation, ...newParams } = params;
+
         this.data = [];
         this.procesServer = false;
         this.searchTerm = "";
@@ -14,8 +23,13 @@ class Search {
         this.cacheMaxSize = 50; // Máximo 50 entradas
         this.sortBy = null;
         this.sortOrder = 'asc';
+        this.selectedIndex = -1;
+        this.keyboardEnabled = false;
+        this.template = null;
 
-        Object.assign(this, params);
+        Object.assign(this, newParams);
+
+        this.t = { ...this.#defaultTranslations, ...translation };
 
         if (!this.element) {
             throw new Error("El parámetro 'element' es requerido");
@@ -60,8 +74,7 @@ class Search {
         if (!this._body.renderItems) this.renderItems();
         if (!this._body.paginationItems) this.renderPagination();
 
-        if (this.procesServer) Object.assign(this, searchingServer);
-        else Object.assign(this, searchingLocal);
+        Object.assign(this, (this.procesServer ? searchingServer : searchingLocal))
 
         this._pagination = {
             page: 1, // página actual
@@ -88,6 +101,8 @@ class Search {
             console.log(this, "vamos a ver");
     }
     init() {
+        this.setupKeyboardNavigation();
+
         if (this.procesServer) {
             this.searching(this.searchTerm);
             return;
@@ -105,17 +120,43 @@ class Search {
         // Crear clase única combinando la base con el selector del padre
         return `${baseClass}-${parentSelector}`;
     }
-    _renderItems(data, callback) {
+    _renderItems(data) {
         const container = this._body.renderItems;
+        const jsonItem = {
+            element: "div",
+            className: "items",
+            textContent: '',
+            attributes: { 'role': 'option' }
+        };
 
         if (!data || data.length === 0) {
-            container.innerHTML = '<div class="items">No se encontraron resultados</div>';
+            jsonItem.textContent = this.t.noResults;
+            container.innerHTML = createElement(jsonItem).outerHTML;
             return;
         }
 
-        container.innerHTML = data.map((item) => {
-            return (callback ? callback(item) : `<div class="items">${Object.values(item).join(' ')}</div>`);
-        }).join('');
+        let html;
+
+        if (this.template) {
+            if (typeof this.template === 'function') {
+                html = data.map(item => this.template(item)).join('');
+            } else if (typeof this.template === 'string') {
+                html = data.map(item => {
+                    let template = this.template;
+                    Object.keys(item).forEach(key => {
+                        template = template.replace(`{{${key}}}`, item[key]);
+                    });
+                    return template;
+                }).join('');
+            }
+        } else {
+            html = data.map(item => {
+                jsonItem.textContent = Object.values(item).join(' ');
+                return createElement(jsonItem).outerHTML;
+            }).join('');
+        }
+
+        container.innerHTML = html;
     }
     contentSearch() {
         if (this._body.contentSearch) return;
@@ -131,8 +172,8 @@ class Search {
                 children: [
                     {
                         element: "label",
-                        htmlFor: "filter-search",
-                        textContent: "Filtrar por Busqueda"
+                        htmlFor: this.#getUniqueClassName('input-search'),
+                        textContent: this.t.searchLabel
                     }
                 ]
             });
@@ -154,6 +195,12 @@ class Search {
 
         let jsonInput = {
             element: inputSearch,
+            id: this.#getUniqueClassName('input-search'),
+            attributes: {
+                "aria-label": this.t.searchLabel,
+                "aria-autocomplete": "list",
+                "role": "combobox"
+            },
             event: {
                 input: (e) => {
                     const searchTerm = e.target.value.trim().toLowerCase();
@@ -167,11 +214,13 @@ class Search {
                 element: "input",
                 name: this.#getUniqueClassName("filterSearch"),
                 className: `form-control input-lg ${this.#getUniqueClassName("filter-search")}`,
-                placeholder: "Ingrese palabra clave...",
+                placeholder: this.t.searchPlaceholder,
             } : {})
         };
 
         inputSearch = createElement(jsonInput);
+
+        inputSearch.setAttribute('aria-controls', this.#getUniqueClassName('items-search')); // INDICA QUE CONTROLA LA LISTA DE SUGERENCIAS
 
         if (jsonInput.element === "input") element.appendChild(inputSearch);
 
@@ -187,7 +236,13 @@ class Search {
         if (!renderItems) {
             renderItems = createElement({
                 element: "main",
+                id: this.#getUniqueClassName('items-search'),
                 className: `items-search scroll-personalize ${this.#getUniqueClassName("items-search")}`,
+                attributes: {
+                    'aria-label': 'Resultados de búsqueda',
+                    'role': 'listbox',
+                    'aria-activedescendant': ''
+                }
             });
             element.appendChild(renderItems);
         }
@@ -205,6 +260,10 @@ class Search {
             paginationItems = createElement({
                 element: "footer",
                 className: `index-search ${this.#getUniqueClassName("index-search")}`,
+                attributes: {
+                    'aria-label': 'Paginación de resultados',
+                    'role': 'navigation'
+                },
                 children: [
                     {
                         element: "ul",
@@ -238,21 +297,28 @@ class Search {
 
             const jsonElement = {
                 element: "li",
-                textContent: buttonsPaginations[key],
-                className: key === "current" ? `page-selected ${key}` : key
+                className: key === "current" ? `page-selected ${key}` : key,
+                children: key === "current"
+                    ? [{ element: "span", textContent: buttonsPaginations[key], attributes: { 'aria-current': 'page' } }]
+                    : [{
+                        element: "button",
+                        textContent: buttonsPaginations[key],
+                        attributes: {
+                            'aria-label': `Ir a página ${buttonsPaginations[key]}`
+                        },
+                        event: {
+                            click: () => {
+                                this._pagination.page = buttonsPaginations[key];
+                                if (this.procesServer) {
+                                    this.fetch.body.page = buttonsPaginations[key];
+                                    this.searching(this.searchTerm);
+                                    return;
+                                }
+                                this.processPagination()
+                            }
+                        }
+                    }]
             };
-
-            if (key !== "current") jsonElement.event = {
-                click: () => {
-                    this._pagination.page = buttonsPaginations[key];
-                    if (this.procesServer) {
-                        this.fetch.body.page = buttonsPaginations[key];
-                        this.searching(this.searchTerm);
-                        return;
-                    }
-                    this.processPagination()
-                }
-            }
 
             const li = createElement(jsonElement);
             pagination.appendChild(li);
@@ -293,7 +359,7 @@ class Search {
                     },
                     {
                         element: "p",
-                        textContent: "Buscando..."
+                        textContent: this.t.loading
                     }
                 ]
             });
@@ -305,7 +371,6 @@ class Search {
     }
     addToCache(key, data) {
         if (this._cache.size >= this.cacheMaxSize) {
-            // Remover el menos usado recientemente (primera entrada)
             const oldestKey = this._cache.keys().next().value;
             this._cache.delete(oldestKey);
         }
@@ -313,7 +378,6 @@ class Search {
     }
     getFromCache(key) {
         if (this._cache.has(key)) {
-            // Mover al final (más recientemente usado)
             const data = this._cache.get(key);
             this._cache.delete(key);
             this._cache.set(key, data);
@@ -324,27 +388,13 @@ class Search {
     clearCache() {
         this._cache.clear();
     }
-    destroy() {
-        this.emit('destroy', { timestamp: new Date().toISOString() });
-        if (this._body.inputSearch) {
-            const newInput = this._body.inputSearch.cloneNode(true);
-            this._body.inputSearch.parentNode.replaceChild(newInput, this._body.inputSearch);
-        }
-        this._body = null;
-        this._data = null;
-        this.data = null;
-        this._pagination = null;
-        this._events = null;
-    }
     sort(field, order = 'asc') {
         this.sortBy = field;
         this.sortOrder = order;
 
         if (this.procesServer) {
-            // Modo servidor: re-hacer la búsqueda con nuevo ordenamiento
             this.searching(this.searchTerm, true);
         } else {
-            // Modo local: ordenar en el cliente
             this._data.sort((a, b) => {
                 const valA = a[field];
                 const valB = b[field];
@@ -361,7 +411,72 @@ class Search {
     clearSort() {
         this.sortBy = null;
         this.sortOrder = 'asc';
+
+        if (this.procesServer) {
+            this.fetch.body.sortBy = null;
+            this.fetch.body.sortOrder = 'asc';
+        }
+
         this._cache.clear();
+    }
+    setupKeyboardNavigation() {
+        if (!this.keyboardEnabled) return;
+
+        const content = this._body.content;
+        content.addEventListener('keydown', (e) => {
+            const items = this._body.renderItems.querySelectorAll('.items');
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                const keyName = (e.key === 'ArrowLeft' ? 'prev' : 'next');
+                const btnPagination = this._body.paginationItems.querySelector(`.${keyName} button`);
+                if (!btnPagination) {
+                    const btn = keyName === 'prev' ? 'start' : 'end';
+                    if (btn === "start" && this._pagination.page <= 1) return;
+                    if (btn === "end" && this._pagination.page >= this._pagination.countPage()) return;
+                    const btnStart = this._body.paginationItems.querySelector(`.${btn} button`);
+                    btnStart.click();
+                    return;
+                }
+                btnPagination.click();
+                return;
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
+                this.highlightItem(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
+                this.highlightItem(items);
+            } else if (e.key === 'Enter' && this.selectedIndex >= 0) {
+                e.preventDefault();
+                this.selectItem(items[this.selectedIndex]);
+            }
+        });
+    }
+    highlightItem(items) {
+        items.forEach((item, index) => {
+            if (index === this.selectedIndex) {
+                item.classList.add('selected');
+                item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+    }
+    selectItem(item) {
+        this.emit('itemSelected', { item, index: this.selectedIndex });
+    }
+    destroy() {
+        this.emit('destroy', { timestamp: new Date().toISOString() });
+        if (this._body.inputSearch) {
+            const newInput = this._body.inputSearch.cloneNode(true);
+            this._body.inputSearch.parentNode.replaceChild(newInput, this._body.inputSearch);
+        }
+        this._body = null;
+        this._data = null;
+        this.data = null;
+        this._pagination = null;
+        this._events = null;
     }
 }
 
