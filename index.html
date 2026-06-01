@@ -231,9 +231,11 @@
             procesServer: true,
             cacheEnabled: true,
             keyboardEnabled: true,
+            template: `<div>{{name}} - {{id_ciudad}}</div>`,
             translation: {
                 searchPlaceholder: 'Escribe la busqueda aqui.'
             },
+            dom: 'sip',
             fetch: {
                 url: "./src/php/responseAjax.php",
                 method: "POST",
@@ -252,6 +254,13 @@
                 //     console.log(error);
                 // }
             },
+        });
+
+        search1.on('renderItems', (data) => {
+            const { content } = data;
+            const item = content.children;
+            console.log('Page change event:', item[0]);
+            console.log('Item content:', item[0].innerHTML);
         });
 
         search1.on('itemSelected', (data) => {
@@ -354,12 +363,24 @@
                 },
             ]
         });
-
+        
+        // search1.on('renderItems', (data) => {
+        //     console.log(search1.selectedIndex, "a ver");
+        //     const contentElement = search1._body.content;
+        //     contentElement.dispatchEvent(new KeyboardEvent('keydown', {
+        //         key: 'ArrowDown',
+        //         code: 'ArrowDown',
+        //         bubbles: true,
+        //         cancelable: true
+        //     }));
+        //     console.log(search1.selectedIndex, "despues de dispatch");
+        // });
 
         search1.init();
         search2.init();
         search3.init();
         search4.init();
+
     </script>
 </body>
 

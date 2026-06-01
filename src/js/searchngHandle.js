@@ -2,7 +2,7 @@ const searchingLocal = {
     isExtractData() {
         if (this.data.length > 0) return false;
 
-        const items = this._body.renderItems?.querySelectorAll(".items");
+        const items = this._body.content?.querySelectorAll(".items");
         const newData = Object.keys(items || {}).map((key) => {
             return { ...items[key].dataset, children: items[key].innerHTML };
         });
@@ -27,18 +27,12 @@ const searchingLocal = {
         this._data = this.data.filter((element) => {
             const values = Object.values(element);
             return values.some((value) =>
-                value.toString().toLowerCase().includes(searchTerm)
+                value.toString().toLowerCase().includes(searchTerm.toLowerCase())
             );
         });
 
         if (this.sortBy) {
-            this._data.sort((a, b) => {
-                const valA = a[this.sortBy];
-                const valB = b[this.sortBy];
-                if (valA < valB) return this.sortOrder === 'asc' ? -1 : 1;
-                if (valA > valB) return this.sortOrder === 'asc' ? 1 : -1;
-                return 0;
-            });
+            this.sort(this.sortBy, this.sortOrder);
         }
 
         this.searchTerm = searchTerm;
@@ -55,8 +49,6 @@ const searchingLocal = {
                 timestamp: new Date().toISOString()
             });
         }
-
-        this.processPagination();
     }
 }
 
@@ -70,11 +62,13 @@ const searchingServer = {
             this.fetch.body.searchTerm = searchTerm;
         }
 
-        if (this._pagination.page != this.fetch.body.page)
+        if (this._pagination.page != this.fetch.body.page) {
             this._pagination.page = this.fetch.body.page;
+        }
 
-        if (this.itemsPerPage != this.fetch.body.itemsPerPage || !this.fetch.body.itemsPerPage)
+        if (this.itemsPerPage != this.fetch.body.itemsPerPage || !this.fetch.body.itemsPerPage) {
             this.fetch.body.itemsPerPage = this.itemsPerPage;
+        }
 
         this.searchTerm = searchTerm;
 
@@ -86,7 +80,7 @@ const searchingServer = {
             return;
         }
 
-        if (this.sortBy && (this.sortBy.length !== this.fetch.body.sortBy?.length)) {
+        if (this.sortBy && (this.sortBy !== this.fetch.body.sortBy)) {
             this.fetch.body.sortBy = this.sortBy;
             this.fetch.body.sortOrder = this.sortOrder;
         }
@@ -107,8 +101,6 @@ const searchingServer = {
                 timestamp: new Date().toISOString()
             });
         }
-
-        this.processPagination();
     },
     async ajax(resp) {
         const {

@@ -2,12 +2,19 @@ import { createElement } from './renderElement.js'
 import { searchingLocal, searchingServer } from './searchngHandle.js'
 
 class Search {
-    #defaultTranslations = {
+    static #defaultTranslations = {
         searchLabel: 'Filtrar por Búsqueda',
         searchPlaceholder: 'Ingrese palabra clave...',
         noResults: 'No se encontraron resultados',
         loading: 'Buscando...'
     };
+    static #DEFAULT_ITEMS_PER_PAGE = 10;
+    static #DEFAULT_DEBOUNCE_TIME = 500;
+    static #DEFAULT_CACHE_MAX_SIZE = 50;
+    static #NO_SELECTION = -1;
+    static #FIRST_PAGE = 1;
+    static #SORT_ASC = -1;
+    static #SORT_DESC = 1;
 
     constructor(params) {
         const { translation, ...newParams } = params;
@@ -15,21 +22,22 @@ class Search {
         this.data = [];
         this.procesServer = false;
         this.searchTerm = "";
-        this.itemsPerPage = 10;
+        this.itemsPerPage = Search.#DEFAULT_ITEMS_PER_PAGE;
         this._ajaxResponse = {};
-        this.debounceTime = 500;
+        this.debounceTime = Search.#DEFAULT_DEBOUNCE_TIME;
         this._cache = new Map();
         this.cacheEnabled = false;
-        this.cacheMaxSize = 50; // Máximo 50 entradas
+        this.cacheMaxSize = Search.#DEFAULT_CACHE_MAX_SIZE;
         this.sortBy = null;
         this.sortOrder = 'asc';
-        this.selectedIndex = -1;
+        this.selectedIndex = Search.#NO_SELECTION;
         this.keyboardEnabled = false;
         this.template = null;
+        this.dom = 'sip'; // 's': Search, 'i': Items, 'p': Pagination
 
         Object.assign(this, newParams);
 
-        this.t = { ...this.#defaultTranslations, ...translation };
+        this.t = { ...Search.#defaultTranslations, ...translation };
 
         if (!this.element) {
             throw new Error("El parámetro 'element' es requerido");
@@ -69,23 +77,17 @@ class Search {
             throw new Error(msgError)
         }
 
-        if (!this._body.contentSearch) this.contentSearch();
-        if (!this._body.inputSearch) this.renderSearch();
-        if (!this._body.renderItems) this.renderItems();
-        if (!this._body.paginationItems) this.renderPagination();
-
         Object.assign(this, (this.procesServer ? searchingServer : searchingLocal))
 
         this._pagination = {
-            page: 1, // página actual
+            page: Search.#FIRST_PAGE,
             countPage: () => Math.ceil(this._pagination.countItems() / this.itemsPerPage) || 1, // cantidad de páginas
             countItems: () => (this.procesServer ? this._ajaxResponse.success.countPage : this._data.length) || 0,
             next: () => {
                 if (this.procesServer) return this._data;
-                return {
-                    start: ((this._pagination.page - 1) * this.itemsPerPage),
-                    end: (this._pagination.page * this.itemsPerPage)
-                }
+                const start = ((this._pagination.page - 1) * this.itemsPerPage);
+                const end = (this._pagination.page * this.itemsPerPage);
+                return this._data.slice(start, end);
             }
         }
 
@@ -96,23 +98,24 @@ class Search {
             itemsPerPage: this.itemsPerPage,
             procesServer: this.procesServer
         });
-
-        if (this.procesServer)
-            console.log(this, "vamos a ver");
     }
     init() {
+        if (!this.procesServer) this.isExtractData();
+
+        this.renderByDom();
+
         this.setupKeyboardNavigation();
 
-        if (this.procesServer) {
-            this.searching(this.searchTerm);
-            return;
-        } else this.isExtractData();
-
-        this.processPagination();
-
-        this.searching(this.searchTerm);
+        this.draw(this.searchTerm);
 
         console.log('Init Search', this._data);
+    }
+    async draw(searchTerm, isEvent = false) {
+        await this.searching(searchTerm, isEvent);
+
+        if (this._body.paginationItems) {
+            this.processPagination();
+        }
     }
     #getUniqueClassName(baseClass) {
         // Obtener el selector del padre sin el punto inicial
@@ -122,65 +125,45 @@ class Search {
     }
     _renderItems(data) {
         const container = this._body.renderItems;
+
+        if (!container) return false;
+
+        container.innerHTML = '';
+
         const jsonItem = {
             element: "div",
             className: "items",
-            textContent: '',
             attributes: { 'role': 'option' }
         };
 
         if (!data || data.length === 0) {
             jsonItem.textContent = this.t.noResults;
-            container.innerHTML = createElement(jsonItem).outerHTML;
+            container.appendChild(createElement(jsonItem));
             return;
         }
 
-        let html;
-
-        if (this.template) {
-            if (typeof this.template === 'function') {
-                html = data.map(item => this.template(item)).join('');
-            } else if (typeof this.template === 'string') {
-                html = data.map(item => {
-                    let template = this.template;
+        data.forEach(item => {
+            if (this.template) {
+                let template = this.template;
+                if (typeof template === 'function') {
+                    jsonItem.innerHTML = template(item);
+                } else if (typeof template === 'string') {
                     Object.keys(item).forEach(key => {
                         template = template.replace(`{{${key}}}`, item[key]);
                     });
-                    return template;
-                }).join('');
+                    jsonItem.innerHTML = template;
+                }
+                container.appendChild(createElement(jsonItem));
+                return
             }
-        } else {
-            html = data.map(item => {
-                jsonItem.textContent = Object.values(item).join(' ');
-                return createElement(jsonItem).outerHTML;
-            }).join('');
-        }
+            jsonItem.textContent = Object.values(item).join(' ');
+            container.appendChild(createElement(jsonItem));
+        });
 
-        container.innerHTML = html;
-    }
-    contentSearch() {
-        if (this._body.contentSearch) return;
-
-        const element = this._body.content;
-
-        let contentSearch = element.querySelector('.input-search');
-
-        if (!contentSearch) {
-            contentSearch = createElement({
-                element: "search",
-                className: "input-search" + ` ${this.#getUniqueClassName('input-search')}`,
-                children: [
-                    {
-                        element: "label",
-                        htmlFor: this.#getUniqueClassName('input-search'),
-                        textContent: this.t.searchLabel
-                    }
-                ]
-            });
-            element.appendChild(contentSearch);
-        }
-
-        this._body.contentSearch = contentSearch
+        this.emit('renderItems', {
+            items: data,
+            content: container
+        });
     }
     renderSearch() {
         if (this._body.inputSearch) return;
@@ -206,7 +189,7 @@ class Search {
                     const searchTerm = e.target.value.trim().toLowerCase();
                     clearTimeout(timeOut);
                     timeOut = setTimeout(() => {
-                        this.searching(searchTerm, e instanceof Event);
+                        this.draw(searchTerm, e instanceof Event);
                     }, this.debounceTime);
                 }
             },
@@ -225,6 +208,32 @@ class Search {
         if (jsonInput.element === "input") element.appendChild(inputSearch);
 
         this._body.inputSearch = inputSearch
+    }
+    contentSearch() {
+        if (this._body.contentSearch) return;
+
+        const element = this._body.content;
+
+        let contentSearch = element.querySelector('.input-search');
+
+        if (!contentSearch) {
+            contentSearch = createElement({
+                element: "search",
+                className: "input-search" + ` ${this.#getUniqueClassName('input-search')}`,
+                children: [
+                    {
+                        element: "label",
+                        htmlFor: this.#getUniqueClassName('input-search'),
+                        textContent: this.t.searchLabel
+                    }
+                ]
+            });
+            element.appendChild(contentSearch);
+        }
+
+        this._body.contentSearch = contentSearch;
+
+        this.renderSearch();
     }
     renderItems() {
         if (this._body.renderItems) return;
@@ -247,7 +256,7 @@ class Search {
             element.appendChild(renderItems);
         }
 
-        this._body.renderItems = renderItems
+        this._body.renderItems = renderItems;
     }
     renderPagination() {
         if (this._body.paginationItems) return;
@@ -275,6 +284,23 @@ class Search {
         }
 
         this._body.paginationItems = paginationItems
+    }
+    renderByDom() {
+        const content = this._body.content;
+
+        content.innerHTML = '';
+
+        const domMap = {
+            's': () => this.contentSearch(), // s: Search
+            'i': () => this.renderItems(), // i: Items
+            'p': () => this.renderPagination() // p: Paginacion
+        };
+
+        for (const char of this.dom) {
+            if (domMap[char]) {
+                domMap[char]();
+            }
+        }
     }
     processPagination() {
         const contentPagination = this._body.paginationItems;
@@ -311,7 +337,7 @@ class Search {
                                 this._pagination.page = buttonsPaginations[key];
                                 if (this.procesServer) {
                                     this.fetch.body.page = buttonsPaginations[key];
-                                    this.searching(this.searchTerm);
+                                    this.draw(this.searchTerm);
                                     return;
                                 }
                                 this.processPagination()
@@ -325,14 +351,13 @@ class Search {
         });
 
         const next = this._pagination.next();
-        const dataNext = (this.procesServer ? next : this._data.slice(next.start, next.end));
 
-        this._renderItems(dataNext);
+        this._renderItems(next);
 
         this.emit('pageChange', {
             page: this._pagination.page,
             totalPages: this._pagination.countPage(),
-            itemsOnPage: dataNext.length
+            itemsOnPage: next.length
         });
     }
     on(eventName, callback) {
@@ -393,14 +418,14 @@ class Search {
         this.sortOrder = order;
 
         if (this.procesServer) {
-            this.searching(this.searchTerm, true);
+            this.draw(this.searchTerm, true);
         } else {
             this._data.sort((a, b) => {
                 const valA = a[field];
                 const valB = b[field];
 
-                if (valA < valB) return order === 'asc' ? -1 : 1;
-                if (valA > valB) return order === 'asc' ? 1 : -1;
+                if (valA < valB) return order === 'asc' ? Search.#SORT_ASC : Search.#SORT_DESC;
+                if (valA > valB) return order === 'asc' ? Search.#SORT_DESC : Search.#SORT_ASC;
                 return 0;
             });
             this.processPagination();
@@ -424,7 +449,10 @@ class Search {
 
         const content = this._body.content;
         content.addEventListener('keydown', (e) => {
-            const items = this._body.renderItems.querySelectorAll('.items');
+            const contentItems = this._body.renderItems;
+            if (!contentItems) return;
+
+            const items = contentItems.querySelectorAll('.items');
             if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
                 e.preventDefault();
                 const keyName = (e.key === 'ArrowLeft' ? 'prev' : 'next');
@@ -457,7 +485,7 @@ class Search {
         items.forEach((item, index) => {
             if (index === this.selectedIndex) {
                 item.classList.add('selected');
-                item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                this.emit('itemHighlighted', { item, index });
             } else {
                 item.classList.remove('selected');
             }
