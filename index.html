@@ -363,23 +363,15 @@
                 },
             ]
         });
-        
-        // search1.on('renderItems', (data) => {
-        //     console.log(search1.selectedIndex, "a ver");
-        //     const contentElement = search1._body.content;
-        //     contentElement.dispatchEvent(new KeyboardEvent('keydown', {
-        //         key: 'ArrowDown',
-        //         code: 'ArrowDown',
-        //         bubbles: true,
-        //         cancelable: true
-        //     }));
-        //     console.log(search1.selectedIndex, "despues de dispatch");
-        // });
 
         search1.init();
         search2.init();
         search3.init();
         search4.init();
+
+        search2.sort('name', 'asc').draw();
+
+        search2.searching("v").processPagination();
 
     </script>
 </body>

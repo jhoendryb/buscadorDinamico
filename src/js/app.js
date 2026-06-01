@@ -109,8 +109,9 @@ class Search {
         this.draw(this.searchTerm);
 
         console.log('Init Search', this._data);
+        return this;
     }
-    async draw(searchTerm, isEvent = false) {
+    async draw(searchTerm = this.searchTerm, isEvent = false) {
         await this.searching(searchTerm, isEvent);
 
         if (this._body.paginationItems) {
@@ -416,22 +417,19 @@ class Search {
     sort(field, order = 'asc') {
         this.sortBy = field;
         this.sortOrder = order;
-
         if (this.procesServer) {
             this.draw(this.searchTerm, true);
         } else {
             this._data.sort((a, b) => {
                 const valA = a[field];
                 const valB = b[field];
-
                 if (valA < valB) return order === 'asc' ? Search.#SORT_ASC : Search.#SORT_DESC;
                 if (valA > valB) return order === 'asc' ? Search.#SORT_DESC : Search.#SORT_ASC;
                 return 0;
             });
-            this.processPagination();
         }
-
         this.emit('sortChange', { field, order });
+        return this;
     }
     clearSort() {
         this.sortBy = null;

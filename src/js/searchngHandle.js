@@ -12,7 +12,7 @@ const searchingLocal = {
         return true;
     },
     searching(searchTerm, isEvent = false) {
-        if (this.searchTerm === searchTerm && searchTerm != "") return;
+        if (this.searchTerm === searchTerm && searchTerm != "") return this;
 
         this._pagination.page = 1;
 
