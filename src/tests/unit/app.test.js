@@ -55,10 +55,10 @@ describe('Search', () => {
     test('debe respetar itemsPerPage', () => {
         const search = new Search({
             element: '.test',
-            data: Array.from({ length: 25 }, (_, i) => ({ id: i, name: `Item ${i}` })),
+            data: Array.from({ length: 25 }, (_, i) => ({ id: i, name: `Item ${i}` }))
         });
         search.init();
-        expect(search._pagination.next().length).toBe(10);
+        expect(search.pagination.getPageItems(search._data).length).toBe(10);
     });
 
     test('debe mostrar todos los items si busqueda esta vacia', () => {
@@ -207,6 +207,25 @@ describe('Search', () => {
 
         expect(subscription).toHaveProperty('off');
         expect(typeof subscription.off).toBe('function');
+    });
+
+    test('debe navegar entre páginas', () => {
+        const search = new Search({
+            element: '.test',
+            data: Array.from({ length: 25 }, (_, i) => ({ id: i, name: `Item ${i}` }))
+        });
+        search.init();
+
+        expect(search.pagination.getCurrentPage()).toBe(1);
+
+        search.pagination.nextPage();
+        expect(search.pagination.getCurrentPage()).toBe(2);
+
+        search.pagination.prevPage();
+        expect(search.pagination.getCurrentPage()).toBe(1);
+
+        search.pagination.goToPage(3);
+        expect(search.pagination.getCurrentPage()).toBe(3);
     });
 
 });

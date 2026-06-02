@@ -2,6 +2,7 @@ import { createElement } from './renderElement.js'
 import { searchingLocal, searchingServer } from './searchngHandle.js'
 import { LRUCache } from './cache/index.js';
 import { EventEmitter } from './events/index.js';
+import { Pagination } from './pagination/index.js';
 
 class Search {
     /**
@@ -141,6 +142,14 @@ class Search {
 
         Object.assign(this, newParams);
 
+        this.pagination = new Pagination(this.itemsPerPage);
+        this.pagination.setCountFunction(() => {
+            return this.procesServer ? this._ajaxResponse.success.countPage : this._data.length;
+        });
+        this.pagination.setDataItemsFunction(() => {
+            return this._data;
+        });
+
         this.t = { ...Search.#defaultTranslations, ...translation };
 
         if (!this.element) {
@@ -183,17 +192,6 @@ class Search {
 
         Object.assign(this, (this.procesServer ? searchingServer : searchingLocal))
 
-        this._pagination = {
-            page: Search.#FIRST_PAGE,
-            countPage: () => Math.ceil(this._pagination.countItems() / this.itemsPerPage) || 1, // cantidad de páginas
-            countItems: () => (this.procesServer ? this._ajaxResponse.success.countPage : this._data.length) || 0,
-            next: () => {
-                if (this.procesServer) return this._data;
-                const start = ((this._pagination.page - 1) * this.itemsPerPage);
-                const end = (this._pagination.page * this.itemsPerPage);
-                return this._data.slice(start, end);
-            }
-        }
         this.events.emit('init', {
             searchTerm: this.searchTerm,
             itemsPerPage: this.itemsPerPage,
@@ -543,17 +541,17 @@ class Search {
         pagination.innerHTML = "";
         const buttonsPaginations = {
             start: 1,
-            prev: this._pagination.page - 1,
-            current: this._pagination.page,
-            next: this._pagination.page + 1,
-            end: this._pagination.countPage(),
+            prev: this.pagination.getCurrentPage() - 1,
+            current: this.pagination.getCurrentPage(),
+            next: this.pagination.getCurrentPage() + 1,
+            end: this.pagination.getTotalPages(),
         };
 
         Object.keys(buttonsPaginations).forEach((key) => {
             if (key === "prev" && buttonsPaginations[key] <= 1) return;
             if (key === "start" && buttonsPaginations[key] === buttonsPaginations.current) return;
             if (key === "end" && buttonsPaginations[key] === buttonsPaginations.current) return;
-            if (key === "next" && buttonsPaginations[key] >= this._pagination.countPage()) return;
+            if (key === "next" && buttonsPaginations[key] >= this.pagination.getTotalPages()) return;
 
             const jsonElement = {
                 element: "li",
@@ -568,7 +566,8 @@ class Search {
                         },
                         event: {
                             click: () => {
-                                this._pagination.page = buttonsPaginations[key];
+                                // this.pagination.getCurrentPage() = buttonsPaginations[key];
+                                this.pagination.goToPage(buttonsPaginations[key]);
                                 if (this.procesServer) {
                                     this.fetch.body.page = buttonsPaginations[key];
                                     this.draw(this.searchTerm);
@@ -584,13 +583,13 @@ class Search {
             pagination.appendChild(li);
         });
 
-        const next = this._pagination.next();
+        const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
 
         this._renderItems(next);
 
         this.events.emit('pageChange', {
-            page: this._pagination.page,
-            totalPages: this._pagination.countPage(),
+            page: this.pagination.getCurrentPage(),
+            totalPages: this.pagination.getTotalPages(),
             itemsOnPage: next.length
         });
     }
@@ -714,8 +713,8 @@ class Search {
                 const btnPagination = this._body.paginationItems.querySelector(`.${keyName} button`);
                 if (!btnPagination) {
                     const btn = keyName === 'prev' ? 'start' : 'end';
-                    if (btn === "start" && this._pagination.page <= 1) return;
-                    if (btn === "end" && this._pagination.page >= this._pagination.countPage()) return;
+                    if (btn === "start" && this.pagination.getCurrentPage() <= 1) return;
+                    if (btn === "end" && this.pagination.getCurrentPage() >= this.pagination.getTotalPages()) return;
                     const btnStart = this._body.paginationItems.querySelector(`.${btn} button`);
                     btnStart.click();
                     return;
@@ -773,28 +772,34 @@ class Search {
         this.events.emit('itemSelected', { item, index: this.selectedIndex });
     }
     /**
-     * Destruye la instancia de Search, limpiando recursos y event listeners.
-     * Emite el evento 'destroy' antes de limpiar.
-     * No elimina el HTML del DOM, solo limpia las referencias internas.
-     * 
-     * @public
-     * @returns {void}
-     * @fires Search#destroy - Se emite antes de destruir la instancia
-     * 
-     * @example
-     * search.destroy();
-     */
+ * Destruye la instancia de Search, limpiando recursos y event listeners.
+ * Emite el evento 'destroy' antes de limpiar.
+ * No elimina el HTML del DOM, solo limpia las referencias internas.
+ * 
+ * @public
+ * @returns {void}
+ * @fires Search#destroy - Se emite antes de destruir la instancia
+ * 
+ * @example
+ * search.destroy();
+ */
     destroy() {
         this.events.emit('destroy', { timestamp: new Date().toISOString() });
-        if (this._body.inputSearch) {
+
+        if (this._body?.inputSearch) {
             const newInput = this._body.inputSearch.cloneNode(true);
             this._body.inputSearch.parentNode.replaceChild(newInput, this._body.inputSearch);
         }
+
+        // Limpiar eventos del EventEmitter
+        this.events.removeAllListeners();
+
         this._body = null;
         this._data = null;
         this.data = null;
-        this._pagination = null;
-        this._events = null;
+        this.pagination = null;
+        this.events = null;
+        this.cache = null;
     }
 }
 

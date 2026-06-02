@@ -44,9 +44,9 @@ const searchingLocal = {
     searching(searchTerm, isEvent = false) {
         if (this.searchTerm === searchTerm && searchTerm != "") return this;
 
-        this._pagination.page = 1;
+        this.pagination.goToPage(1)
 
-        const cacheKey = this.getCacheKey(searchTerm, this._pagination.page);
+        const cacheKey = this.getCacheKey(searchTerm, this.pagination.getCurrentPage());
         const cachedData = this.cache.get(cacheKey);
         if (this.cacheEnabled && cachedData) {
             this._data = cachedData;
@@ -108,13 +108,13 @@ const searchingServer = {
         this.showLoading();
 
         if (searchTerm != this.searchTerm) {
-            this._pagination.page = 1;
+            this.pagination.goToPage(1)
             this.fetch.body.page = 1;
             this.fetch.body.searchTerm = searchTerm;
         }
 
-        if (this._pagination.page != this.fetch.body.page) {
-            this._pagination.page = this.fetch.body.page;
+        if (this.pagination.getCurrentPage() != this.fetch.body.page) {
+            this.pagination.goToPage(this.fetch.body.page)
         }
 
         if (this.itemsPerPage != this.fetch.body.itemsPerPage || !this.fetch.body.itemsPerPage) {
@@ -123,7 +123,7 @@ const searchingServer = {
 
         this.searchTerm = searchTerm;
 
-        const cacheKey = this.getCacheKey(searchTerm, this._pagination.page);
+        const cacheKey = this.getCacheKey(searchTerm, this.pagination.getCurrentPage());
         const cachedData = this.cache.get(cacheKey);
         if (this.cacheEnabled && cachedData && !isEvent) {
             this._data = cachedData;

@@ -1,4 +1,3 @@
-// src/js/events/eventEmitter.js
 /**
  * Implementación de EventEmitter para manejo de eventos personalizados.
  * @class
