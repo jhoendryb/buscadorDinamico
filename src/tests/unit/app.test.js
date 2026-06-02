@@ -144,4 +144,33 @@ describe('Search', () => {
         expect(search.selectedIndex).toBe(0);
     });
 
+    test('debe usar caché correctamente', async () => {
+        const search = new Search({
+            element: '.test',
+            data: [
+                { name: 'Juan', age: 25 },
+                { name: 'Maria', age: 30 },
+                { name: 'Pedro', age: 35 }
+            ],
+            cacheEnabled: true,
+            cacheMaxSize: 10
+        });
+
+        await search.init();
+
+        // Primera búsqueda - debe almacenar en caché
+        search.searching('juan');
+        const firstResults = search._data;
+        expect(firstResults.length).toBe(1);
+
+        // Segunda búsqueda igual - debe usar caché
+        search.searching('juan');
+        expect(search._data).toEqual(firstResults);
+
+        // Búsqueda diferente - no debe usar caché
+        search.searching('maria');
+        expect(search._data.length).toBe(1);
+        expect(search._data[0].name).toBe('Maria');
+    });
+
 });
