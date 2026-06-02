@@ -7,8 +7,8 @@ export class Pagination {
      * Crea una instancia de Pagination.
      * @param {number} [itemsPerPage=10] - Items por página
      */
-    constructor(itemsPerPage = 10) {
-        this.currentPage = 1;
+    constructor(itemsPerPage = 10, FIRST_PAGE) {
+        this.currentPage = FIRST_PAGE;
         this.itemsPerPage = itemsPerPage;
     }
 
