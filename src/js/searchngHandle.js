@@ -1,4 +1,20 @@
+/**
+ * Objeto que contiene la lógica de búsqueda en modo local (client-side).
+ * Se asigna dinámicamente a la instancia Search cuando procesServer es false.
+ * @namespace
+ */
 const searchingLocal = {
+    /**
+     * Extrae datos del DOM si no hay datos proporcionados.
+     * Lee los elementos .items del DOM y crea objetos con sus dataset e innerHTML.
+     * 
+     * @public
+     * @returns {boolean} Retorna true si se extrajeron datos del DOM, false si ya existían datos
+     * 
+     * @example
+     * // Se llama automáticamente en init() cuando procesServer es false
+     * this.isExtractData();
+     */
     isExtractData() {
         if (this.data.length > 0) return false;
 
@@ -11,6 +27,20 @@ const searchingLocal = {
         this._data = newData;
         return true;
     },
+    /**
+     * Realiza búsqueda local filtrando los datos en memoria.
+     * Filtra por todos los valores de cada objeto (case-insensitive).
+     * Usa caché si está habilitado.
+     * 
+     * @public
+     * @param {string} searchTerm - Término de búsqueda
+     * @param {boolean} [isEvent=false] - Indica si la búsqueda fue iniciada por un evento del usuario
+     * @returns {Search|void} Retorna la instancia si el término no cambió, void en caso contrario
+     * @fires Search#search - Se emite cuando isEvent es true
+     * 
+     * @example
+     * this.searching('juan', true);
+     */
     searching(searchTerm, isEvent = false) {
         if (this.searchTerm === searchTerm && searchTerm != "") return this;
 
@@ -52,7 +82,28 @@ const searchingLocal = {
     }
 }
 
+/**
+ * Objeto que contiene la lógica de búsqueda en modo servidor (server-side).
+ * Se asigna dinámicamente a la instancia Search cuando procesServer es true.
+ * @namespace
+ */
 const searchingServer = {
+    /**
+     * Realiza búsqueda en servidor vía AJAX.
+     * Muestra loading, configura parámetros de la petición y maneja caché.
+     * 
+     * @public
+     * @async
+     * @param {string} searchTerm - Término de búsqueda
+     * @param {boolean} [isEvent=false] - Indica si la búsqueda fue iniciada por un evento del usuario
+     * @returns {Promise<void>} Una promesa que se resuelve cuando la búsqueda completa
+     * @fires Search#search - Se emite cuando isEvent es true
+     * @fires Search#ajaxSuccess - Se emite cuando la petición AJAX tiene éxito
+     * @fires Search#ajaxError - Se emite cuando hay error en la petición AJAX
+     * 
+     * @example
+     * await this.searching('juan', true);
+     */
     async searching(searchTerm, isEvent = false) {
         this.showLoading();
 
@@ -102,6 +153,31 @@ const searchingServer = {
             });
         }
     },
+    /**
+     * Realiza una petición AJAX con XMLHttpRequest.
+     * Soporta métodos GET, POST, PUT, PATCH y DELETE.
+     * Maneja automáticamente headers, body y parsing de JSON.
+     * 
+     * @public
+     * @async
+     * @param {Object} resp - Configuración de la petición AJAX
+     * @param {string} resp.url - URL del endpoint
+     * @param {'GET'|'POST'|'PUT'|'PATCH'|'DELETE'} resp.method - Método HTTP
+     * @param {Object} [resp.body] - Cuerpo de la petición (para POST/PUT/PATCH)
+     * @param {Object} [resp.header] - Headers adicionales
+     * @param {Function} [resp.sucess] - Callback de éxito
+     * @param {Function} [resp.error] - Callback de error
+     * @returns {Promise<Object>} Una promesa que resuelve con la respuesta JSON
+     * @fires Search#ajaxSuccess - Se emite cuando la petición tiene éxito
+     * @fires Search#ajaxError - Se emite cuando hay error en la petición
+     * 
+     * @example
+     * const response = await this.ajax({
+     *     url: '/api/search',
+     *     method: 'POST',
+     *     body: { term: 'juan' }
+     * });
+     */
     async ajax(resp) {
         const {
             sucess = function (param) { },

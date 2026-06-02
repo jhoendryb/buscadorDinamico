@@ -2,20 +2,121 @@ import { createElement } from './renderElement.js'
 import { searchingLocal, searchingServer } from './searchngHandle.js'
 
 class Search {
+    /**
+     * Traducciones por defecto para la interfaz de usuario.
+     * @private
+     * @static
+     * @type {Object}
+     * @property {string} searchLabel - Etiqueta para el input de búsqueda
+     * @property {string} searchPlaceholder - Placeholder del input
+     * @property {string} noResults - Mensaje cuando no hay resultados
+     * @property {string} loading - Mensaje de carga
+     */
     static #defaultTranslations = {
         searchLabel: 'Filtrar por Búsqueda',
         searchPlaceholder: 'Ingrese palabra clave...',
         noResults: 'No se encontraron resultados',
         loading: 'Buscando...'
     };
+    /**
+     * Cantidad por defecto de items por página.
+     * @private
+     * @static
+     * @type {number}
+     * @default 10
+     */
     static #DEFAULT_ITEMS_PER_PAGE = 10;
+    /**
+     * Tiempo por defecto de debounce en milisegundos.
+     * @private
+     * @static
+     * @type {number}
+     * @default 500
+     */
     static #DEFAULT_DEBOUNCE_TIME = 500;
+    /**
+     * Tamaño máximo por defecto del caché.
+     * @private
+     * @static
+     * @type {number}
+     * @default 50
+     */
     static #DEFAULT_CACHE_MAX_SIZE = 50;
+    /**
+     * Valor que indica que no hay item seleccionado.
+     * @private
+     * @static
+     * @type {number}
+     * @default -1
+     */
     static #NO_SELECTION = -1;
+    /**
+     * Número de la primera página.
+     * @private
+     * @static
+     * @type {number}
+     * @default 1
+     */
     static #FIRST_PAGE = 1;
+    /**
+     * Valor para ordenamiento ascendente.
+     * @private
+     * @static
+     * @type {number}
+     * @default -1
+     */
     static #SORT_ASC = -1;
+    /**
+     * Valor para ordenamiento descendente.
+     * @private
+     * @static
+     * @type {number}
+     * @default 1
+     */
     static #SORT_DESC = 1;
 
+    /**
+     * Crea una instancia del componente Search con las configuraciones especificadas.
+ * 
+ * @public
+ * @param {Object} params - Objeto de configuración del componente
+ * @param {string} params.element - Selector CSS del contenedor donde se renderizará el componente (requerido)
+ * @param {Array} [params.data] - Array de datos para búsqueda en modo local
+ * @param {boolean} [params.procesServer=false] - Si es true, usa búsqueda en servidor vía AJAX
+ * @param {number} [params.itemsPerPage=10] - Cantidad de items por página
+ * @param {number} [params.debounceTime=500] - Tiempo de debounce en milisegundos para la búsqueda
+ * @param {boolean} [params.cacheEnabled=false] - Si es true, habilita caché de resultados
+ * @param {number} [params.cacheMaxSize=50] - Tamaño máximo del caché
+ * @param {string} [params.sortBy] - Campo por el cual ordenar los resultados
+ * @param {'asc'|'desc'} [params.sortOrder='asc'] - Orden de clasificación (ascendente o descendente)
+ * @param {boolean} [params.keyboardEnabled=false] - Si es true, habilita navegación por teclado
+ * @param {string|Function} [params.template] - Template personalizado para renderizar items (string o función)
+ * @param {string} [params.dom='sip'] - Orden de renderizado: 's'=search, 'i'=items, 'p'=pagination
+ * @param {Object} [params.translation] - Objeto con traducciones personalizadas
+ * @param {string} [params.translation.searchLabel] - Etiqueta para el input de búsqueda
+ * @param {string} [params.translation.searchPlaceholder] - Placeholder del input
+ * @param {string} [params.translation.noResults] - Mensaje cuando no hay resultados
+ * @param {string} [params.translation.loading] - Mensaje de carga
+ * @param {Object} [params.fetch] - Configuración para búsqueda en servidor
+ * @param {string} params.fetch.url - URL del endpoint de búsqueda
+ * @param {'GET'|'POST'} [params.fetch.method='POST'] - Método HTTP
+ * @param {Object} [params.fetch.body] - Cuerpo de la petición
+ * @throws {Error} Si el parámetro 'element' no es proporcionado
+ * @throws {Error} Si el parámetro 'element' no es un string
+ * @throws {Error} Si 'procesServer' es true y 'fetch.url' no es proporcionado
+ * @throws {Error} Si 'itemsPerPage' no es un número
+ * @throws {Error} Si 'itemsPerPage' es menor a 1
+ * @throws {Error} Si el contenedor especificado no existe en el DOM
+ * 
+ * @example
+ * const search = new Search({
+ *     element: '.app-search',
+ *     data: [{ name: 'Juan' }, { name: 'Maria' }],
+ *     itemsPerPage: 10,
+ *     debounceTime: 300,
+ *     keyboardEnabled: true
+ * });
+ */
     constructor(params) {
         const { translation, ...newParams } = params;
 
@@ -99,6 +200,24 @@ class Search {
             procesServer: this.procesServer
         });
     }
+    /**
+     * Inicializa el componente Search, renderiza los elementos y realiza la búsqueda inicial.
+     * Este método debe llamarse después de crear una instancia de Search.
+     * 
+     * @public
+     * @returns {Search} Retorna la instancia actual para permitir encadenamiento (chaining)
+     * @throws {Error} Si el elemento contenedor no existe en el DOM
+     * 
+     * @example
+     * const search = new Search({ element: '.app-search' });
+     * search.init();
+     * 
+     * @example
+     * // Con chaining
+     * const search = new Search({ element: '.app-search' })
+     *     .init()
+     *     .sort('name', 'asc');
+     */
     init() {
         if (!this.procesServer) this.isExtractData();
 
@@ -111,6 +230,22 @@ class Search {
         console.log('Init Search', this._data);
         return this;
     }
+    /**
+     * Ejecuta una búsqueda y renderiza los resultados y paginación.
+     * Este método combina searching() y processPagination() en una sola operación.
+     * 
+     * @public
+     * @param {string} [searchTerm=this.searchTerm] - Término de búsqueda a filtrar
+     * @param {boolean} [isEvent=false] - Indica si la búsqueda fue iniciada por un evento del usuario
+     * @returns {Promise<void>} Una promesa que se resuelve cuando la búsqueda y renderizado completan
+     * 
+     * @example
+     * await search.draw('juan');
+     * 
+     * @example
+     * // Con chaining
+     * await search.sort('name', 'asc').draw('juan');
+     */
     async draw(searchTerm = this.searchTerm, isEvent = false) {
         await this.searching(searchTerm, isEvent);
 
@@ -118,12 +253,36 @@ class Search {
             this.processPagination();
         }
     }
+    /**
+     * Genera un nombre de clase único combinando la base con el selector del elemento padre.
+     * Esto evita conflictos de nombres cuando hay múltiples instancias de Search en la página.
+     * 
+     * @private
+     * @param {string} baseClass - Clase base para generar el nombre único
+     * @returns {string} Nombre de clase único en formato "baseClass-parentSelector"
+     * 
+     * @example
+     * // Si element es '.app-search'
+     * this.#getUniqueClassName('input-search'); // "input-search-app-search"
+     */
     #getUniqueClassName(baseClass) {
         // Obtener el selector del padre sin el punto inicial
         const parentSelector = this.element.replace(/^\.|^\#/, '');
         // Crear clase única combinando la base con el selector del padre
         return `${baseClass}-${parentSelector}`;
     }
+    /**
+     * Renderiza los items en el contenedor de resultados.
+     * Usa el template personalizado si está configurado, sino muestra los valores del objeto.
+     * 
+     * @private
+     * @param {Array} data - Array de items a renderizar
+     * @returns {boolean|void} Retorna false si no hay contenedor, void en caso contrario
+     * @fires Search#renderItems - Se emite después de renderizar los items
+     * 
+     * @example
+     * this._renderItems(filteredData);
+     */
     _renderItems(data) {
         const container = this._body.renderItems;
 
@@ -166,6 +325,17 @@ class Search {
             content: container
         });
     }
+    /**
+     * Renderiza el input de búsqueda dentro del contenedor contentSearch.
+     * Configura el debounce y los atributos ARIA para accesibilidad.
+     * Si ya existe un input, lo reutiliza en lugar de crear uno nuevo.
+     * 
+     * @public
+     * @returns {void}
+     * 
+     * @example
+     * search.renderSearch();
+     */
     renderSearch() {
         if (this._body.inputSearch) return;
 
@@ -210,6 +380,17 @@ class Search {
 
         this._body.inputSearch = inputSearch
     }
+    /**
+     * Renderiza el contenedor del input de búsqueda.
+     * Crea el elemento .input-search con su label si no existe.
+     * Llama automáticamente a renderSearch() para crear el input.
+     * 
+     * @public
+     * @returns {void}
+     * 
+     * @example
+     * search.contentSearch();
+     */
     contentSearch() {
         if (this._body.contentSearch) return;
 
@@ -236,6 +417,16 @@ class Search {
 
         this.renderSearch();
     }
+    /**
+     * Renderiza el contenedor donde se mostrarán los resultados de búsqueda.
+     * Crea el elemento .items-search con atributos ARIA para accesibilidad.
+     * 
+     * @public
+     * @returns {void}
+     * 
+     * @example
+     * search.renderItems();
+     */
     renderItems() {
         if (this._body.renderItems) return;
 
@@ -259,6 +450,16 @@ class Search {
 
         this._body.renderItems = renderItems;
     }
+    /**
+     * Renderiza el contenedor de paginación.
+     * Crea el elemento .index-search con la lista de páginas.
+     * 
+     * @public
+     * @returns {void}
+     * 
+     * @example
+     * search.renderPagination();
+     */
     renderPagination() {
         if (this._body.paginationItems) return;
 
@@ -286,6 +487,26 @@ class Search {
 
         this._body.paginationItems = paginationItems
     }
+    /**
+     * Renderiza los componentes en el orden especificado por la propiedad 'dom'.
+     * El string 'dom' define qué componentes renderizar y en qué orden:
+     * - 's': Search (contentSearch + input)
+     * - 'i': Items (contenedor de resultados)
+     * - 'p': Pagination (paginación)
+     * 
+     * @public
+     * @returns {void}
+     * 
+     * @example
+     * // Renderiza: Search, Items, Pagination
+     * search.dom = 'sip';
+     * search.renderByDom();
+     * 
+     * @example
+     * // Renderiza: Items, Pagination (sin Search)
+     * search.dom = 'ip';
+     * search.renderByDom();
+     */
     renderByDom() {
         const content = this._body.content;
 
@@ -303,6 +524,18 @@ class Search {
             }
         }
     }
+    /**
+     * Procesa y renderiza los botones de paginación.
+     * Calcula qué botones mostrar según la página actual y total de páginas.
+     * Renderiza los items correspondientes a la página actual.
+     * 
+     * @public
+     * @returns {void}
+     * @fires Search#pageChange - Se emite cuando cambia la página
+     * 
+     * @example
+     * search.processPagination();
+     */
     processPagination() {
         const contentPagination = this._body.paginationItems;
         const pagination = contentPagination.querySelector(".pagination");
@@ -361,18 +594,73 @@ class Search {
             itemsOnPage: next.length
         });
     }
+    /**
+     * Registra un listener para un evento específico.
+     * 
+     * @public
+     * @param {string} eventName - Nombre del evento a escuchar
+     * @param {Function} callback - Función a ejecutar cuando se emita el evento
+     * @returns {void}
+     * 
+     * @event Search#init - Se emite cuando la instancia se inicializa
+     * @event Search#renderItems - Se emite cuando se renderizan los items
+     * @event Search#pageChange - Se emite cuando cambia la página
+     * @event Search#sortChange - Se emite cuando cambia el ordenamiento
+     * @event Search#itemHighlighted - Se emite cuando se destaca un item con el teclado
+     * @event Search#itemSelected - Se emite cuando se selecciona un item
+     * @event Search#destroy - Se emite cuando se destruye la instancia
+     * 
+     * @example
+     * search.on('itemSelected', (data) => {
+     *     console.log('Item seleccionado:', data.item);
+     * });
+     */
     on(eventName, callback) {
         if (!this._events[eventName]) this._events[eventName] = [];
         this._events[eventName].push(callback);
     }
+    /**
+     * Elimina un listener específico de un evento.
+     * 
+     * @public
+     * @param {string} eventName - Nombre del evento
+     * @param {Function} callback - Función a eliminar del evento
+     * @returns {void}
+     * 
+     * @example
+     * const handler = (data) => console.log(data);
+     * search.on('itemSelected', handler);
+     * search.off('itemSelected', handler);
+     */
     off(eventName, callback) {
         if (!this._events[eventName]) return;
         this._events[eventName] = this._events[eventName].filter(cb => cb !== callback);
     }
+    /**
+     * Emite un evento con datos opcionales a todos los listeners registrados.
+     * 
+     * @public
+     * @param {string} eventName - Nombre del evento a emitir
+     * @param {Object} [data] - Datos a pasar a los listeners
+     * @returns {void}
+     * 
+     * @example
+     * this.emit('customEvent', { message: 'Hola' });
+     */
     emit(eventName, data) {
         if (!this._events[eventName]) return;
         this._events[eventName].forEach(callback => callback(data));
     }
+    /**
+     * Muestra un indicador de carga en el contenedor de items.
+     * Reemplaza el contenido actual con un spinner y mensaje de carga.
+     * 
+     * @public
+     * @returns {void}
+     * 
+     * @example
+     * search.showLoading();
+     */
     showLoading() {
         if (this._body.renderItems) {
             const loading = createElement({
@@ -392,9 +680,32 @@ class Search {
             this._body.renderItems.innerHTML = loading.outerHTML;
         }
     }
+    /**
+     * Genera una clave única para el caché basada en el término de búsqueda y página.
+     * 
+     * @public
+     * @param {string} searchTerm - Término de búsqueda
+     * @param {number} page - Número de página
+     * @returns {string} Clave única para el caché en formato "searchTerm_page"
+     * 
+     * @example
+     * const key = search.getCacheKey('juan', 1); // "juan_1"
+     */
     getCacheKey(searchTerm, page) {
         return `${searchTerm}_${page}`;
     }
+    /**
+     * Agrega datos al caché con la clave especificada.
+     * Si el caché está lleno, elimina la entrada más antigua (LRU).
+     * 
+     * @public
+     * @param {string} key - Clave para almacenar los datos
+     * @param {*} data - Datos a almacenar en el caché
+     * @returns {void}
+     * 
+     * @example
+     * search.addToCache('juan_1', results);
+     */
     addToCache(key, data) {
         if (this._cache.size >= this.cacheMaxSize) {
             const oldestKey = this._cache.keys().next().value;
@@ -402,6 +713,20 @@ class Search {
         }
         this._cache.set(key, data);
     }
+    /**
+     * Recupera datos del caché usando la clave especificada.
+     * Si los datos existen, los mueve al final (LRU - Least Recently Used).
+     * 
+     * @public
+     * @param {string} key - Clave para buscar en el caché
+     * @returns {*} Datos almacenados o null si no existen
+     * 
+     * @example
+     * const data = search.getFromCache('juan_1');
+     * if (data) {
+     *     console.log('Datos desde caché:', data);
+     * }
+     */
     getFromCache(key) {
         if (this._cache.has(key)) {
             const data = this._cache.get(key);
@@ -411,9 +736,34 @@ class Search {
         }
         return null;
     }
+    /**
+     * Limpia todo el caché, eliminando todas las entradas almacenadas.
+     * 
+     * @public
+     * @returns {void}
+     * 
+     * @example
+     * search.clearCache();
+     */
     clearCache() {
         this._cache.clear();
     }
+    /**
+     * Ordena los resultados por un campo específico.
+     * 
+     * @public
+     * @param {string} field - Nombre del campo por el cual ordenar
+     * @param {'asc'|'desc'} [order='asc'] - Orden de clasificación ('asc' para ascendente, 'desc' para descendente)
+     * @returns {Search} Retorna la instancia actual para permitir encadenamiento (chaining)
+     * @fires Search#sortChange - Se emite cuando cambia el ordenamiento
+     * 
+     * @example
+     * search.sort('name', 'asc');
+     * 
+     * @example
+     * // Con chaining
+     * search.sort('name', 'asc').draw();
+     */
     sort(field, order = 'asc') {
         this.sortBy = field;
         this.sortOrder = order;
@@ -431,6 +781,16 @@ class Search {
         this.emit('sortChange', { field, order });
         return this;
     }
+    /**
+     * Limpia el ordenamiento actual y restaura el estado original.
+     * En modo servidor, también limpia los parámetros de ordenamiento en la petición fetch.
+     * 
+     * @public
+     * @returns {void}
+     * 
+     * @example
+     * search.clearSort();
+     */
     clearSort() {
         this.sortBy = null;
         this.sortOrder = 'asc';
@@ -442,6 +802,22 @@ class Search {
 
         this._cache.clear();
     }
+    /**
+     * Configura la navegación por teclado para el componente.
+     * Habilita las siguientes teclas:
+     * - ArrowUp/ArrowDown: Navegar entre items
+     * - ArrowLeft/ArrowRight: Navegar entre páginas
+     * - Enter: Seleccionar item destacado
+     * 
+     * Requiere que keyboardEnabled sea true.
+     * 
+     * @public
+     * @returns {void}
+     * 
+     * @example
+     * search.keyboardEnabled = true;
+     * search.setupKeyboardNavigation();
+     */
     setupKeyboardNavigation() {
         if (!this.keyboardEnabled) return;
 
@@ -479,6 +855,18 @@ class Search {
             }
         });
     }
+    /**
+     * Destaca el item seleccionado agregando la clase 'selected'.
+     * Remueve la clase de todos los demás items.
+     * 
+     * @private
+     * @param {NodeList} items - Lista de items del DOM
+     * @returns {void}
+     * @fires Search#itemHighlighted - Se emite cuando se destaca un item
+     * 
+     * @example
+     * this.highlightItem(items);
+     */
     highlightItem(items) {
         items.forEach((item, index) => {
             if (index === this.selectedIndex) {
@@ -489,9 +877,32 @@ class Search {
             }
         });
     }
+    /**
+     * Selecciona un item y emite el evento 'itemSelected'.
+     * 
+     * @private
+     * @param {HTMLElement} item - Elemento DOM del item a seleccionar
+     * @returns {void}
+     * @fires Search#itemSelected - Se emite cuando se selecciona un item
+     * 
+     * @example
+     * this.selectItem(items[0]);
+     */
     selectItem(item) {
         this.emit('itemSelected', { item, index: this.selectedIndex });
     }
+    /**
+     * Destruye la instancia de Search, limpiando recursos y event listeners.
+     * Emite el evento 'destroy' antes de limpiar.
+     * No elimina el HTML del DOM, solo limpia las referencias internas.
+     * 
+     * @public
+     * @returns {void}
+     * @fires Search#destroy - Se emite antes de destruir la instancia
+     * 
+     * @example
+     * search.destroy();
+     */
     destroy() {
         this.emit('destroy', { timestamp: new Date().toISOString() });
         if (this._body.inputSearch) {

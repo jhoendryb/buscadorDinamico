@@ -1,12 +1,46 @@
 /**
- * Función que crea un elemento HTML con los atributos y las opciones especificadas.
- *
- * @param {string} element - El nombre del elemento HTML a crear.
- * @param {Object} [dataset] - Un objeto con los pares clave-valor para los atributos data del elemento.
- * @param {Array} [children] - Un arreglo de objetos con los elementos hijos del elemento.
- * @param {Object|HTMLDomElement} [child] - Un elemento hijo del elemento.
- * @param {...*} [attributes.*] - Cualquier otro atributo se convierte en un atributo del elemento.
- * @returns {HTMLDomElement} - El elemento HTML creado.
+ * Crea un elemento HTML con los atributos y opciones especificadas.
+ * Función auxiliar para crear elementos DOM de forma declarativa.
+ * 
+ * @public
+ * @param {Object} config - Configuración del elemento a crear
+ * @param {string|HTMLElement} config.element - Nombre del elemento HTML a crear o elemento existente
+ * @param {Object} [config.dataset] - Objeto con pares clave-valor para atributos data-*
+ * @param {Array<Object>} [config.children] - Arreglo de objetos con configuración de elementos hijos
+ * @param {HTMLElement} [config.child] - Elemento hijo único
+ * @param {Object} [config.event] - Objeto con eventos a agregar (clave: nombre evento, valor: callback)
+ * @param {Object} [config.attributes] - Objeto con atributos HTML a establecer
+ * @param {Object} [config.*] - Cualquier otra propiedad opcional se asigna directamente al elemento. Debe ser el último parámetro.
+ * @returns {HTMLElement} El elemento HTML creado
+ * 
+ * @example
+ * // Crear un input simple
+ * const input = createElement({
+ *     element: 'input',
+ *     type: 'text',
+ *     placeholder: 'Buscar...'
+ * });
+ * 
+ * @example
+ * // Crear un div con hijos y eventos
+ * const container = createElement({
+ *     element: 'div',
+ *     className: 'container',
+ *     attributes: { 'role': 'listbox' },
+ *     event: {
+ *         click: (e) => console.log('Clicked', e)
+ *     },
+ *     children: [
+ *         { element: 'span', textContent: 'Hola' }
+ *     ]
+ * });
+ * 
+ * @example
+ * // Crear con dataset
+ * const item = createElement({
+ *     element: 'div',
+ *     dataset: { id: '123', name: 'Juan' }
+ * });
  */
 function createElement({ element, dataset, children, child, event, attributes, ...propertys }) {
     const specialAttributes = {
