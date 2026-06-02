@@ -1,6 +1,7 @@
 import { createElement } from './renderElement.js'
 import { searchingLocal, searchingServer } from './searchngHandle.js'
 import { LRUCache } from './cache/index.js';
+import { EventEmitter } from './events/index.js';
 
 class Search {
     /**
@@ -135,6 +136,7 @@ class Search {
         this.keyboardEnabled = false;
         this.template = null;
         this.cache = new LRUCache(this.cacheMaxSize);
+        this.events = new EventEmitter();
         this.dom = 'sip'; // 's': Search, 'i': Items, 'p': Pagination
 
         Object.assign(this, newParams);
@@ -192,10 +194,7 @@ class Search {
                 return this._data.slice(start, end);
             }
         }
-
-        this._events = {}
-
-        this.emit('init', {
+        this.events.emit('init', {
             searchTerm: this.searchTerm,
             itemsPerPage: this.itemsPerPage,
             procesServer: this.procesServer
@@ -321,7 +320,7 @@ class Search {
             container.appendChild(createElement(jsonItem));
         });
 
-        this.emit('renderItems', {
+        this.events.emit('renderItems', {
             items: data,
             content: container
         });
@@ -589,68 +588,14 @@ class Search {
 
         this._renderItems(next);
 
-        this.emit('pageChange', {
+        this.events.emit('pageChange', {
             page: this._pagination.page,
             totalPages: this._pagination.countPage(),
             itemsOnPage: next.length
         });
     }
-    /**
-     * Registra un listener para un evento específico.
-     * 
-     * @public
-     * @param {string} eventName - Nombre del evento a escuchar
-     * @param {Function} callback - Función a ejecutar cuando se emita el evento
-     * @returns {void}
-     * 
-     * @event Search#init - Se emite cuando la instancia se inicializa
-     * @event Search#renderItems - Se emite cuando se renderizan los items
-     * @event Search#pageChange - Se emite cuando cambia la página
-     * @event Search#sortChange - Se emite cuando cambia el ordenamiento
-     * @event Search#itemHighlighted - Se emite cuando se destaca un item con el teclado
-     * @event Search#itemSelected - Se emite cuando se selecciona un item
-     * @event Search#destroy - Se emite cuando se destruye la instancia
-     * 
-     * @example
-     * search.on('itemSelected', (data) => {
-     *     console.log('Item seleccionado:', data.item);
-     * });
-     */
     on(eventName, callback) {
-        if (!this._events[eventName]) this._events[eventName] = [];
-        this._events[eventName].push(callback);
-    }
-    /**
-     * Elimina un listener específico de un evento.
-     * 
-     * @public
-     * @param {string} eventName - Nombre del evento
-     * @param {Function} callback - Función a eliminar del evento
-     * @returns {void}
-     * 
-     * @example
-     * const handler = (data) => console.log(data);
-     * search.on('itemSelected', handler);
-     * search.off('itemSelected', handler);
-     */
-    off(eventName, callback) {
-        if (!this._events[eventName]) return;
-        this._events[eventName] = this._events[eventName].filter(cb => cb !== callback);
-    }
-    /**
-     * Emite un evento con datos opcionales a todos los listeners registrados.
-     * 
-     * @public
-     * @param {string} eventName - Nombre del evento a emitir
-     * @param {Object} [data] - Datos a pasar a los listeners
-     * @returns {void}
-     * 
-     * @example
-     * this.emit('customEvent', { message: 'Hola' });
-     */
-    emit(eventName, data) {
-        if (!this._events[eventName]) return;
-        this._events[eventName].forEach(callback => callback(data));
+        return this.events.on(eventName, callback);
     }
     /**
      * Muestra un indicador de carga en el contenedor de items.
@@ -714,7 +659,7 @@ class Search {
                 return 0;
             });
         }
-        this.emit('sortChange', { field, order });
+        this.events.emit('sortChange', { field, order });
         return this;
     }
     /**
@@ -807,7 +752,7 @@ class Search {
         items.forEach((item, index) => {
             if (index === this.selectedIndex) {
                 item.classList.add('selected');
-                this.emit('itemHighlighted', { item, index });
+                this.events.emit('itemHighlighted', { item, index });
             } else {
                 item.classList.remove('selected');
             }
@@ -825,7 +770,7 @@ class Search {
      * this.selectItem(items[0]);
      */
     selectItem(item) {
-        this.emit('itemSelected', { item, index: this.selectedIndex });
+        this.events.emit('itemSelected', { item, index: this.selectedIndex });
     }
     /**
      * Destruye la instancia de Search, limpiando recursos y event listeners.
@@ -840,7 +785,7 @@ class Search {
      * search.destroy();
      */
     destroy() {
-        this.emit('destroy', { timestamp: new Date().toISOString() });
+        this.events.emit('destroy', { timestamp: new Date().toISOString() });
         if (this._body.inputSearch) {
             const newInput = this._body.inputSearch.cloneNode(true);
             this._body.inputSearch.parentNode.replaceChild(newInput, this._body.inputSearch);

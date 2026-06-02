@@ -173,4 +173,40 @@ describe('Search', () => {
         expect(search._data[0].name).toBe('Maria');
     });
 
+    test('debe emitir eventos correctamente', async () => {
+        const search = new Search({
+            element: '.test',
+            data: [
+                { name: 'Juan', age: 25 },
+                { name: 'Maria', age: 30 }
+            ]
+        });
+
+        const mockCallback = jest.fn();
+        search.on('renderItems', mockCallback);
+
+        await search.init();
+
+        expect(mockCallback).toHaveBeenCalled();
+        expect(mockCallback).toHaveBeenCalledWith(
+            expect.objectContaining({
+                items: expect.any(Array),
+                content: expect.any(Object)
+            })
+        );
+    });
+
+    test('debe permitir encadenar on y off', () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Juan', age: 25 }]
+        });
+
+        const mockCallback = jest.fn();
+        const subscription = search.on('renderItems', mockCallback);
+
+        expect(subscription).toHaveProperty('off');
+        expect(typeof subscription.off).toBe('function');
+    });
+
 });

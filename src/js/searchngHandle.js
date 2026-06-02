@@ -72,7 +72,7 @@ const searchingLocal = {
         }
 
         if (isEvent) {
-            this.emit('search', {
+            this.events.emit('search', {
                 searchTerm,
                 results: this._data,
                 totalResults: this._data.length,
@@ -145,7 +145,7 @@ const searchingServer = {
         }
 
         if (isEvent) {
-            this.emit('search', {
+            this.events.emit('search', {
                 searchTerm,
                 results: this._data,
                 totalResults: this._data.length,
@@ -222,7 +222,7 @@ const searchingServer = {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     try {
                         const response = JSON.parse(xhr.responseText);
-                        this.emit('ajaxSuccess', {
+                        this.events.emit('ajaxSuccess', {
                             response,
                             status: xhr.status,
                             url: resp.url
@@ -230,7 +230,7 @@ const searchingServer = {
                         sucess(response, this);
                         resolve(response);
                     } catch (error) {
-                        this.emit('ajaxError', {
+                        this.events.emit('ajaxError', {
                             error: 'Error al parsear JSON',
                             originalError: error
                         });
@@ -238,7 +238,7 @@ const searchingServer = {
                         reject(new Error('Error al parsear la respuesta JSON'));
                     }
                 } else {
-                    this.emit('ajaxError', {
+                    this.events.emit('ajaxError', {
                         error: `Error HTTP: ${xhr.status}`,
                         status: xhr.status,
                         url: resp.url
@@ -249,7 +249,7 @@ const searchingServer = {
             };
 
             xhr.onerror = () => {
-                this.emit('ajaxError', {
+                this.events.emit('ajaxError', {
                     error: 'Error en la petición AJAX',
                     type: 'network'
                 });
