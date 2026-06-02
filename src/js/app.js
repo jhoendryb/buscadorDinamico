@@ -1,5 +1,6 @@
 import { createElement } from './renderElement.js'
 import { searchingLocal, searchingServer } from './searchngHandle.js'
+import { LRUCache } from './cache/index.js';
 
 class Search {
     /**
@@ -77,46 +78,46 @@ class Search {
 
     /**
      * Crea una instancia del componente Search con las configuraciones especificadas.
- * 
- * @public
- * @param {Object} params - Objeto de configuración del componente
- * @param {string} params.element - Selector CSS del contenedor donde se renderizará el componente (requerido)
- * @param {Array} [params.data] - Array de datos para búsqueda en modo local
- * @param {boolean} [params.procesServer=false] - Si es true, usa búsqueda en servidor vía AJAX
- * @param {number} [params.itemsPerPage=10] - Cantidad de items por página
- * @param {number} [params.debounceTime=500] - Tiempo de debounce en milisegundos para la búsqueda
- * @param {boolean} [params.cacheEnabled=false] - Si es true, habilita caché de resultados
- * @param {number} [params.cacheMaxSize=50] - Tamaño máximo del caché
- * @param {string} [params.sortBy] - Campo por el cual ordenar los resultados
- * @param {'asc'|'desc'} [params.sortOrder='asc'] - Orden de clasificación (ascendente o descendente)
- * @param {boolean} [params.keyboardEnabled=false] - Si es true, habilita navegación por teclado
- * @param {string|Function} [params.template] - Template personalizado para renderizar items (string o función)
- * @param {string} [params.dom='sip'] - Orden de renderizado: 's'=search, 'i'=items, 'p'=pagination
- * @param {Object} [params.translation] - Objeto con traducciones personalizadas
- * @param {string} [params.translation.searchLabel] - Etiqueta para el input de búsqueda
- * @param {string} [params.translation.searchPlaceholder] - Placeholder del input
- * @param {string} [params.translation.noResults] - Mensaje cuando no hay resultados
- * @param {string} [params.translation.loading] - Mensaje de carga
- * @param {Object} [params.fetch] - Configuración para búsqueda en servidor
- * @param {string} params.fetch.url - URL del endpoint de búsqueda
- * @param {'GET'|'POST'} [params.fetch.method='POST'] - Método HTTP
- * @param {Object} [params.fetch.body] - Cuerpo de la petición
- * @throws {Error} Si el parámetro 'element' no es proporcionado
- * @throws {Error} Si el parámetro 'element' no es un string
- * @throws {Error} Si 'procesServer' es true y 'fetch.url' no es proporcionado
- * @throws {Error} Si 'itemsPerPage' no es un número
- * @throws {Error} Si 'itemsPerPage' es menor a 1
- * @throws {Error} Si el contenedor especificado no existe en el DOM
- * 
- * @example
- * const search = new Search({
- *     element: '.app-search',
- *     data: [{ name: 'Juan' }, { name: 'Maria' }],
- *     itemsPerPage: 10,
- *     debounceTime: 300,
- *     keyboardEnabled: true
- * });
- */
+    * 
+    * @public
+    * @param {Object} params - Objeto de configuración del componente
+    * @param {string} params.element - Selector CSS del contenedor donde se renderizará el componente (requerido)
+    * @param {Array} [params.data] - Array de datos para búsqueda en modo local
+    * @param {boolean} [params.procesServer=false] - Si es true, usa búsqueda en servidor vía AJAX
+    * @param {number} [params.itemsPerPage=10] - Cantidad de items por página
+    * @param {number} [params.debounceTime=500] - Tiempo de debounce en milisegundos para la búsqueda
+    * @param {boolean} [params.cacheEnabled=false] - Si es true, habilita caché de resultados
+    * @param {number} [params.cacheMaxSize=50] - Tamaño máximo del caché
+    * @param {string} [params.sortBy] - Campo por el cual ordenar los resultados
+    * @param {'asc'|'desc'} [params.sortOrder='asc'] - Orden de clasificación (ascendente o descendente)
+    * @param {boolean} [params.keyboardEnabled=false] - Si es true, habilita navegación por teclado
+    * @param {string|Function} [params.template] - Template personalizado para renderizar items (string o función)
+    * @param {string} [params.dom='sip'] - Orden de renderizado: 's'=search, 'i'=items, 'p'=pagination
+    * @param {Object} [params.translation] - Objeto con traducciones personalizadas
+    * @param {string} [params.translation.searchLabel] - Etiqueta para el input de búsqueda
+    * @param {string} [params.translation.searchPlaceholder] - Placeholder del input
+    * @param {string} [params.translation.noResults] - Mensaje cuando no hay resultados
+    * @param {string} [params.translation.loading] - Mensaje de carga
+    * @param {Object} [params.fetch] - Configuración para búsqueda en servidor
+    * @param {string} params.fetch.url - URL del endpoint de búsqueda
+    * @param {'GET'|'POST'} [params.fetch.method='POST'] - Método HTTP
+    * @param {Object} [params.fetch.body] - Cuerpo de la petición
+    * @throws {Error} Si el parámetro 'element' no es proporcionado
+    * @throws {Error} Si el parámetro 'element' no es un string
+    * @throws {Error} Si 'procesServer' es true y 'fetch.url' no es proporcionado
+    * @throws {Error} Si 'itemsPerPage' no es un número
+    * @throws {Error} Si 'itemsPerPage' es menor a 1
+    * @throws {Error} Si el contenedor especificado no existe en el DOM
+    * 
+    * @example
+    * const search = new Search({
+    *     element: '.app-search',
+    *     data: [{ name: 'Juan' }, { name: 'Maria' }],
+    *     itemsPerPage: 10,
+    *     debounceTime: 300,
+    *     keyboardEnabled: true
+    * });
+    */
     constructor(params) {
         const { translation, ...newParams } = params;
 
@@ -134,6 +135,7 @@ class Search {
         this.selectedIndex = Search.#NO_SELECTION;
         this.keyboardEnabled = false;
         this.template = null;
+        this.cache = new LRUCache(this.cacheMaxSize);
         this.dom = 'sip'; // 's': Search, 'i': Items, 'p': Pagination
 
         Object.assign(this, newParams);
@@ -680,73 +682,17 @@ class Search {
             this._body.renderItems.innerHTML = loading.outerHTML;
         }
     }
-    /**
-     * Genera una clave única para el caché basada en el término de búsqueda y página.
-     * 
-     * @public
-     * @param {string} searchTerm - Término de búsqueda
-     * @param {number} page - Número de página
-     * @returns {string} Clave única para el caché en formato "searchTerm_page"
-     * 
-     * @example
-     * const key = search.getCacheKey('juan', 1); // "juan_1"
-     */
     getCacheKey(searchTerm, page) {
         return `${searchTerm}_${page}`;
     }
-    /**
-     * Agrega datos al caché con la clave especificada.
-     * Si el caché está lleno, elimina la entrada más antigua (LRU).
-     * 
-     * @public
-     * @param {string} key - Clave para almacenar los datos
-     * @param {*} data - Datos a almacenar en el caché
-     * @returns {void}
-     * 
-     * @example
-     * search.addToCache('juan_1', results);
-     */
     addToCache(key, data) {
-        if (this._cache.size >= this.cacheMaxSize) {
-            const oldestKey = this._cache.keys().next().value;
-            this._cache.delete(oldestKey);
-        }
-        this._cache.set(key, data);
+        this.cache.set(key, data);
     }
-    /**
-     * Recupera datos del caché usando la clave especificada.
-     * Si los datos existen, los mueve al final (LRU - Least Recently Used).
-     * 
-     * @public
-     * @param {string} key - Clave para buscar en el caché
-     * @returns {*} Datos almacenados o null si no existen
-     * 
-     * @example
-     * const data = search.getFromCache('juan_1');
-     * if (data) {
-     *     console.log('Datos desde caché:', data);
-     * }
-     */
     getFromCache(key) {
-        if (this._cache.has(key)) {
-            const data = this._cache.get(key);
-            this._cache.delete(key);
-            this._cache.set(key, data);
-            return data;
-        }
-        return null;
+        return this.cache.get(key);
     }
-    /**
-     * Limpia todo el caché, eliminando todas las entradas almacenadas.
-     * 
-     * @public
-     * @returns {void}
-     * 
-     * @example
-     * search.clearCache();
-     */
     clearCache() {
-        this._cache.clear();
+        this.cache.clear();
     }
     /**
      * Ordena los resultados por un campo específico.
