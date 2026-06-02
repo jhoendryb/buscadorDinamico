@@ -1,4 +1,3 @@
-// src/js/searching/searchingLocal.js
 /**
  * Objeto que contiene la lógica de búsqueda en modo local (client-side).
  * Se asigna dinámicamente a la instancia Search cuando procesServer es false.

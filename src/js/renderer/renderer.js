@@ -1,5 +1,5 @@
-// src/js/renderer/renderer.js
 import { createElement } from '../renderElement.js';
+import { BodyConfig } from '../types.js';
 
 /**
  * Clase helper para crear la estructura DOM inicial de los componentes.
@@ -9,7 +9,7 @@ import { createElement } from '../renderElement.js';
 export class SearchRenderer {
     /**
      * Crea una instancia de SearchRenderer.
-     * @param {Object} body - Objeto con referencias a elementos del DOM
+     * @param {BodyConfig} body - Objeto con referencias a elementos del DOM
      * @param {Function} uniqueClassNameFn - Función para generar nombres de clase únicos
      */
     constructor(body, uniqueClassNameFn) {

@@ -1,24 +1,25 @@
-import { createElement } from './renderElement.js'
-import { searchingLocal, searchingServer } from './searching/index.js';
-import { LRUCache } from './cache/index.js';
-import { EventEmitter } from './events/index.js';
-import { Pagination } from './pagination/index.js';
-import { SearchRenderer } from './renderer/index.js';
 import {
-    DEFAULT_ITEMS_PER_PAGE,
-    DEFAULT_DEBOUNCE_TIME,
-    DEFAULT_CACHE_MAX_SIZE,
-    NO_SELECTION,
-    FIRST_PAGE,
-    SORT_ASC,
-    SORT_DESC,
-    SORT_ORDER,
-    DEFAULT_TRANSLATIONS,
-    DOM_ORDERS
-} from './constants.js';
+    createElement,
+    searchingLocal,
+    searchingServer,
+    LRUCache,
+    EventEmitter,
+    Pagination,
+    SearchRenderer,
+    Constants,
+    Types
+} from './index.js';
 
 class Search {
-    static #defaultTranslations = DEFAULT_TRANSLATIONS;
+    /**
+     * Una instancia de `LRUCache<string, string>` que almacena las traducciones predeterminadas.
+     * @type {Types.TranslationCache}
+     */
+    static #defaultTranslations = Constants.DEFAULT_TRANSLATIONS;
+    /**
+     * Crea una instancia de Search.
+     * @param {Types.SearchParams} params - Parámetros de configuración
+     */
     constructor(params) {
         const { translation, ...newParams } = params;
 
@@ -27,15 +28,15 @@ class Search {
         this.searchTerm = "";
         this._ajaxResponse = {};
         this.sortBy = null;
-        this.sortOrder = SORT_ORDER;
+        this.sortOrder = Constants.SORT_ORDER;
         this.keyboardEnabled = false;
         this.template = null;
         this.cacheEnabled = false;
-        this.itemsPerPage = DEFAULT_ITEMS_PER_PAGE;
-        this.debounceTime = DEFAULT_DEBOUNCE_TIME;
-        this.cacheMaxSize = DEFAULT_CACHE_MAX_SIZE;
-        this.selectedIndex = NO_SELECTION;
-        this.dom = DOM_ORDERS.SEARCH_ITEMS_PAGINATION; // 's': Search, 'i': Items, 'p': Pagination
+        this.itemsPerPage = Constants.DEFAULT_ITEMS_PER_PAGE;
+        this.debounceTime = Constants.DEFAULT_DEBOUNCE_TIME;
+        this.cacheMaxSize = Constants.DEFAULT_CACHE_MAX_SIZE;
+        this.selectedIndex = Constants.NO_SELECTION;
+        this.dom = Constants.DOM_ORDERS.SEARCH_ITEMS_PAGINATION; // 's': Search, 'i': Items, 'p': Pagination
 
         Object.assign(this, newParams);
 
@@ -48,7 +49,7 @@ class Search {
         }, this.#getUniqueClassName.bind(this));
         this.cache = new LRUCache(this.cacheMaxSize);
         this.events = new EventEmitter();
-        this.pagination = new Pagination(this.itemsPerPage, FIRST_PAGE);
+        this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
         this.pagination.setCountFunction(() => {
             return this.procesServer ? this._ajaxResponse.success.countPage : this._data.length;
         });
@@ -227,8 +228,8 @@ class Search {
             this._data.sort((a, b) => {
                 const valA = a[field];
                 const valB = b[field];
-                if (valA < valB) return order === 'asc' ? SORT_ASC : SORT_DESC;
-                if (valA > valB) return order === 'asc' ? SORT_DESC : SORT_ASC;
+                if (valA < valB) return order === 'asc' ? Constants.SORT_ASC : Constants.SORT_DESC;
+                if (valA > valB) return order === 'asc' ? Constants.SORT_DESC : Constants.SORT_ASC;
                 return 0;
             });
         }
