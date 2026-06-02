@@ -1,5 +1,5 @@
 import { createElement } from './renderElement.js'
-import { searchingLocal, searchingServer } from './searchngHandle.js'
+import { searchingLocal, searchingServer } from './searching/index.js';
 import { LRUCache } from './cache/index.js';
 import { EventEmitter } from './events/index.js';
 import { Pagination } from './pagination/index.js';
