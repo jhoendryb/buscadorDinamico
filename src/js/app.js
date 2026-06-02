@@ -127,7 +127,6 @@ class Search {
         this.itemsPerPage = Search.#DEFAULT_ITEMS_PER_PAGE;
         this._ajaxResponse = {};
         this.debounceTime = Search.#DEFAULT_DEBOUNCE_TIME;
-        this._cache = new Map();
         this.cacheEnabled = false;
         this.cacheMaxSize = Search.#DEFAULT_CACHE_MAX_SIZE;
         this.sortBy = null;
@@ -685,15 +684,6 @@ class Search {
     getCacheKey(searchTerm, page) {
         return `${searchTerm}_${page}`;
     }
-    addToCache(key, data) {
-        this.cache.set(key, data);
-    }
-    getFromCache(key) {
-        return this.cache.get(key);
-    }
-    clearCache() {
-        this.cache.clear();
-    }
     /**
      * Ordena los resultados por un campo específico.
      * 
@@ -746,7 +736,7 @@ class Search {
             this.fetch.body.sortOrder = 'asc';
         }
 
-        this._cache.clear();
+        this.cache.clear();
     }
     /**
      * Configura la navegación por teclado para el componente.

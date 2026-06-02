@@ -47,7 +47,7 @@ const searchingLocal = {
         this._pagination.page = 1;
 
         const cacheKey = this.getCacheKey(searchTerm, this._pagination.page);
-        const cachedData = this.getFromCache(cacheKey);
+        const cachedData = this.cache.get(cacheKey);
         if (this.cacheEnabled && cachedData) {
             this._data = cachedData;
             this.processPagination();
@@ -68,7 +68,7 @@ const searchingLocal = {
         this.searchTerm = searchTerm;
 
         if (this.cacheEnabled) {
-            this.addToCache(cacheKey, this._data);
+            this.cache.set(cacheKey, this._data);
         }
 
         if (isEvent) {
@@ -124,7 +124,7 @@ const searchingServer = {
         this.searchTerm = searchTerm;
 
         const cacheKey = this.getCacheKey(searchTerm, this._pagination.page);
-        const cachedData = this.getFromCache(cacheKey);
+        const cachedData = this.cache.get(cacheKey);
         if (this.cacheEnabled && cachedData && !isEvent) {
             this._data = cachedData;
             this.processPagination();
@@ -141,7 +141,7 @@ const searchingServer = {
         this._ajaxResponse.success = rest;
 
         if (this.cacheEnabled) {
-            this.addToCache(cacheKey, data);
+            this.cache.set(cacheKey, data);
         }
 
         if (isEvent) {
