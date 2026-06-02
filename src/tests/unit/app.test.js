@@ -43,7 +43,7 @@ describe('Search', () => {
         });
         search.init();
 
-        const input = search._body.inputSearch;
+        const input = search.renderer.body.inputSearch;
         input.value = 'juan';
         input.dispatchEvent(new Event('input'), { bubbles: true });
 
@@ -132,10 +132,10 @@ describe('Search', () => {
         });
         await search.init(); // Espera a que init termine
 
-        const items = search._body.renderItems?.querySelectorAll('.items');
+        const items = search.renderer.body.renderItems?.querySelectorAll('.items');
         expect(items.length).toBeGreaterThan(0);
 
-        const contentElement = search._body.content;
+        const contentElement = search.renderer.body.content;
         contentElement.dispatchEvent(new KeyboardEvent('keydown', {
             key: 'ArrowDown',
             bubbles: true

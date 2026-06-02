@@ -3,6 +3,7 @@ import { searchingLocal, searchingServer } from './searchngHandle.js'
 import { LRUCache } from './cache/index.js';
 import { EventEmitter } from './events/index.js';
 import { Pagination } from './pagination/index.js';
+import { SearchRenderer } from './renderer/index.js';
 
 class Search {
     /**
@@ -136,12 +137,19 @@ class Search {
         this.selectedIndex = Search.#NO_SELECTION;
         this.keyboardEnabled = false;
         this.template = null;
-        this.cache = new LRUCache(this.cacheMaxSize);
-        this.events = new EventEmitter();
         this.dom = 'sip'; // 's': Search, 'i': Items, 'p': Pagination
 
         Object.assign(this, newParams);
 
+        this.renderer = new SearchRenderer({
+            content: document.querySelector(this.element), // ".input-search" - contenedor que contiene la app Search
+            contentSearch: undefined, // ".app-search" - contenedor del Search
+            inputSearch: undefined, // "#filter-search" - input donde se escribe la búsqueda
+            renderItems: undefined, // ".items-search" - elemento donde se muestran los items
+            paginationItems: undefined // ".index-search" - elemento donde se muestra la paginación
+        }, this.#getUniqueClassName.bind(this));
+        this.cache = new LRUCache(this.cacheMaxSize);
+        this.events = new EventEmitter();
         this.pagination = new Pagination(this.itemsPerPage);
         this.pagination.setCountFunction(() => {
             return this.procesServer ? this._ajaxResponse.success.countPage : this._data.length;
@@ -174,15 +182,8 @@ class Search {
         }
 
         this._data = this.data;
-        this._body = {
-            content: document.querySelector(this.element), // ".input-search" - contenedor que contiene la app Search
-            contentSearch: undefined, // ".app-search" - contenedor del Search
-            inputSearch: undefined, // "#filter-search" - input donde se escribe la búsqueda
-            renderItems: undefined, // ".items-search" - elemento donde se muestran los items
-            paginationItems: undefined // ".index-search" - elemento donde se muestra la paginación
-        };
 
-        const element = this._body.content;
+        const element = this.renderer.body.content;
 
         if (!element) {
             let msgError = `No existe el contenedor ${this.element}`
@@ -219,7 +220,14 @@ class Search {
     init() {
         if (!this.procesServer) this.isExtractData();
 
-        this.renderByDom();
+        this.renderer.renderByDom(this.dom, {
+            search: {
+                onInput: (searchTerm, isEvent) => this.draw(searchTerm, isEvent),
+                debounceTime: this.debounceTime,
+                placeholder: this.t.searchPlaceholder,
+                ariaLabel: this.t.searchLabel
+            }
+        });
 
         this.setupKeyboardNavigation();
 
@@ -247,7 +255,7 @@ class Search {
     async draw(searchTerm = this.searchTerm, isEvent = false) {
         await this.searching(searchTerm, isEvent);
 
-        if (this._body.paginationItems) {
+        if (this.renderer.body.paginationItems) {
             this.processPagination();
         }
     }
@@ -269,258 +277,13 @@ class Search {
         // Crear clase única combinando la base con el selector del padre
         return `${baseClass}-${parentSelector}`;
     }
-    /**
-     * Renderiza los items en el contenedor de resultados.
-     * Usa el template personalizado si está configurado, sino muestra los valores del objeto.
-     * 
-     * @private
-     * @param {Array} data - Array de items a renderizar
-     * @returns {boolean|void} Retorna false si no hay contenedor, void en caso contrario
-     * @fires Search#renderItems - Se emite después de renderizar los items
-     * 
-     * @example
-     * this._renderItems(filteredData);
-     */
     _renderItems(data) {
-        const container = this._body.renderItems;
-
-        if (!container) return false;
-
-        container.innerHTML = '';
-
-        const jsonItem = {
-            element: "div",
-            className: "items",
-            attributes: { 'role': 'option' }
-        };
-
-        if (!data || data.length === 0) {
-            jsonItem.textContent = this.t.noResults;
-            container.appendChild(createElement(jsonItem));
-            return;
-        }
-
-        data.forEach(item => {
-            if (this.template) {
-                let template = this.template;
-                if (typeof template === 'function') {
-                    jsonItem.innerHTML = template(item);
-                } else if (typeof template === 'string') {
-                    Object.keys(item).forEach(key => {
-                        template = template.replace(`{{${key}}}`, item[key]);
-                    });
-                    jsonItem.innerHTML = template;
-                }
-                container.appendChild(createElement(jsonItem));
-                return
-            }
-            jsonItem.textContent = Object.values(item).join(' ');
-            container.appendChild(createElement(jsonItem));
-        });
-
-        this.events.emit('renderItems', {
-            items: data,
-            content: container
-        });
-    }
-    /**
-     * Renderiza el input de búsqueda dentro del contenedor contentSearch.
-     * Configura el debounce y los atributos ARIA para accesibilidad.
-     * Si ya existe un input, lo reutiliza en lugar de crear uno nuevo.
-     * 
-     * @public
-     * @returns {void}
-     * 
-     * @example
-     * search.renderSearch();
-     */
-    renderSearch() {
-        if (this._body.inputSearch) return;
-
-        const element = this._body.contentSearch;
-
-        let inputSearch = element.querySelector('.filter-search');
-        // EVITAMOS QUE SE USE POR CADA TECLA EL BUSCADOR
-        // ASI LIBERAMOS UN POCO DE CARGA AL CODIGO
-        let timeOut;
-        //------------------
-
-        let jsonInput = {
-            element: inputSearch,
-            id: this.#getUniqueClassName('input-search'),
-            attributes: {
-                "aria-label": this.t.searchLabel,
-                "aria-autocomplete": "list",
-                "role": "combobox"
-            },
-            event: {
-                input: (e) => {
-                    const searchTerm = e.target.value.trim().toLowerCase();
-                    clearTimeout(timeOut);
-                    timeOut = setTimeout(() => {
-                        this.draw(searchTerm, e instanceof Event);
-                    }, this.debounceTime);
-                }
-            },
-            ...(!inputSearch ? {
-                element: "input",
-                name: this.#getUniqueClassName("filterSearch"),
-                className: `form-control input-lg ${this.#getUniqueClassName("filter-search")}`,
-                placeholder: this.t.searchPlaceholder,
-            } : {})
-        };
-
-        inputSearch = createElement(jsonInput);
-
-        inputSearch.setAttribute('aria-controls', this.#getUniqueClassName('items-search')); // INDICA QUE CONTROLA LA LISTA DE SUGERENCIAS
-
-        if (jsonInput.element === "input") element.appendChild(inputSearch);
-
-        this._body.inputSearch = inputSearch
-    }
-    /**
-     * Renderiza el contenedor del input de búsqueda.
-     * Crea el elemento .input-search con su label si no existe.
-     * Llama automáticamente a renderSearch() para crear el input.
-     * 
-     * @public
-     * @returns {void}
-     * 
-     * @example
-     * search.contentSearch();
-     */
-    contentSearch() {
-        if (this._body.contentSearch) return;
-
-        const element = this._body.content;
-
-        let contentSearch = element.querySelector('.input-search');
-
-        if (!contentSearch) {
-            contentSearch = createElement({
-                element: "search",
-                className: "input-search" + ` ${this.#getUniqueClassName('input-search')}`,
-                children: [
-                    {
-                        element: "label",
-                        htmlFor: this.#getUniqueClassName('input-search'),
-                        textContent: this.t.searchLabel
-                    }
-                ]
-            });
-            element.appendChild(contentSearch);
-        }
-
-        this._body.contentSearch = contentSearch;
-
-        this.renderSearch();
-    }
-    /**
-     * Renderiza el contenedor donde se mostrarán los resultados de búsqueda.
-     * Crea el elemento .items-search con atributos ARIA para accesibilidad.
-     * 
-     * @public
-     * @returns {void}
-     * 
-     * @example
-     * search.renderItems();
-     */
-    renderItems() {
-        if (this._body.renderItems) return;
-
-        const element = this._body.content;
-
-        let renderItems = element.querySelector('.items-search');
-
-        if (!renderItems) {
-            renderItems = createElement({
-                element: "main",
-                id: this.#getUniqueClassName('items-search'),
-                className: `items-search scroll-personalize ${this.#getUniqueClassName("items-search")}`,
-                attributes: {
-                    'aria-label': 'Resultados de búsqueda',
-                    'role': 'listbox',
-                    'aria-activedescendant': ''
-                }
-            });
-            element.appendChild(renderItems);
-        }
-
-        this._body.renderItems = renderItems;
-    }
-    /**
-     * Renderiza el contenedor de paginación.
-     * Crea el elemento .index-search con la lista de páginas.
-     * 
-     * @public
-     * @returns {void}
-     * 
-     * @example
-     * search.renderPagination();
-     */
-    renderPagination() {
-        if (this._body.paginationItems) return;
-
-        const element = this._body.content;
-
-        let paginationItems = element.querySelector('.index-search');
-
-        if (!paginationItems) {
-            paginationItems = createElement({
-                element: "footer",
-                className: `index-search ${this.#getUniqueClassName("index-search")}`,
-                attributes: {
-                    'aria-label': 'Paginación de resultados',
-                    'role': 'navigation'
-                },
-                children: [
-                    {
-                        element: "ul",
-                        className: `pagination ${this.#getUniqueClassName("pagination")}`
-                    }
-                ]
-            });
-            element.appendChild(paginationItems);
-        }
-
-        this._body.paginationItems = paginationItems
-    }
-    /**
-     * Renderiza los componentes en el orden especificado por la propiedad 'dom'.
-     * El string 'dom' define qué componentes renderizar y en qué orden:
-     * - 's': Search (contentSearch + input)
-     * - 'i': Items (contenedor de resultados)
-     * - 'p': Pagination (paginación)
-     * 
-     * @public
-     * @returns {void}
-     * 
-     * @example
-     * // Renderiza: Search, Items, Pagination
-     * search.dom = 'sip';
-     * search.renderByDom();
-     * 
-     * @example
-     * // Renderiza: Items, Pagination (sin Search)
-     * search.dom = 'ip';
-     * search.renderByDom();
-     */
-    renderByDom() {
-        const content = this._body.content;
-
-        content.innerHTML = '';
-
-        const domMap = {
-            's': () => this.contentSearch(), // s: Search
-            'i': () => this.renderItems(), // i: Items
-            'p': () => this.renderPagination() // p: Paginacion
-        };
-
-        for (const char of this.dom) {
-            if (domMap[char]) {
-                domMap[char]();
-            }
-        }
+        return this.renderer.renderItemsContent(
+            data,
+            this.template,
+            this.t.noResults,
+            this.events
+        );
     }
     /**
      * Procesa y renderiza los botones de paginación.
@@ -535,7 +298,7 @@ class Search {
      * search.processPagination();
      */
     processPagination() {
-        const contentPagination = this._body.paginationItems;
+        const contentPagination = this.renderer.body.paginationItems;
         const pagination = contentPagination.querySelector(".pagination");
 
         pagination.innerHTML = "";
@@ -566,7 +329,6 @@ class Search {
                         },
                         event: {
                             click: () => {
-                                // this.pagination.getCurrentPage() = buttonsPaginations[key];
                                 this.pagination.goToPage(buttonsPaginations[key]);
                                 if (this.procesServer) {
                                     this.fetch.body.page = buttonsPaginations[key];
@@ -607,7 +369,7 @@ class Search {
      * search.showLoading();
      */
     showLoading() {
-        if (this._body.renderItems) {
+        if (this.renderer.body.renderItems) {
             const loading = createElement({
                 element: "div",
                 className: `search-loading`,
@@ -622,7 +384,7 @@ class Search {
                     }
                 ]
             });
-            this._body.renderItems.innerHTML = loading.outerHTML;
+            this.renderer.body.renderItems.innerHTML = loading.outerHTML;
         }
     }
     getCacheKey(searchTerm, page) {
@@ -701,21 +463,21 @@ class Search {
     setupKeyboardNavigation() {
         if (!this.keyboardEnabled) return;
 
-        const content = this._body.content;
+        const content = this.renderer.body.content;
         content.addEventListener('keydown', (e) => {
-            const contentItems = this._body.renderItems;
+            const contentItems = this.renderer.body.renderItems;
             if (!contentItems) return;
 
             const items = contentItems.querySelectorAll('.items');
             if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
                 e.preventDefault();
                 const keyName = (e.key === 'ArrowLeft' ? 'prev' : 'next');
-                const btnPagination = this._body.paginationItems.querySelector(`.${keyName} button`);
+                const btnPagination = this.renderer.body.paginationItems.querySelector(`.${keyName} button`);
                 if (!btnPagination) {
                     const btn = keyName === 'prev' ? 'start' : 'end';
                     if (btn === "start" && this.pagination.getCurrentPage() <= 1) return;
                     if (btn === "end" && this.pagination.getCurrentPage() >= this.pagination.getTotalPages()) return;
-                    const btnStart = this._body.paginationItems.querySelector(`.${btn} button`);
+                    const btnStart = this.renderer.body.paginationItems.querySelector(`.${btn} button`);
                     btnStart.click();
                     return;
                 }
@@ -787,8 +549,8 @@ class Search {
         this.events.emit('destroy', { timestamp: new Date().toISOString() });
 
         if (this._body?.inputSearch) {
-            const newInput = this._body.inputSearch.cloneNode(true);
-            this._body.inputSearch.parentNode.replaceChild(newInput, this._body.inputSearch);
+            const newInput = this.renderer.body.inputSearch.cloneNode(true);
+            this.renderer.body.inputSearch.parentNode.replaceChild(newInput, this.renderer.body.inputSearch);
         }
 
         // Limpiar eventos del EventEmitter

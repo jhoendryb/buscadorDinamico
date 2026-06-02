@@ -18,7 +18,7 @@ const searchingLocal = {
     isExtractData() {
         if (this.data.length > 0) return false;
 
-        const items = this._body.content?.querySelectorAll(".items");
+        const items = this.renderer.body.content?.querySelectorAll(".items");
         const newData = Object.keys(items || {}).map((key) => {
             return { ...items[key].dataset, children: items[key].innerHTML };
         });
