@@ -35,8 +35,9 @@ class Search {
         this.itemsPerPage = Constants.DEFAULT_ITEMS_PER_PAGE;
         this.debounceTime = Constants.DEFAULT_DEBOUNCE_TIME;
         this.cacheMaxSize = Constants.DEFAULT_CACHE_MAX_SIZE;
+        this.cacheTtlSeconds = Constants.DEFAULT_CACHE_TTL;
         this.selectedIndex = Constants.NO_SELECTION;
-        this.dom = Constants.DOM_ORDERS.SEARCH_ITEMS_PAGINATION; // 's': Search, 'i': Items, 'p': Pagination
+        this.dom = Constants.DOM_ORDERS.SEARCH_ITEMS_PAGINATION;
 
         Object.assign(this, newParams);
 
@@ -47,7 +48,7 @@ class Search {
             renderItems: undefined, // ".items-search" - elemento donde se muestran los items
             paginationItems: undefined // ".index-search" - elemento donde se muestra la paginación
         }, this.#getUniqueClassName.bind(this));
-        this.cache = new LRUCache(this.cacheMaxSize);
+        this.cache = new LRUCache(this.cacheMaxSize, this.cacheTtlSeconds);
         this.events = new EventEmitter();
         this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
         this.pagination.setCountFunction(() => {

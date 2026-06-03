@@ -6,6 +6,7 @@
  * @property {number} [itemsPerPage=10] - Items por página
  * @property {number} [debounceTime=500] - Tiempo de debounce en ms
  * @property {number} [cacheMaxSize=50] - Tamaño máximo del caché
+ * @property {number} [cacheTtlSeconds=60] - Tiempo de vida del caché en segundos
  * @property {boolean} [cacheEnabled=false] - Habilita caché
  * @property {Object} [fetch] - Configuración AJAX
  * @property {string} [sortBy] - Campo para ordenamiento
