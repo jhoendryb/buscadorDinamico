@@ -29,6 +29,7 @@ export class EventEmitter {
      * Remueve un listener de un evento.
      * @param {string} eventName - Nombre del evento
      * @param {Function} callback - Función a remover
+     * @returns {{on: Function}} Objeto con método on para volver a registrar
      */
     off(eventName, callback) {
         if (!this.events[eventName]) return;
@@ -39,9 +40,10 @@ export class EventEmitter {
     }
 
     /**
-     * Emite un evento con datos opcionales.
+     * Emite un evento con datos opcionales a todos los listeners registrados.
      * @param {string} eventName - Nombre del evento
-     * @param {*} [data] - Datos a pasar a los listeners
+     * @param {*} [data] - Datos a pasar a los listeners (opcional)
+     * @returns {void}
      */
     emit(eventName, data) {
         if (!this.events[eventName]) return;
@@ -49,8 +51,9 @@ export class EventEmitter {
     }
 
     /**
-     * Remueve todos los listeners de un evento.
-     * @param {string} eventName - Nombre del evento
+     * Remueve todos los listeners de un evento específico o de todos los eventos.
+     * @param {string} [eventName] - Nombre del evento (si no se proporciona, limpia todos)
+     * @returns {void}
      */
     removeAllListeners(eventName) {
         if (eventName) {
@@ -61,7 +64,7 @@ export class EventEmitter {
     }
 
     /**
-     * Obtiene la cantidad de listeners de un evento.
+     * Obtiene la cantidad de listeners registrados para un evento.
      * @param {string} eventName - Nombre del evento
      * @returns {number} Cantidad de listeners
      */

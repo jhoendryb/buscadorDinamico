@@ -6,30 +6,30 @@ export class Pagination {
     /**
      * Crea una instancia de Pagination.
      * @param {number} [itemsPerPage=10] - Items por página
+     * @param {number} [firstPage=1] - Página inicial
      */
     constructor(itemsPerPage = 10, FIRST_PAGE) {
         this.currentPage = FIRST_PAGE;
         this.itemsPerPage = itemsPerPage;
     }
-
     /**
      * Establece la función para obtener el total de items.
      * @param {Function} countFn - Función que retorna el total de items
+     * @returns {void}
      */
     setCountFunction(countFn) {
         this.countFn = countFn;
     }
-
     /**
      * Establece la función para obtener la data actual.
      * @param {Function} dataItemsFn - Función que retorna la data actual
+     * @returns {void}
      */
     setDataItemsFunction(dataItemsFn) {
         this.dataItemsFn = dataItemsFn;
     }
-
     /**
-     * Obtiene el total de items.
+     * Obtiene el total de items usando la función de conteo configurada.
      * @returns {number} Total de items
      */
     getTotalItems() {
@@ -38,18 +38,16 @@ export class Pagination {
         }
         return 0;
     }
-
     /**
-     * Obtiene el total de páginas.
-     * @returns {number} Total de páginas
+     * Obtiene el total de páginas calculado a partir del total de items.
+     * @returns {number} Total de páginas (mínimo 1)
      */
     getTotalPages() {
         const totalItems = this.getTotalItems();
         return Math.ceil(totalItems / this.itemsPerPage) || 1;
     }
-
     /**
-     * Avanza a la siguiente página.
+     * Avanza a la siguiente página si existe.
      * @returns {number} Nueva página actual
      */
     nextPage() {
@@ -59,9 +57,8 @@ export class Pagination {
         }
         return this.currentPage;
     }
-
     /**
-     * Retrocede a la página anterior.
+     * Retrocede a la página anterior si existe.
      * @returns {number} Nueva página actual
      */
     prevPage() {
@@ -70,10 +67,9 @@ export class Pagination {
         }
         return this.currentPage;
     }
-
     /**
-     * Va a una página específica.
-     * @param {number} page - Página a ir
+     * Va a una página específica si es válida.
+     * @param {number} page - Página a ir (debe ser >= 1 y <= totalPages)
      * @returns {number} Nueva página actual
      */
     goToPage(page) {
@@ -83,16 +79,14 @@ export class Pagination {
         }
         return this.currentPage;
     }
-
     /**
      * Va a la primera página.
-     * @returns {number} Nueva página actual
+     * @returns {number} Nueva página actual (siempre 1)
      */
     firstPage() {
         this.currentPage = 1;
         return this.currentPage;
     }
-
     /**
      * Va a la última página.
      * @returns {number} Nueva página actual
@@ -101,11 +95,10 @@ export class Pagination {
         this.currentPage = this.getTotalPages();
         return this.currentPage;
     }
-
     /**
      * Obtiene los items de la página actual.
-     * @param {Array} data - Array completo de datos
-     * @returns {Array} Items de la página actual
+     * @param {Array<Object>} [data] - Array completo de datos (opcional, usa dataItemsFn si no se proporciona)
+     * @returns {Array<Object>} Items de la página actual
      */
     getPageItems(data) {
         if (!data) return this.dataItemsFn();
@@ -113,7 +106,6 @@ export class Pagination {
         const end = this.currentPage * this.itemsPerPage;
         return data.slice(start, end);
     }
-
     /**
      * Obtiene la página actual.
      * @returns {number} Página actual
@@ -121,10 +113,10 @@ export class Pagination {
     getCurrentPage() {
         return this.currentPage;
     }
-
     /**
-     * Establece los items por página.
+     * Establece los items por página y recalcula la página actual si es necesario.
      * @param {number} itemsPerPage - Items por página
+     * @returns {void}
      */
     setItemsPerPage(itemsPerPage) {
         this.itemsPerPage = itemsPerPage;

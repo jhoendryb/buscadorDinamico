@@ -1,3 +1,4 @@
+import * as Types from '../types.js';
 /**
  * Objeto que contiene la lógica de búsqueda en modo servidor (server-side).
  * Se asigna dinámicamente a la instancia Search cuando procesServer es true.
@@ -6,9 +7,10 @@
 export const searchingServer = {
     /**
      * Realiza búsqueda en servidor vía AJAX.
+     * Usa caché para paginación si está habilitado.
      * @param {string} searchTerm - Término de búsqueda
      * @param {boolean} [isEvent=false] - Si fue iniciado por evento del usuario
-     * @returns {Promise<Search>} Instancia de Search para encadenamiento
+     * @returns {Promise<Search>} Promesa que resuelve con la instancia de Search
      */
     async searching(searchTerm, isEvent = false) {
 
@@ -69,8 +71,8 @@ export const searchingServer = {
 
     /**
      * Realiza una petición AJAX con XMLHttpRequest.
-     * @param {Object} config - Configuración de la petición
-     * @returns {Promise<Object>} Respuesta del servidor
+     * @param {Types.FetchConfig} config - Configuración de la petición
+     * @returns {Promise<Object>} Promesa que resuelve con la respuesta del servidor
      */
     async ajax(config) {
         return new Promise((resolve, reject) => {

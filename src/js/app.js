@@ -12,7 +12,7 @@ import {
 
 class Search {
     /**
-     * Una instancia de `LRUCache<string, string>` que almacena las traducciones predeterminadas.
+     * Instancia que almacena las traducciones predeterminadas.
      * @type {Types.TranslationCache}
      */
     static #defaultTranslations = Constants.DEFAULT_TRANSLATIONS;
@@ -98,6 +98,10 @@ class Search {
             procesServer: this.procesServer
         });
     }
+    /**
+     * Inicializa el componente Search.
+     * @returns {Search} Instancia para encadenamiento
+     */
     init() {
         if (!this.procesServer) this.isExtractData();
 
@@ -117,6 +121,12 @@ class Search {
         console.log('Init Search', this._data);
         return this;
     }
+    /**
+     * Ejecuta una búsqueda y renderiza los resultados.
+     * @param {string} [searchTerm] - Término de búsqueda (usa this.searchTerm si no se proporciona)
+     * @param {boolean} [isEvent=false] - Si fue iniciado por evento del usuario
+     * @returns {Promise<void>} Promesa que se resuelve cuando termina el renderizado
+     */
     async draw(searchTerm = this.searchTerm, isEvent = false) {
         await this.searching(searchTerm, isEvent);
 
@@ -124,10 +134,22 @@ class Search {
             this.processPagination();
         }
     }
+    /**
+     * Genera un nombre de clase CSS único basado en el selector del elemento.
+     * @param {string} baseClass - Clase base (ej: "input-search")
+     * @returns {string} Nombre de clase único (ej: "input-search-mi-buscador")
+     * @private
+     */
     #getUniqueClassName(baseClass) {
         const parentSelector = this.element.replace(/^\.|^\#/, '');
         return `${baseClass}-${parentSelector}`;
     }
+    /**
+     * Renderiza los items en el contenedor de resultados.
+     * @param {Array<Object>} data - Array de items a renderizar
+     * @returns {void}
+     * @private
+     */
     _renderItems(data) {
         return this.renderer.renderItemsContent(
             data,
@@ -136,6 +158,10 @@ class Search {
             this.events
         );
     }
+    /**
+     * Renderiza los botones de paginación y los items de la página actual.
+     * @returns {void}
+     */
     processPagination() {
         const contentPagination = this.renderer.body.paginationItems;
         const pagination = contentPagination.querySelector(".pagination");
@@ -194,9 +220,19 @@ class Search {
             itemsOnPage: next.length
         });
     }
+    /**
+     * Registra un listener para un evento.
+     * @param {string} eventName - Nombre del evento (ej: "search", "pageChange")
+     * @param {Function} callback - Función a ejecutar cuando se emite el evento
+     * @returns {{off: Function}} Objeto con método off para remover el listener
+     */
     on(eventName, callback) {
         return this.events.on(eventName, callback);
     }
+    /**
+     * Muestra el indicador de carga.
+     * @returns {void}
+     */
     showLoading() {
         if (this.renderer.body.renderItems) {
             const loading = createElement({
@@ -216,9 +252,21 @@ class Search {
             this.renderer.body.renderItems.innerHTML = loading.outerHTML;
         }
     }
+    /**
+     * Genera una clave única para el caché basada en el término de búsqueda y página.
+     * @param {string} searchTerm - Término de búsqueda
+     * @param {number} page - Página actual
+     * @returns {string} Clave única para el caché
+     */
     getCacheKey(searchTerm, page) {
         return `${searchTerm}_${page}`;
     }
+    /**
+     * Ordena los datos por un campo específico.
+     * @param {string} field - Campo por el cual ordenar
+     * @param {'asc'|'desc'} [order='asc'] - Orden de ordenamiento
+     * @returns {void}
+     */
     sort(field, order = 'asc') {
         this.sortBy = field;
         this.sortOrder = order;
@@ -258,10 +306,6 @@ class Search {
      * 
      * @public
      * @returns {void}
-     * 
-     * @example
-     * search.keyboardEnabled = true;
-     * search.setupKeyboardNavigation();
      */
     setupKeyboardNavigation() {
         if (!this.keyboardEnabled) return;

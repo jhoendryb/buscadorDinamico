@@ -6,6 +6,7 @@
 export const searchingLocal = {
     /**
      * Extrae datos del DOM si no hay datos proporcionados.
+     * Busca elementos con la clase '.items' y extrae sus atributos data-.
      * @returns {boolean} True si extrajo datos, false si ya existían
      */
     isExtractData() {
@@ -31,6 +32,7 @@ export const searchingLocal = {
 
     /**
      * Realiza búsqueda local filtrando los datos en memoria.
+     * Usa caché si está habilitado y ordena si sortBy está configurado.
      * @param {string} searchTerm - Término de búsqueda
      * @param {boolean} [isEvent=false] - Si fue iniciado por evento del usuario
      * @returns {Search} Instancia de Search para encadenamiento

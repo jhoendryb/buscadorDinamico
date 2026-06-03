@@ -5,7 +5,7 @@
 export class LRUCache {
     /**
      * Crea una instancia de LRUCache.
-     * @param {number} [maxSize=50] - Tamaño máximo del caché
+     * @param {number} [maxSize=50] - Tamaño máximo del caché (cantidad de items)
      */
     constructor(maxSize = 50) {
         this.cache = new Map();
@@ -13,8 +13,9 @@ export class LRUCache {
     }
     /**
      * Almacena un valor en el caché.
-     * @param {string} key - Clave del valor
-     * @param {*} value - Valor a almacenar
+     * @param {string} key - Clave única para identificar el valor
+     * @param {*} value - Valor a almacenar (puede ser cualquier tipo)
+     * @returns {void}
      */
     set(key, value) {
         if (this.cache.size >= this.maxSize) {
@@ -26,8 +27,8 @@ export class LRUCache {
     }
     /**
      * Obtiene un valor del caché.
-     * @param {string} key - Clave del valor
-     * @returns {*} Valor almacenado o undefined si no existe
+     * @param {string} key - Clave del valor a obtener
+     * @returns {*|undefined} Valor almacenado o undefined si no existe
      */
     get(key) {
         if (this.cache.has(key)) {
@@ -48,13 +49,14 @@ export class LRUCache {
         return this.cache.has(key);
     }
     /**
-     * Limpia todo el caché.
+     * Limpia todo el caché, eliminando todos los items.
+     * @returns {void}
      */
     clear() {
         this.cache.clear();
     }
     /**
-     * Obtiene el tamaño actual del caché.
+     * Obtiene la cantidad de items almacenados en el caché.
      * @returns {number} Cantidad de elementos en el caché
      */
     size() {

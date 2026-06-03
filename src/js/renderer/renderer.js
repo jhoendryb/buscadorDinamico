@@ -1,5 +1,5 @@
 import { createElement } from '../renderElement.js';
-import { BodyConfig } from '../types.js';
+import * as Types from '../types.js';
 
 /**
  * Clase helper para crear la estructura DOM inicial de los componentes.
@@ -9,23 +9,21 @@ import { BodyConfig } from '../types.js';
 export class SearchRenderer {
     /**
      * Crea una instancia de SearchRenderer.
-     * @param {BodyConfig} body - Objeto con referencias a elementos del DOM
+     * @param {Types.BodyConfig} body - Objeto con referencias a elementos del DOM
      * @param {Function} uniqueClassNameFn - Función para generar nombres de clase únicos
      */
     constructor(body, uniqueClassNameFn) {
         this.body = body;
         this.uniqueClassNameFn = uniqueClassNameFn;
     }
-
     /**
-     * Genera un nombre de clase único.
-     * @param {string} baseClass - Clase base
+     * Genera un nombre de clase único usando la función proporcionada.
+     * @param {string} baseClass - Clase base (ej: "input-search")
      * @returns {string} Nombre de clase único
      */
     getUniqueClassName(baseClass) {
         return this.uniqueClassNameFn(baseClass);
     }
-
     /**
      * Renderiza el contenedor del input de búsqueda (label + contenedor).
      * NO crea el input con debounce, eso lo hace renderSearch().
@@ -55,13 +53,12 @@ export class SearchRenderer {
         this.body.contentSearch = contentSearch;
         return contentSearch;
     }
-
     /**
      * Renderiza el input de búsqueda con debounce.
      * Debe llamarse después de contentSearch().
      * @param {Object} options - Opciones de configuración
      * @param {Function} options.onInput - Callback al escribir en el input
-     * @param {number} options.debounceTime - Tiempo de debounce
+     * @param {number} options.debounceTime - Tiempo de debounce en ms
      * @param {string} options.placeholder - Placeholder del input
      * @param {string} options.ariaLabel - Label ARIA para accesibilidad
      * @returns {HTMLElement} Input de búsqueda
@@ -106,7 +103,6 @@ export class SearchRenderer {
         this.body.inputSearch = inputSearch;
         return inputSearch;
     }
-
     /**
      * Renderiza el contenedor donde se mostrarán los resultados de búsqueda.
      * @returns {HTMLElement} Contenedor de items
@@ -134,7 +130,6 @@ export class SearchRenderer {
         this.body.renderItems = renderItems;
         return renderItems;
     }
-
     /**
      * Renderiza el contenedor de paginación (ul vacía).
      * NO renderiza los botones, eso lo hace processPagination() en app.js.
@@ -167,11 +162,12 @@ export class SearchRenderer {
         this.body.paginationItems = paginationItems;
         return paginationItems;
     }
-
     /**
      * Renderiza los componentes en el orden especificado por la propiedad 'dom'.
      * @param {string} domString - String con el orden (ej: 'sip' = search, items, pagination)
      * @param {Object} options - Opciones para cada componente
+     * @param {Object} options.search - Opciones para el componente de búsqueda
+     * @returns {void}
      */
     renderByDom(domString, options = {}) {
         const content = this.body.content;
@@ -192,11 +188,10 @@ export class SearchRenderer {
             }
         }
     }
-
     /**
      * Renderiza los items en el contenedor de resultados.
      * Usa el template personalizado si está configurado, sino muestra los valores del objeto.
-     * @param {Array} data - Array de items a renderizar
+     * @param {Array<Object>} data - Array de items a renderizar
      * @param {string|Function} template - Template personalizado (string o función)
      * @param {string} noResults - Mensaje cuando no hay resultados
      * @param {EventEmitter} events - Instancia de EventEmitter para emitir eventos
