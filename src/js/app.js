@@ -23,15 +23,15 @@ class Search {
     constructor(params) {
         const { translation, ...newParams } = params;
 
-        this.data = [];
-        this.procesServer = false;
         this.searchTerm = "";
+        this.data = [];
         this._ajaxResponse = {};
+        this.procesServer = false;
+        this.keyboardEnabled = false;
+        this.cacheEnabled = false;
+        this.template = null;
         this.sortBy = null;
         this.sortOrder = Constants.SORT_ORDER;
-        this.keyboardEnabled = false;
-        this.template = null;
-        this.cacheEnabled = false;
         this.itemsPerPage = Constants.DEFAULT_ITEMS_PER_PAGE;
         this.debounceTime = Constants.DEFAULT_DEBOUNCE_TIME;
         this.cacheMaxSize = Constants.DEFAULT_CACHE_MAX_SIZE;
