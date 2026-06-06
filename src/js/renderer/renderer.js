@@ -15,6 +15,8 @@ export class SearchRenderer {
     constructor(body, uniqueClassNameFn) {
         this.body = body;
         this.uniqueClassNameFn = uniqueClassNameFn;
+        this.isVisible = false; // Nuevo: estado de visibilidad
+        this.hideTimeout = null; // Nuevo: timeout para delay al ocultar
     }
     /**
      * Genera un nombre de clase único usando la función proporcionada.
@@ -39,13 +41,13 @@ export class SearchRenderer {
             contentSearch = createElement({
                 element: "search",
                 className: "input-search" + ` ${this.getUniqueClassName('input-search')}`,
-                children: [
-                    {
-                        element: "label",
-                        htmlFor: this.getUniqueClassName('input-search'),
-                        textContent: this.t?.searchLabel || 'Filtrar por Búsqueda'
-                    }
-                ]
+                // children: [
+                //     {
+                //         element: "label",
+                //         htmlFor: this.getUniqueClassName('input-search'),
+                //         textContent: this.t?.searchLabel || 'Filtrar por Búsqueda'
+                //     }
+                // ]
             });
             element.appendChild(contentSearch);
         }
@@ -76,6 +78,7 @@ export class SearchRenderer {
             attributes: {
                 "aria-label": ariaLabel || 'Filtrar por Búsqueda',
                 "aria-autocomplete": "list",
+                "aria-expanded": "false", // Nuevo: estado inicial
                 "role": "combobox"
             },
             event: {
@@ -85,6 +88,12 @@ export class SearchRenderer {
                     timeOut = setTimeout(() => {
                         if (onInput) onInput(searchTerm, e instanceof Event);
                     }, debounceTime);
+                },
+                // focus: () => {
+                //     this.showResults();
+                // },
+                blur: () => {
+                    this.hideResultsWithDelay();
                 }
             },
             ...(!inputSearch ? {
@@ -115,13 +124,14 @@ export class SearchRenderer {
 
         if (!renderItems) {
             renderItems = createElement({
-                element: "main",
+                element: "ul",
                 id: this.getUniqueClassName('items-search'),
                 className: `items-search scroll-personalize ${this.getUniqueClassName("items-search")}`,
                 attributes: {
                     'aria-label': 'Resultados de búsqueda',
                     'role': 'listbox',
-                    'aria-activedescendant': ''
+                    'aria-activedescendant': '',
+                    'hidden': 'true' // Nuevo: oculto por defecto
                 }
             });
             element.appendChild(renderItems);
@@ -197,7 +207,7 @@ export class SearchRenderer {
      * @param {EventEmitter} events - Instancia de EventEmitter para emitir eventos
      * @returns {boolean|void} Retorna false si no hay contenedor, void en caso contrario
      */
-    renderItemsContent(data, template, noResults, events) {
+    renderItemsContent(data, template, noResults, events, pagination) {
         const container = this.body.renderItems;
 
         if (!container) return false;
@@ -205,14 +215,25 @@ export class SearchRenderer {
         container.innerHTML = '';
 
         const jsonItem = {
-            element: "div",
+            element: "li",
             className: "items",
-            attributes: { 'role': 'option' }
+            tabindex: '0',
+            attributes: { 'role': 'option' },
+            event: {
+                // Nuevo: mantener visible al hacer clic
+                mousedown: (e) => {
+                    e.preventDefault(); // Evitar blur inmediato
+                    this.isVisible = true; // Mantener estado visible
+                }
+            }
         };
 
         if (!data || data.length === 0) {
             jsonItem.textContent = noResults || 'No se encontraron resultados';
             container.appendChild(createElement(jsonItem));
+
+            // Ocultar si no hay resultados
+            // this.hideResults();
             return;
         }
 
@@ -234,9 +255,71 @@ export class SearchRenderer {
             container.appendChild(createElement(jsonItem));
         });
 
+        // jsonItem.innerHTML = "";
+        // jsonItem.className = jsonItem.className + " info-page";
+        // jsonItem.textContent = `← ${pagination.currentPage} de ${pagination.getTotalPages()} →`;
+        // container.appendChild(createElement(jsonItem));
+        // Mostrar si hay resultados y el input tiene foco
+        if (document.activeElement === this.body.inputSearch) {
+            this.showResults();
+        }
+
         events.emit('renderItems', {
             items: data,
             content: container
         });
     }
+
+    /**
+ * Muestra el contenedor de resultados.
+ * Actualiza aria-expanded y remueve atributo hidden.
+ */
+    showResults() {
+        if (!this.body.renderItems) return;
+
+        this.body.renderItems.removeAttribute('hidden');
+        this.body.inputSearch.setAttribute('aria-expanded', 'true');
+        this.isVisible = true;
+
+        // Cancelar cualquier timeout de ocultamiento pendiente
+        if (this.hideTimeout) {
+            clearTimeout(this.hideTimeout);
+            this.hideTimeout = null;
+        }
+    }
+
+    /**
+     * Oculta el contenedor de resultados con delay.
+     * Permite que el usuario haga clic en un resultado antes de ocultar.
+     */
+    hideResultsWithDelay() {
+        // Delay de 200ms para permitir clic en resultados
+        this.hideTimeout = setTimeout(() => {
+            this.hideResults();
+        }, 200);
+    }
+
+    /**
+     * Oculta el contenedor de resultados inmediatamente.
+     * Actualiza aria-expanded y agrega atributo hidden.
+     */
+    hideResults() {
+        if (!this.body.renderItems) return;
+
+        this.body.renderItems.setAttribute('hidden', 'true');
+        this.body.inputSearch.setAttribute('aria-expanded', 'false');
+        this.isVisible = false;
+    }
+
+    /**
+     * Toggle de visibilidad de resultados.
+     */
+    toggleResults() {
+        if (this.isVisible) {
+            this.hideResults();
+        } else {
+            this.showResults();
+        }
+    }
+
 }

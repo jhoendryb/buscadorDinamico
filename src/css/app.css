@@ -1,62 +1,28 @@
+@import './root.css';
+@import './staticsStyles.css';
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     width: 100%;
     height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: row;
 }
-
 
 body {
     display: flex;
+    justify-content: space-evenly;
+    align-items: flex-start;
     flex-direction: row;
-    align-items: center;
     gap: 10px;
-    background-color: rgb(215, 242, 250);
 }
-
-:root {
-    --header-color: #d4dce2;
-}
-
-/* Estilos para el contenedor que tendrá la barra de desplazamiento */
-.scroll-personalize {
-    position: relative;
-    scrollbar-color: var(--header-color) transparent;
-}
-
-.scroll-personalize::-webkit-scrollbar {
-    width: 8px;
-    background-color: transparent;
-}
-
-.scroll-personalize::-webkit-scrollbar-track {
-    background-color: transparent;
-}
-
-.scroll-personalize::-webkit-scrollbar-thumb {
-    background-color: var(--header-color);
-    border-radius: 4px;
-}
-
-.scroll-personalize::-webkit-scrollbar-thumb:hover {
-    background-color: var(--header-color);
-}
-
-.scroll-personalize::-webkit-scrollbar-thumb:active {
-    background-color: var(--header-color);
-}
-/* Estilos para el contenedor que tendrá la barra de desplazamiento */
 
 .app-search {
-    width: 100%;
+    width: 250px;
     height: auto;
     max-height: 100%;
     padding: 5px;
@@ -78,16 +44,11 @@ body {
     position: relative;
     display: flex;
     flex-direction: column;
-    padding: 5px;
-}
-
-.input-search {
-    /* background-color: red; */
-    min-height: 80px;
-    max-height: 80px;
 }
 
 .items-search {
+    list-style: none;
+    margin: 0;
     height: 100%;
     max-height: calc(100% - (80px + 30px));
     overflow-x: auto;
@@ -98,6 +59,7 @@ body {
     -o-border-radius: 5px;
     background-color: rgb(255, 255, 255);
     gap: 5px;
+    padding: 5px;
 }
 
 .items-search .items {
@@ -137,7 +99,6 @@ body {
     background-color: rgb(255, 255, 255);
     min-width: 30px;
     height: 100%;
-    /* padding: 0 3px 0 3px; */
     margin: 0;
     border-radius: 1px;
     -webkit-border-radius: 1px;
@@ -153,13 +114,9 @@ body {
 }
 
 .index-search ul li.page-disabled {
-    /* Estilos para el objeto deshabilitado */
     opacity: 0.5;
-    /* Opacidad del 50% */
     pointer-events: none;
-    /* Evita que se puedan interactuar con el objeto */
     cursor: not-allowed;
-    /* Cambia el cursor a "no permitido" */
     background-color: unset;
     box-shadow: none;
     min-width: 0;
@@ -178,13 +135,10 @@ body {
 
 .index-search ul li.page-selected {
     opacity: 0.6;
-    /* background-color: rgba(255, 255, 255, 0.773); */
     pointer-events: none;
     box-shadow: none;
     cursor: not-allowed;
 }
-
-/* ESTILOS PARA EL CONTENEDOR DE LOS ITEMS */
 
 .items-search .items {
     width: 100%;
@@ -199,48 +153,4 @@ body {
     -moz-border-radius: 5px;
     -ms-border-radius: 5px;
     -o-border-radius: 5px;
-}
-
-.items-search .items .img-head{
-    padding: 5px;
-}
-.items-search .items .info-item{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    /* gap: 5px; */
-}
-
-.items-search .items .info-item h5{
-    margin: 0;
-    padding: 0;
-}
-.items-search .items .info-item p{
-    margin: 0;
-    padding: 0;
-}
-
-.search-loading {
-    text-align: center;
-    padding: 20px;
-}
-
-.spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 10px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.items.selected {
-    background-color: #e3f2fd;
-    border-left: 3px solid #2196f3;
 }

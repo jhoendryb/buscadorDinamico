@@ -63,6 +63,10 @@ export class LRUCache {
      * @returns {boolean} True si existe, false si no
      */
     has(key) {
+        const item = this.cache.get(key);
+
+        if (!item) return false;
+
         return this.cache.has(key);
     }
     /**
@@ -70,6 +74,12 @@ export class LRUCache {
      * @returns {number} Cantidad de elementos en el caché
      */
     size() {
+        this.cache.forEach((item, key) => {
+            if (Date.now() > item.expiresAt) {
+                this.cache.delete(key);
+            }
+        });
+
         return this.cache.size;
     }
     /**

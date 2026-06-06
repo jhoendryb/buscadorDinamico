@@ -156,7 +156,8 @@ class Search {
             data,
             this.template,
             this.t.noResults,
-            this.events
+            this.events,
+            this.pagination
         );
     }
     /**
@@ -214,6 +215,9 @@ class Search {
         const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
 
         this._renderItems(next);
+
+        // Nuevo: mostrar resultados después de renderizar
+        this.renderer.showResults();
 
         this.events.emit('pageChange', {
             page: this.pagination.getCurrentPage(),
@@ -316,8 +320,11 @@ class Search {
             const contentItems = this.renderer.body.renderItems;
             if (!contentItems) return;
 
+            const elementInFocus = document.activeElement;
+            console.log(elementInFocus);
+
             const items = contentItems.querySelectorAll('.items');
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' && elementInFocus === this.renderer.body.renderItems) {
                 e.preventDefault();
                 const keyName = (e.key === 'ArrowLeft' ? 'prev' : 'next');
                 const btnPagination = this.renderer.body.paginationItems.querySelector(`.${keyName} button`);
@@ -335,13 +342,16 @@ class Search {
                 e.preventDefault();
                 this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
                 this.highlightItem(items);
+                this.renderer.showResults(); // Nuevo: mantener visible al navegar
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
                 this.highlightItem(items);
+                this.renderer.showResults(); // Nuevo: mantener visible al navegar
             } else if (e.key === 'Enter' && this.selectedIndex >= 0) {
                 e.preventDefault();
                 this.selectItem(items[this.selectedIndex]);
+                this.renderer.hideResults(); // Nuevo: ocultar al seleccionar
             }
         });
     }
