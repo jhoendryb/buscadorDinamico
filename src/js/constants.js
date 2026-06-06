@@ -7,6 +7,7 @@ export const DEFAULT_ITEMS_PER_PAGE = 10;
 export const DEFAULT_DEBOUNCE_TIME = 500;
 export const DEFAULT_CACHE_MAX_SIZE = 50;
 export const DEFAULT_CACHE_TTL = 50;
+export const DEFAULT_INFINITE_SCROLL = false;
 
 // Valores especiales
 export const NO_SELECTION = -1;

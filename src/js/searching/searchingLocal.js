@@ -40,6 +40,12 @@ export const searchingLocal = {
     searching(searchTerm, isEvent = false) {
         if (this.searchTerm === searchTerm && searchTerm != "") return this;
 
+        // En modo scroll infinito, NO limpiar toda la caché
+        // Solo limpiar si cambia el término de búsqueda
+        if (!this.infiniteScroll && this.searchTerm != searchTerm) {
+            this.cache.clear();
+        }
+
         this.pagination.goToPage(1)
 
         const cacheKey = this.getCacheKey(searchTerm, this.pagination.getCurrentPage());

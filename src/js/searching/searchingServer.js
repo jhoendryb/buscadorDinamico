@@ -18,6 +18,11 @@ export const searchingServer = {
             this.pagination.goToPage(1)
             this.fetch.body.page = 1;
             this.fetch.body.searchTerm = searchTerm;
+
+            // En modo scroll infinito, NO limpiar toda la caché
+            if (!this.infiniteScroll) {
+                this.cache.clear();
+            }
         }
 
         if (this.pagination.getCurrentPage() != this.fetch.body.page) {

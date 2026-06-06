@@ -31,6 +31,7 @@ class Search {
         this.cacheEnabled = false;
         this.template = null;
         this.sortBy = null;
+        this.infiniteScroll = Constants.DEFAULT_INFINITE_SCROLL;
         this.sortOrder = Constants.SORT_ORDER;
         this.itemsPerPage = Constants.DEFAULT_ITEMS_PER_PAGE;
         this.debounceTime = Constants.DEFAULT_DEBOUNCE_TIME;
@@ -50,7 +51,11 @@ class Search {
         }, this.#getUniqueClassName.bind(this));
         this.cache = new LRUCache(this.cacheMaxSize, this.cacheTtlSeconds);
         this.events = new EventEmitter();
-        this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
+        this.pagination = new Pagination(
+            this.itemsPerPage,
+            Constants.FIRST_PAGE,
+            this.infiniteScroll
+        );
         this.pagination.setCountFunction(() => {
             return this.procesServer ? this._ajaxResponse.success.countPage : this._data.length;
         });
@@ -131,8 +136,160 @@ class Search {
     async draw(searchTerm = this.searchTerm, isEvent = false) {
         await this.searching(searchTerm, isEvent);
 
-        if (this.renderer.body.paginationItems) {
+        if (this.infiniteScroll) {
+            this.processInfiniteScroll();
+        } else if (this.renderer.body.paginationItems) {
             this.processPagination();
+        }
+    }
+    /**
+     * Procesa la paginación en modo scroll infinito.
+     * @returns {void}
+     */
+    processInfiniteScroll() {
+        const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
+        
+        // Si es la primera página, renderizar items
+        if (this.pagination.getCurrentPage() === 1) {
+            this.renderer.renderItemsContent(
+                next,
+                this.template,
+                this.t.noResults,
+                this.events
+            );
+        } else {
+            // Si es una página adicional, añadir items
+            this.renderer.appendItems(
+                next,
+                this.template,
+                this.t.noResults,
+                this.events
+            );
+        }
+
+        // Actualizar contador
+        const loaded = this.pagination.getTotalLoaded(this.procesServer ? null : this._data);
+        const total = this.pagination.getTotalItems();
+        this.renderer.updateCounter(loaded, total);
+
+        // Configurar detector de scroll
+        this.setupScrollDetection();
+
+        this.events.emit('pageChange', {
+            page: this.pagination.getCurrentPage(),
+            totalPages: this.pagination.getTotalPages(),
+            itemsOnPage: next.length,
+            totalLoaded: loaded
+        });
+    }
+    /**
+     * Configura el detector de scroll al final del contenedor.
+     * @returns {void}
+     */
+    setupScrollDetection() {
+        const container = this.renderer.body.renderItems;
+        if (!container) return;
+
+        // Remover detector anterior si existe
+        if (this.scrollObserver) {
+            this.scrollObserver.disconnect();
+        }
+
+        // Usar Intersection Observer para detectar scroll al final
+        this.scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && this.pagination.hasMorePages()) {
+                    this.loadMore();
+                }
+            });
+        }, {
+            root: container,
+            rootMargin: '100px', // Cargar 100px antes del final
+            threshold: 0.1
+        });
+
+        // Crear elemento sentinel al final
+        const sentinel = createElement({
+            element: "div",
+            className: "scroll-sentinel",
+            attributes: { 'style': 'height: 1px; visibility: hidden;' }
+        });
+
+        container.appendChild(sentinel);
+        this.scrollObserver.observe(sentinel);
+    }
+    /**
+     * Carga más items en modo scroll infinito.
+     * @returns {Promise<void>}
+     */
+    async loadMore() {
+        if (!this.pagination.hasMorePages()) return;
+
+        // Mostrar indicador de carga
+        this.showLoadingMore();
+
+        const nextPage = this.pagination.loadNextPage();
+
+        if (this.procesServer) {
+            this.fetch.body.page = nextPage;
+            await this.searching(this.searchTerm, false);
+        } else {
+            // En modo local, usar datos ya cargados
+            const next = this.pagination.getPageItems(this._data);
+            this.renderer.appendItems(
+                next,
+                this.template,
+                this.t.noResults,
+                this.events
+            );
+        }
+
+        // Actualizar contador
+        const loaded = this.pagination.getTotalLoaded(this.procesServer ? null : this._data);
+        const total = this.pagination.getTotalItems();
+        this.renderer.updateCounter(loaded, total);
+
+        // Ocultar indicador de carga
+        this.hideLoadingMore();
+
+        // Si no hay más páginas, ocultar botón de cargar más
+        if (!this.pagination.hasMorePages()) {
+            const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button');
+            if (loadMoreButton) {
+                loadMoreButton.style.display = 'none';
+            }
+        }
+    }
+    /**
+     * Muestra indicador de carga al cargar más items.
+     * @returns {void}
+     */
+    showLoadingMore() {
+        const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button');
+        if (loadMoreButton) {
+            loadMoreButton.textContent = 'Cargando...';
+            loadMoreButton.disabled = true;
+        }
+    }
+    /**
+     * Oculta indicador de carga al cargar más items.
+     * @returns {void}
+     */
+    hideLoadingMore() {
+        const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button');
+        if (loadMoreButton) {
+            loadMoreButton.textContent = 'Cargar más...';
+            loadMoreButton.disabled = false;
+        }
+    }
+    /**
+     * Limpia el detector de scroll.
+     * @returns {void}
+     */
+    cleanupScrollDetection() {
+        if (this.scrollObserver) {
+            this.scrollObserver.disconnect();
+            this.scrollObserver = null;
         }
     }
     /**

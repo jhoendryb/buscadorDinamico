@@ -141,36 +141,123 @@ export class SearchRenderer {
         return renderItems;
     }
     /**
-     * Renderiza el contenedor de paginación (ul vacía).
-     * NO renderiza los botones, eso lo hace processPagination() en app.js.
+     * Renderiza el contenedor de paginación.
+     * En modo scroll infinito, crea un elemento de "cargar más".
+     * @param {boolean} infiniteScroll - Si está en modo scroll infinito
      * @returns {HTMLElement} Contenedor de paginación
      */
-    renderPagination() {
-        if (this.body.paginationItems) return;
-
-        const element = this.body.content;
-        let paginationItems = element.querySelector('.index-search');
-
-        if (!paginationItems) {
-            paginationItems = createElement({
-                element: "footer",
-                className: `index-search ${this.getUniqueClassName("index-search")}`,
-                attributes: {
-                    'aria-label': 'Paginación de resultados',
-                    'role': 'navigation'
-                },
-                children: [
-                    {
-                        element: "ul",
-                        className: `pagination ${this.getUniqueClassName("pagination")}`
-                    }
-                ]
-            });
-            element.appendChild(paginationItems);
-        }
+    renderPagination(infiniteScroll = false) {
+        const paginationItems = createElement({
+            element: "div",
+            className: "pagination-items",
+            children: infiniteScroll ? [
+                this.renderLoadMore(),
+                this.renderCounter()
+            ] : [
+                {
+                    element: "ul",
+                    className: "pagination"
+                }
+            ]
+        });
 
         this.body.paginationItems = paginationItems;
         return paginationItems;
+    }
+    /**
+     * Renderiza el botón de "cargar más".
+     * @returns {HTMLElement} Botón de cargar más
+     */
+    renderLoadMore() {
+        return createElement({
+            element: "button",
+            className: "load-more-button",
+            textContent: "Cargar más...",
+            attributes: {
+                'aria-label': 'Cargar más resultados'
+            },
+            event: {
+                click: () => {
+                    this.body.onLoadMore?.();
+                }
+            }
+        });
+    }
+    /**
+     * Renderiza el contador de registros.
+     * @returns {HTMLElement} Contador de registros
+     */
+    renderCounter() {
+        return createElement({
+            element: "div",
+            className: "items-counter",
+            textContent: "0 de 0"
+        });
+    }
+    /**
+     * Añade items al contenedor sin reemplazar el contenido existente.
+     * @param {Array<Object>} data - Items a añadir
+     * @param {string|Function} template - Template personalizado
+     * @param {string} noResults - Mensaje sin resultados
+     * @param {EventEmitter} events - Instancia de EventEmitter
+     * @returns {void}
+     */
+    appendItems(data, template, noResults, events) {
+        const container = this.body.renderItems;
+        if (!container) return;
+
+        // Si es la primera carga y no hay items, mostrar mensaje
+        if (container.children.length === 0 && (!data || data.length === 0)) {
+            const noResultsElement = createElement({
+                element: "div",
+                className: "items",
+                textContent: noResults
+            });
+            container.appendChild(noResultsElement);
+            return;
+        }
+
+        // Añadir items al final
+        data.forEach(item => {
+            const itemElement = createElement({
+                element: "div",
+                className: "items",
+                attributes: { 'role': 'option' }
+            });
+
+            if (template) {
+                if (typeof template === 'function') {
+                    itemElement.innerHTML = template(item);
+                } else if (typeof template === 'string') {
+                    let templateStr = template;
+                    Object.keys(item).forEach(key => {
+                        templateStr = templateStr.replace(`{{${key}}}`, item[key]);
+                    });
+                    itemElement.innerHTML = templateStr;
+                }
+            } else {
+                itemElement.textContent = Object.values(item).join(' ');
+            }
+
+            container.appendChild(itemElement);
+        });
+
+        events.emit('appendItems', {
+            items: data,
+            content: container
+        });
+    }
+    /**
+     * Actualiza el contador de registros.
+     * @param {number} loaded - Cantidad de items cargados
+     * @param {number} total - Total de items
+     * @returns {void}
+     */
+    updateCounter(loaded, total) {
+        const counter = this.body.paginationItems?.querySelector('.items-counter');
+        if (counter) {
+            counter.textContent = `${loaded} de ${total}`;
+        }
     }
     /**
      * Renderiza los componentes en el orden especificado por la propiedad 'dom'.
@@ -255,10 +342,6 @@ export class SearchRenderer {
             container.appendChild(createElement(jsonItem));
         });
 
-        // jsonItem.innerHTML = "";
-        // jsonItem.className = jsonItem.className + " info-page";
-        // jsonItem.textContent = `← ${pagination.currentPage} de ${pagination.getTotalPages()} →`;
-        // container.appendChild(createElement(jsonItem));
         // Mostrar si hay resultados y el input tiene foco
         if (document.activeElement === this.body.inputSearch) {
             this.showResults();

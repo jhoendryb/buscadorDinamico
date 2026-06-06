@@ -7,10 +7,53 @@ export class Pagination {
      * Crea una instancia de Pagination.
      * @param {number} [itemsPerPage=10] - Items por página
      * @param {number} [firstPage=1] - Página inicial
+     * @param {boolean} [infiniteScroll=false] - Modo scroll infinito
      */
-    constructor(itemsPerPage = 10, FIRST_PAGE) {
-        this.currentPage = FIRST_PAGE;
+    constructor(itemsPerPage = 10, firstPage = 1, infiniteScroll = false) {
+        this.currentPage = firstPage;
         this.itemsPerPage = itemsPerPage;
+        this.infiniteScroll = infiniteScroll;
+        this.loadedPages = new Set([firstPage]); // Rastrear páginas cargadas
+    }
+    /**
+     * Carga la siguiente página en modo scroll infinito.
+     * @returns {number} Nueva página actual o la misma si no hay más
+     */
+    loadNextPage() {
+        if (!this.infiniteScroll) return this.currentPage;
+        
+        const totalPages = this.getTotalPages();
+        if (this.currentPage < totalPages) {
+            this.currentPage++;
+            this.loadedPages.add(this.currentPage);
+            return this.currentPage;
+        }
+        return this.currentPage; // No hay más páginas
+    }
+
+    /**
+     * Verifica si hay más páginas disponibles.
+     * @returns {boolean} True si hay más páginas
+     */
+    hasMorePages() {
+        if (!this.infiniteScroll) return false;
+        return this.currentPage < this.getTotalPages();
+    }
+
+    /**
+     * Obtiene el total de items cargados (todas las páginas).
+     * @param {Array<Object>} [data] - Array completo de datos
+     * @returns {number} Total de items cargados
+     */
+    getTotalLoaded(data) {
+        if (!this.infiniteScroll) {
+            return this.getPageItems(data).length;
+        }
+        
+        // En modo scroll infinito, calcular items de todas las páginas cargadas
+        const totalItems = this.getTotalItems();
+        const loadedItems = Math.min(totalItems, this.currentPage * this.itemsPerPage);
+        return loadedItems;
     }
     /**
      * Establece la función para obtener el total de items.

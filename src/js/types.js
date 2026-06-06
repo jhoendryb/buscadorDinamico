@@ -78,3 +78,20 @@
  * @property {number} countPage - Total de items
  * @property {number} page - Página actual
  */
+
+/**
+ * @typedef {Object} SearchParams
+ * @property {string} element - Selector del elemento contenedor (requerido)
+ * @property {Array<Object>} [data] - Datos para búsqueda local
+ * @property {boolean} [procesServer=false] - Si es true, usa búsqueda en servidor
+ * @property {number} [itemsPerPage=10] - Items por página
+ * @property {Types.FetchConfig} [fetch] - Configuración de petición AJAX
+ * @property {number} [debounceTime=500] - Tiempo de debounce en ms
+ * @property {string} [dom='sip'] - Orden de renderizado (s=search, i=items, p=pagination)
+ * @property {string|Function} [template] - Template personalizado para items
+ * @property {boolean} [cacheEnabled=false] - Si habilita caché LRU
+ * @property {number} [cacheMaxSize=50] - Tamaño máximo de caché
+ * @property {number} [cacheTtl=50] - Tiempo de vida de caché en segundos
+ * @property {boolean} [infiniteScroll=false] - Si usa scroll infinito en lugar de botones
+ * @property {Types.TranslationConfig} [translation] - Configuración de traducciones
+ */
