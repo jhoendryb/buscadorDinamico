@@ -7,7 +7,7 @@ export const DEFAULT_ITEMS_PER_PAGE = 10;
 export const DEFAULT_DEBOUNCE_TIME = 500;
 export const DEFAULT_CACHE_MAX_SIZE = 50;
 export const DEFAULT_CACHE_TTL = 50;
-export const DEFAULT_INFINITE_SCROLL = false;
+export const DEFAULT_Z_INDEX = 1000;
 
 // Valores especiales
 export const NO_SELECTION = -1;
@@ -36,6 +36,5 @@ export const DEFAULT_CSS_CLASSES = {
 // Configuración de DOM
 export const DOM_ORDERS = {
     SEARCH_ITEMS_PAGINATION: 'sip',
-    ITEMS_SEARCH_PAGINATION: 'isp',
-    SEARCH_PAGINATION_ITEMS: 'spi',
+    SEARCH_CONTENT_ITEMS_PAGINATION: 'scip' // Nuevo: incluye contenedor padre
 };

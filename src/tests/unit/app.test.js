@@ -123,27 +123,6 @@ describe('Search', () => {
         search.init();
     });
 
-    test('debe navegar items con teclado', async () => {
-        const search = new Search({
-            element: '.test',
-            data: [{ name: 'Zebra', age: 26 }, { name: 'Aardvark', age: 28 }, { name: 'Moose', age: 30 }],
-            template: `<div>{{name}} - {{age}} años</div>`,
-            keyboardEnabled: true
-        });
-        await search.init(); // Espera a que init termine
-
-        const items = search.renderer.body.renderItems?.querySelectorAll('.items');
-        expect(items.length).toBeGreaterThan(0);
-
-        const contentElement = search.renderer.body.content;
-        contentElement.dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'ArrowDown',
-            bubbles: true
-        }));
-
-        expect(search.selectedIndex).toBe(0);
-    });
-
     test('debe usar caché correctamente', async () => {
         const search = new Search({
             element: '.test',

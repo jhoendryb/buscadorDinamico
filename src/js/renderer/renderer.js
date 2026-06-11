@@ -89,9 +89,10 @@ export class SearchRenderer {
                         if (onInput) onInput(searchTerm, e instanceof Event);
                     }, debounceTime);
                 },
-                // focus: () => {
-                //     this.showResults();
-                // },
+                focus: () => {
+                    const count = this.body.renderItems.querySelectorAll(".items").length;
+                    if (count > 0) this.showResults();
+                },
                 blur: () => {
                     this.hideResultsWithDelay();
                 }
@@ -116,10 +117,15 @@ export class SearchRenderer {
      * Renderiza el contenedor donde se mostrarán los resultados de búsqueda.
      * @returns {HTMLElement} Contenedor de items
      */
-    renderItems() {
+    renderItems(zIndex) {
         if (this.body.renderItems) return;
 
-        const element = this.body.content;
+        // Requerir contenedor padre
+        if (!this.body.contentPaginationItems) {
+            this.renderContentPaginationItems();
+        }
+
+        const element = this.body.contentPaginationItems;
         let renderItems = element.querySelector('.items-search');
 
         if (!renderItems) {
@@ -131,7 +137,8 @@ export class SearchRenderer {
                     'aria-label': 'Resultados de búsqueda',
                     'role': 'listbox',
                     'aria-activedescendant': '',
-                    'hidden': 'true' // Nuevo: oculto por defecto
+                    'hidden': 'true',
+                    'style': `z-index: ${zIndex};`
                 }
             });
             element.appendChild(renderItems);
@@ -140,59 +147,42 @@ export class SearchRenderer {
         this.body.renderItems = renderItems;
         return renderItems;
     }
+
     /**
      * Renderiza el contenedor de paginación.
-     * En modo scroll infinito, crea un elemento de "cargar más".
-     * @param {boolean} infiniteScroll - Si está en modo scroll infinito
      * @returns {HTMLElement} Contenedor de paginación
      */
-    renderPagination(infiniteScroll = false) {
-        const paginationItems = createElement({
-            element: "div",
-            className: "pagination-items",
-            children: infiniteScroll ? [
-                this.renderLoadMore(),
-                this.renderCounter()
-            ] : [
-                {
-                    element: "ul",
-                    className: "pagination"
-                }
-            ]
-        });
+    renderPagination() {
+        if (!this.body.contentPaginationItems) {
+            this.renderContentPaginationItems();
+        }
+
+        const element = this.body.contentPaginationItems;
+        let paginationItems = element.querySelector('.pagination-items');
+
+        if (!paginationItems) {
+            paginationItems = createElement({
+                element: "div",
+                className: "pagination-items",
+                children: [this.renderCounter()]
+            });
+            element.appendChild(paginationItems);
+        }
 
         this.body.paginationItems = paginationItems;
         return paginationItems;
     }
-    /**
-     * Renderiza el botón de "cargar más".
-     * @returns {HTMLElement} Botón de cargar más
-     */
-    renderLoadMore() {
-        return createElement({
-            element: "button",
-            className: "load-more-button",
-            textContent: "Cargar más...",
-            attributes: {
-                'aria-label': 'Cargar más resultados'
-            },
-            event: {
-                click: () => {
-                    this.body.onLoadMore?.();
-                }
-            }
-        });
-    }
+
     /**
      * Renderiza el contador de registros.
      * @returns {HTMLElement} Contador de registros
      */
     renderCounter() {
-        return createElement({
+        return {
             element: "div",
             className: "items-counter",
             textContent: "0 de 0"
-        });
+        };
     }
     /**
      * Añade items al contenedor sin reemplazar el contenido existente.
@@ -264,6 +254,7 @@ export class SearchRenderer {
      * @param {string} domString - String con el orden (ej: 'sip' = search, items, pagination)
      * @param {Object} options - Opciones para cada componente
      * @param {Object} options.search - Opciones para el componente de búsqueda
+     * @param {boolean} options.infiniteScroll - Si debe usar scroll infinito
      * @returns {void}
      */
     renderByDom(domString, options = {}) {
@@ -275,6 +266,7 @@ export class SearchRenderer {
                 this.contentSearch();
                 this.renderSearch(options.search || {});
             },
+            'c': () => this.renderContentPaginationItems(),
             'i': () => this.renderItems(),
             'p': () => this.renderPagination()
         };
@@ -285,6 +277,8 @@ export class SearchRenderer {
             }
         }
     }
+
+
     /**
      * Renderiza los items en el contenedor de resultados.
      * Usa el template personalizado si está configurado, sino muestra los valores del objeto.
@@ -358,10 +352,23 @@ export class SearchRenderer {
  * Actualiza aria-expanded y remueve atributo hidden.
  */
     showResults() {
-        if (!this.body.renderItems) return;
+        const contentPagination = this.body.contentPaginationItems;
+        const itemsSearch = this.body.renderItems;
 
-        this.body.renderItems.removeAttribute('hidden');
-        this.body.inputSearch.setAttribute('aria-expanded', 'true');
+        if (!contentPagination || !itemsSearch) return;
+
+        if (contentPagination) {
+            contentPagination.classList.remove('content-pagination-hidden');
+            contentPagination.classList.add('content-pagination-visible');
+            contentPagination.removeAttribute('hidden');
+        }
+
+        if (itemsSearch) {
+            itemsSearch.classList.remove('items-search-hidden');
+            itemsSearch.classList.add('items-search-visible');
+            itemsSearch.removeAttribute('hidden');
+        }
+
         this.isVisible = true;
 
         // Cancelar cualquier timeout de ocultamiento pendiente
@@ -387,12 +394,32 @@ export class SearchRenderer {
      * Actualiza aria-expanded y agrega atributo hidden.
      */
     hideResults() {
-        if (!this.body.renderItems) return;
+        const contentPagination = this.body.contentPaginationItems;
+        const itemsSearch = this.body.renderItems;
 
-        this.body.renderItems.setAttribute('hidden', 'true');
-        this.body.inputSearch.setAttribute('aria-expanded', 'false');
-        this.isVisible = false;
+        if (contentPagination) {
+            contentPagination.classList.remove('content-pagination-visible');
+            contentPagination.classList.add('content-pagination-hidden');
+            // Esperar a que termine la animación antes de ocultar
+            setTimeout(() => {
+                if (contentPagination.classList.contains('content-pagination-hidden')) {
+                    contentPagination.setAttribute('hidden', 'true');
+                }
+            }, 200);
+        }
+
+        if (itemsSearch) {
+            itemsSearch.classList.remove('items-search-visible');
+            itemsSearch.classList.add('items-search-hidden');
+            setTimeout(() => {
+                if (itemsSearch.classList.contains('items-search-hidden')) {
+                    itemsSearch.setAttribute('hidden', 'true');
+                }
+            }, 200);
+        }
     }
+
+
 
     /**
      * Toggle de visibilidad de resultados.
@@ -404,5 +431,28 @@ export class SearchRenderer {
             this.showResults();
         }
     }
+
+    /**
+     * Renderiza el contenedor padre que envuelve items-search y pagination-items.
+     * @returns {HTMLElement} Contenedor padre content-pagination-items
+     */
+    renderContentPaginationItems() {
+        if (this.body.contentPaginationItems) return;
+
+        const element = this.body.content;
+        let contentPaginationItems = element.querySelector('.content-pagination-items');
+
+        if (!contentPaginationItems) {
+            contentPaginationItems = createElement({
+                element: "div",
+                className: `content-pagination-items ${this.getUniqueClassName("content-pagination-items")}`
+            });
+            element.appendChild(contentPaginationItems);
+        }
+
+        this.body.contentPaginationItems = contentPaginationItems;
+        return contentPaginationItems;
+    }
+
 
 }

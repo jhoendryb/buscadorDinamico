@@ -40,9 +40,10 @@ export const searchingLocal = {
     searching(searchTerm, isEvent = false) {
         if (this.searchTerm === searchTerm && searchTerm != "") return this;
 
-        // En modo scroll infinito, NO limpiar toda la caché
-        // Solo limpiar si cambia el término de búsqueda
-        if (!this.infiniteScroll && this.searchTerm != searchTerm) {
+        // En modo scroll infinito, limpiar caché del término anterior
+        if (this.infiniteScroll) {
+            this.clearCacheByPrefix(this.searchTerm);
+        } else {
             this.cache.clear();
         }
 
@@ -50,15 +51,10 @@ export const searchingLocal = {
 
         const cacheKey = this.getCacheKey(searchTerm, this.pagination.getCurrentPage());
         const cachedData = this.cache.get(cacheKey);
-        if (this.cacheEnabled && cachedData) {
+        if (this.cacheEnabled && cachedData && !isEvent) {
             this._data = cachedData;
-            this.processPagination();
-            return this;
-        }
-
-        if (this.sortBy && (this.sortBy !== this.fetch.body.sortBy)) {
-            this.fetch.body.sortBy = this.sortBy;
-            this.fetch.body.sortOrder = this.sortOrder;
+            this.processInfiniteScroll();
+            return;
         }
 
         if (!this.isExtractData()) {

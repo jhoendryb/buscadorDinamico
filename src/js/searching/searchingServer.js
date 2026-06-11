@@ -19,8 +19,10 @@ export const searchingServer = {
             this.fetch.body.page = 1;
             this.fetch.body.searchTerm = searchTerm;
 
-            // En modo scroll infinito, NO limpiar toda la caché
-            if (!this.infiniteScroll) {
+            // En modo scroll infinito, limpiar caché del término anterior
+            if (this.infiniteScroll) {
+                this.clearCacheByPrefix(this.searchTerm);
+            } else {
                 this.cache.clear();
             }
         }
@@ -39,16 +41,17 @@ export const searchingServer = {
         const cachedData = this.cache.get(cacheKey);
         if (this.cacheEnabled && cachedData && !isEvent) {
             this._data = cachedData;
-            this.processPagination();
+            this.processInfiniteScroll();
             return;
         }
+
 
         if (this.sortBy && (this.sortBy !== this.fetch.body.sortBy)) {
             this.fetch.body.sortBy = this.sortBy;
             this.fetch.body.sortOrder = this.sortOrder;
         }
 
-        this.showLoading();
+        // this.showLoading();
 
         try {
             const { data, ...rest } = await this.ajax(this.fetch);
@@ -70,6 +73,9 @@ export const searchingServer = {
         } catch (error) {
             this.events.emit('error', error);
         }
+
+        // Llamar a processInfiniteScroll después de obtener datos del servidor
+        this.processInfiniteScroll();
 
         return this;
     },
@@ -121,5 +127,5 @@ export const searchingServer = {
             const body = new URLSearchParams(config.body).toString();
             xhr.send(body);
         });
-    }
+    },
 };

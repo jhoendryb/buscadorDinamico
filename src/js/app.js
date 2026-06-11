@@ -31,14 +31,14 @@ class Search {
         this.cacheEnabled = false;
         this.template = null;
         this.sortBy = null;
-        this.infiniteScroll = Constants.DEFAULT_INFINITE_SCROLL;
+        this.zIndex = Constants.DEFAULT_Z_INDEX;
         this.sortOrder = Constants.SORT_ORDER;
         this.itemsPerPage = Constants.DEFAULT_ITEMS_PER_PAGE;
         this.debounceTime = Constants.DEFAULT_DEBOUNCE_TIME;
         this.cacheMaxSize = Constants.DEFAULT_CACHE_MAX_SIZE;
         this.cacheTtlSeconds = Constants.DEFAULT_CACHE_TTL;
         this.selectedIndex = Constants.NO_SELECTION;
-        this.dom = Constants.DOM_ORDERS.SEARCH_ITEMS_PAGINATION;
+        this.dom = Constants.DOM_ORDERS.SEARCH_CONTENT_ITEMS_PAGINATION;
 
         Object.assign(this, newParams);
 
@@ -112,6 +112,7 @@ class Search {
         if (!this.procesServer) this.isExtractData();
 
         this.renderer.renderByDom(this.dom, {
+            zIndex: this.zIndex,
             search: {
                 onInput: (searchTerm, isEvent) => this.draw(searchTerm, isEvent),
                 debounceTime: this.debounceTime,
@@ -134,13 +135,20 @@ class Search {
      * @returns {Promise<void>} Promesa que se resuelve cuando termina el renderizado
      */
     async draw(searchTerm = this.searchTerm, isEvent = false) {
+        // Resetear scroll si cambia el término de búsqueda
+        if (searchTerm !== this.searchTerm && this.renderer.body.renderItems) {
+            this.renderer.body.renderItems.scrollTop = 0;
+
+            // En modo scroll infinito, limpiar contenedor si cambia el término
+            if (this.infiniteScroll) {
+                this.renderer.body.renderItems.innerHTML = '';
+                this.pagination.goToPage(1);
+            }
+        }
+
         await this.searching(searchTerm, isEvent);
 
-        if (this.infiniteScroll) {
-            this.processInfiniteScroll();
-        } else if (this.renderer.body.paginationItems) {
-            this.processPagination();
-        }
+        this.processInfiniteScroll();
     }
     /**
      * Procesa la paginación en modo scroll infinito.
@@ -148,7 +156,7 @@ class Search {
      */
     processInfiniteScroll() {
         const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
-        
+
         // Si es la primera página, renderizar items
         if (this.pagination.getCurrentPage() === 1) {
             this.renderer.renderItemsContent(
@@ -195,6 +203,12 @@ class Search {
             this.scrollObserver.disconnect();
         }
 
+        // Remover sentinel anterior si existe
+        const existingSentinel = container.querySelector('.scroll-sentinel');
+        if (existingSentinel) {
+            existingSentinel.remove();
+        }
+
         // Usar Intersection Observer para detectar scroll al final
         this.scrollObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -212,7 +226,7 @@ class Search {
         const sentinel = createElement({
             element: "div",
             className: "scroll-sentinel",
-            attributes: { 'style': 'height: 1px; visibility: hidden;' }
+            attributes: { 'style': 'height: 1px; visibility: hidden; padding: 0; margin: 0;' }
         });
 
         container.appendChild(sentinel);
@@ -233,6 +247,9 @@ class Search {
         if (this.procesServer) {
             this.fetch.body.page = nextPage;
             await this.searching(this.searchTerm, false);
+
+            // Reconfigurar detector de scroll para el nuevo contenido
+            this.setupScrollDetection();
         } else {
             // En modo local, usar datos ya cargados
             const next = this.pagination.getPageItems(this._data);
@@ -242,6 +259,9 @@ class Search {
                 this.t.noResults,
                 this.events
             );
+
+            // Reconfigurar detector de scroll para el nuevo contenido
+            this.setupScrollDetection();
         }
 
         // Actualizar contador
@@ -321,67 +341,67 @@ class Search {
      * Renderiza los botones de paginación y los items de la página actual.
      * @returns {void}
      */
-    processPagination() {
-        const contentPagination = this.renderer.body.paginationItems;
-        const pagination = contentPagination.querySelector(".pagination");
+    // processPagination() {
+    //     const contentPagination = this.renderer.body.paginationItems;
+    //     const pagination = contentPagination.querySelector(".pagination");
 
-        pagination.innerHTML = "";
-        const buttonsPaginations = {
-            start: 1,
-            prev: this.pagination.getCurrentPage() - 1,
-            current: this.pagination.getCurrentPage(),
-            next: this.pagination.getCurrentPage() + 1,
-            end: this.pagination.getTotalPages(),
-        };
+    //     pagination.innerHTML = "";
+    //     const buttonsPaginations = {
+    //         start: 1,
+    //         prev: this.pagination.getCurrentPage() - 1,
+    //         current: this.pagination.getCurrentPage(),
+    //         next: this.pagination.getCurrentPage() + 1,
+    //         end: this.pagination.getTotalPages(),
+    //     };
 
-        Object.keys(buttonsPaginations).forEach((key) => {
-            if (key === "prev" && buttonsPaginations[key] <= 1) return;
-            if (key === "start" && buttonsPaginations[key] === buttonsPaginations.current) return;
-            if (key === "end" && buttonsPaginations[key] === buttonsPaginations.current) return;
-            if (key === "next" && buttonsPaginations[key] >= this.pagination.getTotalPages()) return;
+    //     Object.keys(buttonsPaginations).forEach((key) => {
+    //         if (key === "prev" && buttonsPaginations[key] <= 1) return;
+    //         if (key === "start" && buttonsPaginations[key] === buttonsPaginations.current) return;
+    //         if (key === "end" && buttonsPaginations[key] === buttonsPaginations.current) return;
+    //         if (key === "next" && buttonsPaginations[key] >= this.pagination.getTotalPages()) return;
 
-            const jsonElement = {
-                element: "li",
-                className: key === "current" ? `page-selected ${key}` : key,
-                children: key === "current"
-                    ? [{ element: "span", textContent: buttonsPaginations[key], attributes: { 'aria-current': 'page' } }]
-                    : [{
-                        element: "button",
-                        textContent: buttonsPaginations[key],
-                        attributes: {
-                            'aria-label': `Ir a página ${buttonsPaginations[key]}`
-                        },
-                        event: {
-                            click: () => {
-                                this.pagination.goToPage(buttonsPaginations[key]);
-                                if (this.procesServer) {
-                                    this.fetch.body.page = buttonsPaginations[key];
-                                    this.draw(this.searchTerm);
-                                    return;
-                                }
-                                this.processPagination()
-                            }
-                        }
-                    }]
-            };
+    //         const jsonElement = {
+    //             element: "li",
+    //             className: key === "current" ? `page-selected ${key}` : key,
+    //             children: key === "current"
+    //                 ? [{ element: "span", textContent: buttonsPaginations[key], attributes: { 'aria-current': 'page' } }]
+    //                 : [{
+    //                     element: "button",
+    //                     textContent: buttonsPaginations[key],
+    //                     attributes: {
+    //                         'aria-label': `Ir a página ${buttonsPaginations[key]}`
+    //                     },
+    //                     event: {
+    //                         click: () => {
+    //                             this.pagination.goToPage(buttonsPaginations[key]);
+    //                             if (this.procesServer) {
+    //                                 this.fetch.body.page = buttonsPaginations[key];
+    //                                 this.draw(this.searchTerm);
+    //                                 return;
+    //                             }
+    //                             this.processPagination()
+    //                         }
+    //                     }
+    //                 }]
+    //         };
 
-            const li = createElement(jsonElement);
-            pagination.appendChild(li);
-        });
+    //         const li = createElement(jsonElement);
+    //         pagination.appendChild(li);
+    //     });
 
-        const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
+    //     const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
 
-        this._renderItems(next);
+    //     this._renderItems(next);
 
-        // Nuevo: mostrar resultados después de renderizar
-        this.renderer.showResults();
+    //     // Nuevo: mostrar resultados después de renderizar
+    //     this.renderer.showResults();
 
-        this.events.emit('pageChange', {
-            page: this.pagination.getCurrentPage(),
-            totalPages: this.pagination.getTotalPages(),
-            itemsOnPage: next.length
-        });
-    }
+    //     this.events.emit('pageChange', {
+    //         page: this.pagination.getCurrentPage(),
+    //         totalPages: this.pagination.getTotalPages(),
+    //         itemsOnPage: next.length
+    //     });
+    // }
     /**
      * Registra un listener para un evento.
      * @param {string} eventName - Nombre del evento (ej: "search", "pageChange")
@@ -477,25 +497,7 @@ class Search {
             const contentItems = this.renderer.body.renderItems;
             if (!contentItems) return;
 
-            const elementInFocus = document.activeElement;
-            console.log(elementInFocus);
-
-            const items = contentItems.querySelectorAll('.items');
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' && elementInFocus === this.renderer.body.renderItems) {
-                e.preventDefault();
-                const keyName = (e.key === 'ArrowLeft' ? 'prev' : 'next');
-                const btnPagination = this.renderer.body.paginationItems.querySelector(`.${keyName} button`);
-                if (!btnPagination) {
-                    const btn = keyName === 'prev' ? 'start' : 'end';
-                    if (btn === "start" && this.pagination.getCurrentPage() <= 1) return;
-                    if (btn === "end" && this.pagination.getCurrentPage() >= this.pagination.getTotalPages()) return;
-                    const btnStart = this.renderer.body.paginationItems.querySelector(`.${btn} button`);
-                    btnStart.click();
-                    return;
-                }
-                btnPagination.click();
-                return;
-            } else if (e.key === 'ArrowDown') {
+            if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
                 this.highlightItem(items);
@@ -547,6 +549,21 @@ class Search {
      */
     selectItem(item) {
         this.events.emit('itemSelected', { item, index: this.selectedIndex });
+    }
+    /**
+     * Limpia la caché por prefijo de término de búsqueda.
+     * @param {string} searchTerm - Término de búsqueda a limpiar
+     * @returns {void}
+     */
+    clearCacheByPrefix(searchTerm) {
+        if (!this.cacheEnabled) return;
+
+        // Iterar sobre todas las claves de caché
+        for (const key of this.cache.cache.keys()) {
+            if (key.startsWith(searchTerm)) {
+                this.cache.cache.delete(key);
+            }
+        }
     }
     /**
      * Destruye la instancia de Search, limpiando recursos y event listeners.
