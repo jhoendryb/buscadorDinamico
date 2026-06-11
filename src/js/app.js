@@ -53,8 +53,7 @@ class Search {
         this.events = new EventEmitter();
         this.pagination = new Pagination(
             this.itemsPerPage,
-            Constants.FIRST_PAGE,
-            this.infiniteScroll
+            Constants.FIRST_PAGE
         );
         this.pagination.setCountFunction(() => {
             return this.procesServer ? this._ajaxResponse.success.countPage : this._data.length;
@@ -124,8 +123,6 @@ class Search {
         this.setupKeyboardNavigation();
 
         this.draw(this.searchTerm);
-
-        console.log('Init Search', this._data);
         return this;
     }
     /**
@@ -138,12 +135,8 @@ class Search {
         // Resetear scroll si cambia el término de búsqueda
         if (searchTerm !== this.searchTerm && this.renderer.body.renderItems) {
             this.renderer.body.renderItems.scrollTop = 0;
-
-            // En modo scroll infinito, limpiar contenedor si cambia el término
-            if (this.infiniteScroll) {
-                this.renderer.body.renderItems.innerHTML = '';
-                this.pagination.goToPage(1);
-            }
+            this.renderer.body.renderItems.innerHTML = '';
+            this.pagination.goToPage(1);
         }
 
         await this.searching(searchTerm, isEvent);
@@ -497,20 +490,21 @@ class Search {
             const contentItems = this.renderer.body.renderItems;
             if (!contentItems) return;
 
+            const items = contentItems.querySelectorAll('.items');
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
                 this.highlightItem(items);
-                this.renderer.showResults(); // Nuevo: mantener visible al navegar
+                this.renderer.showResults();
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
                 this.highlightItem(items);
-                this.renderer.showResults(); // Nuevo: mantener visible al navegar
+                this.renderer.showResults();
             } else if (e.key === 'Enter' && this.selectedIndex >= 0) {
                 e.preventDefault();
                 this.selectItem(items[this.selectedIndex]);
-                this.renderer.hideResults(); // Nuevo: ocultar al seleccionar
+                this.renderer.hideResults();
             }
         });
     }

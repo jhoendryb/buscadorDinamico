@@ -7,12 +7,10 @@ export class Pagination {
      * Crea una instancia de Pagination.
      * @param {number} [itemsPerPage=10] - Items por página
      * @param {number} [firstPage=1] - Página inicial
-     * @param {boolean} [infiniteScroll=false] - Modo scroll infinito
      */
-    constructor(itemsPerPage = 10, firstPage = 1, infiniteScroll = false) {
+    constructor(itemsPerPage = 10, firstPage = 1) {
         this.currentPage = firstPage;
         this.itemsPerPage = itemsPerPage;
-        this.infiniteScroll = infiniteScroll;
         this.loadedPages = new Set([firstPage]); // Rastrear páginas cargadas
     }
     /**
@@ -20,8 +18,6 @@ export class Pagination {
      * @returns {number} Nueva página actual o la misma si no hay más
      */
     loadNextPage() {
-        if (!this.infiniteScroll) return this.currentPage;
-        
         const totalPages = this.getTotalPages();
         if (this.currentPage < totalPages) {
             this.currentPage++;
@@ -36,7 +32,6 @@ export class Pagination {
      * @returns {boolean} True si hay más páginas
      */
     hasMorePages() {
-        if (!this.infiniteScroll) return false;
         return this.currentPage < this.getTotalPages();
     }
 
@@ -46,10 +41,6 @@ export class Pagination {
      * @returns {number} Total de items cargados
      */
     getTotalLoaded(data) {
-        if (!this.infiniteScroll) {
-            return this.getPageItems(data).length;
-        }
-        
         // En modo scroll infinito, calcular items de todas las páginas cargadas
         const totalItems = this.getTotalItems();
         const loadedItems = Math.min(totalItems, this.currentPage * this.itemsPerPage);

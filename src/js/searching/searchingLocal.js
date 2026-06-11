@@ -19,10 +19,10 @@ export const searchingLocal = {
             const data = {};
             Array.from(item.attributes).forEach(attr => {
                 if (attr.name.startsWith('data-')) {
-                    data[attr.name.replace('data-', '')] = attr.value;
+                    data[attr.name.replace('data-', '')] = attr.value.trim();
                 }
             });
-            data.children = item.innerHTML;
+            data.children = item.innerHTML.trim();
             return data;
         });
 
@@ -42,12 +42,7 @@ export const searchingLocal = {
     searching(searchTerm, isEvent = false) {
         if (this.searchTerm === searchTerm && searchTerm != "") return this;
 
-        // En modo scroll infinito, limpiar caché del término anterior
-        if (this.infiniteScroll) {
-            this.clearCacheByPrefix(this.searchTerm);
-        } else {
-            this.cache.clear();
-        }
+        this.clearCacheByPrefix(this.searchTerm);
 
         this.pagination.goToPage(1)
 
@@ -59,9 +54,9 @@ export const searchingLocal = {
             return;
         }
 
-        if (!this.isExtractData()) {
-            this._data = this.data;
-        }
+        // if (!this.isExtractData()) {
+        //     this._data = this.data;
+        // }
 
         this._data = this.data.filter((element) => {
             const values = Object.values(element);
