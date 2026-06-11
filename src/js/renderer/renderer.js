@@ -164,6 +164,7 @@ export class SearchRenderer {
             paginationItems = createElement({
                 element: "div",
                 className: "pagination-items",
+                attributes: { 'role': 'status', 'aria-live': 'polite' },
                 children: [this.renderCounter()]
             });
             element.appendChild(paginationItems);

@@ -316,86 +316,6 @@ class Search {
         return `${baseClass}-${parentSelector}`;
     }
     /**
-     * Renderiza los items en el contenedor de resultados.
-     * @param {Array<Object>} data - Array de items a renderizar
-     * @returns {void}
-     * @private
-     */
-    _renderItems(data) {
-        return this.renderer.renderItemsContent(
-            data,
-            this.template,
-            this.t.noResults,
-            this.events,
-            this.pagination
-        );
-    }
-    /**
-     * Renderiza los botones de paginación y los items de la página actual.
-     * @returns {void}
-     */
-    // processPagination() {
-    //     const contentPagination = this.renderer.body.paginationItems;
-    //     const pagination = contentPagination.querySelector(".pagination");
-
-    //     pagination.innerHTML = "";
-    //     const buttonsPaginations = {
-    //         start: 1,
-    //         prev: this.pagination.getCurrentPage() - 1,
-    //         current: this.pagination.getCurrentPage(),
-    //         next: this.pagination.getCurrentPage() + 1,
-    //         end: this.pagination.getTotalPages(),
-    //     };
-
-    //     Object.keys(buttonsPaginations).forEach((key) => {
-    //         if (key === "prev" && buttonsPaginations[key] <= 1) return;
-    //         if (key === "start" && buttonsPaginations[key] === buttonsPaginations.current) return;
-    //         if (key === "end" && buttonsPaginations[key] === buttonsPaginations.current) return;
-    //         if (key === "next" && buttonsPaginations[key] >= this.pagination.getTotalPages()) return;
-
-    //         const jsonElement = {
-    //             element: "li",
-    //             className: key === "current" ? `page-selected ${key}` : key,
-    //             children: key === "current"
-    //                 ? [{ element: "span", textContent: buttonsPaginations[key], attributes: { 'aria-current': 'page' } }]
-    //                 : [{
-    //                     element: "button",
-    //                     textContent: buttonsPaginations[key],
-    //                     attributes: {
-    //                         'aria-label': `Ir a página ${buttonsPaginations[key]}`
-    //                     },
-    //                     event: {
-    //                         click: () => {
-    //                             this.pagination.goToPage(buttonsPaginations[key]);
-    //                             if (this.procesServer) {
-    //                                 this.fetch.body.page = buttonsPaginations[key];
-    //                                 this.draw(this.searchTerm);
-    //                                 return;
-    //                             }
-    //                             this.processPagination()
-    //                         }
-    //                     }
-    //                 }]
-    //         };
-
-    //         const li = createElement(jsonElement);
-    //         pagination.appendChild(li);
-    //     });
-
-    //     const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
-
-    //     this._renderItems(next);
-
-    //     // Nuevo: mostrar resultados después de renderizar
-    //     this.renderer.showResults();
-
-    //     this.events.emit('pageChange', {
-    //         page: this.pagination.getCurrentPage(),
-    //         totalPages: this.pagination.getTotalPages(),
-    //         itemsOnPage: next.length
-    //     });
-    // }
-    /**
      * Registra un listener para un evento.
      * @param {string} eventName - Nombre del evento (ej: "search", "pageChange")
      * @param {Function} callback - Función a ejecutar cuando se emite el evento
@@ -574,7 +494,7 @@ class Search {
     destroy() {
         this.events.emit('destroy', { timestamp: new Date().toISOString() });
 
-        if (this._body?.inputSearch) {
+        if (this.renderer.body.inputSearch) {
             const newInput = this.renderer.body.inputSearch.cloneNode(true);
             this.renderer.body.inputSearch.parentNode.replaceChild(newInput, this.renderer.body.inputSearch);
         }
@@ -582,7 +502,6 @@ class Search {
         // Limpiar eventos del EventEmitter
         this.events.removeAllListeners();
 
-        this._body = null;
         this._data = null;
         this.data = null;
         this.pagination = null;
