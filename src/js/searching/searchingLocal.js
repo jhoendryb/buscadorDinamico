@@ -27,6 +27,8 @@ export const searchingLocal = {
         });
 
         this._data = this.data;
+
+        console.log(this._data, "Quien soy loco");
         return true;
     },
 
