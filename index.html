@@ -30,7 +30,6 @@
 
     <div class="app-search app-search2">
         <search class="input-search">
-            <!-- <label for="filter-search">Filtrar por Busqueda</label> -->
             <input type="text" name="filterSearch" class="filter-search form-control input-lg"
                 placeholder="Ingrese palabra clave...">
         </search>
@@ -111,7 +110,6 @@
 
     <div class="app-search app-search3">
         <search class="input-search">
-            <label for="filter-search">Filtrar por Busqueda</label>
             <input type="text" name="filterSearch" class="filter-search form-control input-lg"
                 placeholder="Ingrese palabra clave...">
         </search>
@@ -218,7 +216,6 @@
             procesServer: true,
             cacheEnabled: true,
             keyboardEnabled: true,
-            infiniteScroll: true,
             template: `<div>{{name}} - {{id_ciudad}}</div>`,
             translation: {
                 searchPlaceholder: 'Escribe la busqueda aqui.'
@@ -244,18 +241,18 @@
         });
 
 
-        const prueba = search1.on('renderItems', (data) => {
-            const { content } = data;
-            const item = content.children;
-            console.log('Page change event:', item[0]);
-            console.log('Item content:', item[0].innerHTML);
-        });
+        // const prueba = search1.on('renderItems', (data) => {
+        //     const { content } = data;
+        //     const item = content.children;
+        //     console.log('Page change event:', item[0]);
+        //     console.log('Item content:', item[0].innerHTML);
+        // });
 
-        console.log("Esto es pruebas", prueba);
+        // console.log("Esto es pruebas", prueba);
 
-        search1.on('itemSelected', (data) => {
-            console.log('Item seleccionado:', data.item);
-        });
+        // search1.on('itemSelected', (data) => {
+        //     console.log('Item seleccionado:', data.item);
+        // });
 
         const search2 = new Search({
             element: '.app-search2',
@@ -362,8 +359,6 @@
         search4.init();
 
         search2.sort('name', 'asc').draw();
-
-        prueba.off().on().off();
 
     </script>
 </body>

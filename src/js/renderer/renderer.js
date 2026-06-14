@@ -398,6 +398,10 @@ export class SearchRenderer {
         const contentPagination = this.body.contentPaginationItems;
         const itemsSearch = this.body.renderItems;
 
+        if (!this.animationTimeouts) {
+            this.animationTimeouts = [];
+        }
+
         if (contentPagination) {
             contentPagination.classList.remove('content-pagination-visible');
             contentPagination.classList.add('content-pagination-hidden');
@@ -407,6 +411,7 @@ export class SearchRenderer {
                     contentPagination.setAttribute('hidden', 'true');
                 }
             }, 200);
+            this.animationTimeouts.push(timeout);
         }
 
         if (itemsSearch) {
@@ -417,6 +422,7 @@ export class SearchRenderer {
                     itemsSearch.setAttribute('hidden', 'true');
                 }
             }, 200);
+            this.animationTimeouts.push(timeout);
         }
     }
 

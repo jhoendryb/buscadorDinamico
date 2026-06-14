@@ -19,12 +19,7 @@ export const searchingServer = {
             this.fetch.body.page = 1;
             this.fetch.body.searchTerm = searchTerm;
 
-            // En modo scroll infinito, limpiar caché del término anterior
-            if (this.infiniteScroll) {
-                this.clearCacheByPrefix(this.searchTerm);
-            } else {
-                this.cache.clear();
-            }
+            this.clearCacheByPrefix(this.searchTerm);
         }
 
         if (this.pagination.getCurrentPage() != this.fetch.body.page) {
@@ -74,7 +69,6 @@ export const searchingServer = {
             this.events.emit('error', error);
         }
 
-        // Llamar a processInfiniteScroll después de obtener datos del servidor
         this.processInfiniteScroll();
 
         return this;

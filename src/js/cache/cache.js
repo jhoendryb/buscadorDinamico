@@ -8,7 +8,7 @@ export class LRUCache {
      * @param {number} maxSize - Tamaño máximo del caché (cantidad de items)
      * @param {number} ttlSeconds - Tiempo de vida en segundos
      */
-    constructor(maxSize, ttlSeconds) {
+    constructor(maxSize = 50, ttlSeconds = 300) {
         this.cache = new Map();
         this.maxSize = maxSize;
         this.ttlSeconds = ttlSeconds;
@@ -40,13 +40,13 @@ export class LRUCache {
     get(key) {
         if (this.cache.has(key)) {
             const item = this.cache.get(key);
-            
+
             // Verificar si expiró
             if (Date.now() > item.expiresAt) {
                 this.cache.delete(key);
                 return undefined;
             }
-            
+
             // Renovar TTL y mover al final (LRU)
             this.cache.delete(key);
             this.cache.set(key, {

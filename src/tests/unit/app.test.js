@@ -1,5 +1,23 @@
 import { Search } from '../../js/app.js';
 
+// Mock de IntersectionObserver para Node.js
+global.IntersectionObserver = class IntersectionObserver {
+    constructor(callback, options) {
+        this.callback = callback;
+        this.options = options;
+    }
+    observe(target) {
+        // Simular que el elemento no es visible para no activar scroll infinito en tests
+        this.callback([{ isIntersecting: false, target }]);
+    }
+    unobserve(target) {
+        // No hacer nada
+    }
+    disconnect() {
+        // No hacer nada
+    }
+};
+
 describe('Search', () => {
     let testElement;
 
@@ -205,6 +223,279 @@ describe('Search', () => {
 
         search.pagination.goToPage(3);
         expect(search.pagination.getCurrentPage()).toBe(3);
+    });
+
+    test('debe limpiar recursos, eventos y DOM al llamar destroy', () => {
+        const search = new Search({
+            element: '.test',
+            data: Array.from({ length: 25 }, (_, i) => ({ id: i, name: `Item ${i}` }))
+        });
+        search.init();
+
+        expect(search._data).toBeDefined();
+        expect(search._data.length).toBe(25);
+        expect(search.renderer).toBeDefined();
+        expect(search.events).toBeDefined();
+
+        const mockCallback = jest.fn();
+        search.on('destroy', mockCallback);
+
+        search.destroy();
+
+        expect(mockCallback).toHaveBeenCalled();
+        expect(search._data).toBeNull();
+        expect(search.data).toBeNull();
+        expect(search.pagination).toBeNull();
+        expect(search.events).toBeNull();
+        expect(search.cache).toBeNull();
+        expect(search.renderer).toBeNull();
+    });
+
+    test('debe reiniciar ordenamiento al llamar clearSort', () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Zebra' }, { name: 'Aardvark' }, { name: 'Moose' }]
+        });
+        search.init();
+        search.sort('name', 'asc');
+
+        expect(search.sortBy).toBe('name');
+        expect(search.sortOrder).toBe('asc');
+
+        const result = search.clearSort();
+
+        expect(search.sortBy).toBeNull();
+        expect(search.sortOrder).toBe('asc');
+        expect(result).toBe(search);
+    });
+
+    test('debe generar clave única para caché', () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Juan' }]
+        });
+
+        const key1 = search.getCacheKey('juan', 1);
+        const key2 = search.getCacheKey('juan', 2);
+        const key3 = search.getCacheKey('maria', 1);
+
+        expect(key1).toBe('juan_1');
+        expect(key2).toBe('juan_2');
+        expect(key3).toBe('maria_1');
+    });
+
+    test('debe limpiar caché por prefijo', () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Juan' }, { name: 'Maria' }],
+            cacheEnabled: true,
+            cacheMaxSize: 10
+        });
+        search.init();
+
+        // EL PRIMER cache.set ES LA PRIMERA CARGA "" (VACIA)
+        search.cache.set('juan_1', [{ name: 'Juan' }]);
+        search.cache.set('juan_2', [{ name: 'Juan' }]);
+        search.cache.set('maria_1', [{ name: 'Maria' }]);
+
+        expect(search.cache.size()).toBe(4);
+
+        const result = search.clearCacheByPrefix('juan');
+
+        // Solo maria_1 y la primera carga vacía
+        expect(search.cache.size()).toBe(2);
+        expect(search.cache.has('maria_1')).toBe(true);
+        expect(result).toBe(search); // Encadenamiento
+    });
+
+    test('debe mostrar indicador de carga', () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Juan' }]
+        });
+        search.init();
+
+        search.showLoading();
+
+        const loadingElement = search.renderer.body.renderItems.querySelector('.search-loading');
+        expect(loadingElement).toBeTruthy();
+        expect(loadingElement.querySelector('.spinner')).toBeTruthy();
+    });
+
+    test('debe configurar navegación por teclado', () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Juan' }, { name: 'Maria' }],
+            keyboardEnabled: true
+        });
+
+        search.setupKeyboardNavigation();
+
+        const content = search.renderer.body.content;
+        expect(content).toBeTruthy();
+    });
+
+    test('debe procesar scroll infinito para primera página', () => {
+        const search = new Search({
+            element: '.test',
+            data: Array.from({ length: 25 }, (_, i) => ({ id: i, name: `Item ${i}` }))
+        });
+        search.init();
+
+        search.pagination.goToPage(1);
+        search.processInfiniteScroll();
+
+        const items = search.renderer.body.renderItems.querySelectorAll('.items');
+        expect(items.length).toBe(10); // itemsPerPage por defecto
+    });
+
+    // EVENTOS
+
+    test('debe emitir evento init al inicializar', async () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Juan' }]
+        });
+
+        const mockCallback = jest.fn();
+        search.on('init', mockCallback);
+
+        await search.init();
+
+        expect(mockCallback).toHaveBeenCalledWith(
+            expect.objectContaining({
+                searchTerm: "",
+                itemsPerPage: 10,
+                procesServer: false
+            })
+        );
+    });
+
+    test('debe emitir evento search al buscar', async () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Juan' }, { name: 'Maria' }]
+        });
+
+        const mockCallback = jest.fn();
+        search.on('search', mockCallback);
+
+        await search.draw('juan', true);
+
+        expect(mockCallback).toHaveBeenCalled();
+    });
+
+    test('debe emitir evento pageChange al cambiar de página', () => {
+        const search = new Search({
+            element: '.test',
+            data: Array.from({ length: 25 }, (_, i) => ({ id: i, name: `Item ${i}` }))
+        });
+        search.init();
+
+        const mockCallback = jest.fn();
+        search.on('pageChange', mockCallback);
+
+        search.processInfiniteScroll();
+
+        expect(mockCallback).toHaveBeenCalledWith(
+            expect.objectContaining({
+                page: 1,
+                totalPages: 3,
+                itemsOnPage: 10
+            })
+        );
+    });
+
+    test('debe emitir evento sortChange al ordenar', () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Zebra' }, { name: 'Aardvark' }]
+        });
+        search.init();
+
+        const mockCallback = jest.fn();
+        search.on('sortChange', mockCallback);
+
+        search.sort('name', 'asc');
+
+        expect(mockCallback).toHaveBeenCalledWith({ field: 'name', order: 'asc' });
+    });
+
+    test('debe emitir evento destroy al destruir', () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Juan' }]
+        });
+        search.init();
+
+        const mockCallback = jest.fn();
+        search.on('destroy', mockCallback);
+
+        search.destroy();
+
+        expect(mockCallback).toHaveBeenCalledWith(
+            expect.objectContaining({
+                timestamp: expect.any(String)
+            })
+        );
+    });
+
+    //-----------------------
+
+    test('debe permitir encadenamiento en draw', async () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Juan' }]
+        });
+
+        const result = await search.draw('juan');
+
+        expect(result).toBe(search);
+    });
+
+    test('debe permitir encadenamiento en on', () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Juan' }]
+        });
+
+        const result = search.on('test', jest.fn());
+
+        expect(result).toBe(search.events);
+    });
+
+    test('debe permitir encadenamiento en showLoading', () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Juan' }]
+        });
+        search.init();
+
+        const result = search.showLoading();
+
+        expect(result).toBe(search);
+    });
+
+    test('debe configurar zIndex correctamente', () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Juan' }],
+            zIndex: 9999
+        });
+
+        expect(search.zIndex).toBe(9999);
+    });
+
+    test('debe configurar sortBy y sortOrder', () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Juan' }],
+            sortBy: 'name',
+            sortOrder: 'desc'
+        });
+
+        expect(search.sortBy).toBe('name');
+        expect(search.sortOrder).toBe('desc');
     });
 
 });

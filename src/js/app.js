@@ -51,10 +51,7 @@ class Search {
         }, this.#getUniqueClassName.bind(this));
         this.cache = new LRUCache(this.cacheMaxSize, this.cacheTtlSeconds);
         this.events = new EventEmitter();
-        this.pagination = new Pagination(
-            this.itemsPerPage,
-            Constants.FIRST_PAGE
-        );
+        this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
         this.pagination.setCountFunction(() => {
             return this.procesServer ? this._ajaxResponse.success.countPage : this._data.length;
         });
@@ -96,12 +93,6 @@ class Search {
         }
 
         Object.assign(this, (this.procesServer ? searchingServer : searchingLocal))
-
-        this.events.emit('init', {
-            searchTerm: this.searchTerm,
-            itemsPerPage: this.itemsPerPage,
-            procesServer: this.procesServer
-        });
     }
     /**
      * Inicializa el componente Search.
@@ -123,6 +114,13 @@ class Search {
         this.setupKeyboardNavigation();
 
         this.draw(this.searchTerm);
+
+        this.events.emit('init', {
+            searchTerm: this.searchTerm,
+            itemsPerPage: this.itemsPerPage,
+            procesServer: this.procesServer
+        });
+
         return this;
     }
     /**
@@ -142,12 +140,16 @@ class Search {
         await this.searching(searchTerm, isEvent);
 
         this.processInfiniteScroll();
+
+        return this;
     }
     /**
      * Procesa la paginación en modo scroll infinito.
      * @returns {void}
      */
     processInfiniteScroll() {
+        if (!this.pagination) return;
+
         const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
 
         // Si es la primera página, renderizar items
@@ -174,7 +176,7 @@ class Search {
         this.renderer.updateCounter(loaded, total);
 
         // Configurar detector de scroll
-        this.setupScrollDetection();
+        this.#setupScrollDetection();
 
         this.events.emit('pageChange', {
             page: this.pagination.getCurrentPage(),
@@ -187,9 +189,14 @@ class Search {
      * Configura el detector de scroll al final del contenedor.
      * @returns {void}
      */
-    setupScrollDetection() {
+    #setupScrollDetection() {
         const container = this.renderer.body.renderItems;
-        if (!container) return;
+        if (!container) return this;
+
+        if (typeof IntersectionObserver === 'undefined') {
+            console.warn('IntersectionObserver no está disponible. Scroll infinito no funcionará en este entorno.');
+            return this;
+        }
 
         // Remover detector anterior si existe
         if (this.scrollObserver) {
@@ -206,7 +213,7 @@ class Search {
         this.scrollObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting && this.pagination.hasMorePages()) {
-                    this.loadMore();
+                    this.#loadMore();
                 }
             });
         }, {
@@ -224,16 +231,18 @@ class Search {
 
         container.appendChild(sentinel);
         this.scrollObserver.observe(sentinel);
+
+        return this;
     }
     /**
      * Carga más items en modo scroll infinito.
      * @returns {Promise<void>}
      */
-    async loadMore() {
+    async #loadMore() {
         if (!this.pagination.hasMorePages()) return;
 
         // Mostrar indicador de carga
-        this.showLoadingMore();
+        this.#showLoadingMore();
 
         const nextPage = this.pagination.loadNextPage();
 
@@ -242,7 +251,7 @@ class Search {
             await this.searching(this.searchTerm, false);
 
             // Reconfigurar detector de scroll para el nuevo contenido
-            this.setupScrollDetection();
+            this.#setupScrollDetection();
         } else {
             // En modo local, usar datos ya cargados
             const next = this.pagination.getPageItems(this._data);
@@ -254,7 +263,7 @@ class Search {
             );
 
             // Reconfigurar detector de scroll para el nuevo contenido
-            this.setupScrollDetection();
+            this.#setupScrollDetection();
         }
 
         // Actualizar contador
@@ -263,7 +272,7 @@ class Search {
         this.renderer.updateCounter(loaded, total);
 
         // Ocultar indicador de carga
-        this.hideLoadingMore();
+        this.#hideLoadingMore();
 
         // Si no hay más páginas, ocultar botón de cargar más
         if (!this.pagination.hasMorePages()) {
@@ -272,38 +281,43 @@ class Search {
                 loadMoreButton.style.display = 'none';
             }
         }
+
+        return this;
     }
     /**
      * Muestra indicador de carga al cargar más items.
      * @returns {void}
      */
-    showLoadingMore() {
+    #showLoadingMore() {
         const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button');
         if (loadMoreButton) {
             loadMoreButton.textContent = 'Cargando...';
             loadMoreButton.disabled = true;
         }
+        return this;
     }
     /**
      * Oculta indicador de carga al cargar más items.
      * @returns {void}
      */
-    hideLoadingMore() {
+    #hideLoadingMore() {
         const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button');
         if (loadMoreButton) {
             loadMoreButton.textContent = 'Cargar más...';
             loadMoreButton.disabled = false;
         }
+        return this;
     }
     /**
      * Limpia el detector de scroll.
      * @returns {void}
      */
-    cleanupScrollDetection() {
+    #cleanupScrollDetection() {
         if (this.scrollObserver) {
             this.scrollObserver.disconnect();
             this.scrollObserver = null;
         }
+        return this;
     }
     /**
      * Genera un nombre de clase CSS único basado en el selector del elemento.
@@ -346,6 +360,8 @@ class Search {
             });
             this.renderer.body.renderItems.innerHTML = loading.outerHTML;
         }
+
+        return this;
     }
     /**
      * Genera una clave única para el caché basada en el término de búsqueda y página.
@@ -379,6 +395,10 @@ class Search {
         this.events.emit('sortChange', { field, order });
         return this;
     }
+    /**
+     * Elimina el orden actual y reinicia a orden natural.
+     * @returns {Search} Instancia actual para encadenamiento
+     */
     clearSort() {
         this.sortBy = null;
         this.sortOrder = 'asc';
@@ -389,6 +409,7 @@ class Search {
         }
 
         this.cache.clear();
+        return this;
     }
     /**
      * Configura la navegación por teclado para el componente.
@@ -414,16 +435,16 @@ class Search {
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
-                this.highlightItem(items);
+                this.#highlightItem(items);
                 this.renderer.showResults();
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
-                this.highlightItem(items);
+                this.#highlightItem(items);
                 this.renderer.showResults();
             } else if (e.key === 'Enter' && this.selectedIndex >= 0) {
                 e.preventDefault();
-                this.selectItem(items[this.selectedIndex]);
+                this.#selectItem(items[this.selectedIndex]);
                 this.renderer.hideResults();
             }
         });
@@ -438,9 +459,9 @@ class Search {
      * @fires Search#itemHighlighted - Se emite cuando se destaca un item
      * 
      * @example
-     * this.highlightItem(items);
+     * this.#highlightItem(items);
      */
-    highlightItem(items) {
+    #highlightItem(items) {
         items.forEach((item, index) => {
             if (index === this.selectedIndex) {
                 item.classList.add('selected');
@@ -459,9 +480,9 @@ class Search {
      * @fires Search#itemSelected - Se emite cuando se selecciona un item
      * 
      * @example
-     * this.selectItem(items[0]);
+     * this.#selectItem(items[0]);
      */
-    selectItem(item) {
+    #selectItem(item) {
         this.events.emit('itemSelected', { item, index: this.selectedIndex });
     }
     /**
@@ -470,7 +491,7 @@ class Search {
      * @returns {void}
      */
     clearCacheByPrefix(searchTerm) {
-        if (!this.cacheEnabled) return;
+        if (!this.cacheEnabled) return this;
 
         // Iterar sobre todas las claves de caché
         for (const key of this.cache.cache.keys()) {
@@ -478,6 +499,8 @@ class Search {
                 this.cache.cache.delete(key);
             }
         }
+
+        return this;
     }
     /**
      * Destruye la instancia de Search, limpiando recursos y event listeners.
@@ -494,19 +517,36 @@ class Search {
     destroy() {
         this.events.emit('destroy', { timestamp: new Date().toISOString() });
 
+        if (this.scrollObserver) {
+            this.scrollObserver.disconnect();
+            this.scrollObserver = null;
+        }
+
+        this.#cleanupScrollDetection();
+
+        if (this.renderer.animationTimeouts) {
+            this.renderer.animationTimeouts.forEach(timeout => clearTimeout(timeout));
+            this.renderer.animationTimeouts = [];
+        }
+
+        if (this.renderer.hideTimeout) {
+            clearTimeout(this.renderer.hideTimeout);
+            this.renderer.hideTimeout = null;
+        }
+
         if (this.renderer.body.inputSearch) {
             const newInput = this.renderer.body.inputSearch.cloneNode(true);
             this.renderer.body.inputSearch.parentNode.replaceChild(newInput, this.renderer.body.inputSearch);
         }
 
-        // Limpiar eventos del EventEmitter
         this.events.removeAllListeners();
 
         this._data = null;
         this.data = null;
+        this.cache = null;
         this.pagination = null;
         this.events = null;
-        this.cache = null;
+        this.renderer = null;
     }
 }
 

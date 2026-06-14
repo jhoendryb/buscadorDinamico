@@ -67,8 +67,13 @@ export class Pagination {
      * @returns {number} Total de items
      */
     getTotalItems() {
+        // Si hay función de conteo, usarla
         if (typeof this.countFn === 'function') {
             return this.countFn();
+        }
+        // Si no, usar la función de dataItems si existe y retornar su longitud
+        else if (typeof this.dataItemsFn === 'function') {
+            return this.dataItemsFn().length;
         }
         return 0;
     }

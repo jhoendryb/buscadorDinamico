@@ -36,7 +36,7 @@ describe('LRUCache', () => {
         cache.set('key2', 'value2');
         cache.set('key3', 'value3');
         cache.set('key4', 'value4'); // Debe eliminar key1 (LRU)
-        
+
         expect(cache.size()).toBe(3);
         expect(cache.has('key1')).toBe(false);
         expect(cache.has('key4')).toBe(true);
@@ -47,10 +47,10 @@ describe('LRUCache', () => {
         cache.set('key1', 'value1');
         cache.set('key2', 'value2');
         cache.set('key3', 'value3');
-        
+
         cache.get('key1'); // key1 ahora es recientemente usado
         cache.set('key4', 'value4'); // Debe eliminar key2 (LRU)
-        
+
         expect(cache.has('key1')).toBe(true);
         expect(cache.has('key2')).toBe(false);
         expect(cache.has('key4')).toBe(true);
@@ -59,10 +59,10 @@ describe('LRUCache', () => {
     test('debe retornar el tamaño correcto', () => {
         const cache = new LRUCache();
         expect(cache.size()).toBe(0);
-        
+
         cache.set('key1', 'value1');
         expect(cache.size()).toBe(1);
-        
+
         cache.set('key2', 'value2');
         cache.set('key3', 'value3');
         expect(cache.size()).toBe(3);
@@ -72,9 +72,9 @@ describe('LRUCache', () => {
         const cache = new LRUCache();
         cache.set('key1', 'value1');
         cache.set('key2', 'value2');
-        
+
         expect(cache.size()).toBe(2);
-        
+
         cache.clear();
         expect(cache.size()).toBe(0);
         expect(cache.has('key1')).toBe(false);
@@ -82,15 +82,34 @@ describe('LRUCache', () => {
 
     test('debe almacenar diferentes tipos de valores', () => {
         const cache = new LRUCache();
-        
+
         cache.set('string', 'valor');
         cache.set('number', 123);
         cache.set('object', { name: 'Juan' });
         cache.set('array', [1, 2, 3]);
-        
+
         expect(cache.get('string')).toBe('valor');
         expect(cache.get('number')).toBe(123);
         expect(cache.get('object')).toEqual({ name: 'Juan' });
         expect(cache.get('array')).toEqual([1, 2, 3]);
     });
+
+    test('debe expirar elementos por TTL', (done) => {
+        const cache = new LRUCache(10, 1); // TTL de 1 segundo
+
+        cache.set('key1', 'value1');
+        expect(cache.get('key1')).toBe('value1');
+
+        setTimeout(() => {
+            expect(cache.get('key1')).toBeUndefined();
+            done();
+        }, 1100);
+    });
+
+    test('debe respetar cacheTtlSeconds en constructor', () => {
+        const cache = new LRUCache(10, 5);
+
+        expect(cache.ttlSeconds).toBe(5);
+    });
+
 });

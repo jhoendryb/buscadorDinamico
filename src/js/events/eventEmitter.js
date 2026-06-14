@@ -22,7 +22,7 @@ export class EventEmitter {
         }
         this.events[eventName].push(callback);
 
-        return { off: () => this.off(eventName, callback) };
+        return this;
     }
 
     /**
@@ -32,11 +32,9 @@ export class EventEmitter {
      * @returns {{on: Function}} Objeto con método on para volver a registrar
      */
     off(eventName, callback) {
-        if (!this.events[eventName]) return;
-        console.log("Mira voy a borrar de:", eventName, callback);
+        if (!this.events[eventName]) return this;
         this.events[eventName] = this.events[eventName].filter(cb => cb !== callback);
-
-        return { on: () => this.on(eventName, callback) };
+        return this;
     }
 
     /**
