@@ -32,7 +32,7 @@ export class SearchRenderer {
      * @returns {HTMLElement} Contenedor de búsqueda
      */
     contentSearch() {
-        if (this.body.contentSearch) return;
+        if (this.body.contentSearch) return this.body.contentSearch;
 
         const element = this.body.content;
         let contentSearch = element.querySelector('.input-search');
@@ -349,9 +349,9 @@ export class SearchRenderer {
     }
 
     /**
- * Muestra el contenedor de resultados.
- * Actualiza aria-expanded y remueve atributo hidden.
- */
+     * Muestra el contenedor de resultados.
+     * Actualiza aria-expanded y remueve atributo hidden.
+     */
     showResults() {
         const contentPagination = this.body.contentPaginationItems;
         const itemsSearch = this.body.renderItems;
@@ -402,11 +402,13 @@ export class SearchRenderer {
             this.animationTimeouts = [];
         }
 
+        let timeout;
+
         if (contentPagination) {
             contentPagination.classList.remove('content-pagination-visible');
             contentPagination.classList.add('content-pagination-hidden');
             // Esperar a que termine la animación antes de ocultar
-            setTimeout(() => {
+            timeout = setTimeout(() => {
                 if (contentPagination.classList.contains('content-pagination-hidden')) {
                     contentPagination.setAttribute('hidden', 'true');
                 }
@@ -417,7 +419,7 @@ export class SearchRenderer {
         if (itemsSearch) {
             itemsSearch.classList.remove('items-search-visible');
             itemsSearch.classList.add('items-search-hidden');
-            setTimeout(() => {
+            timeout = setTimeout(() => {
                 if (itemsSearch.classList.contains('items-search-hidden')) {
                     itemsSearch.setAttribute('hidden', 'true');
                 }

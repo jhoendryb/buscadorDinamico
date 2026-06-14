@@ -96,8 +96,8 @@ describe('SearchRenderer', () => {
         const pagination = renderer.renderPagination();
 
         expect(pagination).toBeTruthy();
-        expect(pagination.className).toContain('index-search');
-        expect(pagination.getAttribute('role')).toBe('navigation');
+        expect(pagination.className).toContain('pagination-items');
+        expect(pagination.getAttribute('role')).toBe('status');
         expect(renderer.body.paginationItems).toBe(pagination);
     });
 
@@ -207,7 +207,7 @@ describe('SearchRenderer', () => {
 
         renderer.updateCounter(10, 25);
 
-        const counter = renderer.body.paginationItems.querySelector('.counter');
+        const counter = renderer.body.paginationItems.querySelector('.items-counter');
         expect(counter.textContent).toContain('10');
         expect(counter.textContent).toContain('25');
     });
@@ -233,7 +233,7 @@ describe('SearchRenderer', () => {
     });
 
     test('debe renderizar en orden SEARCH_CONTENT_ITEMS_PAGINATION', () => {
-        renderer.renderByDom('SEARCH_CONTENT_ITEMS_PAGINATION', {
+        renderer.renderByDom('scip', {
             search: {
                 onInput: jest.fn(),
                 debounceTime: 100
@@ -246,7 +246,7 @@ describe('SearchRenderer', () => {
         expect(renderer.body.paginationItems).toBeTruthy();
 
         // Verificar orden en el DOM
-        const children = renderer.body.contentSearch.children;
+        const children = renderer.body.content.children;
         expect(children[0].className).toContain('input-search');
         expect(children[1].className).toContain('content-pagination-items');
     });
