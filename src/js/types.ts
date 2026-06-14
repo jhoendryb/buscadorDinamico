@@ -48,7 +48,7 @@ export interface SearchParams {
 
 export interface FetchConfig {
     url: string;
-    method?: string;
+    method: string;
     headers?: Record<string, string>;
     body?: Record<string, any>;
     sucess?: (resp: any, instance: any) => void;
@@ -133,7 +133,7 @@ export interface RenderByDomOptions {
 }
 
 // Tipos de eventos
-export interface SearchEventData {
+export interface SearchEventInit {
     searchTerm: string;
     itemsPerPage: number;
     procesServer: boolean;
@@ -173,4 +173,21 @@ export interface RenderItemsEventData {
 export interface AppendItemsEventData {
     items: any[];
     content: HTMLElement;
+}
+
+export interface SearchEventData {
+    searchTerm: string;
+    results: Record<string, any>;
+    totalResults: number;
+    timestamp: string;
+}
+
+export interface CreateElementConfig {
+    element: string | HTMLElement;
+    dataset?: Record<string, string>;
+    children?: CreateElementConfig[];
+    child?: HTMLElement;
+    event?: Record<string, (e: Event) => void>;
+    attributes?: Record<string, string>;
+    [key: string]: any;
 }

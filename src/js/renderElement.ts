@@ -1,3 +1,5 @@
+import * as Types from './types';
+
 /**
  * Crea un elemento HTML con los atributos y opciones especificadas.
  * Función auxiliar para crear elementos DOM de forma declarativa.
@@ -42,16 +44,19 @@
  *     dataset: { id: '123', name: 'Juan' }
  * });
  */
-function createElement({ element, dataset, children, child, event, attributes, ...propertys }) {
+
+function createElement({ element, dataset, children, child, event, attributes, ...propertys }: Types.CreateElementConfig): HTMLElement {
     const specialAttributes = {
         value: ["input", "textarea", "select"],
         selected: ["option"]
     };
 
-    let el = (typeof element == "object" ? element : document.createElement(element));
+    const typeElement = typeof element == "object";
+    let el = (typeElement ? element : document.createElement(element)) as HTMLElement;
 
-    Object.keys(specialAttributes).forEach(key => {
-        if (propertys[key] && specialAttributes[key].includes(element)) {
+    Object.keys(specialAttributes).forEach((key: string) => {
+        const elementName = (typeElement ? (element as HTMLElement).tagName : element).toLowerCase();
+        if (propertys[key] && specialAttributes[key as keyof typeof specialAttributes].includes(elementName)) {
             el.setAttribute(key, propertys[key]);
             delete propertys[key];
         }

@@ -1,8 +1,14 @@
-export default {
+module.exports = {
+    preset: 'ts-jest',
     testEnvironment: 'jsdom',
+    roots: ['<rootDir>/src'],
+    testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
+    moduleFileExtensions: ['ts', 'tsx', 'js'],
     transform: {
-        '^.+\.js$': 'babel-jest'
+        '^.+\\.ts$': 'ts-jest',
     },
-    moduleFileExtensions: ['js', 'json'],
-    testMatch: ['**/tests/**/*.test.js']
+    collectCoverageFrom: [
+        'src/**/*.ts',
+        '!src/**/*.d.ts',
+    ],
 };

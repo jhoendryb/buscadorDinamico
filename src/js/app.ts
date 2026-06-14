@@ -152,7 +152,7 @@ class Search {
             searchTerm: this.searchTerm,
             itemsPerPage: this.itemsPerPage,
             procesServer: this.procesServer
-        });
+        } as Types.SearchEventInit);
 
         return this;
     }
@@ -216,7 +216,7 @@ class Search {
             totalPages: this.pagination.getTotalPages(),
             itemsOnPage: next.length,
             totalLoaded: loaded
-        });
+        } as Types.PageChangeEventData);
     }
     /**
      * Configura el detector de scroll al final del contenedor.
@@ -427,7 +427,7 @@ class Search {
                 return 0;
             });
         }
-        this.events.emit('sortChange', { field, order });
+        this.events.emit('sortChange', { field, order } as Types.SortChangeEventData);
         return this;
     }
     /**
@@ -504,7 +504,7 @@ class Search {
         items.forEach((item, index) => {
             if (index === this.selectedIndex) {
                 item.classList.add('selected');
-                this.events.emit('itemHighlighted', { item, index });
+                this.events.emit('itemHighlighted', { item, index } as Types.ItemHighlightedEventData);
             } else {
                 item.classList.remove('selected');
             }
@@ -522,7 +522,7 @@ class Search {
      * this.#selectItem(items[0]);
      */
     #selectItem(item: Record<string, any>): void {
-        this.events.emit('itemSelected', { item, index: this.selectedIndex });
+        this.events.emit('itemSelected', { item, index: this.selectedIndex } as Types.ItemSelectedEventData);
     }
     /**
      * Destruye la instancia de Search, limpiando recursos y event listeners.
@@ -537,7 +537,7 @@ class Search {
      * search.destroy();
      */
     destroy(): void {
-        this.events.emit('destroy', { timestamp: new Date().toISOString() });
+        this.events.emit('destroy', { timestamp: new Date().toISOString() } as Types.DestroyEventData);
 
         if (this.scrollObserver) {
             this.scrollObserver.disconnect();
