@@ -19,7 +19,9 @@ export const searchingServer = {
             this.fetch.body.page = 1;
             this.fetch.body.searchTerm = searchTerm;
 
-            this.clearCacheByPrefix(this.searchTerm);
+            if (this.cacheEnabled) {
+                this.clearCacheByPrefix(this.searchTerm);
+            }
         }
 
         if (this.pagination.getCurrentPage() != this.fetch.body.page) {

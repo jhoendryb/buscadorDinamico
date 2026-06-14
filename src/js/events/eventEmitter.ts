@@ -3,12 +3,7 @@
  * @class
  */
 export class EventEmitter {
-    /**
-     * Crea una instancia de EventEmitter.
-     */
-    constructor() {
-        this.events = {};
-    }
+    private events: { [key: string]: Function[] } = {};
 
     /**
      * Registra un listener para un evento.
@@ -16,7 +11,7 @@ export class EventEmitter {
      * @param {Function} callback - Función a ejecutar cuando se emite el evento
      * @returns {Function} Función para remover el listener
      */
-    on(eventName, callback) {
+    on(eventName: string, callback: Function): EventEmitter {
         if (!this.events[eventName]) {
             this.events[eventName] = [];
         }
@@ -31,7 +26,7 @@ export class EventEmitter {
      * @param {Function} callback - Función a remover
      * @returns {{on: Function}} Objeto con método on para volver a registrar
      */
-    off(eventName, callback) {
+    off(eventName: string, callback: Function): EventEmitter {
         if (!this.events[eventName]) return this;
         this.events[eventName] = this.events[eventName].filter(cb => cb !== callback);
         return this;
@@ -43,7 +38,7 @@ export class EventEmitter {
      * @param {*} [data] - Datos a pasar a los listeners (opcional)
      * @returns {void}
      */
-    emit(eventName, data) {
+    emit(eventName: string, data?: Object): void {
         if (!this.events[eventName]) return;
         this.events[eventName].forEach(callback => callback(data));
     }
@@ -53,7 +48,7 @@ export class EventEmitter {
      * @param {string} [eventName] - Nombre del evento (si no se proporciona, limpia todos)
      * @returns {void}
      */
-    removeAllListeners(eventName) {
+    removeAllListeners(eventName?: string): void {
         if (eventName) {
             delete this.events[eventName];
         } else {
@@ -66,7 +61,7 @@ export class EventEmitter {
      * @param {string} eventName - Nombre del evento
      * @returns {number} Cantidad de listeners
      */
-    listenerCount(eventName) {
+    listenerCount(eventName: string): number {
         return this.events[eventName] ? this.events[eventName].length : 0;
     }
 }

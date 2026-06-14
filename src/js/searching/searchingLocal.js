@@ -42,7 +42,9 @@ export const searchingLocal = {
     searching(searchTerm, isEvent = false) {
         if (this.searchTerm === searchTerm && searchTerm != "") return this;
 
-        this.clearCacheByPrefix(this.searchTerm);
+        if (this.cacheEnabled) {
+            this.clearCacheByPrefix(this.searchTerm);
+        }
 
         this.pagination.goToPage(1)
 

@@ -1,1 +1,0 @@
-export { SearchRenderer } from './renderer.js';

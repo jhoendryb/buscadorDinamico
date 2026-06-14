@@ -3,12 +3,17 @@
  * @class
  */
 export class Pagination {
+    private currentPage: number;
+    public itemsPerPage: number;
+    private loadedPages: Set<number>;
+    private countFn?: () => number;
+    private dataItemsFn?: () => Object[];
     /**
      * Crea una instancia de Pagination.
      * @param {number} [itemsPerPage=10] - Items por página
      * @param {number} [firstPage=1] - Página inicial
      */
-    constructor(itemsPerPage = 10, firstPage = 1) {
+    constructor(itemsPerPage: number = 10, firstPage: number = 1) {
         this.currentPage = firstPage;
         this.itemsPerPage = itemsPerPage;
         this.loadedPages = new Set([firstPage]); // Rastrear páginas cargadas
@@ -17,7 +22,7 @@ export class Pagination {
      * Carga la siguiente página en modo scroll infinito.
      * @returns {number} Nueva página actual o la misma si no hay más
      */
-    loadNextPage() {
+    loadNextPage(): number {
         const totalPages = this.getTotalPages();
         if (this.currentPage < totalPages) {
             this.currentPage++;
@@ -31,16 +36,15 @@ export class Pagination {
      * Verifica si hay más páginas disponibles.
      * @returns {boolean} True si hay más páginas
      */
-    hasMorePages() {
+    hasMorePages(): boolean {
         return this.currentPage < this.getTotalPages();
     }
 
     /**
      * Obtiene el total de items cargados (todas las páginas).
-     * @param {Array<Object>} [data] - Array completo de datos
      * @returns {number} Total de items cargados
      */
-    getTotalLoaded(data) {
+    getTotalLoaded(): number {
         // En modo scroll infinito, calcular items de todas las páginas cargadas
         const totalItems = this.getTotalItems();
         const loadedItems = Math.min(totalItems, this.currentPage * this.itemsPerPage);
@@ -51,7 +55,7 @@ export class Pagination {
      * @param {Function} countFn - Función que retorna el total de items
      * @returns {void}
      */
-    setCountFunction(countFn) {
+    setCountFunction(countFn: () => number): void {
         this.countFn = countFn;
     }
     /**
@@ -59,14 +63,14 @@ export class Pagination {
      * @param {Function} dataItemsFn - Función que retorna la data actual
      * @returns {void}
      */
-    setDataItemsFunction(dataItemsFn) {
+    setDataItemsFunction(dataItemsFn: () => Record<string, any>[]): void {
         this.dataItemsFn = dataItemsFn;
     }
     /**
      * Obtiene el total de items usando la función de conteo configurada.
      * @returns {number} Total de items
      */
-    getTotalItems() {
+    getTotalItems(): number {
         // Si hay función de conteo, usarla
         if (typeof this.countFn === 'function') {
             return this.countFn();
@@ -81,7 +85,7 @@ export class Pagination {
      * Obtiene el total de páginas calculado a partir del total de items.
      * @returns {number} Total de páginas (mínimo 1)
      */
-    getTotalPages() {
+    getTotalPages(): number {
         const totalItems = this.getTotalItems();
         return Math.ceil(totalItems / this.itemsPerPage) || 1;
     }
@@ -89,7 +93,7 @@ export class Pagination {
      * Avanza a la siguiente página si existe.
      * @returns {number} Nueva página actual
      */
-    nextPage() {
+    nextPage(): number {
         const totalPages = this.getTotalPages();
         if (this.currentPage < totalPages) {
             this.currentPage++;
@@ -100,7 +104,7 @@ export class Pagination {
      * Retrocede a la página anterior si existe.
      * @returns {number} Nueva página actual
      */
-    prevPage() {
+    prevPage(): number {
         if (this.currentPage > 1) {
             this.currentPage--;
         }
@@ -111,7 +115,7 @@ export class Pagination {
      * @param {number} page - Página a ir (debe ser >= 1 y <= totalPages)
      * @returns {number} Nueva página actual
      */
-    goToPage(page) {
+    goToPage(page: number): number {
         const totalPages = this.getTotalPages();
         if (page >= 1 && page <= totalPages) {
             this.currentPage = page;
@@ -122,7 +126,7 @@ export class Pagination {
      * Va a la primera página.
      * @returns {number} Nueva página actual (siempre 1)
      */
-    firstPage() {
+    firstPage(): number {
         this.currentPage = 1;
         return this.currentPage;
     }
@@ -130,7 +134,7 @@ export class Pagination {
      * Va a la última página.
      * @returns {number} Nueva página actual
      */
-    lastPage() {
+    lastPage(): number {
         this.currentPage = this.getTotalPages();
         return this.currentPage;
     }
@@ -139,8 +143,8 @@ export class Pagination {
      * @param {Array<Object>} [data] - Array completo de datos (opcional, usa dataItemsFn si no se proporciona)
      * @returns {Array<Object>} Items de la página actual
      */
-    getPageItems(data) {
-        if (!data) return this.dataItemsFn();
+    getPageItems(data?: Record<string, any>[] | null): Record<string, any>[] {
+        if (!data) return this.dataItemsFn ? this.dataItemsFn() : [];
         const start = (this.currentPage - 1) * this.itemsPerPage;
         const end = this.currentPage * this.itemsPerPage;
         return data.slice(start, end);
@@ -149,7 +153,7 @@ export class Pagination {
      * Obtiene la página actual.
      * @returns {number} Página actual
      */
-    getCurrentPage() {
+    getCurrentPage(): number {
         return this.currentPage;
     }
     /**
@@ -157,7 +161,7 @@ export class Pagination {
      * @param {number} itemsPerPage - Items por página
      * @returns {void}
      */
-    setItemsPerPage(itemsPerPage) {
+    setItemsPerPage(itemsPerPage: number): void {
         this.itemsPerPage = itemsPerPage;
         // Recalcular página actual si es necesario
         const totalPages = this.getTotalPages();

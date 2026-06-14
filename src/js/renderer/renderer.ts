@@ -1,5 +1,6 @@
-import { createElement } from '../renderElement.js';
-import * as Types from '../types.js';
+import { createElement } from '../renderElement.ts';
+import { EventEmitter } from '../events/eventEmitter.ts';
+import * as Types from '../types.ts';
 
 /**
  * Clase helper para crear la estructura DOM inicial de los componentes.
@@ -7,23 +8,29 @@ import * as Types from '../types.js';
  * @class
  */
 export class SearchRenderer {
+    public body: Types.BodyConfig;
+    private uniqueClassNameFn: (baseClass: string) => string;
+    public isVisible: boolean;
+    public hideTimeout: ReturnType<typeof setTimeout> | null;
+    public animationTimeouts: ReturnType<typeof setTimeout>[];
     /**
      * Crea una instancia de SearchRenderer.
      * @param {Types.BodyConfig} body - Objeto con referencias a elementos del DOM
      * @param {Function} uniqueClassNameFn - Función para generar nombres de clase únicos
      */
-    constructor(body, uniqueClassNameFn) {
+    constructor(body: Types.BodyConfig, uniqueClassNameFn: (baseClass: string) => string) {
         this.body = body;
         this.uniqueClassNameFn = uniqueClassNameFn;
         this.isVisible = false; // Nuevo: estado de visibilidad
         this.hideTimeout = null; // Nuevo: timeout para delay al ocultar
+        this.animationTimeouts = [];
     }
     /**
      * Genera un nombre de clase único usando la función proporcionada.
      * @param {string} baseClass - Clase base (ej: "input-search")
      * @returns {string} Nombre de clase único
      */
-    getUniqueClassName(baseClass) {
+    getUniqueClassName(baseClass: string): string {
         return this.uniqueClassNameFn(baseClass);
     }
     /**
@@ -31,11 +38,11 @@ export class SearchRenderer {
      * NO crea el input con debounce, eso lo hace renderSearch().
      * @returns {HTMLElement} Contenedor de búsqueda
      */
-    contentSearch() {
+    contentSearch(): HTMLElement {
         if (this.body.contentSearch) return this.body.contentSearch;
 
         const element = this.body.content;
-        let contentSearch = element.querySelector('.input-search');
+        let contentSearch = element.querySelector('.input-search') as HTMLElement;
 
         if (!contentSearch) {
             contentSearch = createElement({
@@ -65,12 +72,12 @@ export class SearchRenderer {
      * @param {string} options.ariaLabel - Label ARIA para accesibilidad
      * @returns {HTMLElement} Input de búsqueda
      */
-    renderSearch({ onInput, debounceTime, placeholder, ariaLabel }) {
-        if (this.body.inputSearch) return;
+    renderSearch({ onInput, debounceTime, placeholder, ariaLabel }: Types.RenderSearchOptions): HTMLElement {
+        if (this.body.inputSearch) return this.body.inputSearch;
 
         const element = this.body.contentSearch;
-        let inputSearch = element.querySelector('.filter-search');
-        let timeOut;
+        let inputSearch = element?.querySelector('.filter-search') as HTMLElement;
+        let timeOut: any;
 
         let jsonInput = {
             element: inputSearch,
@@ -82,15 +89,15 @@ export class SearchRenderer {
                 "role": "combobox"
             },
             event: {
-                input: (e) => {
-                    const searchTerm = e.target.value.trim().toLowerCase();
+                input: (e: Event) => {
+                    const searchTerm = (e.target as HTMLInputElement).value.trim().toLowerCase();
                     clearTimeout(timeOut);
                     timeOut = setTimeout(() => {
                         if (onInput) onInput(searchTerm, e instanceof Event);
                     }, debounceTime);
                 },
                 focus: () => {
-                    const count = this.body.renderItems.querySelectorAll(".items").length;
+                    const count = this.body.renderItems?.querySelectorAll(".items").length || 0;
                     if (count > 0) this.showResults();
                 },
                 blur: () => {
@@ -108,7 +115,7 @@ export class SearchRenderer {
         inputSearch = createElement(jsonInput);
         inputSearch.setAttribute('aria-controls', this.getUniqueClassName('items-search'));
 
-        if (jsonInput.element === "input") element.appendChild(inputSearch);
+        if (jsonInput.element === "input" && element) element.appendChild(inputSearch);
 
         this.body.inputSearch = inputSearch;
         return inputSearch;
@@ -117,8 +124,8 @@ export class SearchRenderer {
      * Renderiza el contenedor donde se mostrarán los resultados de búsqueda.
      * @returns {HTMLElement} Contenedor de items
      */
-    renderItems(zIndex) {
-        if (this.body.renderItems) return;
+    renderItems(zIndex: number = 999): HTMLElement {
+        if (this.body.renderItems) return this.body.renderItems;
 
         // Requerir contenedor padre
         if (!this.body.contentPaginationItems) {
@@ -126,9 +133,9 @@ export class SearchRenderer {
         }
 
         const element = this.body.contentPaginationItems;
-        let renderItems = element.querySelector('.items-search');
+        let renderItems = element?.querySelector('.items-search') as HTMLElement;
 
-        if (!renderItems) {
+        if (!renderItems && element) {
             renderItems = createElement({
                 element: "ul",
                 id: this.getUniqueClassName('items-search'),
@@ -152,15 +159,15 @@ export class SearchRenderer {
      * Renderiza el contenedor de paginación.
      * @returns {HTMLElement} Contenedor de paginación
      */
-    renderPagination() {
+    renderPagination(): HTMLElement {
         if (!this.body.contentPaginationItems) {
             this.renderContentPaginationItems();
         }
 
         const element = this.body.contentPaginationItems;
-        let paginationItems = element.querySelector('.pagination-items');
+        let paginationItems = element?.querySelector('.pagination-items') as HTMLElement;
 
-        if (!paginationItems) {
+        if (!paginationItems && element) {
             paginationItems = createElement({
                 element: "div",
                 className: "pagination-items",
@@ -176,9 +183,9 @@ export class SearchRenderer {
 
     /**
      * Renderiza el contador de registros.
-     * @returns {HTMLElement} Contador de registros
+     * @returns {object} Contador de registros
      */
-    renderCounter() {
+    renderCounter(): object {
         return {
             element: "div",
             className: "items-counter",
@@ -193,7 +200,7 @@ export class SearchRenderer {
      * @param {EventEmitter} events - Instancia de EventEmitter
      * @returns {void}
      */
-    appendItems(data, template, noResults, events) {
+    appendItems(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter) {
         const container = this.body.renderItems;
         if (!container) return;
 
@@ -244,7 +251,7 @@ export class SearchRenderer {
      * @param {number} total - Total de items
      * @returns {void}
      */
-    updateCounter(loaded, total) {
+    updateCounter(loaded: number, total: number): void {
         const counter = this.body.paginationItems?.querySelector('.items-counter');
         if (counter) {
             counter.textContent = `${loaded} de ${total}`;
@@ -258,11 +265,11 @@ export class SearchRenderer {
      * @param {boolean} options.infiniteScroll - Si debe usar scroll infinito
      * @returns {void}
      */
-    renderByDom(domString, options = {}) {
+    renderByDom(domString: string, options: Record<string, any>): void {
         const content = this.body.content;
         content.innerHTML = '';
 
-        const domMap = {
+        const domMap: Record<string, () => void> = {
             's': () => {
                 this.contentSearch();
                 this.renderSearch(options.search || {});
@@ -287,23 +294,23 @@ export class SearchRenderer {
      * @param {string|Function} template - Template personalizado (string o función)
      * @param {string} noResults - Mensaje cuando no hay resultados
      * @param {EventEmitter} events - Instancia de EventEmitter para emitir eventos
-     * @returns {boolean|void} Retorna false si no hay contenedor, void en caso contrario
+     * @returns {boolean} Retorna false si no hay contenedor, true en caso contrario
      */
-    renderItemsContent(data, template, noResults, events, pagination) {
+    renderItemsContent(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter): boolean {
         const container = this.body.renderItems;
 
         if (!container) return false;
 
         container.innerHTML = '';
 
-        const jsonItem = {
+        const jsonItem: Record<string, any> = {
             element: "li",
             className: "items",
             tabindex: '0',
             attributes: { 'role': 'option' },
             event: {
                 // Nuevo: mantener visible al hacer clic
-                mousedown: (e) => {
+                mousedown: (e: MouseEvent) => {
                     e.preventDefault(); // Evitar blur inmediato
                     this.isVisible = true; // Mantener estado visible
                 }
@@ -316,12 +323,12 @@ export class SearchRenderer {
 
             // Ocultar si no hay resultados
             // this.hideResults();
-            return;
+            return false;
         }
 
         data.forEach(item => {
             if (template) {
-                let templateStr = template;
+                let templateStr: any = template;
                 if (typeof template === 'function') {
                     jsonItem.innerHTML = template(item);
                 } else if (typeof template === 'string') {
@@ -346,13 +353,15 @@ export class SearchRenderer {
             items: data,
             content: container
         });
+
+        return true;
     }
 
     /**
      * Muestra el contenedor de resultados.
      * Actualiza aria-expanded y remueve atributo hidden.
      */
-    showResults() {
+    showResults(): void {
         const contentPagination = this.body.contentPaginationItems;
         const itemsSearch = this.body.renderItems;
 
@@ -383,7 +392,7 @@ export class SearchRenderer {
      * Oculta el contenedor de resultados con delay.
      * Permite que el usuario haga clic en un resultado antes de ocultar.
      */
-    hideResultsWithDelay() {
+    hideResultsWithDelay(): void {
         // Delay de 200ms para permitir clic en resultados
         this.hideTimeout = setTimeout(() => {
             this.hideResults();
@@ -394,13 +403,9 @@ export class SearchRenderer {
      * Oculta el contenedor de resultados inmediatamente.
      * Actualiza aria-expanded y agrega atributo hidden.
      */
-    hideResults() {
+    hideResults(): void {
         const contentPagination = this.body.contentPaginationItems;
         const itemsSearch = this.body.renderItems;
-
-        if (!this.animationTimeouts) {
-            this.animationTimeouts = [];
-        }
 
         let timeout;
 
@@ -433,7 +438,7 @@ export class SearchRenderer {
     /**
      * Toggle de visibilidad de resultados.
      */
-    toggleResults() {
+    toggleResults(): void {
         if (this.isVisible) {
             this.hideResults();
         } else {
@@ -445,11 +450,11 @@ export class SearchRenderer {
      * Renderiza el contenedor padre que envuelve items-search y pagination-items.
      * @returns {HTMLElement} Contenedor padre content-pagination-items
      */
-    renderContentPaginationItems() {
-        if (this.body.contentPaginationItems) return;
+    renderContentPaginationItems(): HTMLElement {
+        if (this.body.contentPaginationItems) return this.body.contentPaginationItems;
 
         const element = this.body.content;
-        let contentPaginationItems = element.querySelector('.content-pagination-items');
+        let contentPaginationItems = element.querySelector('.content-pagination-items') as HTMLElement;
 
         if (!contentPaginationItems) {
             contentPaginationItems = createElement({

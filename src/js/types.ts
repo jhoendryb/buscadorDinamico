@@ -16,6 +16,25 @@
  * @property {string|Function} [template] - Template personalizado
  * @property {Object} [translation] - Traducciones personalizadas
  */
+export interface SearchParams {
+    element: string;
+    searchTerm?: string;
+    data?: Object[];
+    procesServer?: boolean;
+    keyboardEnabled?: boolean;
+    cacheEnabled?: boolean;
+    template?: string | ((item: any) => string);
+    sortBy?: string;
+    zIndex?: number;
+    sortOrder?: 'asc' | 'desc';
+    itemsPerPage?: number;
+    debounceTime?: number;
+    cacheMaxSize?: number;
+    cacheTtlSeconds?: number;
+    dom?: string;
+    fetch?: FetchConfig;
+    translation?: TranslationCache;
+}
 
 /**
  * @typedef {Object} FetchConfig
@@ -27,13 +46,27 @@
  * @property {Function} [error] - Callback de error
  */
 
+export interface FetchConfig {
+    url: string;
+    method?: string;
+    headers?: Record<string, string>;
+    body?: Record<string, any>;
+    sucess?: (resp: any, instance: any) => void;
+    error?: (err: any) => void;
+}
+
 /**
  * @typedef {Object} TranslationConfig
- * @property {string} [searchLabel] - Etiqueta del input
  * @property {string} [searchPlaceholder] - Placeholder del input
  * @property {string} [noResults] - Mensaje sin resultados
  * @property {string} [loading] - Mensaje de carga
  */
+export interface TranslationCache {
+    searchPlaceholder?: string;
+    loading?: string;
+    noResults?: string;
+    [key: string]: string | undefined;
+}
 
 /**
  * @typedef {Object} PaginationConfig
@@ -50,6 +83,14 @@
  * @property {HTMLElement} [renderItems] - Contenedor de items
  * @property {HTMLElement} [paginationItems] - Contenedor de paginación
  */
+export interface BodyConfig {
+    content: HTMLElement;
+    contentSearch?: HTMLElement;
+    inputSearch?: HTMLElement;
+    renderItems?: HTMLElement;
+    paginationItems?: HTMLElement;
+    contentPaginationItems?: HTMLElement;
+}
 
 /**
  * @typedef {Object} CacheItem
@@ -79,19 +120,57 @@
  * @property {number} page - Página actual
  */
 
-/**
- * @typedef {Object} SearchParams
- * @property {string} element - Selector del elemento contenedor (requerido)
- * @property {Array<Object>} [data] - Datos para búsqueda local
- * @property {boolean} [procesServer=false] - Si es true, usa búsqueda en servidor
- * @property {number} [itemsPerPage=10] - Items por página
- * @property {Types.FetchConfig} [fetch] - Configuración de petición AJAX
- * @property {number} [debounceTime=500] - Tiempo de debounce en ms
- * @property {string} [dom='sip'] - Orden de renderizado (s=search, i=items, p=pagination)
- * @property {string|Function} [template] - Template personalizado para items
- * @property {boolean} [cacheEnabled=false] - Si habilita caché LRU
- * @property {number} [cacheMaxSize=50] - Tamaño máximo de caché
- * @property {number} [cacheTtl=50] - Tiempo de vida de caché en segundos
- * @property {boolean} [infiniteScroll=false] - Si usa scroll infinito en lugar de botones
- * @property {Types.TranslationConfig} [translation] - Configuración de traducciones
- */
+export interface RenderSearchOptions {
+    onInput: (searchTerm: string, isEvent: boolean) => void;
+    debounceTime: number;
+    placeholder?: string;
+    ariaLabel?: string;
+}
+
+export interface RenderByDomOptions {
+    zIndex?: number;
+    search?: RenderSearchOptions;
+}
+
+// Tipos de eventos
+export interface SearchEventData {
+    searchTerm: string;
+    itemsPerPage: number;
+    procesServer: boolean;
+}
+
+export interface PageChangeEventData {
+    page: number;
+    totalPages: number;
+    itemsOnPage: number;
+    totalLoaded: number;
+}
+
+export interface SortChangeEventData {
+    field: string;
+    order: 'asc' | 'desc';
+}
+
+export interface ItemSelectedEventData {
+    item: HTMLElement;
+    index: number;
+}
+
+export interface ItemHighlightedEventData {
+    item: HTMLElement;
+    index: number;
+}
+
+export interface DestroyEventData {
+    timestamp: string;
+}
+
+export interface RenderItemsEventData {
+    items: any[];
+    content: HTMLElement;
+}
+
+export interface AppendItemsEventData {
+    items: any[];
+    content: HTMLElement;
+}

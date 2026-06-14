@@ -300,7 +300,7 @@ describe('Search', () => {
 
         expect(search.cache.size()).toBe(4);
 
-        const result = search.clearCacheByPrefix('juan');
+        const result = search.cache.clearCacheByPrefix('juan');
 
         // Solo maria_1 y la primera carga vacía
         expect(search.cache.size()).toBe(2);

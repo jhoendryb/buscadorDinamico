@@ -11,21 +11,49 @@ import {
 } from './index.js';
 
 class Search {
+    // Declaraciones de propiedades
+    element: string;
+    searchTerm: string;
+    data: Record<string, any>[];
+    _data: Record<string, any>[] | null;
+    procesServer: boolean;
+    keyboardEnabled: boolean;
+    cacheEnabled: boolean;
+    template: string | Function | null;
+    sortBy: string | null;
+    zIndex: number;
+    sortOrder: 'asc' | 'desc';
+    itemsPerPage: number;
+    debounceTime: number;
+    cacheMaxSize: number;
+    cacheTtlSeconds: number;
+    dom: string;
+    selectedIndex: number;
+    _ajaxResponse: Record<string, any>;
+    renderer: any;
+    cache: any;
+    events: any;
+    pagination: any;
+    scrollObserver: IntersectionObserver | null;
+    t: Types.TranslationCache;
+    fetch?: Types.FetchConfig;
+    isExtractData?: () => void | undefined;
+    searching: (searchTerm: string, isEvent: boolean) => Promise<void> = async () => { };
     /**
      * Instancia que almacena las traducciones predeterminadas.
      * @type {Types.TranslationCache}
      */
-    static #defaultTranslations = Constants.DEFAULT_TRANSLATIONS;
+    static #defaultTranslations: Types.TranslationCache = Constants.DEFAULT_TRANSLATIONS;
     /**
      * Crea una instancia de Search.
      * @param {Types.SearchParams} params - Parámetros de configuración
      */
-    constructor(params) {
+    constructor(params: Types.SearchParams) {
         const { translation, ...newParams } = params;
 
+        this.element = undefined as unknown as string;
         this.searchTerm = "";
         this.data = [];
-        this._ajaxResponse = {};
         this.procesServer = false;
         this.keyboardEnabled = false;
         this.cacheEnabled = false;
@@ -37,13 +65,16 @@ class Search {
         this.debounceTime = Constants.DEFAULT_DEBOUNCE_TIME;
         this.cacheMaxSize = Constants.DEFAULT_CACHE_MAX_SIZE;
         this.cacheTtlSeconds = Constants.DEFAULT_CACHE_TTL;
-        this.selectedIndex = Constants.NO_SELECTION;
         this.dom = Constants.DOM_ORDERS.SEARCH_CONTENT_ITEMS_PAGINATION;
+        this.selectedIndex = Constants.NO_SELECTION;
 
         Object.assign(this, newParams);
 
+        this.scrollObserver = null;
+        this._ajaxResponse = {};
+
         this.renderer = new SearchRenderer({
-            content: document.querySelector(this.element), // ".input-search" - contenedor que contiene la app Search
+            content: document.querySelector(this.element) as HTMLElement, // ".input-search" - contenedor que contiene la app Search
             contentSearch: undefined, // ".app-search" - contenedor del Search
             inputSearch: undefined, // "#filter-search" - input donde se escribe la búsqueda
             renderItems: undefined, // ".items-search" - elemento donde se muestran los items
@@ -53,10 +84,10 @@ class Search {
         this.events = new EventEmitter();
         this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
         this.pagination.setCountFunction(() => {
-            return this.procesServer ? this._ajaxResponse.success.countPage : this._data.length;
+            return this.procesServer ? this._ajaxResponse.success.countPage : this._data?.length;
         });
-        this.pagination.setDataItemsFunction(() => {
-            return this._data;
+        this.pagination.setDataItemsFunction((): Record<string, any>[] => {
+            return this._data || [];
         });
 
         this.t = { ...Search.#defaultTranslations, ...translation };
@@ -98,18 +129,20 @@ class Search {
      * Inicializa el componente Search.
      * @returns {Search} Instancia para encadenamiento
      */
-    init() {
-        if (!this.procesServer) this.isExtractData();
+    init(): Search {
+        if (!this.procesServer && typeof this.isExtractData === 'function') {
+            this.isExtractData();
+        }
 
         this.renderer.renderByDom(this.dom, {
             zIndex: this.zIndex,
             search: {
-                onInput: (searchTerm, isEvent) => this.draw(searchTerm, isEvent),
+                onInput: (searchTerm: string, isEvent: boolean) => this.draw(searchTerm, isEvent),
                 debounceTime: this.debounceTime,
                 placeholder: this.t.searchPlaceholder,
                 ariaLabel: this.t.searchLabel
             }
-        });
+        } as Types.RenderByDomOptions);
 
         this.setupKeyboardNavigation();
 
@@ -129,7 +162,7 @@ class Search {
      * @param {boolean} [isEvent=false] - Si fue iniciado por evento del usuario
      * @returns {Promise<void>} Promesa que se resuelve cuando termina el renderizado
      */
-    async draw(searchTerm = this.searchTerm, isEvent = false) {
+    async draw(searchTerm: string = this.searchTerm, isEvent: boolean = false): Promise<Search> {
         // Resetear scroll si cambia el término de búsqueda
         if (searchTerm !== this.searchTerm && this.renderer.body.renderItems) {
             this.renderer.body.renderItems.scrollTop = 0;
@@ -147,7 +180,7 @@ class Search {
      * Procesa la paginación en modo scroll infinito.
      * @returns {void}
      */
-    processInfiniteScroll() {
+    processInfiniteScroll(): void {
         if (!this.pagination) return;
 
         const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
@@ -171,7 +204,7 @@ class Search {
         }
 
         // Actualizar contador
-        const loaded = this.pagination.getTotalLoaded(this.procesServer ? null : this._data);
+        const loaded = this.pagination.getTotalLoaded();
         const total = this.pagination.getTotalItems();
         this.renderer.updateCounter(loaded, total);
 
@@ -187,9 +220,9 @@ class Search {
     }
     /**
      * Configura el detector de scroll al final del contenedor.
-     * @returns {void}
+     * @returns {Search} Instancia actual para encadenamiento
      */
-    #setupScrollDetection() {
+    #setupScrollDetection(): Search {
         const container = this.renderer.body.renderItems;
         if (!container) return this;
 
@@ -236,10 +269,10 @@ class Search {
     }
     /**
      * Carga más items en modo scroll infinito.
-     * @returns {Promise<void>}
+     * @returns {Promise<Search>} Instancia actual para encadenamiento
      */
-    async #loadMore() {
-        if (!this.pagination.hasMorePages()) return;
+    async #loadMore(): Promise<Search> {
+        if (!this.pagination.hasMorePages()) return this;
 
         // Mostrar indicador de carga
         this.#showLoadingMore();
@@ -247,7 +280,9 @@ class Search {
         const nextPage = this.pagination.loadNextPage();
 
         if (this.procesServer) {
-            this.fetch.body.page = nextPage;
+            if (this.fetch?.body) {
+                this.fetch.body.page = nextPage;
+            }
             await this.searching(this.searchTerm, false);
 
             // Reconfigurar detector de scroll para el nuevo contenido
@@ -267,7 +302,7 @@ class Search {
         }
 
         // Actualizar contador
-        const loaded = this.pagination.getTotalLoaded(this.procesServer ? null : this._data);
+        const loaded = this.pagination.getTotalLoaded();
         const total = this.pagination.getTotalItems();
         this.renderer.updateCounter(loaded, total);
 
@@ -276,7 +311,7 @@ class Search {
 
         // Si no hay más páginas, ocultar botón de cargar más
         if (!this.pagination.hasMorePages()) {
-            const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button');
+            const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button') as HTMLButtonElement;
             if (loadMoreButton) {
                 loadMoreButton.style.display = 'none';
             }
@@ -288,8 +323,8 @@ class Search {
      * Muestra indicador de carga al cargar más items.
      * @returns {void}
      */
-    #showLoadingMore() {
-        const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button');
+    #showLoadingMore(): Search {
+        const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button') as HTMLButtonElement;
         if (loadMoreButton) {
             loadMoreButton.textContent = 'Cargando...';
             loadMoreButton.disabled = true;
@@ -300,8 +335,8 @@ class Search {
      * Oculta indicador de carga al cargar más items.
      * @returns {void}
      */
-    #hideLoadingMore() {
-        const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button');
+    #hideLoadingMore(): Search {
+        const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button') as HTMLButtonElement;
         if (loadMoreButton) {
             loadMoreButton.textContent = 'Cargar más...';
             loadMoreButton.disabled = false;
@@ -312,7 +347,7 @@ class Search {
      * Limpia el detector de scroll.
      * @returns {void}
      */
-    #cleanupScrollDetection() {
+    #cleanupScrollDetection(): Search {
         if (this.scrollObserver) {
             this.scrollObserver.disconnect();
             this.scrollObserver = null;
@@ -325,7 +360,7 @@ class Search {
      * @returns {string} Nombre de clase único (ej: "input-search-mi-buscador")
      * @private
      */
-    #getUniqueClassName(baseClass) {
+    #getUniqueClassName(baseClass: string): string {
         const parentSelector = this.element.replace(/^\.|^\#/, '');
         return `${baseClass}-${parentSelector}`;
     }
@@ -335,14 +370,14 @@ class Search {
      * @param {Function} callback - Función a ejecutar cuando se emite el evento
      * @returns {{off: Function}} Objeto con método off para remover el listener
      */
-    on(eventName, callback) {
+    on(eventName: string, callback: Function): EventEmitter {
         return this.events.on(eventName, callback);
     }
     /**
      * Muestra el indicador de carga.
      * @returns {void}
      */
-    showLoading() {
+    showLoading(): Search {
         if (this.renderer.body.renderItems) {
             const loading = createElement({
                 element: "div",
@@ -369,7 +404,7 @@ class Search {
      * @param {number} page - Página actual
      * @returns {string} Clave única para el caché
      */
-    getCacheKey(searchTerm, page) {
+    getCacheKey(searchTerm: string, page: number): string {
         return `${searchTerm}_${page}`;
     }
     /**
@@ -378,13 +413,13 @@ class Search {
      * @param {'asc'|'desc'} [order='asc'] - Orden de ordenamiento
      * @returns {void}
      */
-    sort(field, order = 'asc') {
+    sort(field: string, order: 'asc' | 'desc' = 'asc'): Search {
         this.sortBy = field;
         this.sortOrder = order;
         if (this.procesServer) {
             this.draw(this.searchTerm, true);
         } else {
-            this._data.sort((a, b) => {
+            this._data?.sort((a, b) => {
                 const valA = a[field];
                 const valB = b[field];
                 if (valA < valB) return order === 'asc' ? Constants.SORT_ASC : Constants.SORT_DESC;
@@ -399,13 +434,15 @@ class Search {
      * Elimina el orden actual y reinicia a orden natural.
      * @returns {Search} Instancia actual para encadenamiento
      */
-    clearSort() {
+    clearSort(): Search {
         this.sortBy = null;
         this.sortOrder = 'asc';
 
         if (this.procesServer) {
-            this.fetch.body.sortBy = null;
-            this.fetch.body.sortOrder = 'asc';
+            if (this.fetch?.body) {
+                this.fetch.body.sortBy = null;
+                this.fetch.body.sortOrder = 'asc';
+            }
         }
 
         this.cache.clear();
@@ -421,17 +458,17 @@ class Search {
      * Requiere que keyboardEnabled sea true.
      * 
      * @public
-     * @returns {void}
+     * @returns {Search} Instancia actual para encadenamiento
      */
-    setupKeyboardNavigation() {
-        if (!this.keyboardEnabled) return;
+    setupKeyboardNavigation(): Search {
+        if (!this.keyboardEnabled) return this;
 
         const content = this.renderer.body.content;
-        content.addEventListener('keydown', (e) => {
+        content.addEventListener('keydown', (e: KeyboardEvent) => {
             const contentItems = this.renderer.body.renderItems;
             if (!contentItems) return;
 
-            const items = contentItems.querySelectorAll('.items');
+            const items = contentItems.querySelectorAll('.items') as any;
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
@@ -448,6 +485,8 @@ class Search {
                 this.renderer.hideResults();
             }
         });
+
+        return this;
     }
     /**
      * Destaca el item seleccionado agregando la clase 'selected'.
@@ -461,7 +500,7 @@ class Search {
      * @example
      * this.#highlightItem(items);
      */
-    #highlightItem(items) {
+    #highlightItem(items: Record<string, any>[]): void {
         items.forEach((item, index) => {
             if (index === this.selectedIndex) {
                 item.classList.add('selected');
@@ -482,25 +521,8 @@ class Search {
      * @example
      * this.#selectItem(items[0]);
      */
-    #selectItem(item) {
+    #selectItem(item: Record<string, any>): void {
         this.events.emit('itemSelected', { item, index: this.selectedIndex });
-    }
-    /**
-     * Limpia la caché por prefijo de término de búsqueda.
-     * @param {string} searchTerm - Término de búsqueda a limpiar
-     * @returns {void}
-     */
-    clearCacheByPrefix(searchTerm) {
-        if (!this.cacheEnabled) return this;
-
-        // Iterar sobre todas las claves de caché
-        for (const key of this.cache.cache.keys()) {
-            if (key.startsWith(searchTerm)) {
-                this.cache.cache.delete(key);
-            }
-        }
-
-        return this;
     }
     /**
      * Destruye la instancia de Search, limpiando recursos y event listeners.
@@ -514,7 +536,7 @@ class Search {
      * @example
      * search.destroy();
      */
-    destroy() {
+    destroy(): void {
         this.events.emit('destroy', { timestamp: new Date().toISOString() });
 
         if (this.scrollObserver) {
@@ -525,7 +547,7 @@ class Search {
         this.#cleanupScrollDetection();
 
         if (this.renderer.animationTimeouts) {
-            this.renderer.animationTimeouts.forEach(timeout => clearTimeout(timeout));
+            this.renderer.animationTimeouts.forEach((timeout: any) => clearTimeout(timeout));
             this.renderer.animationTimeouts = [];
         }
 
@@ -536,13 +558,15 @@ class Search {
 
         if (this.renderer.body.inputSearch) {
             const newInput = this.renderer.body.inputSearch.cloneNode(true);
-            this.renderer.body.inputSearch.parentNode.replaceChild(newInput, this.renderer.body.inputSearch);
+            if (this.renderer.body.inputSearch.parentNode) {
+                this.renderer.body.inputSearch.parentNode.replaceChild(newInput, this.renderer.body.inputSearch);
+            }
         }
 
         this.events.removeAllListeners();
 
         this._data = null;
-        this.data = null;
+        this.data = [];
         this.cache = null;
         this.pagination = null;
         this.events = null;
