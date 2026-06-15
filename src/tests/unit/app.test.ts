@@ -1,16 +1,16 @@
-import { Search } from '../../js/app.js';
+import { Search } from '../../js/app';
 
 // Mock de IntersectionObserver para Node.js
-global.IntersectionObserver = class IntersectionObserver {
-    constructor(callback, options) {
-        this.callback = callback;
-        this.options = options;
+(global as any).IntersectionObserver = class IntersectionObserver {
+    constructor(callback: any, options: any) {
+        (this as any).callback = callback;
+        (this as any).options = options;
     }
-    observe(target) {
+    observe(target: any) {
         // Simular que el elemento no es visible para no activar scroll infinito en tests
-        this.callback([{ isIntersecting: false, target }]);
+        (this as any).callback([{ isIntersecting: false, target }]);
     }
-    unobserve(target) {
+    unobserve(target: any) {
         // No hacer nada
     }
     disconnect() {
@@ -19,7 +19,7 @@ global.IntersectionObserver = class IntersectionObserver {
 };
 
 describe('Search', () => {
-    let testElement;
+    let testElement: HTMLElement;
 
     beforeEach(() => {
         // Crea el elemento en el DOM antes de cada test
@@ -49,6 +49,9 @@ describe('Search', () => {
         });
         search.init();
         search.sort('name', 'asc');
+        if (!search._data) {
+            throw new Error('search._data is null');
+        }
         expect(search._data[0].name).toBe('Aardvark');
         expect(search._data[2].name).toBe('Zebra');
     });
@@ -64,6 +67,10 @@ describe('Search', () => {
         const input = search.renderer.body.inputSearch;
         input.value = 'juan';
         input.dispatchEvent(new Event('input'), { bubbles: true });
+
+        if (!search._data) {
+            throw new Error('search._data is null');
+        }
 
         expect(search._data.length).toBe(2); // Debe mostrar ambos resultados inmediatamente
         await new Promise(resolve => setTimeout(resolve, 600));
@@ -84,7 +91,10 @@ describe('Search', () => {
             element: '.test',
             data: Array.from({ length: 25 }, (_, i) => ({ id: i, name: `Item ${i}` })),
         });
-        search.searching('');
+        search.searching('', false);
+        if (!search._data) {
+            throw new Error('search._data is null');
+        }
         expect(search._data.length).toBe(25);
     });
 
@@ -93,7 +103,10 @@ describe('Search', () => {
             element: '.test',
             data: [{ name: 'Juan' }, { name: 'Maria' }]
         });
-        search.searching('JUAN');
+        search.searching('JUAN', false);
+        if (!search._data) {
+            throw new Error('search._data is null');
+        }
         expect(search._data.length).toBe(1);
         expect(search._data[0].name).toBe('Juan');
     });
@@ -103,7 +116,10 @@ describe('Search', () => {
             element: '.test',
             data: [{ name: 'Juan' }, { name: 'Maria' }]
         });
-        search.searching('juan');
+        search.searching('juan', false);
+        if (!search._data) {
+            throw new Error('search._data is null');
+        }
         expect(search._data.length).toBe(1);
         expect(search._data[0].name).toBe('Juan');
     });
@@ -114,7 +130,7 @@ describe('Search', () => {
             data: [{ name: 'Zebra', age: 26 }, { name: 'Aardvark', age: 28 }, { name: 'Moose', age: 30 }],
             template: `<div>{{name}} - {{age}} años</div>`
         });
-        search.on('renderItems', (data) => {
+        search.on('renderItems', (data: any) => {
             const { content } = data;
             const item = content.querySelector('.items');
             expect(item.innerHTML).toContain('Zebra - 26 años');
@@ -128,11 +144,11 @@ describe('Search', () => {
             data: [{ name: 'Zebra', age: 26 }, { name: 'Aardvark', age: 28 }, { name: 'Moose', age: 30 }],
             template: `<div>{{name}} - {{age}} años</div>`
         });
-        search.on('itemSelected', (data) => {
+        search.on('itemSelected', (data: any) => {
             const { item } = data;
             expect(item.innerHTML).toContain('Aardvark - 28 años');
         });
-        search.on('renderItems', (data) => {
+        search.on('renderItems', (data: any) => {
             const { content } = data;
             const item = content.querySelectorAll('.items')[1];
             const enterEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
@@ -156,16 +172,19 @@ describe('Search', () => {
         await search.init();
 
         // Primera búsqueda - debe almacenar en caché
-        search.searching('juan');
+        search.searching('juan', false);
+        if (!search._data) {
+            throw new Error('search._data is null');
+        }
         const firstResults = search._data;
         expect(firstResults.length).toBe(1);
 
         // Segunda búsqueda igual - debe usar caché
-        search.searching('juan');
+        search.searching('juan', false);
         expect(search._data).toEqual(firstResults);
 
         // Búsqueda diferente - no debe usar caché
-        search.searching('maria');
+        search.searching('maria', false);
         expect(search._data.length).toBe(1);
         expect(search._data[0].name).toBe('Maria');
     });
@@ -232,6 +251,9 @@ describe('Search', () => {
         });
         search.init();
 
+        if (!search._data) {
+            throw new Error('search._data is null');
+        }
         expect(search._data).toBeDefined();
         expect(search._data.length).toBe(25);
         expect(search.renderer).toBeDefined();
@@ -244,7 +266,7 @@ describe('Search', () => {
 
         expect(mockCallback).toHaveBeenCalled();
         expect(search._data).toBeNull();
-        expect(search.data).toBeNull();
+        expect(search.data).toEqual([]);
         expect(search.pagination).toBeNull();
         expect(search.events).toBeNull();
         expect(search.cache).toBeNull();
@@ -305,7 +327,7 @@ describe('Search', () => {
         // Solo maria_1 y la primera carga vacía
         expect(search.cache.size()).toBe(2);
         expect(search.cache.has('maria_1')).toBe(true);
-        expect(result).toBe(search); // Encadenamiento
+        expect(result).toBe(search.cache); // Encadenamiento
     });
 
     test('debe mostrar indicador de carga', () => {

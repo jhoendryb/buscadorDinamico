@@ -1,10 +1,10 @@
-import { SearchRenderer } from '../../js/renderer/index.js';
-import { EventEmitter } from '../../js/events/index.js';
+import { SearchRenderer } from '../../js/renderer/index';
+import { EventEmitter } from '../../js/events/index';
 
 describe('SearchRenderer', () => {
-    let testElement;
-    let renderer;
-    let events;
+    let testElement: HTMLDivElement;
+    let renderer: SearchRenderer;
+    let events: EventEmitter;
 
     beforeEach(() => {
         testElement = document.createElement('div');
@@ -58,7 +58,7 @@ describe('SearchRenderer', () => {
 
         expect(inputSearch).toBeTruthy();
         expect(inputSearch.tagName).toBe('INPUT');
-        expect(inputSearch.placeholder).toBe('Buscar...');
+        expect((inputSearch as HTMLInputElement).placeholder).toBe('Buscar...');
         expect(inputSearch.getAttribute('aria-label')).toBe('Label de prueba');
         expect(renderer.body.inputSearch).toBe(inputSearch);
     });
@@ -72,8 +72,11 @@ describe('SearchRenderer', () => {
             debounceTime: 50
         });
 
-        renderer.body.inputSearch.value = 'test';
-        renderer.body.inputSearch.dispatchEvent(new Event('input'));
+        const element = renderer.body.inputSearch as HTMLInputElement;
+
+
+        element.value = 'test';
+        element.dispatchEvent(new Event('input'));
 
         expect(mockCallback).not.toHaveBeenCalled();
 
@@ -116,7 +119,7 @@ describe('SearchRenderer', () => {
     });
 
     test('debe renderizar componentes en orden ip (sin search)', () => {
-        renderer.renderByDom('ip');
+        renderer.renderByDom('ip', {});
 
         expect(renderer.body.contentSearch).toBeFalsy();
         expect(renderer.body.inputSearch).toBeFalsy();
@@ -130,21 +133,21 @@ describe('SearchRenderer', () => {
         const data = [{ name: 'Juan', age: 25 }];
         renderer.renderItemsContent(data, '<div>{{name}} - {{age}}</div>', 'No results', events);
 
-        const items = renderer.body.renderItems.querySelectorAll('.items');
-        expect(items.length).toBe(1);
-        expect(items[0].innerHTML).toContain('Juan - 25');
+        const items = renderer.body.renderItems?.querySelectorAll('.items');
+        expect(items?.length).toBe(1);
+        expect(items?.[0].innerHTML).toContain('Juan - 25');
     });
 
     test('debe renderizar items con template función', () => {
         renderer.renderItems();
 
         const data = [{ name: 'Juan', age: 25 }];
-        const templateFn = (item) => `<div>${item.name.toUpperCase()}</div>`;
+        const templateFn = (item: any) => `<div>${item.name.toUpperCase()}</div>`;
         renderer.renderItemsContent(data, templateFn, 'No results', events);
 
-        const items = renderer.body.renderItems.querySelectorAll('.items');
-        expect(items.length).toBe(1);
-        expect(items[0].innerHTML).toContain('JUAN');
+        const items = renderer.body.renderItems?.querySelectorAll('.items');
+        expect(items?.length).toBe(1);
+        expect(items?.[0].innerHTML).toContain('JUAN');
     });
 
     test('debe renderizar items sin template', () => {
@@ -153,9 +156,9 @@ describe('SearchRenderer', () => {
         const data = [{ name: 'Juan', age: 25 }];
         renderer.renderItemsContent(data, null, 'No results', events);
 
-        const items = renderer.body.renderItems.querySelectorAll('.items');
-        expect(items.length).toBe(1);
-        expect(items[0].textContent).toBe('Juan 25');
+        const items = renderer.body.renderItems?.querySelectorAll('.items');
+        expect(items?.length).toBe(1);
+        expect(items?.[0].textContent).toBe('Juan 25');
     });
 
     test('debe mostrar mensaje cuando no hay resultados', () => {
@@ -163,9 +166,9 @@ describe('SearchRenderer', () => {
 
         renderer.renderItemsContent([], null, 'Sin resultados', events);
 
-        const items = renderer.body.renderItems.querySelectorAll('.items');
-        expect(items.length).toBe(1);
-        expect(items[0].textContent).toBe('Sin resultados');
+        const items = renderer.body.renderItems?.querySelectorAll('.items');
+        expect(items?.length).toBe(1);
+        expect(items?.[0].textContent).toBe('Sin resultados');
     });
 
     test('debe emitir evento renderItems', () => {
@@ -197,8 +200,8 @@ describe('SearchRenderer', () => {
         const data2 = [{ name: 'Maria' }];
         renderer.appendItems(data2, null, 'No results', events);
 
-        const items = renderer.body.renderItems.querySelectorAll('.items');
-        expect(items.length).toBe(2);
+        const items = renderer.body.renderItems?.querySelectorAll('.items');
+        expect(items?.length).toBe(2);
     });
 
     test('debe actualizar contador de paginación', () => {
@@ -207,29 +210,29 @@ describe('SearchRenderer', () => {
 
         renderer.updateCounter(10, 25);
 
-        const counter = renderer.body.paginationItems.querySelector('.items-counter');
-        expect(counter.textContent).toContain('10');
-        expect(counter.textContent).toContain('25');
+        const counter = renderer.body.paginationItems?.querySelector('.items-counter');
+        expect(counter?.textContent).toContain('10');
+        expect(counter?.textContent).toContain('25');
     });
 
     test('debe mostrar resultados', () => {
         renderer.renderItems();
-        renderer.body.renderItems.setAttribute('hidden', 'true');
+        renderer.body.renderItems?.setAttribute('hidden', 'true');
 
         renderer.showResults();
 
-        expect(renderer.body.renderItems.hasAttribute('hidden')).toBe(false);
-        expect(renderer.body.renderItems.classList.contains('items-search-visible')).toBe(true);
+        expect(renderer.body.renderItems?.hasAttribute('hidden')).toBe(false);
+        expect(renderer.body.renderItems?.classList.contains('items-search-visible')).toBe(true);
     });
 
     test('debe ocultar resultados', () => {
         renderer.renderItems();
-        renderer.body.renderItems.classList.add('items-search-visible');
+        renderer.body.renderItems?.classList.add('items-search-visible');
 
         renderer.hideResults();
 
-        expect(renderer.body.renderItems.hasAttribute('hidden')).toBe(true);
-        expect(renderer.body.renderItems.classList.contains('items-search-visible')).toBe(false);
+        expect(renderer.body.renderItems?.hasAttribute('hidden')).toBe(true);
+        expect(renderer.body.renderItems?.classList.contains('items-search-visible')).toBe(false);
     });
 
     test('debe renderizar en orden SEARCH_CONTENT_ITEMS_PAGINATION', () => {

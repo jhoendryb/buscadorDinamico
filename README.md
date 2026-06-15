@@ -36,6 +36,61 @@ La clase Search se importa como módulo ES6:
 <script src="./node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
 ```
 
+## Paso 7: Documentar Uso
+
+### README.md - Sección de CSS
+
+## CSS
+
+El componente Search incluye CSS modular en dos partes:
+
+### CSS Core (Obligatorio)
+
+CSS necesario para el funcionamiento del componente:
+
+- Estructura de layout
+- Visibilidad y ocultamiento
+- Animaciones
+- Estados (selected, loading)
+- Scrollbar
+
+```html
+<link rel="stylesheet" href="./node_modules/search-component/dist/css/core.css">
+```
+
+### CSS Theme (Opcional)
+
+CSS de estilización personalizable:
+
+- Variables CSS
+- Colores
+- Dimensiones
+- Bordes
+- Tipografía
+  
+```html
+<link rel="stylesheet" href="./node_modules/search-component/dist/css/theme.css">
+```
+
+### Personalización CSS
+
+Puedes sobrescribir las variables CSS:
+
+```css
+:root {
+    --search-width: 300px;
+    --search-bg-color: #f0f0f0;
+    --search-selected-bg-color: #ffeb3b;
+}
+```
+
+O crear tu propio tema:
+
+```html
+<link rel="stylesheet" href="./node_modules/search-component/dist/css/core.css">
+<link rel="stylesheet" href="./mi-tema-personalizado.css">
+```
+
 ## Estructura HTML
 
 ### Contenedor Básico

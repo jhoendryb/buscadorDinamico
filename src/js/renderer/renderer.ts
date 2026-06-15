@@ -1,6 +1,6 @@
-import { createElement } from '../renderElement.ts';
-import { EventEmitter } from '../events/eventEmitter.ts';
-import * as Types from '../types.ts';
+import { createElement } from '../renderElement';
+import { EventEmitter } from '../events/eventEmitter';
+import * as Types from '../types';
 
 /**
  * Clase helper para crear la estructura DOM inicial de los componentes.
@@ -172,7 +172,7 @@ export class SearchRenderer {
                 element: "div",
                 className: "pagination-items",
                 attributes: { 'role': 'status', 'aria-live': 'polite' },
-                children: [this.renderCounter()]
+                children: [this.renderCounter() as Types.CreateElementConfig]
             });
             element.appendChild(paginationItems);
         }
@@ -303,7 +303,7 @@ export class SearchRenderer {
 
         container.innerHTML = '';
 
-        const jsonItem: Record<string, any> = {
+        const jsonItem: Types.CreateElementConfig = {
             element: "li",
             className: "items",
             tabindex: '0',
@@ -319,7 +319,7 @@ export class SearchRenderer {
 
         if (!data || data.length === 0) {
             jsonItem.textContent = noResults || 'No se encontraron resultados';
-            container.appendChild(createElement(jsonItem));
+            container.appendChild(createElement(jsonItem as Types.CreateElementConfig));
 
             // Ocultar si no hay resultados
             // this.hideResults();
@@ -337,11 +337,11 @@ export class SearchRenderer {
                     });
                     jsonItem.innerHTML = templateStr;
                 }
-                container.appendChild(createElement(jsonItem));
+                container.appendChild(createElement(jsonItem as Types.CreateElementConfig));
                 return
             }
             jsonItem.textContent = Object.values(item).join(' ');
-            container.appendChild(createElement(jsonItem));
+            container.appendChild(createElement(jsonItem as Types.CreateElementConfig));
         });
 
         // Mostrar si hay resultados y el input tiene foco

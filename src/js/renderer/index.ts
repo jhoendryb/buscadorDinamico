@@ -1,1 +1,1 @@
-export { SearchRenderer } from './renderer.ts';
+export { SearchRenderer } from './renderer';

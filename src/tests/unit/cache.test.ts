@@ -1,4 +1,4 @@
-import { LRUCache } from '../../js/cache/index.js';
+import { LRUCache } from '../../js/cache/index';
 
 describe('LRUCache', () => {
     test('debe crear caché con tamaño por defecto', () => {

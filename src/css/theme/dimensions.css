@@ -1,0 +1,24 @@
+.app-search {
+    width: var(--search-width);
+    max-height: var(--search-max-height);
+    gap: var(--search-gap);
+    /* border-radius: var(--search-border-radius); */
+}
+
+.input-search {
+    padding: var(--search-padding);
+}
+
+.items-search {
+    padding: var(--search-padding);
+    gap: var(--search-padding);
+}
+
+.pagination-items .items-counter {
+    padding: var(--search-padding);
+}
+
+.content-pagination-items {
+    max-height: 300px;
+    /* border-radius: var(--search-border-radius); */
+}

@@ -187,7 +187,7 @@ export interface CreateElementConfig {
     dataset?: Record<string, string>;
     children?: CreateElementConfig[];
     child?: HTMLElement;
-    event?: Record<string, (e: Event) => void>;
+    event?: Record<string, (e: any) => void>;
     attributes?: Record<string, string>;
     [key: string]: any;
 }

@@ -15,12 +15,12 @@ export const searchingServer = {
     async searching(searchTerm: string, isEvent: boolean = false): Promise<any> {
 
         if (searchTerm != (this as any).searchTerm) {
-            (this as any).pagination.goToPage(1)
-                (this as any).fetch.body.page = 1;
+            (this as any).pagination.goToPage(1);
+            (this as any).fetch.body.page = 1;
             (this as any).fetch.body.searchTerm = searchTerm;
 
             if ((this as any).cacheEnabled) {
-                (this as any).clearCacheByPrefix((this as any).searchTerm);
+                (this as any).cache.clearCacheByPrefix((this as any).searchTerm);
             }
         }
 

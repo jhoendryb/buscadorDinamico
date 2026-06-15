@@ -1,4 +1,4 @@
-import { EventEmitter } from '../../js/events/index.js';
+import { EventEmitter } from '../../js/events/index';
 
 describe('EventEmitter', () => {
     test('debe registrar y ejecutar listener', () => {

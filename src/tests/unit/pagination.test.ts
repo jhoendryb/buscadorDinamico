@@ -1,4 +1,4 @@
-import { Pagination } from '../../js/pagination/index.js';
+import { Pagination } from '../../js/pagination/index';
 
 describe('Pagination', () => {
     test('debe crear instancia con itemsPerPage por defecto', () => {

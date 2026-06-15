@@ -2,25 +2,35 @@
   "name": "buscador-dinamico",
   "version": "1.0.0",
   "description": "Buscador dinámico",
-  "type": "module",
+  "type": "commonjs",
   "dependencies": {
     "bootstrap": "^5.3.3"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
     "@babel/preset-env": "^7.29.7",
+    "@types/jest": "^30.0.0",
     "@types/node": "^25.9.3",
     "babel-jest": "^30.4.1",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
     "jsdom": "^29.1.1",
-    "typescript": "^6.0.3"
+    "ts-jest": "^29.4.11",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16"
   },
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "jest",
     "test:watch": "jest --watch",
-    "build": "tsc",
-    "build:watch": "tsc --watch",
     "type-check": "tsc --noEmit"
-  }
+  },
+  "files": [
+    "dist",
+    "src/css",
+    "README.md",
+    "LICENSE"
+  ]
 }

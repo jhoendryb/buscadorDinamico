@@ -1,1 +1,1 @@
-export { EventEmitter } from './eventEmitter.ts';
+export { EventEmitter } from './eventEmitter';

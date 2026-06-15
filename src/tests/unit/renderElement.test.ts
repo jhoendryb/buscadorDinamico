@@ -1,4 +1,4 @@
-import { createElement } from '../../js/renderElement.js';
+import { createElement } from '../../js/renderElement';
 
 describe('createElement', () => {
     test('crea un elemento div correctamente', () => {

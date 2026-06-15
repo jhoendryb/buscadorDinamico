@@ -44,7 +44,7 @@ export const searchingLocal = {
         if ((this as any).searchTerm === searchTerm && searchTerm != "") return this;
 
         if ((this as any).cacheEnabled) {
-            (this as any).clearCacheByPrefix((this as any).searchTerm);
+            (this as any).cache.clearCacheByPrefix((this as any).searchTerm);
         }
 
         (this as any).pagination.goToPage(1)

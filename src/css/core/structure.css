@@ -1,0 +1,49 @@
+.app-search {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 100;
+}
+
+.input-search {
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.items-search {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    overflow-y: auto;
+}
+
+.items-search .items {
+    width: 100%;
+    height: auto;
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.pagination-items {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.content-pagination-items {
+    width: 100%;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 1000;
+    top: 100%;
+    /* left: 0; */
+}

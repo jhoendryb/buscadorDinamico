@@ -8,7 +8,7 @@ import {
     SearchRenderer,
     Constants,
     Types
-} from './index.js';
+} from './index';
 
 class Search {
     // Declaraciones de propiedades
@@ -119,7 +119,6 @@ class Search {
 
         if (!element) {
             let msgError = `No existe el contenedor ${this.element}`
-            alert(msgError)
             throw new Error(msgError)
         }
 

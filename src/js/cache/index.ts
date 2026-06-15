@@ -1,1 +1,1 @@
-export { LRUCache } from './cache.ts';
+export { LRUCache } from './cache';
