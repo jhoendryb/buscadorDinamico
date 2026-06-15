@@ -19,6 +19,7 @@
     flex-direction: column;
     list-style: none;
     overflow-y: auto;
+    margin: 0;
 }
 
 .items-search .items {
