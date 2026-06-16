@@ -33,6 +33,11 @@ export class SearchRenderer {
     getUniqueClassName(baseClass: string): string {
         return this.uniqueClassNameFn(baseClass);
     }
+    #classDefault(baseClass: string, classImport: string = ''): string {
+        return `${baseClass} ${classImport}`.trim().split(' ')
+            .filter((cls, index, array) => !classImport.includes(cls) || array.indexOf(cls) === index)
+            .join(' ');
+    }
     /**
      * Renderiza el contenedor del input de búsqueda (label + contenedor).
      * NO crea el input con debounce, eso lo hace renderSearch().
@@ -44,14 +49,9 @@ export class SearchRenderer {
         const element = this.body.content;
         let contentSearch = element.querySelector('.input-search') as HTMLElement;
 
-        const classDefault = `input-search ${this.getUniqueClassName('input-search')} ${contentSearch?.className || ''}`.trim().split(' ')
-            .filter((cls, index, array) => {
-                return !contentSearch?.className.includes(cls) || array.indexOf(cls) === index;
-            }).join(' ');
-
         let jsonContentSearch: Types.CreateElementConfig = {
             element: contentSearch,
-            className: classDefault,
+            className: this.#classDefault(`input-search ${this.getUniqueClassName('input-search')}`, contentSearch?.className),
             ...(!contentSearch ? {
                 element: "search"
             } : {})
@@ -83,16 +83,11 @@ export class SearchRenderer {
         let inputSearch = element?.querySelector('.filter-search') as HTMLElement;
         let timeOut: any;
 
-        const classDefault = `${this.getUniqueClassName("filter-search")} ${inputSearch?.className || ''}`.trim().split(' ')
-            .filter((cls, index, array) => {
-                return !inputSearch?.className.includes(cls) || array.indexOf(cls) === index;
-            }).join(' ');
-
         let jsonInput = {
             element: inputSearch,
             id: this.getUniqueClassName('input-search'),
             placeholder: placeholder || 'Ingrese palabra clave...',
-            className: classDefault,
+            className: this.#classDefault(`${this.getUniqueClassName("filter-search")}`, inputSearch?.className),
             attributes: {
                 "aria-label": ariaLabel || 'Filtrar por Búsqueda',
                 "aria-autocomplete": "list",
@@ -143,14 +138,9 @@ export class SearchRenderer {
         const element = this.body.contentPaginationItems;
         let renderItems = element?.querySelector('.items-search') as HTMLElement;
 
-        const classDefault = `items-search scroll-personalize ${this.getUniqueClassName("items-search")} ${renderItems?.className || ''}`.trim().split(' ')
-            .filter((cls, index, array) => {
-                return !renderItems?.className.includes(cls) || array.indexOf(cls) === index;
-            }).join(' ');
-
         let jsonItemsSearch: Record<string, any> = {
             element: renderItems,
-            className: classDefault,
+            className: this.#classDefault(`items-search scroll-personalize ${this.getUniqueClassName("items-search")}`, renderItems?.className),
             attributes: {
                 'aria-label': 'Resultados de búsqueda',
                 'role': 'listbox',
@@ -186,14 +176,9 @@ export class SearchRenderer {
         const element = this.body.contentPaginationItems;
         let paginationItems = element?.querySelector('.pagination-items') as HTMLElement;
 
-        const classDefault = `pagination-items ${paginationItems?.className || ''}`.trim().split(' ')
-            .filter((cls, index, array) => {
-                return !paginationItems?.className.includes(cls) || array.indexOf(cls) === index;
-            }).join(' ');
-
         let jsonPaginationItems: Types.CreateElementConfig = {
             element: paginationItems,
-            className: classDefault,
+            className: this.#classDefault(`pagination-items`, paginationItems?.className),
             attributes: { 'role': 'status', 'aria-live': 'polite' },
             innerHTML: this.renderCounter().outerHTML as string,
             ...(!paginationItems ? {
@@ -221,14 +206,9 @@ export class SearchRenderer {
         const element = this.body.contentPaginationItems;
         const countItems = element?.querySelector('.items-counter') as HTMLElement;
 
-        const classDefault = `items-counter ${countItems?.className || ''}`.trim().split(' ')
-            .filter((cls, index, array) => {
-                return !countItems?.className.includes(cls) || array.indexOf(cls) === index;
-            }).join(' ');
-
         let jsonCountItems: Types.CreateElementConfig = {
             element: countItems,
-            className: classDefault,
+            className: this.#classDefault(`items-counter`, countItems?.className),
             textContent: "0 de 0",
             ...(!countItems ? {
                 element: "div",
@@ -499,14 +479,9 @@ export class SearchRenderer {
         const element = this.body.content;
         let contentPaginationItems = element.querySelector('.content-pagination-items') as HTMLElement;
 
-        const classDefault = `content-pagination-items ${this.getUniqueClassName("content-pagination-items")} ${contentPaginationItems?.className || ''}`.trim().split(' ')
-            .filter((cls, index, array) => {
-                return !contentPaginationItems?.className.includes(cls) || array.indexOf(cls) === index;
-            }).join(' ');
-
         let jsonContentPagItems: Types.CreateElementConfig = {
             element: contentPaginationItems,
-            className: classDefault,
+            className: this.#classDefault(`content-pagination-items ${this.getUniqueClassName("content-pagination-items")}`, contentPaginationItems?.className),
             ...(!contentPaginationItems ? {
                 element: "div",
             } : {})
