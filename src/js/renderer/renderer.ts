@@ -44,23 +44,27 @@ export class SearchRenderer {
         const element = this.body.content;
         let contentSearch = element.querySelector('.input-search') as HTMLElement;
 
-        if (!contentSearch) {
-            contentSearch = createElement({
-                element: "search",
-                className: "input-search" + ` ${this.getUniqueClassName('input-search')}`,
-                // children: [
-                //     {
-                //         element: "label",
-                //         htmlFor: this.getUniqueClassName('input-search'),
-                //         textContent: this.t?.searchLabel || 'Filtrar por Búsqueda'
-                //     }
-                // ]
-            });
-            element.appendChild(contentSearch);
+        const classDefault = `input-search ${this.getUniqueClassName('input-search')} ${contentSearch?.className || ''}`.trim().split(' ')
+            .filter((cls, index, array) => {
+                return !contentSearch?.className.includes(cls) || array.indexOf(cls) === index;
+            }).join(' ');
+
+        let jsonContentSearch: Types.CreateElementConfig = {
+            element: contentSearch,
+            className: classDefault,
+            ...(!contentSearch ? {
+                element: "search"
+            } : {})
         }
 
-        this.body.contentSearch = contentSearch;
-        return contentSearch;
+        const newContentSearch = createElement(jsonContentSearch);
+
+        if (!contentSearch) {
+            element.appendChild(newContentSearch);
+        }
+
+        this.body.contentSearch = newContentSearch;
+        return newContentSearch;
     }
     /**
      * Renderiza el input de búsqueda con debounce.
@@ -79,14 +83,22 @@ export class SearchRenderer {
         let inputSearch = element?.querySelector('.filter-search') as HTMLElement;
         let timeOut: any;
 
+        const classDefault = `${this.getUniqueClassName("filter-search")} ${inputSearch?.className || ''}`.trim().split(' ')
+            .filter((cls, index, array) => {
+                return !inputSearch?.className.includes(cls) || array.indexOf(cls) === index;
+            }).join(' ');
+
         let jsonInput = {
             element: inputSearch,
             id: this.getUniqueClassName('input-search'),
+            placeholder: placeholder || 'Ingrese palabra clave...',
+            className: classDefault,
             attributes: {
                 "aria-label": ariaLabel || 'Filtrar por Búsqueda',
                 "aria-autocomplete": "list",
-                "aria-expanded": "false", // Nuevo: estado inicial
-                "role": "combobox"
+                "aria-expanded": "false",
+                "role": "combobox",
+                "aria-controls": this.getUniqueClassName('items-search')
             },
             event: {
                 input: (e: Event) => {
@@ -107,13 +119,10 @@ export class SearchRenderer {
             ...(!inputSearch ? {
                 element: "input",
                 name: this.getUniqueClassName("filterSearch"),
-                className: `form-control input-lg ${this.getUniqueClassName("filter-search")}`,
-                placeholder: placeholder || 'Ingrese palabra clave...',
             } : {})
         };
 
         inputSearch = createElement(jsonInput);
-        inputSearch.setAttribute('aria-controls', this.getUniqueClassName('items-search'));
 
         if (jsonInput.element === "input" && element) element.appendChild(inputSearch);
 
@@ -127,7 +136,6 @@ export class SearchRenderer {
     renderItems(zIndex: number = 999): HTMLElement {
         if (this.body.renderItems) return this.body.renderItems;
 
-        // Requerir contenedor padre
         if (!this.body.contentPaginationItems) {
             this.renderContentPaginationItems();
         }
@@ -135,24 +143,35 @@ export class SearchRenderer {
         const element = this.body.contentPaginationItems;
         let renderItems = element?.querySelector('.items-search') as HTMLElement;
 
-        if (!renderItems && element) {
-            renderItems = createElement({
+        const classDefault = `items-search scroll-personalize ${this.getUniqueClassName("items-search")} ${renderItems?.className || ''}`.trim().split(' ')
+            .filter((cls, index, array) => {
+                return !renderItems?.className.includes(cls) || array.indexOf(cls) === index;
+            }).join(' ');
+
+        let jsonItemsSearch: Record<string, any> = {
+            element: renderItems,
+            className: classDefault,
+            attributes: {
+                'aria-label': 'Resultados de búsqueda',
+                'role': 'listbox',
+                'aria-activedescendant': '',
+                'hidden': 'true',
+                'style': `z-index: ${zIndex};`
+            },
+            ...(!renderItems ? {
                 element: "ul",
-                id: this.getUniqueClassName('items-search'),
-                className: `items-search scroll-personalize ${this.getUniqueClassName("items-search")}`,
-                attributes: {
-                    'aria-label': 'Resultados de búsqueda',
-                    'role': 'listbox',
-                    'aria-activedescendant': '',
-                    'hidden': 'true',
-                    'style': `z-index: ${zIndex};`
-                }
-            });
-            element.appendChild(renderItems);
+                id: this.getUniqueClassName('items-search')
+            } : {})
         }
 
-        this.body.renderItems = renderItems;
-        return renderItems;
+        const newRenderItem = createElement(jsonItemsSearch as Types.CreateElementConfig);
+
+        if (!renderItems && element) {
+            element.appendChild(newRenderItem);
+        }
+
+        this.body.renderItems = newRenderItem;
+        return newRenderItem;
     }
 
     /**
@@ -167,30 +186,56 @@ export class SearchRenderer {
         const element = this.body.contentPaginationItems;
         let paginationItems = element?.querySelector('.pagination-items') as HTMLElement;
 
-        if (!paginationItems && element) {
-            paginationItems = createElement({
+        const classDefault = `pagination-items ${paginationItems?.className || ''}`.trim().split(' ')
+            .filter((cls, index, array) => {
+                return !paginationItems?.className.includes(cls) || array.indexOf(cls) === index;
+            }).join(' ');
+
+        let jsonPaginationItems: Types.CreateElementConfig = {
+            element: paginationItems,
+            className: classDefault,
+            attributes: { 'role': 'status', 'aria-live': 'polite' },
+            innerHTML: this.renderCounter().outerHTML as string,
+            ...(!paginationItems ? {
                 element: "div",
-                className: "pagination-items",
-                attributes: { 'role': 'status', 'aria-live': 'polite' },
-                children: [this.renderCounter() as Types.CreateElementConfig]
-            });
-            element.appendChild(paginationItems);
+            } : {})
         }
 
-        this.body.paginationItems = paginationItems;
-        return paginationItems;
+        console.log(this.body.content.classList);
+
+        const newPaginationItems = createElement(jsonPaginationItems);
+
+        if (!paginationItems && element) {
+            element.appendChild(newPaginationItems);
+        }
+
+        this.body.paginationItems = newPaginationItems;
+        return newPaginationItems;
     }
 
     /**
      * Renderiza el contador de registros.
-     * @returns {object} Contador de registros
+     * @returns {HTMLElement} Contador de registros
      */
-    renderCounter(): object {
-        return {
-            element: "div",
-            className: "items-counter",
-            textContent: "0 de 0"
-        };
+    renderCounter(): HTMLElement {
+        const element = this.body.contentPaginationItems;
+        const countItems = element?.querySelector('.items-counter') as HTMLElement;
+
+        const classDefault = `items-counter ${countItems?.className || ''}`.trim().split(' ')
+            .filter((cls, index, array) => {
+                return !countItems?.className.includes(cls) || array.indexOf(cls) === index;
+            }).join(' ');
+
+        let jsonCountItems: Types.CreateElementConfig = {
+            element: countItems,
+            className: classDefault,
+            textContent: "0 de 0",
+            ...(!countItems ? {
+                element: "div",
+            } : {})
+        }
+
+        return createElement(jsonCountItems);
     }
     /**
      * Añade items al contenedor sin reemplazar el contenido existente.
@@ -266,8 +311,8 @@ export class SearchRenderer {
      * @returns {void}
      */
     renderByDom(domString: string, options: Record<string, any>): void {
-        const content = this.body.content;
-        content.innerHTML = '';
+        // const content = this.body.content;
+        // content.innerHTML = '';
 
         const domMap: Record<string, () => void> = {
             's': () => {
@@ -433,8 +478,6 @@ export class SearchRenderer {
         }
     }
 
-
-
     /**
      * Toggle de visibilidad de resultados.
      */
@@ -456,16 +499,27 @@ export class SearchRenderer {
         const element = this.body.content;
         let contentPaginationItems = element.querySelector('.content-pagination-items') as HTMLElement;
 
-        if (!contentPaginationItems) {
-            contentPaginationItems = createElement({
+        const classDefault = `content-pagination-items ${this.getUniqueClassName("content-pagination-items")} ${contentPaginationItems?.className || ''}`.trim().split(' ')
+            .filter((cls, index, array) => {
+                return !contentPaginationItems?.className.includes(cls) || array.indexOf(cls) === index;
+            }).join(' ');
+
+        let jsonContentPagItems: Types.CreateElementConfig = {
+            element: contentPaginationItems,
+            className: classDefault,
+            ...(!contentPaginationItems ? {
                 element: "div",
-                className: `content-pagination-items ${this.getUniqueClassName("content-pagination-items")}`
-            });
-            element.appendChild(contentPaginationItems);
+            } : {})
         }
 
-        this.body.contentPaginationItems = contentPaginationItems;
-        return contentPaginationItems;
+        const newContentPagItems = createElement(jsonContentPagItems)
+
+        if (!contentPaginationItems) {
+            element.appendChild(newContentPagItems);
+        }
+
+        this.body.contentPaginationItems = newContentPagItems;
+        return newContentPagItems;
     }
 
 
