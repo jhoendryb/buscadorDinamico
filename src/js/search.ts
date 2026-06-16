@@ -31,7 +31,7 @@ const search1 = new Search({
 });
 
 
-const prueba = search1.on('renderItems', (data) => {
+const prueba = search1.on('renderItems', (data: any) => {
     const { content } = data;
     const item = content.children;
     console.log('Page change event:', item[0]);
@@ -40,7 +40,7 @@ const prueba = search1.on('renderItems', (data) => {
 
 console.log("Esto es pruebas", prueba);
 
-search1.on('itemSelected', (data) => {
+search1.on('itemSelected', (data: any) => {
     console.log('Item seleccionado:', data.item);
 });
 
