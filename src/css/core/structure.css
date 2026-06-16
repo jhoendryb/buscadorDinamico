@@ -1,8 +1,15 @@
 .app-search {
+    width: 250px;
+    /* Mínimo para ser visible */
+    min-height: auto;
+    /* Mínimo para ser usable */
     display: flex;
     flex-direction: column;
     position: relative;
     z-index: 100;
+    /* padding: 5px;           Mínimo para espaciado */
+    gap: 10px;
+    /* Mínimo para separación */
 }
 
 .input-search {
@@ -46,5 +53,7 @@
     overflow-y: auto;
     z-index: 1000;
     top: 100%;
-    /* left: 0; */
+    left: 0;
+    max-height: 300px;
+    /* Mínimo para scroll */
 }

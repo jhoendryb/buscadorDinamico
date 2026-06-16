@@ -20,7 +20,7 @@
     /* Dimensiones */
     --search-width: 250px;
     --search-max-height: 350px;
-    --search-padding: 5px;
+    --search-padding: 8px;
     --search-gap: 10px;
     --search-border-radius: 5px;
     --items-search-border-radius: 5px 5px 0 0;
@@ -29,4 +29,5 @@
     /* Tipografía */
     --search-font-size: 14px;
     --search-counter-font-size: 0.8em;
+    --search-counter-text-align: center;
 }
