@@ -39,7 +39,7 @@ describe('Search', () => {
     });
 
     test('debe lanzar error si element no existe', () => {
-        expect(() => new Search({ element: '.non-existent' })).toThrow();
+        expect(() => new Search({ element: '.non-existent' }).init()).toThrow();
     });
 
     test('debe ordenar datos correctamente', () => {
