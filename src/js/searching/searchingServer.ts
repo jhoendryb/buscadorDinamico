@@ -1,127 +1,215 @@
 import * as Types from '../types';
-/**
- * Objeto que contiene la lógica de búsqueda en modo servidor (server-side).
- * Se asigna dinámicamente a la instancia Search cuando procesServer es true.
- * @namespace
- */
-export const searchingServer = {
+import { ErrorHandler, ErrorCode, SearchError } from '../error-handler';
+
+export class SearchingServer {
+    private searchInstance: any;
+    private errorHandler: ErrorHandler;
+    private defaultTimeout: number = 30000; // 30 segundos
+
+    constructor(searchInstance: any, errorHandler: ErrorHandler) {
+        this.searchInstance = searchInstance;
+        this.errorHandler = errorHandler;
+    }
+
     /**
-     * Realiza búsqueda en servidor vía AJAX.
-     * Usa caché para paginación si está habilitado.
-     * @param {string} searchTerm - Término de búsqueda
-     * @param {boolean} [isEvent=false] - Si fue iniciado por evento del usuario
-     * @returns {Promise<Search>} Promesa que resuelve con la instancia de Search
+     * Realiza búsqueda en servidor vía Fetch API.
      */
     async searching(searchTerm: string, isEvent: boolean = false): Promise<any> {
-
-        if (searchTerm != (this as any).searchTerm) {
-            (this as any).pagination.goToPage(1);
-            (this as any).fetch.body.page = 1;
-            (this as any).fetch.body.searchTerm = searchTerm;
-
-            if ((this as any).cacheEnabled) {
-                (this as any).cache.clearCacheByPrefix((this as any).searchTerm);
-            }
-        }
-
-        if ((this as any).pagination.getCurrentPage() != (this as any).fetch.body.page) {
-            (this as any).pagination.goToPage((this as any).fetch.body.page)
-        }
-
-        if ((this as any).itemsPerPage != (this as any).fetch.body.itemsPerPage || !(this as any).fetch.body.itemsPerPage) {
-            (this as any).fetch.body.itemsPerPage = (this as any).itemsPerPage;
-        }
-
-        (this as any).searchTerm = searchTerm;
-
-        const cacheKey = (this as any).getCacheKey(searchTerm, (this as any).pagination.getCurrentPage());
-        const cachedData = (this as any).cache.get(cacheKey);
-        if ((this as any).cacheEnabled && cachedData && !isEvent) {
-            (this as any)._data = cachedData;
-            (this as any).processInfiniteScroll();
-            return;
-        }
-
-
-        if ((this as any).sortBy && ((this as any).sortBy !== (this as any).fetch.body.sortBy)) {
-            (this as any).fetch.body.sortBy = (this as any).sortBy;
-            (this as any).fetch.body.sortOrder = (this as any).sortOrder;
-        }
-
-        // (this as any).showLoading();
-
         try {
-            const { data, ...rest } = await (this as any).ajax((this as any).fetch);
-            (this as any)._data = data;
-            (this as any)._ajaxResponse.success = rest;
+            // Validaciones con ErrorHandler
+            this.errorHandler.validateRequired(this.searchInstance.fetch?.url, 'fetch.url', ErrorCode.FETCH_URL_REQUIRED);
 
-            if ((this as any).cacheEnabled) {
-                (this as any).cache.set(cacheKey, data);
+            if (searchTerm !== this.searchInstance.searchTerm) {
+                this.searchInstance.pagination.goToPage(1);
+                this.searchInstance.fetch.body.page = 1;
+                this.searchInstance.fetch.body.searchTerm = searchTerm;
+
+                if (this.searchInstance.cacheEnabled) {
+                    this.searchInstance.cache.clearCacheByPrefix(this.searchInstance.searchTerm);
+                }
             }
 
-            if (isEvent) {
-                (this as any).events.emit('search', {
-                    searchTerm,
-                    results: (this as any)._data,
-                    totalResults: (this as any)._data.length,
-                    timestamp: new Date().toISOString()
-                } as Types.SearchEventData);
+            if (this.searchInstance.pagination.getCurrentPage() !== this.searchInstance.fetch.body.page) {
+                this.searchInstance.pagination.goToPage(this.searchInstance.fetch.body.page);
             }
+
+            if (this.searchInstance.itemsPerPage !== this.searchInstance.fetch.body.itemsPerPage || !this.searchInstance.fetch.body.itemsPerPage) {
+                this.searchInstance.fetch.body.itemsPerPage = this.searchInstance.itemsPerPage;
+            }
+
+            this.searchInstance.searchTerm = searchTerm;
+
+            const cacheKey = this.searchInstance.getCacheKey(searchTerm, this.searchInstance.pagination.getCurrentPage());
+            const cachedData = this.searchInstance.cache.get(cacheKey);
+
+            if (this.searchInstance.cacheEnabled && cachedData && !isEvent) {
+                this.searchInstance._data = cachedData;
+                this.searchInstance.processInfiniteScroll();
+                return this.searchInstance;
+            }
+
+            if (this.searchInstance.sortBy && (this.searchInstance.sortBy !== this.searchInstance.fetch.body.sortBy)) {
+                this.searchInstance.fetch.body.sortBy = this.searchInstance.sortBy;
+                this.searchInstance.fetch.body.sortOrder = this.searchInstance.sortOrder;
+            }
+
+            try {
+                const { data, ...rest } = await this.ajax(this.searchInstance.fetch);
+                this.searchInstance._data = data;
+                this.searchInstance._ajaxResponse.success = rest;
+
+                if (this.searchInstance.cacheEnabled) {
+                    this.searchInstance.cache.set(cacheKey, data);
+                }
+
+                if (isEvent) {
+                    this.searchInstance.events.emit('search', {
+                        searchTerm,
+                        results: this.searchInstance._data,
+                        totalResults: this.searchInstance._data.length,
+                        timestamp: new Date().toISOString()
+                    } as Types.SearchEventData);
+                }
+            } catch (error) {
+                if (error instanceof SearchError) {
+                    this.errorHandler.logError(error, this.searchInstance.events);
+                }
+                this.searchInstance.events.emit('error', error);
+                throw error;
+            }
+
+            this.searchInstance.processInfiniteScroll();
+            return this.searchInstance;
         } catch (error) {
-            (this as any).events.emit('error', error as Error);
+            if (error instanceof SearchError) {
+                this.errorHandler.logError(error, this.searchInstance.events);
+            }
+            throw error;
         }
-
-        (this as any).processInfiniteScroll();
-
-        return this;
-    },
+    }
 
     /**
-     * Realiza una petición AJAX con XMLHttpRequest.
-     * @param {Types.FetchConfig} config - Configuración de la petición
-     * @returns {Promise<Object>} Promesa que resuelve con la respuesta del servidor
+     * Realiza petición HTTP con Fetch API.
      */
     async ajax(config: Types.FetchConfig): Promise<any> {
-        return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
+        try {
+            // Validaciones con ErrorHandler
+            this.errorHandler.validateRequired(config.url, 'url', ErrorCode.FETCH_URL_REQUIRED);
+            this.errorHandler.validateRequired(config.method, 'method', ErrorCode.FETCH_URL_REQUIRED);
+            this.errorHandler.validateType(config.method, 'string', 'method', ErrorCode.FETCH_URL_REQUIRED);
 
-            xhr.open(config.method, config.url, true);
-
-            // Headers
-            if (config.headers) {
-                Object.entries(config.headers).forEach(([key, value]) => {
-                    xhr.setRequestHeader(key, value);
+            // Validar método HTTP
+            const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+            if (!validMethods.includes(config.method.toUpperCase())) {
+                this.errorHandler.throwCustomError(ErrorCode.FETCH_FAILED, {
+                    context: 'invalid_http_method',
+                    providedMethod: config.method,
+                    validMethods
                 });
             }
 
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            // Configurar AbortController para timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), config.timeout || this.defaultTimeout);
 
-            xhr.onload = () => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    try {
-                        const response = JSON.parse(xhr.responseText);
-                        if (config.sucess) {
-                            config.sucess(response, this);
-                        }
-                        resolve(response);
-                    } catch (error) {
-                        reject(new Error('Error al parsear JSON'));
-                    }
+            // Configurar headers
+            const headers = new Headers(config.headers || {});
+
+            // Configurar body
+            let body: BodyInit | undefined;
+            if (config.method.toUpperCase() !== 'GET' && config.body) {
+                // Validar que body sea un objeto
+                this.errorHandler.validateType(config.body, 'object', 'body', ErrorCode.INVALID_DATA_FORMAT);
+
+                if (config.body instanceof FormData) {
+                    body = config.body;
+                } else if (headers.get('Content-Type')?.includes('application/x-www-form-urlencoded')) {
+                    body = new URLSearchParams(config.body as Record<string, string>);
                 } else {
-                    reject(new Error(`HTTP Error: ${xhr.status}`));
+                    if (!headers.has('Content-Type')) {
+                        headers.set('Content-Type', 'application/json');
+                    }
+                    body = JSON.stringify(config.body);
                 }
-            };
+            }
 
-            xhr.onerror = () => {
-                if (config.error) {
-                    config.error(xhr);
-                }
-                reject(new Error('Error de red'));
-            };
+            // Realizar petición fetch
+            const response = await fetch(config.url, {
+                method: config.method,
+                headers,
+                body,
+                signal: controller.signal
+            });
 
-            // Body
-            const body = new URLSearchParams(config.body).toString();
-            xhr.send(body);
-        });
-    },
-};
+            clearTimeout(timeoutId);
+
+            // Manejar errores HTTP
+            if (!response.ok) {
+                this.errorHandler.throwCustomError(ErrorCode.FETCH_FAILED, {
+                    context: 'http_error',
+                    status: response.status,
+                    statusText: response.statusText,
+                    url: config.url
+                });
+            }
+
+            // Parsear respuesta JSON
+            let data;
+            try {
+                data = await response.json();
+            } catch (error) {
+                this.errorHandler.throwCustomError(ErrorCode.INVALID_DATA_FORMAT, {
+                    context: 'json_parse_error',
+                    url: config.url,
+                    originalError: error
+                });
+            }
+
+            // Validar que la respuesta tenga datos
+            if (!data || (Array.isArray(data) && data.length === 0)) {
+                this.errorHandler.throwCustomError(ErrorCode.EMPTY_RESPONSE, {
+                    context: 'empty_response',
+                    url: config.url
+                });
+            }
+
+            // Ejecutar callback de éxito si existe
+            if (config.sucess) {
+                config.sucess(data, this.searchInstance);
+            }
+
+            return data;
+
+        } catch (error) {
+            // Manejar error de timeout
+            if (error instanceof Error && error.name === 'AbortError') {
+                this.errorHandler.throwCustomError(ErrorCode.NETWORK_ERROR, {
+                    context: 'request_timeout',
+                    url: config.url,
+                    timeout: config.timeout || this.defaultTimeout
+                });
+            }
+
+            // Manejar error de red
+            if (error instanceof TypeError && error.message.includes('fetch')) {
+                this.errorHandler.throwCustomError(ErrorCode.NETWORK_ERROR, {
+                    context: 'network_error',
+                    url: config.url,
+                    originalError: error
+                });
+            }
+
+            // Si ya es SearchError, relanzarlo
+            if (error instanceof SearchError) {
+                throw error;
+            }
+
+            // Error genérico
+            this.errorHandler.throwCustomError(ErrorCode.FETCH_FAILED, {
+                context: 'unknown_error',
+                url: config.url,
+                originalError: error
+            });
+        }
+    }
+}

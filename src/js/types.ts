@@ -52,6 +52,7 @@ export interface FetchConfig {
     method: string;
     headers?: Record<string, string>;
     body?: Record<string, any>;
+    timeout?: number;
     sucess?: (resp: any, instance: any) => void;
     error?: (err: any) => void;
 }

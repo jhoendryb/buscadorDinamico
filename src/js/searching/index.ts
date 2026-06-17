@@ -1,2 +1,2 @@
-export { searchingLocal } from './searchingLocal';
-export { searchingServer } from './searchingServer';
+export { SearchingLocal } from './searchingLocal';
+export { SearchingServer } from './searchingServer';

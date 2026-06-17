@@ -1,5 +1,9 @@
 import { Search } from './app';
 
+// const formData = new FormData();
+// formData.append('page', '1');
+// formData.append('searchTerm', '');
+
 const search1 = new Search({
     element: '.app-search1',
     procesServer: true,
@@ -14,12 +18,17 @@ const search1 = new Search({
     fetch: {
         url: "/buscadorDinamico/src/php/responseAjax.php",
         method: "POST",
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
         body: {
             page: 1,
             searchTerm: ""
             // sortBy: "id_ciudad",
             // sortOrder: "asc"
         },
+        // body: formData,
+
         // sucess: function (resp, instance) {
         //     if (resp) {
         //         console.log(resp)
@@ -46,7 +55,8 @@ search1.on('itemSelected', (data: any) => {
 });
 
 const search2 = new Search({
-    element: '.app-search2'
+    element: '.app-search2',
+    developmentMode: true,
 });
 
 search2.on('search', (data: any) => {
@@ -58,11 +68,13 @@ search2.on('pageChange', (data: any) => {
 });
 
 const search3 = new Search({
-    element: '.app-search3'
+    element: '.app-search3',
+    developmentMode: true,
 });
 
 const search4 = new Search({
     element: '.app-search4',
+    developmentMode: true,
     data: [
         {
             country: 'VE',
@@ -143,8 +155,8 @@ const search4 = new Search({
 });
 
 search1.init();
-search2.init();
-search3.init();
-search4.init();
+// search2.init();
+// search3.init();
+// search4.init();
 
 search2.sort('name', 'asc').draw();

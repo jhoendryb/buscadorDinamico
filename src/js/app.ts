@@ -1,7 +1,7 @@
 import {
     createElement,
-    searchingLocal,
-    searchingServer,
+    SearchingLocal,
+    SearchingServer,
     LRUCache,
     EventEmitter,
     Pagination,
@@ -44,6 +44,8 @@ class Search {
     isExtractData?: () => void | undefined;
     searching: (searchTerm: string, isEvent: boolean) => Promise<void> = async () => { };
     private errorHandler: ErrorHandler;
+    private searchingLocal: SearchingLocal;
+    private searchingServer: SearchingServer;
     /**
      * Instancia que almacena las traducciones predeterminadas.
      * @type {Types.TranslationCache}
@@ -93,6 +95,13 @@ class Search {
 
             this.scrollObserver = null;
             this._ajaxResponse = {};
+
+            this.searchingLocal = new SearchingLocal(this, this.errorHandler);
+            this.searchingServer = new SearchingServer(this, this.errorHandler);
+            this.searching = this.procesServer
+                ? this.searchingServer.searching.bind(this.searchingServer)
+                : this.searchingLocal.searching.bind(this.searchingLocal);
+
             this.renderer = new SearchRenderer({
                 content: document.querySelector(this.element) as HTMLElement, // ".input-search" - contenedor que contiene la app Search
                 contentSearch: undefined, // ".app-search" - contenedor del Search
@@ -104,7 +113,7 @@ class Search {
             this.events = new EventEmitter();
             this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
             this.pagination.setCountFunction(() => {
-                return this.procesServer ? this._ajaxResponse.success.countPage : this._data?.length;
+                return this.procesServer ? this._ajaxResponse.success?.countPage || 0 : this._data?.length || 0;
             });
             this.pagination.setDataItemsFunction((): Record<string, any>[] => {
                 return this._data || [];
@@ -113,8 +122,6 @@ class Search {
             this.t = { ...Search.#defaultTranslations, ...translation };
 
             this._data = this.data;
-
-            Object.assign(this, (this.procesServer ? searchingServer : searchingLocal))
         } catch (error) {
             if (error instanceof SearchError) {
                 this.errorHandler.logError(error, this.events);
@@ -130,8 +137,8 @@ class Search {
         try {
             this.errorHandler.validateElementExists(this.element, ErrorCode.ELEMENT_NOT_FOUND);
 
-            if (!this.procesServer && typeof this.isExtractData === 'function') {
-                this.isExtractData();
+            if (!this.procesServer && typeof this.searchingLocal.isExtractData === 'function') {
+                this.searchingLocal.isExtractData();
             }
 
             this.renderer.renderByDom(this.dom, {
