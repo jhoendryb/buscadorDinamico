@@ -54,7 +54,7 @@ export class SearchingServer {
             }
 
             try {
-                const { data, ...rest } = await this.ajax(this.searchInstance.fetch);
+                const { data, ...rest } = await this.fetch(this.searchInstance.fetch);
                 this.searchInstance._data = data;
                 this.searchInstance._ajaxResponse.success = rest;
 
@@ -91,7 +91,7 @@ export class SearchingServer {
     /**
      * Realiza petición HTTP con Fetch API.
      */
-    async ajax(config: Types.FetchConfig): Promise<any> {
+    async fetch(config: Types.FetchConfig): Promise<any> {
         try {
             // Validaciones con ErrorHandler
             this.errorHandler.validateRequired(config.url, 'url', ErrorCode.FETCH_URL_REQUIRED);
