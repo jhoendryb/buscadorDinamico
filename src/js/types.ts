@@ -34,6 +34,7 @@ export interface SearchParams {
     dom?: string;
     fetch?: FetchConfig;
     translation?: TranslationCache;
+    developmentMode?: boolean;
 }
 
 /**

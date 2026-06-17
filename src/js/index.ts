@@ -5,5 +5,6 @@ export { EventEmitter } from './events/index';
 export { Pagination } from './pagination/index';
 export { SearchRenderer } from './renderer/index';
 export { searchingLocal, searchingServer } from './searching/index';
+export { SearchError, ErrorCode, ErrorHandler } from './error-handler/index';
 export * as Constants from './constants';
 export * as Types from './types';

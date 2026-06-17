@@ -6,6 +6,9 @@ import {
     EventEmitter,
     Pagination,
     SearchRenderer,
+    SearchError,
+    ErrorCode,
+    ErrorHandler,
     Constants,
     Types
 } from './index';
@@ -30,6 +33,7 @@ class Search {
     dom: string;
     selectedIndex: number;
     _ajaxResponse: Record<string, any>;
+    developmentMode: boolean;
     renderer: any;
     cache: any;
     events: any;
@@ -39,6 +43,7 @@ class Search {
     fetch?: Types.FetchConfig;
     isExtractData?: () => void | undefined;
     searching: (searchTerm: string, isEvent: boolean) => Promise<void> = async () => { };
+    private errorHandler: ErrorHandler;
     /**
      * Instancia que almacena las traducciones predeterminadas.
      * @type {Types.TranslationCache}
@@ -67,93 +72,95 @@ class Search {
         this.cacheTtlSeconds = Constants.DEFAULT_CACHE_TTL;
         this.dom = Constants.DOM_ORDERS.SEARCH_CONTENT_ITEMS_PAGINATION;
         this.selectedIndex = Constants.NO_SELECTION;
+        this.developmentMode = Constants.DEFAULT_DEVELOPMENT_MODE;
 
         Object.assign(this, newParams);
 
-        this.scrollObserver = null;
-        this._ajaxResponse = {};
+        this.errorHandler = ErrorHandler.getInstance(this.developmentMode);
 
-        this.renderer = new SearchRenderer({
-            content: document.querySelector(this.element) as HTMLElement, // ".input-search" - contenedor que contiene la app Search
-            contentSearch: undefined, // ".app-search" - contenedor del Search
-            inputSearch: undefined, // "#filter-search" - input donde se escribe la búsqueda
-            renderItems: undefined, // ".items-search" - elemento donde se muestran los items
-            paginationItems: undefined // ".index-search" - elemento donde se muestra la paginación
-        }, this.#getUniqueClassName.bind(this));
-        this.cache = new LRUCache(this.cacheMaxSize, this.cacheTtlSeconds);
-        this.events = new EventEmitter();
-        this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
-        this.pagination.setCountFunction(() => {
-            return this.procesServer ? this._ajaxResponse.success.countPage : this._data?.length;
-        });
-        this.pagination.setDataItemsFunction((): Record<string, any>[] => {
-            return this._data || [];
-        });
+        try {
+            this.errorHandler.validateRequired(this.element, 'element', ErrorCode.ELEMENT_REQUIRED);
+            this.errorHandler.validateType(this.element, 'string', 'element', ErrorCode.ELEMENT_TYPE_INVALID);
 
-        this.t = { ...Search.#defaultTranslations, ...translation };
-
-        if (!this.element) {
-            throw new Error("El parámetro 'element' es requerido");
-        }
-
-        if (typeof this.element !== 'string') {
-            throw new Error("El parámetro 'element' debe ser un string con el selector CSS");
-        }
-
-        if (this.procesServer && !this.fetch?.url) {
-            throw new Error("El parámetro 'fetch.url' es requerido cuando procesServer es true");
-        }
-
-        if (this.itemsPerPage) {
-            if (typeof this.itemsPerPage !== 'number') {
-                throw new Error("El parámetro 'itemsPerPage' debe ser un número");
+            if (this.procesServer) {
+                this.errorHandler.validateRequired(this.fetch?.url, 'fetch.url', ErrorCode.FETCH_URL_REQUIRED);
             }
-            if (this.itemsPerPage < 1) {
-                throw new Error("El parámetro 'itemsPerPage' debe ser mayor a 0");
+
+            if (this.itemsPerPage) {
+                this.errorHandler.validateType(this.itemsPerPage, 'number', 'itemsPerPage', ErrorCode.ITEMSPERPAGE_TYPE_INVALID);
+                this.errorHandler.validateRange(this.itemsPerPage, 1, 'itemsPerPage', ErrorCode.ITEMSPERPAGE_VALUE_INVALID);
             }
+
+            this.scrollObserver = null;
+            this._ajaxResponse = {};
+            this.renderer = new SearchRenderer({
+                content: document.querySelector(this.element) as HTMLElement, // ".input-search" - contenedor que contiene la app Search
+                contentSearch: undefined, // ".app-search" - contenedor del Search
+                inputSearch: undefined, // "#filter-search" - input donde se escribe la búsqueda
+                renderItems: undefined, // ".items-search" - elemento donde se muestran los items
+                paginationItems: undefined // ".index-search" - elemento donde se muestra la paginación
+            }, this.#getUniqueClassName.bind(this));
+            this.cache = new LRUCache(this.cacheMaxSize, this.cacheTtlSeconds);
+            this.events = new EventEmitter();
+            this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
+            this.pagination.setCountFunction(() => {
+                return this.procesServer ? this._ajaxResponse.success.countPage : this._data?.length;
+            });
+            this.pagination.setDataItemsFunction((): Record<string, any>[] => {
+                return this._data || [];
+            });
+
+            this.t = { ...Search.#defaultTranslations, ...translation };
+
+            this._data = this.data;
+
+            Object.assign(this, (this.procesServer ? searchingServer : searchingLocal))
+        } catch (error) {
+            if (error instanceof SearchError) {
+                this.errorHandler.logError(error, this.events);
+            }
+            throw error;
         }
-
-        this._data = this.data;
-
-        const element = this.renderer.body.content;
-
-        if (!element) {
-            let msgError = `No existe el contenedor ${this.element}`
-            throw new Error(msgError)
-        }
-
-        Object.assign(this, (this.procesServer ? searchingServer : searchingLocal))
     }
     /**
      * Inicializa el componente Search.
      * @returns {Search} Instancia para encadenamiento
      */
     init(): Search {
-        if (!this.procesServer && typeof this.isExtractData === 'function') {
-            this.isExtractData();
-        }
+        try {
+            this.errorHandler.validateElementExists(this.element, ErrorCode.ELEMENT_NOT_FOUND);
 
-        this.renderer.renderByDom(this.dom, {
-            zIndex: this.zIndex,
-            search: {
-                onInput: (searchTerm: string, isEvent: boolean) => this.draw(searchTerm, isEvent),
-                debounceTime: this.debounceTime,
-                placeholder: this.t.searchPlaceholder,
-                ariaLabel: this.t.searchLabel
+            if (!this.procesServer && typeof this.isExtractData === 'function') {
+                this.isExtractData();
             }
-        } as Types.RenderByDomOptions);
 
-        this.setupKeyboardNavigation();
+            this.renderer.renderByDom(this.dom, {
+                zIndex: this.zIndex,
+                search: {
+                    onInput: (searchTerm: string, isEvent: boolean) => this.draw(searchTerm, isEvent),
+                    debounceTime: this.debounceTime,
+                    placeholder: this.t.searchPlaceholder,
+                    ariaLabel: this.t.searchLabel
+                }
+            } as Types.RenderByDomOptions);
 
-        this.draw(this.searchTerm);
+            this.setupKeyboardNavigation();
 
-        this.events.emit('init', {
-            searchTerm: this.searchTerm,
-            itemsPerPage: this.itemsPerPage,
-            procesServer: this.procesServer
-        } as Types.SearchEventInit);
+            this.draw(this.searchTerm);
 
-        return this;
+            this.events.emit('init', {
+                searchTerm: this.searchTerm,
+                itemsPerPage: this.itemsPerPage,
+                procesServer: this.procesServer
+            } as Types.SearchEventInit);
+
+            return this;
+        } catch (error) {
+            if (error instanceof SearchError) {
+                this.errorHandler.logError(error);
+            }
+            throw error;
+        }
     }
     /**
      * Ejecuta una búsqueda y renderiza los resultados.

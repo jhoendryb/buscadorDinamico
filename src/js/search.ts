@@ -5,6 +5,7 @@ const search1 = new Search({
     procesServer: true,
     cacheEnabled: true,
     keyboardEnabled: true,
+    developmentMode: true,
     template: `<div>{{name}} - {{id_ciudad}}</div>`,
     translation: {
         searchPlaceholder: 'Escribe la busqueda aqui.'
