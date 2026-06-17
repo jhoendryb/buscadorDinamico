@@ -1,0 +1,150 @@
+import { Search } from './app';
+
+const search1 = new Search({
+    element: '.app-search1',
+    procesServer: true,
+    cacheEnabled: true,
+    keyboardEnabled: true,
+    developmentMode: true,
+    template: `<div>{{name}} - {{id_ciudad}}</div>`,
+    translation: {
+        searchPlaceholder: 'Escribe la busqueda aqui.'
+    },
+    dom: 'scip',
+    fetch: {
+        url: "/buscadorDinamico/src/php/responseAjax.php",
+        method: "POST",
+        body: {
+            page: 1,
+            searchTerm: ""
+            // sortBy: "id_ciudad",
+            // sortOrder: "asc"
+        },
+        // sucess: function (resp, instance) {
+        //     if (resp) {
+        //         console.log(resp)
+        //     }
+        // },
+        // error: function (error) {
+        //     console.log(error);
+        // }
+    },
+});
+
+
+const prueba = search1.on('renderItems', (data: any) => {
+    const { content } = data;
+    const item = content.children;
+    console.log('Page change event:', item[0]);
+    console.log('Item content:', item[0].innerHTML);
+});
+
+console.log("Esto es pruebas", prueba);
+
+search1.on('itemSelected', (data: any) => {
+    console.log('Item seleccionado:', data.item);
+});
+
+const search2 = new Search({
+    element: '.app-search2'
+});
+
+search2.on('search', (data: any) => {
+    console.log('Search event:', data);
+});
+
+search2.on('pageChange', (data: any) => {
+    console.log('Page change event:', data);
+});
+
+const search3 = new Search({
+    element: '.app-search3'
+});
+
+const search4 = new Search({
+    element: '.app-search4',
+    data: [
+        {
+            country: 'VE',
+            name: 'Venezuela',
+            descripcion: 'El pais mas rico en petroleo.'
+        },
+        {
+            country: 'CO',
+            name: 'Colombia',
+            descripcion: 'El pais mas rico en cafe.'
+        },
+        {
+            country: 'MX',
+            name: 'Mexico',
+            descripcion: 'El pais mas rico en tacos.'
+        },
+        {
+            country: 'AR',
+            name: 'Argentina',
+            descripcion: 'El pais mas rico en empanadas.'
+        },
+        {
+            country: 'CL',
+            name: 'Chile',
+            descripcion: 'El pais mas rico en vino.'
+        },
+        {
+            country: 'PE',
+            name: 'Peru',
+            descripcion: 'El pais mas rico en machi.'
+        },
+        {
+            country: 'EC',
+            name: 'Ecuador',
+            descripcion: 'El pais mas rico en cacao.'
+        },
+        {
+            country: 'BO',
+            name: 'Bolivia',
+            descripcion: 'El pais mas rico en plata.'
+        },
+        {
+            country: 'CO',
+            name: 'Colombia',
+            descripcion: 'El pais mas rico en cafe.'
+        },
+        {
+            country: 'MX',
+            name: 'Mexico',
+            descripcion: 'El pais mas rico en tacos.'
+        },
+        {
+            country: 'AR',
+            name: 'Argentina',
+            descripcion: 'El pais mas rico en empanadas.'
+        },
+        {
+            country: 'CL',
+            name: 'Chile',
+            descripcion: 'El pais mas rico en vino.'
+        },
+        {
+            country: 'PE',
+            name: 'Peru',
+            descripcion: 'El pais mas rico en machi.'
+        },
+        {
+            country: 'EC',
+            name: 'Ecuador',
+            descripcion: 'El pais mas rico en cacao.'
+        },
+        {
+            country: 'BO',
+            name: 'Bolivia',
+            descripcion: 'El pais mas rico en plata.'
+        },
+    ]
+});
+
+search1.init();
+search2.init();
+search3.init();
+search4.init();
+
+search2.sort('name', 'asc').draw();

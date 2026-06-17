@@ -1,0 +1,23 @@
+.app-search {
+    border-radius: var(--search-border-radius);
+}
+
+.app-search:has(.content-pagination-items.content-pagination-visible) {
+    border-radius: var(--search-border-radius-open);
+}
+
+/* .items-search {
+    border-radius: var(--items-search-border-radius);
+} */
+
+.items-search .items {
+    border-radius: var(--search-border-radius);
+}
+
+.pagination-items .items-counter {
+    border-top: 1px solid var(--search-border-color);
+}
+
+/* .content-pagination-items {
+    border-radius: var(--search-border-radius);
+} */

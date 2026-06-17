@@ -36,6 +36,77 @@ La clase Search se importa como módulo ES6:
 <script src="./node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
 ```
 
+## Gestión de Errores
+
+El componente Search incluye un sistema robusto de gestión de errores que proporciona mensajes claros con guías de solución.
+
+### Códigos de Error
+
+```text
+| Código | Descripción | Solución |
+|--------|-------------|----------|
+| SEARCH_001 | El parámetro 'element' es requerido | Proporciona el selector CSS del contenedor |
+| SEARCH_002 | El parámetro 'element' debe ser un string | Usa un selector CSS válido |
+| SEARCH_003 | El parámetro 'fetch.url' es requerido | Configura la URL del endpoint |
+| SEARCH_010 | No existe el contenedor especificado | Verifica el selector CSS |
+| SEARCH_020 | Error de conexión al servidor | Verifica tu conexión a internet |
+```
+
+## Paso 7: Documentar Uso
+
+### README.md - Sección de CSS
+
+## CSS
+
+El componente Search incluye CSS modular en dos partes:
+
+### CSS Core (Obligatorio)
+
+CSS necesario para el funcionamiento del componente:
+
+- Estructura de layout
+- Visibilidad y ocultamiento
+- Animaciones
+- Estados (selected, loading)
+- Scrollbar
+
+```html
+<link rel="stylesheet" href="./node_modules/search-component/dist/css/core.css">
+```
+
+### CSS Theme (Opcional)
+
+CSS de estilización personalizable:
+
+- Variables CSS
+- Colores
+- Dimensiones
+- Bordes
+- Tipografía
+  
+```html
+<link rel="stylesheet" href="./node_modules/search-component/dist/css/theme.css">
+```
+
+### Personalización CSS
+
+Puedes sobrescribir las variables CSS:
+
+```css
+:root {
+    --search-width: 300px;
+    --search-bg-color: #f0f0f0;
+    --search-selected-bg-color: #ffeb3b;
+}
+```
+
+O crear tu propio tema:
+
+```html
+<link rel="stylesheet" href="./node_modules/search-component/dist/css/core.css">
+<link rel="stylesheet" href="./mi-tema-personalizado.css">
+```
+
 ## Estructura HTML
 
 ### Contenedor Básico
@@ -475,8 +546,7 @@ const element = createElement({
 
 ### Parámetros
 
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
+| Parámetro | Tipo | Descripción ||-----------|------|-------------|
 | `element` | String/Object | Nombre del elemento HTML o elemento existente |
 | `dataset` | Object | Atributos data-* del elemento |
 | `children` | Array | Array de objetos para crear elementos hijos |

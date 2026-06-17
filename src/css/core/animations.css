@@ -1,0 +1,7 @@
+.items-search {
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.content-pagination-items {
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}

@@ -1,0 +1,33 @@
+:root {
+    /* Colores principales */
+    --search-bg-color: #ffffff;
+    --search-border-color: #dddddd;
+    --search-text-color: #333333;
+    --search-item-bg-color: rgba(0, 15, 89, 0.31);
+    --search-item-hover-bg-color: rgba(0, 15, 89, 0.5);
+    --search-selected-bg-color: #e3f2fd;
+    --search-selected-border-color: #2196f3;
+    --search-counter-color: #666666;
+    --search-counter-bg-color: rgba(255, 255, 255, 0.9);
+
+    /* Scrollbar */
+    --scrollbar-thumb-color: #d4dce2;
+
+    /* Loading */
+    --spinner-border-color: #f3f3f3;
+    --spinner-top-color: #3498db;
+
+    /* Dimensiones */
+    --search-width: 250px;
+    --search-max-height: 350px;
+    --search-padding: 8px;
+    --search-gap: 10px;
+    --search-border-radius: 5px;
+    --items-search-border-radius: 5px 5px 0 0;
+    --search-border-radius-open: 5px 5px 0 0;
+
+    /* Tipografía */
+    --search-font-size: 14px;
+    --search-counter-font-size: 0.8em;
+    --search-counter-text-align: center;
+}

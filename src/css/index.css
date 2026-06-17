@@ -1,0 +1,20 @@
+@import './core/structure.css';
+@import './core/visibility.css';
+@import './core/animations.css';
+@import './core/states.css';
+@import './core/scrollbar.css';
+@import './theme/variables.css';
+@import './theme/colors.css';
+@import './theme/dimensions.css';
+@import './theme/borders.css';
+@import './theme/typography.css';
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    padding: 10px;
+}
