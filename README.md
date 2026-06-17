@@ -1,117 +1,276 @@
-# Search Class Documentation
+# Search Component
 
-Una clase JavaScript flexible para crear buscadores dinámicos con soporte para paginación y búsqueda en tiempo real, tanto con datos locales como con peticiones AJAX al servidor.
+Una clase TypeScript flexible y moderna para crear buscadores dinámicos con soporte para paginación, scroll infinito, búsqueda en tiempo real, navegación por teclado y gestión de errores centralizada. Compatible con datos locales y peticiones AJAX al servidor usando Fetch API.
+
+## Características Principales
+
+- **Búsqueda en tiempo real** con debounce configurable
+- **Modo local** (datos en memoria) y **modo servidor** (AJAX con Fetch API)
+- **Scroll infinito** automático con Intersection Observer
+- **Navegación por teclado** (ArrowUp, ArrowDown, Enter)
+- **Sistema de eventos** personalizado y extensible
+- **Caché LRU** con TTL para optimizar rendimiento
+- **Templates personalizados** para renderizado de items
+- **Internacionalización** (i18n) con traducciones configurables
+- **Gestión de errores centralizada** con mensajes claros
+- **TypeScript** con type safety completo
+- **Múltiples instancias** en la misma página sin conflictos
+- **Accesibilidad** con ARIA attributes
 
 ## Tabla de Contenidos
 
 - [Instalación](#instalación)
+- [Arquitectura del Componente](#arquitectura-del-componente)
+- [Configuración Completa](#configuración-completa)
 - [Estructura HTML](#estructura-html)
-- [Configuración](#configuración)
+- [CSS y Estilos](#css-y-estilos)
 - [Modos de Uso](#modos-de-uso)
-- [Archivos PHP del Servidor](#archivos-php-del-servidor)
-- [Métodos de la Clase](#métodos-de-la-clase)
-- [Mixins](#mixins)
-- [Función createElement](#función-createelement)
+- [API Fetch](#api-fetch)
+- [Sistema de Eventos](#sistema-de-eventos)
+- [Métodos Públicos](#métodos-públicos)
+- [Scroll Infinito](#scroll-infinito)
+- [Navegación por Teclado](#navegación-por-teclado)
+- [Templates Personalizados](#templates-personalizados)
+- [Internacionalización](#internacionalización-i18n)
+- [Sistema de Caché](#sistema-de-caché)
+- [Gestión de Errores](#gestión-de-errores)
+- [Servidor Backend](#servidor-backend)
 - [Ejemplos Completos](#ejemplos-completos)
-- [Personalización](#personalización)
-- [Notas Importantes](#notas-importantes)
+- [Personalización Avanzada](#personalización-avanzada)
+- [TypeScript](#typescript)
+- [Rendimiento y Optimización](#rendimiento-y-optimización)
+- [Accesibilidad](#accesibilidad)
+- [Troubleshooting](#troubleshooting)
+- [Migración desde XMLHttpRequest](#migración-desde-xmlhttprequest)
+- [Changelog](#changelog)
+- [Licencia](#licencia)
 
 ## Instalación
 
-La clase Search se importa como módulo ES6:
+### Instalación con npm/pnpm
 
-```html
-<script src="./src/js/app.js" type="module"></script>
+```bash
+npm install buscador-dinamico
+# o
+pnpm install buscador-dinamico
 ```
 
-**Dependencias opcionales:**
+### Instalación Manual
 
-- Bootstrap CSS y JS (para estilos - opcional, solo para mejorar la visualización del ejemplo)
-- Popper.js (para componentes de Bootstrap - opcional, solo para mejorar la visualización del ejemplo)
+Descarga los archivos del proyecto e importa la clase Search:
 
 ```html
-<!-- Opcional: Solo si deseas usar los estilos de Bootstrap para mejorar la visualización -->
+<script type="module">
+    import { Search } from './src/js/app.js';
+</script>
+```
+
+### Dependencias
+
+**Requeridas:**
+- Ninguna (Vanilla JavaScript + TypeScript)
+
+**Opcionales (para mejor visualización):**
+- Bootstrap CSS y JS
+- Popper.js (para componentes de Bootstrap)
+
+```html
+<!-- Opcional: Solo si deseas usar los estilos de Bootstrap -->
 <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
 <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="./node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
 ```
 
-## Gestión de Errores
+### Estructura de Archivos
 
-El componente Search incluye un sistema robusto de gestión de errores que proporciona mensajes claros con guías de solución.
-
-### Códigos de Error
-
-```text
-| Código | Descripción | Solución |
-|--------|-------------|----------|
-| SEARCH_001 | El parámetro 'element' es requerido | Proporciona el selector CSS del contenedor |
-| SEARCH_002 | El parámetro 'element' debe ser un string | Usa un selector CSS válido |
-| SEARCH_003 | El parámetro 'fetch.url' es requerido | Configura la URL del endpoint |
-| SEARCH_010 | No existe el contenedor especificado | Verifica el selector CSS |
-| SEARCH_020 | Error de conexión al servidor | Verifica tu conexión a internet |
+```
+buscadorDinamico/
+├── src/
+│   ├── js/
+│   │   ├── app.ts              # Clase principal Search
+│   │   ├── search.ts           # Ejemplos de uso
+│   │   ├── types.ts            # Interfaces TypeScript
+│   │   ├── searching/
+│   │   │   ├── searchingLocal.ts    # Búsqueda local
+│   │   │   └── searchingServer.ts   # Búsqueda por servidor
+│   │   ├── error-handler/      # Sistema de errores
+│   │   ├── cache/              # Sistema de caché LRU
+│   │   ├── events/             # Sistema de eventos
+│   │   ├── pagination/         # Paginación
+│   │   └── renderer/           # Renderizado de DOM
+│   ├── css/
+│   │   └── index.css          # Estilos del componente
+│   └── php/
+│       └── responseAjax.php   # Ejemplo de backend
+├── index.html                 # Ejemplo de uso
+└── README.md                  # Documentación
 ```
 
-## Paso 7: Documentar Uso
+## Arquitectura del Componente
 
-### README.md - Sección de CSS
+### Clases Principales
 
-## CSS
+El componente sigue una arquitectura orientada a objetos (OOP) con separación de responsabilidades:
 
-El componente Search incluye CSS modular en dos partes:
+- **Search**: Clase principal que orquesta todas las funcionalidades
+- **SearchingLocal**: Maneja la búsqueda en el cliente (datos locales)
+- **SearchingServer**: Maneja la búsqueda por servidor usando Fetch API
+- **Pagination**: Gestiona la paginación y scroll infinito
+- **SearchRenderer**: Renderiza el DOM y maneja la visualización
+- **EventEmitter**: Sistema de eventos personalizado
+- **ErrorHandler**: Gestión centralizada de errores
+- **LRUCache**: Sistema de caché con política LRU y TTL
 
-### CSS Core (Obligatorio)
+### Patrón OOP y Composición
 
-CSS necesario para el funcionamiento del componente:
+El componente utiliza:
+- **Encapsulamiento**: Propiedades privadas con `#` y métodos públicos bien definidos
+- **Composición**: Search compone instancias de SearchingLocal, SearchingServer, Pagination, etc.
+- **Herencia**: Clases especializadas extienden funcionalidades base
+- **Polimorfismo**: Interfaces compartidas entre clases similares
 
-- Estructura de layout
-- Visibilidad y ocultamiento
-- Animaciones
-- Estados (selected, loading)
-- Scrollbar
+### Fetch API vs XMLHttpRequest
 
-```html
-<link rel="stylesheet" href="./node_modules/search-component/dist/css/core.css">
+El componente ha migrado de XMLHttpRequest a **Fetch API** por las siguientes ventajas:
+
+- **API moderna y basada en Promises**
+- **Mejor manejo de streams**
+- **Soporte nativo para AbortController** (timeout)
+- **Sintaxis más limpia y legible**
+- **Mejor integración con async/await**
+- **Soporte para diferentes Content-Type** (JSON, FormData, URL-encoded)
+
+### Sistema de Gestión de Errores
+
+El sistema ErrorHandler proporciona:
+- Validación centralizada de parámetros
+- Códigos de error estandarizados
+- Mensajes de error con guías de solución
+- Logging en modo desarrollo
+- Type safety con TypeScript
+
+### Sistema de Eventos
+
+El EventEmitter permite:
+- Suscripción a eventos personalizados
+- Múltiples listeners por evento
+- Remoción de listeners
+- Emisión de datos estructurados
+- Encadenamiento de métodos
+
+### Sistema de Caché LRU con TTL
+
+El sistema de caché implementa:
+- **LRU (Least Recently Used)**: Elimina los items menos usados
+- **TTL (Time To Live)**: Expiración por tiempo
+- **Configuración de tamaño máximo**
+- **Invalidación manual**
+- **Claves únicas por búsqueda**
+
+## Configuración Completa
+
+### Parámetros del Constructor
+
+```typescript
+const search = new Search({
+    // Requerido
+    element: '.app-search',
+    
+    // Datos y búsqueda
+    data: [],
+    procesServer: false,
+    searchTerm: '',
+    
+    // Paginación
+    itemsPerPage: 10,
+    
+    // Performance
+    debounceTime: 500,
+    
+    // Caché
+    cacheEnabled: false,
+    cacheMaxSize: 50,
+    cacheTtlSeconds: 60,
+    
+    // Ordenamiento
+    sortBy: null,
+    sortOrder: 'asc',
+    
+    // UI/UX
+    keyboardEnabled: false,
+    zIndex: 1000,
+    dom: 'scip',
+    template: null,
+    translation: {},
+    
+    // Desarrollo
+    developmentMode: false,
+    
+    // Fetch API (modo servidor)
+    fetch: {
+        url: '',
+        method: 'POST',
+        headers: {},
+        body: {},
+        timeout: 10000,
+        sucess: () => {},
+        error: () => {}
+    }
+});
 ```
 
-### CSS Theme (Opcional)
+### Descripción Detallada de Parámetros
 
-CSS de estilización personalizable:
+| Parámetro | Tipo | Default | Descripción |
+|-----------|------|---------|-------------|
+| `element` | String | - | Selector CSS del contenedor (requerido) |
+| `data` | Array | `[]` | Array de objetos para búsqueda local |
+| `procesServer` | Boolean | `false` | Habilita búsqueda por servidor (AJAX) |
+| `searchTerm` | String | `""` | Término de búsqueda inicial |
+| `itemsPerPage` | Number | `10` | Cantidad de items por página |
+| `debounceTime` | Number | `500` | Tiempo de debounce en milisegundos |
+| `cacheEnabled` | Boolean | `false` | Habilita caché LRU |
+| `cacheMaxSize` | Number | `50` | Tamaño máximo del caché |
+| `cacheTtlSeconds` | Number | `60` | Tiempo de vida del caché en segundos |
+| `keyboardEnabled` | Boolean | `false` | Habilita navegación por teclado |
+| `sortBy` | String | `null` | Campo para ordenamiento |
+| `sortOrder` | String | `'asc'` | Orden: `'asc'` o `'desc'` |
+| `zIndex` | Number | `1000` | z-index del componente |
+| `dom` | String | `'scip'` | Orden de renderizado (s=search, c=content, i=items, p=pagination) |
+| `template` | String/Function | `null` | Template personalizado para items |
+| `translation` | Object | `{}` | Traducciones personalizadas |
+| `developmentMode` | Boolean | `false` | Modo desarrollo con logs detallados |
+| `fetch` | Object | `{}` | Configuración de Fetch API (solo si `procesServer: true`) |
 
-- Variables CSS
-- Colores
-- Dimensiones
-- Bordes
-- Tipografía
-  
-```html
-<link rel="stylesheet" href="./node_modules/search-component/dist/css/theme.css">
-```
+### Configuración del Objeto `fetch`
 
-### Personalización CSS
-
-Puedes sobrescribir las variables CSS:
-
-```css
-:root {
-    --search-width: 300px;
-    --search-bg-color: #f0f0f0;
-    --search-selected-bg-color: #ffeb3b;
+```typescript
+fetch: {
+    url: "./src/php/responseAjax.php",  // URL del endpoint (requerido)
+    method: "POST",                      // Método HTTP (GET, POST, PUT, PATCH)
+    headers: {                           // Headers adicionales
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    },
+    body: {                              // Cuerpo de la petición
+        page: 1,
+        searchTerm: "",
+        itemsPerPage: 10
+    },
+    timeout: 10000,                      // Timeout en milisegundos
+    sucess: (resp, instance) => {        // Callback de éxito
+        console.log('Respuesta:', resp);
+    },
+    error: (err) => {                    // Callback de error
+        console.error('Error:', err);
+    }
 }
-```
-
-O crear tu propio tema:
-
-```html
-<link rel="stylesheet" href="./node_modules/search-component/dist/css/core.css">
-<link rel="stylesheet" href="./mi-tema-personalizado.css">
 ```
 
 ## Estructura HTML
 
 ### Contenedor Básico
 
-La clase Search requiere un contenedor con una clase CSS (por ejemplo, `.app-search`):
+La clase Search requiere un contenedor con una clase CSS:
 
 ```html
 <div class="app-search">
@@ -129,12 +288,12 @@ Si tienes datos ya en el HTML, puedes incluir elementos con data attributes:
 ```html
 <div class="app-search">
     <main class="items-search">
-        <section class="items" data-country="VE" data-name="Venezuela"
+        <li class="items" data-country="VE" data-name="Venezuela"
             data-descripcion="El pais mas rico en petroleo.">
-        </section>
-        <section class="items" data-country="CO" data-name="Colombia"
+        </li>
+        <li class="items" data-country="CO" data-name="Colombia"
             data-descripcion="Un pais con una gran riqueza cultural.">
-        </section>
+        </li>
         <!-- ... más items -->
     </main>
 </div>
@@ -151,64 +310,109 @@ Si el contenedor está vacío, la clase Search generará automáticamente:
     <search class="input-search">
         <label for="filter-search">Filtrar por Busqueda</label>
         <input type="text" name="filterSearch" class="filter-search form-control input-lg"
-            placeholder="Ingrese palabra clave...">
+            placeholder="Ingrese palabra clave..."
+            aria-label="Campo de búsqueda">
     </search>
     <main class="items-search scroll-personalize">
         <!-- Aquí se renderizan los resultados -->
     </main>
     <footer class="index-search">
-        <ul class="pagination">
-            <!-- Aquí se renderiza la paginación -->
-        </ul>
+        <div class="pagination-items">
+            <div class="items-counter">0 de 0</div>
+            <ul class="pagination">
+                <!-- Aquí se renderiza la paginación -->
+            </ul>
+        </div>
     </footer>
 </div>
 ```
 
-## Configuración
+### Clases CSS Únicas
 
-### Parámetros del Constructor
+La clase genera automáticamente clases CSS únicas para múltiples instancias:
 
 ```javascript
-const search = new Search({
-    element: '.app-search',      // Selector CSS del contenedor (requerido)
-    data: [],                    // Array de datos para búsqueda local (opcional)
-    procesServer: false,         // Habilita búsqueda por servidor (opcional, default: false)
-    itemsPerPage: 10,            // Items por página (opcional, default: 10)
-    fetch: {                     // Configuración AJAX para servidor (opcional)
-        url: "./src/php/responseAjax.php",
-        method: "POST",
-        body: {
-            page: 1,
-            searchTerm: ""
-        }
-    }
-});
+// Para `.app-search1`: `input-search-app-search1`, `items-search-app-search1`
+// Para `.app-search2`: `input-search-app-search2`, `items-search-app-search2`
 ```
 
-### Descripción de Parámetros
+Esto evita conflictos de estilos entre múltiples instancias.
 
-| Parámetro | Tipo | Default | Descripción |
-|-----------|------|---------|-------------|
-| `element` | String | - | Selector CSS del contenedor del buscador (requerido) |
-| `data` | Array | `[]` | Array de objetos con datos para búsqueda local |
-| `procesServer` | Boolean | `false` | Habilita modo de búsqueda por servidor (AJAX) |
-| `itemsPerPage` | Number | `10` | Cantidad de items a mostrar por página |
-| `fetch` | Object | `{}` | Configuración de la petición AJAX (solo si `procesServer: true`) |
+### ARIA Attributes y Accesibilidad
 
-### Configuración del Objeto `fetch`
+El componente incluye atributos ARIA para accesibilidad:
 
-```javascript
-fetch: {
-    url: "./src/php/responseAjax.php",  // URL del endpoint PHP
-    method: "POST",                      // Método HTTP (POST, GET, PUT, PATCH)
-    body: {
-        page: 1,                          // Página inicial
-        searchTerm: "",                   // Término de búsqueda inicial
-        itemsPerPage: 10                  // Items por página (se sincroniza con itemsPerPage)
-    },
-    sucess: function(response, instance) { },  // Callback de éxito (opcional)
-    error: function(error) { }                   // Callback de error (opcional)
-    header: { }                                  // Headers adicionales (opcional)
+```html
+<input type="text" 
+    aria-label="Campo de búsqueda"
+    placeholder="Ingrese palabra clave..."
+    role="searchbox">
+```
+
+## CSS y Estilos
+
+### CSS Core (Obligatorio)
+
+CSS necesario para el funcionamiento del componente:
+
+- Estructura de layout
+- Visibilidad y ocultamiento
+- Animaciones
+- Estados (selected, loading)
+- Scrollbar
+
+```html
+<link rel="stylesheet" href="./src/css/index.css">
+```
+
+### CSS Theme (Opcional)
+
+CSS de estilización personalizable:
+
+- Variables CSS
+- Colores
+- Dimensiones
+- Bordes
+- Tipografía
+
+### Variables CSS Personalizables
+
+```css
+:root {
+    --search-width: 300px;
+    --search-bg-color: #f0f0f0;
+    --search-selected-bg-color: #ffeb3b;
+    --search-border-radius: 4px;
+    --search-font-size: 14px;
+}
+```
+
+### Creación de Temas Personalizados
+
+```html
+<link rel="stylesheet" href="./src/css/index.css">
+<link rel="stylesheet" href="./mi-tema-personalizado.css">
+```
+
+### Ejemplo de Personalización
+
+```css
+:root {
+    --search-width: 400px;
+    --search-bg-color: #f5f5f5;
+    --search-selected-bg-color: #ffeb3b;
+}
+
+.app-search {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.items-search .items {
+    transition: all 0.3s ease;
+}
+
+.content-pagination-items {
+    background: #f5f5f5;
 }
 ```
 
@@ -229,6 +433,11 @@ const search = new Search({
             country: 'CO',
             name: 'Colombia',
             descripcion: 'El pais mas rico en cafe.'
+        },
+        {
+            country: 'MX',
+            name: 'Mexico',
+            descripcion: 'El pais mas rico en tacos.'
         }
     ]
 });
@@ -237,7 +446,6 @@ search.init();
 ```
 
 **Cómo funciona:**
-
 - Los datos se pasan directamente en el parámetro `data`
 - La búsqueda se realiza filtrando el array en el cliente
 - La paginación se calcula basándose en los resultados filtrados
@@ -253,7 +461,6 @@ search.init();
 ```
 
 **Cómo funciona:**
-
 - La clase busca elementos `.items` dentro del contenedor
 - Extrae los datos de los atributos `data-*` de cada elemento
 - También captura el `innerHTML` del elemento en la propiedad `children`
@@ -264,14 +471,14 @@ search.init();
 ```html
 <div class="app-search">
     <main class="items-search">
-        <section class="items" data-country="VE" data-name="Venezuela">
+        <li class="items" data-country="VE" data-name="Venezuela">
             Contenido HTML del item
-        </section>
+        </li>
     </main>
 </div>
 ```
 
-### 3. Búsqueda por Servidor (AJAX)
+### 3. Búsqueda por Servidor (Fetch API)
 
 ```javascript
 const search = new Search({
@@ -280,6 +487,9 @@ const search = new Search({
     fetch: {
         url: "./src/php/responseAjax.php",
         method: "POST",
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
         body: {
             page: 1,
             searchTerm: ""
@@ -291,36 +501,764 @@ search.init();
 ```
 
 **Cómo funciona:**
-
-- La clase usa XMLHttpRequest para hacer peticiones al servidor
+- La clase usa Fetch API para hacer peticiones al servidor
 - Envía parámetros: `searchTerm`, `page`, `itemsPerPage`
 - El servidor debe responder con JSON conteniendo: `data`, `page`, `countPage`
 - La paginación se maneja del lado del servidor
+- Soporta timeout configurable con AbortController
 
-## Archivos PHP del Servidor
+### 4. Múltiples Instancias en la Misma Página
+
+```javascript
+const search1 = new Search({
+    element: '.app-search1',
+    procesServer: true,
+    fetch: {
+        url: "./src/php/responseAjax.php",
+        method: "POST",
+        body: { page: 1, searchTerm: "" }
+    }
+});
+
+const search2 = new Search({
+    element: '.app-search2'
+});
+
+const search3 = new Search({
+    element: '.app-search3',
+    data: [
+        { name: 'Item 1', descripcion: 'Descripción 1' }
+    ]
+});
+
+search1.init();
+search2.init();
+search3.init();
+```
+
+## API Fetch
+
+### Configuración de Fetch API
+
+El componente usa la API Fetch moderna en lugar de XMLHttpRequest:
+
+```javascript
+fetch: {
+    url: "./src/php/responseAjax.php",
+    method: "POST",
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    },
+    body: {
+        page: 1,
+        searchTerm: "",
+        itemsPerPage: 10
+    },
+    timeout: 10000,
+    sucess: (resp, instance) => {
+        console.log('Respuesta:', resp);
+    },
+    error: (err) => {
+        console.error('Error:', err);
+    }
+}
+```
+
+### Timeout Configurable con AbortController
+
+```javascript
+fetch: {
+    url: "./src/php/responseAjax.php",
+    timeout: 10000  // 10 segundos
+}
+```
+
+Si la petición excede el timeout, se cancela automáticamente y se emite un error.
+
+### Soporte para Diferentes Content-Type
+
+**JSON:**
+```javascript
+fetch: {
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ page: 1, searchTerm: "" })
+}
+```
+
+**URL-encoded:**
+```javascript
+fetch: {
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    },
+    body: {
+        page: 1,
+        searchTerm: ""
+    }
+}
+```
+
+**FormData:**
+```javascript
+const formData = new FormData();
+formData.append('page', '1');
+formData.append('searchTerm', '');
+
+fetch: {
+    body: formData
+}
+```
+
+### Callbacks de Éxito y Error
+
+```javascript
+fetch: {
+    sucess: (resp, instance) => {
+        console.log('Datos recibidos:', resp.data);
+        console.log('Instancia:', instance);
+    },
+    error: (err) => {
+        console.error('Error en petición:', err);
+    }
+}
+```
+
+## Sistema de Eventos
+
+### Lista Completa de Eventos
+
+| Evento | Cuándo se emite | Datos emitidos |
+|--------|----------------|----------------|
+| `init` | Al inicializar el componente | `{ searchTerm, itemsPerPage, procesServer }` |
+| `search` | Al realizar una búsqueda | `{ searchTerm, results, totalResults, timestamp }` |
+| `pageChange` | Al cambiar de página | `{ page, totalPages, itemsOnPage, totalLoaded }` |
+| `sortChange` | Al cambiar el ordenamiento | `{ field, order }` |
+| `itemSelected` | Al seleccionar un item | `{ item, index }` |
+| `itemHighlighted` | Al destacar un item con teclado | `{ item, index }` |
+| `renderItems` | Al renderizar items | `{ items, content }` |
+| `appendItems` | Al añadir items (scroll infinito) | `{ items, content }` |
+| `destroy` | Al destruir la instancia | `{ timestamp }` |
+| `error` | Al ocurrir un error | `{ code, message, solution }` |
+
+### Ejemplos de Uso de Eventos
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    data: [/* datos */]
+});
+
+// Evento init
+search.on('init', (data) => {
+    console.log('Componente inicializado:', data);
+});
+
+// Evento search
+search.on('search', (data) => {
+    console.log('Búsqueda realizada:', data.searchTerm);
+    console.log('Resultados:', data.totalResults);
+});
+
+// Evento pageChange
+search.on('pageChange', (data) => {
+    console.log('Página actual:', data.page);
+    console.log('Total páginas:', data.totalPages);
+});
+
+// Evento itemSelected
+search.on('itemSelected', (data) => {
+    console.log('Item seleccionado:', data.item);
+    console.log('Índice:', data.index);
+});
+
+// Evento sortChange
+search.on('sortChange', (data) => {
+    console.log('Ordenado por:', data.field);
+    console.log('Orden:', data.order);
+});
+
+// Evento destroy
+search.on('destroy', (data) => {
+    console.log('Componente destruido:', data.timestamp);
+});
+
+search.init();
+```
+
+### Remover Listeners
+
+```javascript
+const listener = search.on('search', (data) => {
+    console.log('Búsqueda:', data);
+});
+
+// Remover el listener
+listener.off();
+```
+
+## Métodos Públicos
+
+### init()
+
+Inicializa el buscador y configura los elementos necesarios.
+
+```javascript
+search.init();
+```
+
+**Retorna:** Instancia de Search para encadenamiento
+
+**Funcionamiento:**
+- Valida que el contenedor exista
+- Extrae datos del DOM si es modo local
+- Renderiza la estructura del DOM
+- Configura navegación por teclado si está habilitada
+- Ejecuta búsqueda inicial
+- Emite evento `init`
+
+### draw(searchTerm, isEvent)
+
+Ejecuta una búsqueda y renderiza los resultados.
+
+```javascript
+await search.draw('venezuela', true);
+```
+
+**Parámetros:**
+- `searchTerm` (string): Término de búsqueda (opcional, usa `this.searchTerm` si no se proporciona)
+- `isEvent` (boolean): Si fue iniciado por evento del usuario (default: false)
+
+**Retorna:** Promise<Search> para encadenamiento
+
+**Funcionamiento:**
+- Resetea el scroll si cambia el término de búsqueda
+- Ejecuta la búsqueda (local o servidor)
+- Procesa scroll infinito
+- Emite eventos correspondientes
+
+### sort(field, order)
+
+Ordena los datos por un campo específico.
+
+```javascript
+search.sort('name', 'asc');
+```
+
+**Parámetros:**
+- `field` (string): Campo por el cual ordenar
+- `order` (string): Orden de ordenamiento ('asc' o 'desc', default: 'asc')
+
+**Retorna:** Instancia de Search para encadenamiento
+
+**Funcionamiento:**
+- En modo local: ordena el array `_data`
+- En modo servidor: envía parámetros de ordenamiento al servidor
+- Emite evento `sortChange`
+
+### clearSort()
+
+Elimina el orden actual y reinicia a orden natural.
+
+```javascript
+search.clearSort();
+```
+
+**Retorna:** Instancia de Search para encadenamiento
+
+**Funcionamiento:**
+- Reinicia `sortBy` a null
+- Reinicia `sortOrder` a 'asc'
+- Limpia el caché
+- En modo servidor: envía parámetros de reinicio al servidor
+
+### on(eventName, callback)
+
+Registra un listener para un evento.
+
+```javascript
+search.on('search', (data) => {
+    console.log('Búsqueda:', data);
+});
+```
+
+**Parámetros:**
+- `eventName` (string): Nombre del evento
+- `callback` (function): Función a ejecutar
+
+**Retorna:** Objeto con método `off()` para remover el listener
+
+### showLoading()
+
+Muestra el indicador de carga.
+
+```javascript
+search.showLoading();
+```
+
+**Retorna:** Instancia de Search para encadenamiento
+
+### getCacheKey(searchTerm, page)
+
+Genera una clave única para el caché basada en el término de búsqueda y página.
+
+```javascript
+const key = search.getCacheKey('venezuela', 1);
+// Retorna: 'venezuela_1'
+```
+
+**Parámetros:**
+- `searchTerm` (string): Término de búsqueda
+- `page` (number): Página actual
+
+**Retorna:** string con clave única
+
+### clearCacheByPrefix(prefix)
+
+Limpia el caché por prefijo de búsqueda.
+
+```javascript
+search.clearCacheByPrefix('venezuela');
+```
+
+**Parámetros:**
+- `prefix` (string): Prefijo de búsqueda a limpiar
+
+**Retorna:** Instancia de Search para encadenamiento
+
+### setupKeyboardNavigation()
+
+Configura la navegación por teclado para el componente.
+
+```javascript
+search.setupKeyboardNavigation();
+```
+
+**Retorna:** Instancia de Search para encadenamiento
+
+**Funcionamiento:**
+- Requiere que `keyboardEnabled` sea true
+- Habilita teclas: ArrowUp, ArrowDown, Enter
+- Emite eventos `itemHighlighted` y `itemSelected`
+
+### destroy()
+
+Destruye la instancia de Search, limpiando recursos y event listeners.
+
+```javascript
+search.destroy();
+```
+
+**Retorna:** void
+
+**Funcionamiento:**
+- Emite evento `destroy`
+- Limpia IntersectionObserver
+- Limpia timeouts de animación
+- Remueve event listeners del input
+- Limpia todas las referencias internas
+- No elimina el HTML del DOM
+
+## Scroll Infinito
+
+### Cómo Funciona el Scroll Infinito
+
+El scroll infinito carga automáticamente más items cuando el usuario llega al final del contenedor de resultados, usando la API Intersection Observer.
+
+### Intersection Observer API
+
+```javascript
+this.scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting && this.pagination.hasMorePages()) {
+            this.#loadMore();
+        }
+    });
+}, {
+    root: container,
+    rootMargin: '100px',  // Cargar 100px antes del final
+    threshold: 0.1
+});
+```
+
+### Carga Automática al Final del Scroll
+
+- Se crea un elemento "sentinel" al final del contenedor
+- Cuando el sentinel entra en el viewport, se carga la siguiente página
+- Los nuevos items se añaden al DOM sin reemplazar los existentes
+- El contador se actualiza automáticamente
+
+### Configuración del Detector de Scroll
+
+El detector se configura automáticamente al inicializar el componente. No requiere configuración manual.
+
+### Eventos Emitidos Durante Scroll
+
+- `pageChange`: Se emite cada vez que se carga una nueva página
+- `appendItems`: Se emite cuando se añaden items al DOM
+
+## Navegación por Teclado
+
+### Teclas Disponibles
+
+| Tecla | Acción |
+|-------|--------|
+| ArrowDown | Navegar al siguiente item |
+| ArrowUp | Navegar al item anterior |
+| Enter | Seleccionar item destacado |
+
+### Habilitación con keyboardEnabled
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    keyboardEnabled: true,
+    data: [/* datos */]
+});
+
+search.init();
+```
+
+### Eventos Emitidos
+
+- `itemHighlighted`: Se emite al navegar entre items con ArrowUp/ArrowDown
+- `itemSelected`: Se emite al presionar Enter en un item destacado
+
+### Ejemplo de Uso
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    keyboardEnabled: true,
+    data: [
+        { name: 'Venezuela' },
+        { name: 'Colombia' },
+        { name: 'Mexico' }
+    ]
+});
+
+search.on('itemHighlighted', (data) => {
+    console.log('Item destacado:', data.item);
+});
+
+search.on('itemSelected', (data) => {
+    console.log('Item seleccionado:', data.item);
+});
+
+search.init();
+```
+
+## Templates Personalizados
+
+### Uso de Templates con Strings
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    data: [
+        { name: 'Venezuela', id: 1 },
+        { name: 'Colombia', id: 2 }
+    ],
+    template: `<div>{{name}} - {{id}}</div>`
+});
+
+search.init();
+```
+
+### Uso de Templates con Funciones
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    data: [
+        { name: 'Venezuela', id: 1 },
+        { name: 'Colombia', id: 2 }
+    ],
+    template: (item) => {
+        return `<div class="custom-item">
+            <strong>${item.name}</strong>
+            <span>ID: ${item.id}</span>
+        </div>`;
+    }
+});
+
+search.init();
+```
+
+### Sintaxis de Variables
+
+- Usar `{{variable}}` para templates con strings
+- La variable debe coincidir con una propiedad del objeto de datos
+- Se pueden usar múltiples variables en un template
+
+### Ejemplos de Templates
+
+```javascript
+// Template simple
+template: `<div>{{name}}</div>`
+
+// Template con múltiples variables
+template: `<div>{{name}} - {{country}}</div>`
+
+// Template con función
+template: (item) => {
+    return `<div class="item">
+        <h3>${item.name}</h3>
+        <p>${item.descripcion}</p>
+    </div>`;
+}
+```
+
+## Internacionalización (i18n)
+
+### Traducciones Disponibles
+
+| Clave | Default | Descripción |
+|-------|---------|-------------|
+| `searchPlaceholder` | "Ingrese palabra clave..." | Placeholder del input |
+| `searchLabel` | "Campo de búsqueda" | Label del input (aria-label) |
+| `noResults` | "No se encontraron resultados" | Mensaje sin resultados |
+| `loading` | "Cargando..." | Mensaje de carga |
+
+### Configuración de Traducciones Personalizadas
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    translation: {
+        searchPlaceholder: 'Escribe la búsqueda aquí...',
+        searchLabel: 'Buscar',
+        noResults: 'No hay resultados',
+        loading: 'Cargando datos...'
+    },
+    data: [/* datos */]
+});
+
+search.init();
+```
+
+### Traducciones por Defecto
+
+```javascript
+static #defaultTranslations = {
+    searchPlaceholder: "Ingrese palabra clave...",
+    searchLabel: "Campo de búsqueda",
+    noResults: "No se encontraron resultados",
+    loading: "Cargando..."
+};
+```
+
+### Ejemplo de Uso
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    translation: {
+        searchPlaceholder: 'Escribe la busqueda aqui.'
+    },
+    procesServer: true,
+    fetch: {
+        url: "./src/php/responseAjax.php",
+        method: "POST",
+        body: { page: 1, searchTerm: "" }
+    }
+});
+
+search.init();
+```
+
+## Sistema de Caché
+
+### Caché LRU con TTL
+
+El sistema de caché implementa:
+- **LRU (Least Recently Used)**: Elimina los items menos usados cuando se llena
+- **TTL (Time To Live)**: Expira items después de un tiempo configurable
+- **Claves únicas**: Cada búsqueda tiene una clave única basada en término y página
+
+### Configuración de Caché
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    cacheEnabled: true,
+    cacheMaxSize: 50,      // Máximo 50 items en caché
+    cacheTtlSeconds: 60,   // Expirar después de 60 segundos
+    procesServer: true,
+    fetch: {
+        url: "./src/php/responseAjax.php",
+        method: "POST",
+        body: { page: 1, searchTerm: "" }
+    }
+});
+
+search.init();
+```
+
+### Métodos de Caché
+
+```javascript
+// Generar clave única
+const key = search.getCacheKey('venezuela', 1);
+
+// Limpiar caché por prefijo
+search.clearCacheByPrefix('venezuela');
+```
+
+### Invalidación de Caché
+
+El caché se invalida automáticamente:
+- Cuando se llama a `clearSort()`
+- Cuando expira el TTL
+- Cuando se llena el caché (política LRU)
+- Manualmente con `clearCacheByPrefix()`
+
+### Ejemplos de Uso
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    cacheEnabled: true,
+    cacheMaxSize: 100,
+    cacheTtlSeconds: 300,  // 5 minutos
+    procesServer: true,
+    fetch: {
+        url: "./src/php/responseAjax.php",
+        method: "POST",
+        body: { page: 1, searchTerm: "" }
+    }
+});
+
+// La primera búsqueda hace petición al servidor
+await search.draw('venezuela');
+
+// La segunda búsqueda con el mismo término usa caché
+await search.draw('venezuela');
+
+// Limpiar caché manualmente
+search.clearCacheByPrefix('venezuela');
+```
+
+## Gestión de Errores
+
+### Sistema ErrorHandler
+
+El componente incluye un sistema robusto de gestión de errores que proporciona mensajes claros con guías de solución.
+
+### Códigos de Error
+
+| Código | Descripción | Solución |
+|--------|-------------|----------|
+| SEARCH_001 | El parámetro 'element' es requerido | Proporciona el selector CSS del contenedor |
+| SEARCH_002 | El parámetro 'element' debe ser un string | Usa un selector CSS válido |
+| SEARCH_003 | El parámetro 'fetch.url' es requerido | Configura la URL del endpoint |
+| SEARCH_010 | No existe el contenedor especificado | Verifica el selector CSS |
+| SEARCH_020 | Error de conexión al servidor | Verifica tu conexión a internet |
+| SEARCH_021 | Timeout de la petición | Aumenta el timeout o verifica el servidor |
+| SEARCH_030 | Error al parsear JSON del servidor | Verifica que el servidor retorne JSON válido |
+| SEARCH_031 | itemsPerPage debe ser mayor a 0 | Configura itemsPerPage con un valor positivo |
+| SEARCH_032 | itemsPerPage debe ser un número | Configura itemsPerPage con un número |
+
+### Manejo de Errores en Eventos
+
+```javascript
+search.on('error', (data) => {
+    console.error('Código:', data.code);
+    console.error('Mensaje:', data.message);
+    console.error('Solución:', data.solution);
+});
+```
+
+### Modo Development vs Production
+
+```javascript
+// Modo development: muestra logs detallados
+const search = new Search({
+    element: '.app-search',
+    developmentMode: true,
+    data: [/* datos */]
+});
+
+// Modo production: no muestra logs
+const search = new Search({
+    element: '.app-search',
+    developmentMode: false,
+    data: [/* datos */]
+});
+```
+
+### Ejemplo de Manejo de Errores
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    developmentMode: true,
+    procesServer: true,
+    fetch: {
+        url: "./src/php/responseAjax.php",
+        method: "POST",
+        body: { page: 1, searchTerm: "" },
+        error: (err) => {
+            console.error('Error en petición:', err);
+        }
+    }
+});
+
+search.on('error', (data) => {
+    alert(`Error: ${data.message}\nSolución: ${data.solution}`);
+});
+
+try {
+    search.init();
+} catch (error) {
+    console.error('Error al inicializar:', error);
+}
+```
+
+## Servidor Backend
+
+### Parámetros Esperados por el Servidor
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `searchTerm` | String | Término de búsqueda |
+| `page` | Number | Página actual |
+| `itemsPerPage` | Number | Items por página |
+| `sortBy` | String (opcional) | Campo para ordenamiento |
+| `sortOrder` | String (opcional) | Orden: 'asc' o 'desc' |
+
+### Respuesta JSON Esperada
+
+```json
+{
+    "data": [
+        {
+            "id_ciudad": 1,
+            "name": "Caracas"
+        }
+    ],
+    "page": 1,
+    "countPage": 25
+}
+```
+
+### Ejemplo de Implementación en PHP
 
 **Nota importante:** La implementación de los archivos PHP del servidor es a discreción del usuario. Los ejemplos mostrados a continuación son solo referencias. Puedes usar cualquier lenguaje de programación, framework o método de tu preferencia, siempre y cuando respetes la respuesta JSON esperada por la clase Search.
 
-### Ejemplo de Implementación
-
-A continuación se muestra un ejemplo de implementación en PHP con MySQL, pero puedes adaptarlo según tus necesidades:
-
 #### modelo.php (Ejemplo)
-
-Configuración de conexión a la base de datos:
 
 ```php
 <?php
 $HOST = "localhost";
 $USER = "root";
-$PASS = "xample";
-$DB = "venezuela";
+$PASS = "password";
+$DB = "mi_base_de_datos";
 $conexion = mysqli_connect($HOST, $USER, $PASS, $DB) or die("Error de conexion");
 ```
 
 #### responseAjax.php (Ejemplo)
-
-Endpoint para paginación del lado del servidor:
 
 ```php
 <?php
@@ -330,10 +1268,11 @@ require __DIR__ . "/modelo.php";
 
 $busqueda = $_POST['searchTerm'];
 $page = $_POST['page'];
-$start = ($page - 1) * 10;
+$itemsPerPage = $_POST['itemsPerPage'];
+$start = ($page - 1) * $itemsPerPage;
 
 $busqueda = (!empty($busqueda) ? "WHERE ciudad LIKE '%{$busqueda}%'" : "");
-$consulta = mysqli_query($conexion, "SELECT id_ciudad, ciudad AS name FROM ciudades {$busqueda} ORDER BY id_ciudad ASC LIMIT $start, {$_POST['itemsPerPage']}");
+$consulta = mysqli_query($conexion, "SELECT id_ciudad, ciudad AS name FROM ciudades {$busqueda} ORDER BY id_ciudad ASC LIMIT $start, $itemsPerPage");
 $consultaRow = mysqli_query($conexion, "SELECT COUNT(*) AS totalCount FROM ciudades {$busqueda} ORDER BY id_ciudad ASC");
 $consultaRow = mysqli_fetch_assoc($consultaRow);
 
@@ -353,221 +1292,81 @@ mysqli_close($conexion);
 echo json_encode($response);
 ```
 
-**Puedes implementar esto con:**
+### Ejemplo de Implementación en Node.js
 
-- Cualquier cosa de tu preferencia.
+```javascript
+const express = require('express');
+const mysql = require('mysql');
+const app = express();
 
-### Parámetros Esperados por el Servidor
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| `searchTerm` | String | Término de búsqueda |
-| `page` | Number | Página actual |
-| `itemsPerPage` | Number | Items por página |
+const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'password',
+    database: 'mi_base_de_datos'
+});
 
-### Respuesta JSON Esperada
-
-```json
-{
-    "data": [
-        {
-            "id_ciudad": 1,
-            "name": "Caracas"
+app.post('/api/search', (req, res) => {
+    const { searchTerm, page, itemsPerPage } = req.body;
+    const start = (page - 1) * itemsPerPage;
+    
+    let query = 'SELECT id, name FROM ciudades';
+    let params = [];
+    
+    if (searchTerm) {
+        query += ' WHERE name LIKE ?';
+        params.push(`%${searchTerm}%`);
+    }
+    
+    query += ' ORDER BY id ASC LIMIT ?, ?';
+    params.push(start, itemsPerPage);
+    
+    connection.query(query, params, (error, results) => {
+        if (error) {
+            return res.status(500).json({ error: error.message });
         }
-    ],
-    "page": 1,
-    "countPage": 25
-}
-```
+        
+        const countQuery = searchTerm 
+            ? 'SELECT COUNT(*) as count FROM ciudades WHERE name LIKE ?'
+            : 'SELECT COUNT(*) as count FROM ciudades';
+        const countParams = searchTerm ? [`%${searchTerm}%`] : [];
+        
+        connection.query(countQuery, countParams, (error, countResults) => {
+            if (error) {
+                return res.status(500).json({ error: error.message });
+            }
+            
+            res.json({
+                data: results,
+                page: parseInt(page),
+                countPage: countResults[0].count
+            });
+        });
+    });
+});
 
-## Métodos de la Clase
-
-### init()
-
-Inicializa el buscador y configura los elementos necesarios.
-
-```javascript
-search.init();
-```
-
-**Funcionamiento:**
-
-- Si `procesServer: true`, ejecuta búsqueda inicial en el servidor
-- Si `procesServer: false`, extrae datos del DOM si no hay datos en el array
-- Procesa y renderiza la paginación
-- Ejecuta búsqueda inicial con término vacío
-
-### searching(searchTerm)
-
-Realiza la búsqueda según el término proporcionado.
-
-```javascript
-search.searching("venezuela");
-```
-
-**Funcionamiento:**
-
-- **Modo local**: Filtra el array de datos según el término
-- **Modo servidor**: Envía petición AJAX al servidor con el término
-- Implementa debounce de 500ms en el input para optimizar rendimiento
-
-### processPagination()
-
-Procesa y renderiza la paginación.
-
-```javascript
-search.processPagination();
-```
-
-**Funcionamiento:**
-
-- Calcula el número total de páginas
-- Genera botones de paginación (start, prev, current, next, end)
-- Renderiza los items correspondientes a la página actual
-- Actualiza el DOM con los resultados paginados
-
-### isExtractData()
-
-Extrae datos del DOM si no hay datos en el array.
-
-```javascript
-search.isExtractData();
-```
-
-**Funcionamiento:**
-
-- Busca elementos `.items` en el contenedor
-- Extrae atributos `data-*` de cada elemento
-- Captura el `innerHTML` en la propiedad `children`
-- Retorna `true` si extrajo datos, `false` si ya existían datos
-
-### _renderItems(data, callback)
-
-Renderiza los items en el DOM.
-
-```javascript
-search._renderItems(data, (item) => {
-    return `<div class="custom-item">${item.name}</div>`;
+app.listen(3000, () => {
+    console.log('Servidor corriendo en puerto 3000');
 });
 ```
 
-**Parámetros:**
+### Nota Sobre Implementación
 
-- `data`: Array de items a renderizar
-- `callback`: Función opcional para personalizar el renderizado
-
-### Métodos de Renderizado
-
-Estos métodos generan automáticamente los elementos HTML si no existen:
-
-- `contentSearch()` - Genera el contenedor del input de búsqueda
-- `renderSearch()` - Genera el input de búsqueda con evento de input
-- `renderItems()` - Genera el contenedor de resultados
-- `renderPagination()` - Genera el contenedor de paginación
-
-## Mixins
-
-La clase Search usa mixins para separar la lógica de búsqueda local y servidor.
-
-### searchingLocal
-
-Mixin que contiene la lógica para búsqueda local:
-
-```javascript
-const searchingLocal = {
-    isExtractData() { /* ... */ },
-    searching(searchTerm) { /* ... */ },
-    processPagination() { /* ... */ }
-}
-```
-
-**Características:**
-
-- Filtra datos en el cliente usando `Array.filter()`
-- Busca en todos los valores de cada objeto
-- Maneja paginación local con `Array.slice()`
-
-### searchingServer
-
-Mixin que contiene la lógica para búsqueda por servidor:
-
-```javascript
-const searchingServer = {
-    async searching(searchTerm) { /* ... */ },
-    async ajax(resp) { /* ... */ },
-    processPagination() { /* ... */ }
-}
-```
-
-**Características:**
-
-- Usa XMLHttpRequest para peticiones AJAX
-- Soporta métodos POST, GET, PUT, PATCH
-- Maneja errores HTTP y de parseo JSON
-- Sincroniza página actual con el servidor
-
-### Método ajax()
-
-Realiza peticiones HTTP:
-
-```javascript
-async ajax(config) {
-    // config: { url, method, body, header, sucess, error }
-}
-```
-
-**Características:**
-
-- Retorna una Promise
-- Soporta form-urlencoded para POST
-- Callbacks `sucess` y `error` opcionales
-- Manejo automático de errores
-
-## Función createElement
-
-Función auxiliar para crear elementos HTML dinámicamente.
-
-```javascript
-import { createElement } from './renderElement.js';
-
-const element = createElement({
-    element: "div",
-    className: "my-class",
-    textContent: "Hello",
-    dataset: { id: "123" },
-    event: {
-        click: () => console.log("Clicked")
-    },
-    children: [
-        { element: "span", textContent: "Child" }
-    ]
-});
-```
-
-### Parámetros
-
-| Parámetro | Tipo | Descripción ||-----------|------|-------------|
-| `element` | String/Object | Nombre del elemento HTML o elemento existente |
-| `dataset` | Object | Atributos data-* del elemento |
-| `children` | Array | Array de objetos para crear elementos hijos |
-| `child` | Object/HTMLElement | Elemento hijo único |
-| `event` | Object | Event listeners (ej: `{ click: handler }`) |
-| `...attributes` | Any | Otros atributos HTML (className, id, etc.) |
-
-### Atributos Especiales
-
-Algunos atributos se manejan especialmente:
-
-- `value` - Se usa `setAttribute` para input, textarea, select
-- `selected` - Se usa `setAttribute` para option
+Puedes implementar el backend con:
+- Cualquier lenguaje de programación (PHP, Node.js, Python, Ruby, etc.)
+- Cualquier framework (Laravel, Express, Django, Rails, etc.)
+- Cualquier base de datos (MySQL, PostgreSQL, MongoDB, etc.)
+- Siempre y cuando respetes la respuesta JSON esperada.
 
 ## Ejemplos Completos
 
-### Ejemplo 1: Búsqueda Local con Datos del Array
+### Ejemplo 1: Búsqueda Local Simple
 
 ```html
-<div class="app-search">
-</div>
+<div class="app-search"></div>
 
 <script type="module">
 import { Search } from './src/js/app.js';
@@ -585,17 +1384,17 @@ search.init();
 </script>
 ```
 
-### Ejemplo 2: Búsqueda Local con Datos del DOM
+### Ejemplo 2: Búsqueda Local con DOM
 
 ```html
 <div class="app-search">
     <main class="items-search">
-        <section class="items" data-country="VE" data-name="Venezuela"
+        <li class="items" data-country="VE" data-name="Venezuela"
             data-descripcion="El pais mas rico en petroleo.">
-        </section>
-        <section class="items" data-country="CO" data-name="Colombia"
+        </li>
+        <li class="items" data-country="CO" data-name="Colombia"
             data-descripcion="Un pais con una gran riqueza cultural.">
-        </section>
+        </li>
     </main>
 </div>
 
@@ -610,11 +1409,10 @@ search.init();
 </script>
 ```
 
-### Ejemplo 3: Búsqueda por Servidor con PHP
+### Ejemplo 3: Búsqueda por Servidor con Fetch
 
 ```html
-<div class="app-search">
-</div>
+<div class="app-search"></div>
 
 <script type="module">
 import { Search } from './src/js/app.js';
@@ -625,6 +1423,9 @@ const search = new Search({
     fetch: {
         url: "./src/php/responseAjax.php",
         method: "POST",
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
         body: {
             page: 1,
             searchTerm: ""
@@ -636,7 +1437,7 @@ search.init();
 </script>
 ```
 
-### Ejemplo 4: Múltiples Instancias en la Misma Página
+### Ejemplo 4: Múltiples Instancias
 
 ```html
 <div class="app-search app-search1"></div>
@@ -673,11 +1474,7 @@ search3.init();
 </script>
 ```
 
-## Personalización
-
-### Personalización del Renderizado de Items
-
-Puedes personalizar cómo se renderizan los items usando el callback en `_renderItems()`:
+### Ejemplo 5: Con Eventos Personalizados
 
 ```javascript
 const search = new Search({
@@ -685,18 +1482,172 @@ const search = new Search({
     data: [/* datos */]
 });
 
-// Sobrescribe el método _renderItems
-search._renderItems = function(data, callback) {
-    const container = this._body.renderItems;
-    container.innerHTML = data.map((item) => {
-        if (callback) return callback(item);
+search.on('init', (data) => {
+    console.log('Inicializado:', data);
+});
+
+search.on('search', (data) => {
+    console.log('Búsqueda:', data.searchTerm);
+});
+
+search.on('pageChange', (data) => {
+    console.log('Página:', data.page);
+});
+
+search.on('itemSelected', (data) => {
+    console.log('Seleccionado:', data.item);
+});
+
+search.init();
+```
+
+### Ejemplo 6: Con Scroll Infinito
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    procesServer: true,
+    itemsPerPage: 20,
+    fetch: {
+        url: "./src/php/responseAjax.php",
+        method: "POST",
+        body: { page: 1, searchTerm: "" }
+    }
+});
+
+search.on('pageChange', (data) => {
+    console.log('Cargando página:', data.page);
+    console.log('Total cargado:', data.totalLoaded);
+});
+
+search.init();
+```
+
+### Ejemplo 7: Con Navegación por Teclado
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    keyboardEnabled: true,
+    data: [
+        { name: 'Venezuela' },
+        { name: 'Colombia' },
+        { name: 'Mexico' }
+    ]
+});
+
+search.on('itemHighlighted', (data) => {
+    console.log('Destacado:', data.item);
+});
+
+search.on('itemSelected', (data) => {
+    console.log('Seleccionado:', data.item);
+});
+
+search.init();
+```
+
+### Ejemplo 8: Con Templates Personalizados
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    data: [
+        { name: 'Venezuela', id: 1 },
+        { name: 'Colombia', id: 2 }
+    ],
+    template: `<div class="custom-item">
+        <strong>{{name}}</strong>
+        <span>ID: {{id}}</span>
+    </div>`
+});
+
+search.init();
+```
+
+### Ejemplo 9: Con Internacionalización
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    translation: {
+        searchPlaceholder: 'Escribe la búsqueda aquí...',
+        noResults: 'No hay resultados',
+        loading: 'Cargando datos...'
+    },
+    data: [/* datos */]
+});
+
+search.init();
+```
+
+### Ejemplo 10: Con Caché Habilitado
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    cacheEnabled: true,
+    cacheMaxSize: 100,
+    cacheTtlSeconds: 300,
+    procesServer: true,
+    fetch: {
+        url: "./src/php/responseAjax.php",
+        method: "POST",
+        body: { page: 1, searchTerm: "" }
+    }
+});
+
+search.init();
+```
+
+## Personalización Avanzada
+
+### Personalización del Renderizado de Items
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    data: [/* datos */]
+});
+
+// Sobrescribe el método de renderizado
+search.renderer.renderItemsContent = function(data, template, noResults, events) {
+    const container = this.body.renderItems;
+    container.innerHTML = data.map((item, index) => {
         return `
-            <div class="custom-item">
+            <div class="custom-item" data-index="${index}">
                 <h3>${item.name}</h3>
                 <p>${item.descripcion}</p>
+                <button class="select-btn">Seleccionar</button>
             </div>
         `;
     }).join('');
+    
+    // Agregar event listeners
+    container.querySelectorAll('.select-btn').forEach((btn, index) => {
+        btn.addEventListener('click', () => {
+            events.emit('itemSelected', { item: data[index], index });
+        });
+    });
+};
+
+search.init();
+```
+
+### Sobrescritura de Métodos
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    data: [/* datos */]
+});
+
+// Sobrescribir método de búsqueda
+const originalSearching = search.searching.bind(search);
+search.searching = async function(searchTerm, isEvent) {
+    console.log('Búsqueda iniciada:', searchTerm);
+    await originalSearching(searchTerm, isEvent);
+    console.log('Búsqueda completada');
 };
 
 search.init();
@@ -704,64 +1655,518 @@ search.init();
 
 ### Clases CSS Únicas
 
-La clase genera automáticamente clases CSS únicas para múltiples instancias:
-
 ```javascript
 // Método privado que genera clases únicas
 #getUniqueClassName(baseClass) {
     const parentSelector = this.element.replace(/^\.|^\#/, '');
     return `${baseClass}-${parentSelector}`;
 }
+
+// Ejemplo:
+// Para `.app-search1`: `input-search-app-search1`, `items-search-app-search1`
+// Para `.app-search2`: `input-search-app-search2`, `items-search-app-search2`
 ```
 
-**Ejemplo:**
+### Variables CSS
 
-- Para `.app-search1`: `input-search-app-search1`, `items-search-app-search1`
-- Para `.app-search2`: `input-search-app-search2`, `items-search-app-search2`
-
-Esto evita conflictos de estilos entre múltiples instancias.
-
-## Notas Importantes
-
-### Debounce en el Input
-
-El input de búsqueda tiene un debounce de 500ms para optimizar el rendimiento:
-
-```javascript
-let timeOut;
-input.addEventListener('input', (e) => {
-    const searchTerm = e.target.value.trim().toLowerCase();
-    clearTimeout(timeOut);
-    timeOut = setTimeout(() => {
-        this.searching(searchTerm);
-    }, 500);
-});
-```
-
-### Manejo de Errores
-
-Si el contenedor especificado no existe, la clase lanza un error:
-
-```javascript
-if (!element) {
-    let msgError = `No existe el contenedor ${this.element}`;
-    alert(msgError);
-    throw new Error(msgError);
+```css
+:root {
+    --search-width: 400px;
+    --search-bg-color: #f5f5f5;
+    --search-selected-bg-color: #ffeb3b;
+    --search-border-radius: 8px;
+    --search-font-size: 16px;
+    --search-padding: 12px;
 }
 ```
 
-### Compatibilidad con Módulos ES6
+### Creación de Temas
 
-La clase usa módulos ES6, por lo que debes importarla con `type="module"`:
+```css
+/* tema-oscuro.css */
+:root {
+    --search-bg-color: #1a1a1a;
+    --search-selected-bg-color: #333;
+    --search-text-color: #fff;
+}
 
-```html
-<script src="./src/js/app.js" type="module"></script>
+/* tema-claro.css */
+:root {
+    --search-bg-color: #fff;
+    --search-selected-bg-color: #f0f0f0;
+    --search-text-color: #333;
+}
 ```
 
-### Múltiples Instancias
+```html
+<link rel="stylesheet" href="./src/css/index.css">
+<link rel="stylesheet" href="./tema-oscuro.css">
+```
 
-Puedes crear múltiples instancias de Search en la misma página sin conflictos gracias a la generación automática de clases CSS únicas.
+## TypeScript
 
-### Sincronización de itemsPerPage
+### Tipos Disponibles
 
-El parámetro `itemsPerPage` se sincroniza automáticamente con el body de la petición AJAX en modo servidor, asegurando consistencia en la paginación.
+El componente incluye interfaces TypeScript completas:
+
+```typescript
+interface SearchParams {
+    element: string;
+    searchTerm?: string;
+    data?: Object[];
+    procesServer?: boolean;
+    keyboardEnabled?: boolean;
+    cacheEnabled?: boolean;
+    template?: string | ((item: any) => string);
+    sortBy?: string;
+    zIndex?: number;
+    sortOrder?: 'asc' | 'desc';
+    itemsPerPage?: number;
+    debounceTime?: number;
+    cacheMaxSize?: number;
+    cacheTtlSeconds?: number;
+    dom?: string;
+    fetch?: FetchConfig;
+    translation?: TranslationCache;
+    developmentMode?: boolean;
+}
+
+interface FetchConfig {
+    url: string;
+    method: string;
+    headers?: Record<string, string>;
+    body?: Record<string, any>;
+    timeout?: number;
+    sucess?: (resp: any, instance: any) => void;
+    error?: (err: any) => void;
+}
+```
+
+### Interfaces TypeScript
+
+```typescript
+interface TranslationCache {
+    searchPlaceholder?: string;
+    loading?: string;
+    noResults?: string;
+    [key: string]: string | undefined;
+}
+
+interface SearchEventInit {
+    searchTerm: string;
+    itemsPerPage: number;
+    procesServer: boolean;
+}
+
+interface PageChangeEventData {
+    page: number;
+    totalPages: number;
+    itemsOnPage: number;
+    totalLoaded: number;
+}
+```
+
+### Autocompletado en IDEs
+
+Al usar TypeScript, obtienes:
+- Autocompletado de métodos y propiedades
+- Type checking en tiempo de compilación
+- Documentación inline en el IDE
+- Refactorización segura
+- Detección de errores antes de ejecutar
+
+### Ejemplos con TypeScript
+
+```typescript
+import { Search, SearchParams, FetchConfig } from './src/js/app';
+
+const config: SearchParams = {
+    element: '.app-search',
+    procesServer: true,
+    cacheEnabled: true,
+    keyboardEnabled: true,
+    developmentMode: true,
+    template: `<div>{{name}} - {{id_ciudad}}</div>`,
+    translation: {
+        searchPlaceholder: 'Escribe la busqueda aqui.'
+    },
+    fetch: {
+        url: "/buscadorDinamico/src/php/responseAjax.php",
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        body: {
+            page: 1,
+            searchTerm: ""
+        }
+    } as FetchConfig
+};
+
+const search = new Search(config);
+
+search.on('renderItems', (data: any) => {
+    const { content } = data;
+    const item = content.children;
+    console.log('Item content:', item[0].innerHTML);
+});
+
+search.on('itemSelected', (data: any) => {
+    console.log('Item seleccionado:', data.item);
+});
+
+search.init();
+```
+
+## Rendimiento y Optimización
+
+### Debounce en el Input
+
+El input de búsqueda tiene un debounce configurable para optimizar el rendimiento:
+
+```javascript
+debounceTime: 500  // 500ms por defecto
+```
+
+Esto evita hacer peticiones excesivas mientras el usuario escribe.
+
+### Caché de Resultados
+
+El sistema de caché LRU con TTL optimiza el rendimiento:
+- Evita peticiones repetidas al servidor
+- Almacena resultados temporalmente
+- Expira automáticamente después del TTL
+- Elimina items menos usados cuando se llena
+
+### Scroll Infinito vs Paginación Tradicional
+
+**Scroll Infinito:**
+- Mejor UX para grandes cantidades de datos
+- Carga progresiva de contenido
+- Mejor en dispositivos móviles
+- Requiere Intersection Observer
+
+**Paginación Tradicional:**
+- Mejor para datos pequeños
+- Control explícito del usuario
+- Más fácil de implementar
+- Compatible con navegadores antiguos
+
+### Fetch API vs XMLHttpRequest
+
+**Fetch API (actual):**
+- API moderna basada en Promises
+- Mejor manejo de streams
+- Soporte nativo para AbortController
+- Sintaxis más limpia
+- Mejor integración con async/await
+
+**XMLHttpRequest (antiguo):**
+- API basada en callbacks
+- Manejo más complejo de streams
+- Timeout manual
+- Sintaxis más verbosa
+- Menos legible
+
+### Optimizaciones Implementadas
+
+1. **Debounce**: Reduce peticiones al escribir
+2. **Caché LRU**: Evita peticiones repetidas
+3. **Scroll Infinito**: Carga progresiva
+4. **Virtual DOM**: Solo renderiza cambios necesarios
+5. **Intersection Observer**: Detección eficiente de scroll
+6. **AbortController**: Cancela peticiones timeout
+
+## Accesibilidad
+
+### ARIA Attributes
+
+El componente incluye atributos ARIA para accesibilidad:
+
+```html
+<input type="text" 
+    aria-label="Campo de búsqueda"
+    placeholder="Ingrese palabra clave..."
+    role="searchbox"
+    aria-autocomplete="list">
+```
+
+### Navegación por Teclado
+
+- **ArrowUp/ArrowDown**: Navegar entre items
+- **Enter**: Seleccionar item destacado
+- **Tab**: Navegar entre elementos del formulario
+
+### Roles Semánticos
+
+```html
+<search class="input-search" role="search">
+    <label for="filter-search">Filtrar por Busqueda</label>
+    <input type="text" name="filterSearch" role="searchbox">
+</search>
+<main class="items-search" role="listbox">
+    <li class="items" role="option"></li>
+</main>
+```
+
+### Labels Descriptivos
+
+```javascript
+translation: {
+    searchLabel: 'Campo de búsqueda',
+    searchPlaceholder: 'Ingrese palabra clave...'
+}
+```
+
+### Soporte de Screen Readers
+
+El componente es compatible con screen readers gracias a:
+- ARIA attributes
+- Roles semánticos
+- Labels descriptivos
+- Navegación por teclado
+- Estados visuales claros
+
+## Troubleshooting
+
+### Errores Comunes
+
+**Error: "No existe el contenedor"**
+- Causa: El selector CSS no coincide con ningún elemento
+- Solución: Verifica que el selector sea correcto y que el elemento exista en el DOM
+
+**Error: "fetch.url es requerido"**
+- Causa: `procesServer: true` pero no se configuró `fetch.url`
+- Solución: Configura la URL del endpoint en `fetch.url`
+
+**Error: Timeout de petición**
+- Causa: El servidor tarda más que el timeout configurado
+- Solución: Aumenta el timeout o verifica el rendimiento del servidor
+
+**Error: "Error al parsear JSON"**
+- Causa: El servidor no retorna JSON válido
+- Solución: Verifica que el servidor retorne JSON con el formato correcto
+
+### Soluciones a Problemas Frecuentes
+
+**El scroll infinito no funciona:**
+- Verifica que IntersectionObserver esté disponible en el navegador
+- Verifica que el contenedor tenga altura fija o max-height
+- Verifica que haya suficientes items para activar el scroll
+
+**La navegación por teclado no funciona:**
+- Verifica que `keyboardEnabled: true`
+- Verifica que el input tenga foco
+- Verifica que haya items renderizados
+
+**El caché no funciona:**
+- Verifica que `cacheEnabled: true`
+- Verifica que `cacheMaxSize` sea mayor a 0
+- Verifica que `cacheTtlSeconds` sea mayor a 0
+
+### Debugging con developmentMode
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    developmentMode: true,  // Habilita logs detallados
+    data: [/* datos */]
+});
+```
+
+En modo development:
+- Se muestran logs de errores detallados
+- Se muestran logs de eventos
+- Se muestran logs de caché
+- Se muestran logs de peticiones
+
+### Logs de Errores
+
+```javascript
+search.on('error', (data) => {
+    console.error('Código:', data.code);
+    console.error('Mensaje:', data.message);
+    console.error('Solución:', data.solution);
+});
+```
+
+### Verificación de Configuración
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    data: [/* datos */]
+});
+
+console.log('Configuración:', {
+    element: search.element,
+    procesServer: search.procesServer,
+    itemsPerPage: search.itemsPerPage,
+    cacheEnabled: search.cacheEnabled,
+    keyboardEnabled: search.keyboardEnabled
+});
+```
+
+## Migración desde XMLHttpRequest
+
+### Cambios Realizados
+
+El componente ha migrado de XMLHttpRequest a Fetch API:
+
+**Antes (XMLHttpRequest):**
+```javascript
+ajax(config) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(config.method, config.url);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                resolve(JSON.parse(xhr.responseText));
+            } else {
+                reject(new Error('Error en petición'));
+            }
+        };
+        xhr.send(JSON.stringify(config.body));
+    });
+}
+```
+
+**Después (Fetch API):**
+```javascript
+async ajax(config) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), config.timeout);
+    
+    try {
+        const response = await fetch(config.url, {
+            method: config.method,
+            headers: config.headers,
+            body: this.#formatBody(config.body),
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+    }
+}
+```
+
+### Diferencias entre XHR y Fetch
+
+| Aspecto | XMLHttpRequest | Fetch API |
+|---------|----------------|------------|
+| API | Callbacks | Promises |
+| Timeout | Manual | AbortController |
+| Streams | Limitado | Nativo |
+| Sintaxis | Verbosa | Limpia |
+| async/await | No compatible | Compatible |
+| Type Safety | Limitado | Mejor |
+
+### Guía de Migración
+
+Si tienes código antiguo con XMLHttpRequest:
+
+1. **Reemplazar llamadas ajax con fetch:**
+```javascript
+// Antes
+search.ajax({ url: '/api', method: 'POST', body: data });
+
+// Después (automático con el componente)
+// El componente usa fetch internamente
+```
+
+2. **Actualizar configuración de fetch:**
+```javascript
+fetch: {
+    url: '/api',
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+}
+```
+
+3. **Manejar errores con callbacks:**
+```javascript
+fetch: {
+    error: (err) => {
+        console.error('Error:', err);
+    }
+}
+```
+
+### Compatibilidad con Navegadores Antiguos
+
+Fetch API es compatible con:
+- Chrome 42+
+- Firefox 39+
+- Safari 10.1+
+- Edge 14+
+- Opera 29+
+
+Para navegadores antiguos, usa un polyfill:
+```html
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.2/dist/fetch.umd.min.js"></script>
+```
+
+## Changelog
+
+### Versión 2.0.0 (Actual)
+
+**Nuevas características:**
+- Migración a TypeScript
+- Migración de XMLHttpRequest a Fetch API
+- Sistema de gestión de errores centralizado (ErrorHandler)
+- Clases SearchingLocal y SearchingServer (antes mixins)
+- Scroll infinito con Intersection Observer
+- Navegación por teclado
+- Templates personalizados
+- Internacionalización (i18n)
+- Sistema de caché LRU con TTL
+- Sistema de eventos mejorado
+- Timeout configurable con AbortController
+
+**Breaking changes:**
+- Requiere TypeScript o transpilación
+- XMLHttpRequest reemplazado por Fetch API
+- Mixins reemplazados por clases
+- Nueva estructura de archivos
+
+**Mejoras:**
+- Mejor performance con caché
+- Mejor UX con scroll infinito
+- Mejor accesibilidad con ARIA
+- Mejor type safety con TypeScript
+- Mejor manejo de errores
+
+### Versión 1.0.0
+
+**Características iniciales:**
+- Búsqueda local y por servidor
+- Paginación
+- XMLHttpRequest para AJAX
+- Mixins para lógica de búsqueda
+- Sistema de eventos básico
+
+## Licencia
+
+MIT License - Puedes usar este componente en proyectos personales y comerciales.
+
+## Soporte
+
+Para más información, ejemplos y soporte:
+- Revisa el código fuente en `src/js/`
+- Ejecuta los ejemplos en `index.html`
+- Revisa los tests en `src/tests/`
+- Reporta issues en el repositorio del proyecto
