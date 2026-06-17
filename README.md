@@ -323,22 +323,18 @@ Si el contenedor está vacío, la clase Search generará automáticamente:
 ```html
 <div class="app-search">
     <search class="input-search">
-        <label for="filter-search">Filtrar por Busqueda</label>
         <input type="text" name="filterSearch" class="filter-search form-control input-lg"
             placeholder="Ingrese palabra clave..."
             aria-label="Campo de búsqueda">
     </search>
-    <main class="items-search scroll-personalize">
-        <!-- Aquí se renderizan los resultados -->
-    </main>
-    <footer class="index-search">
+    <div class="content-pagination-items">
+        <ul class="items-search scroll-personalize">
+            <!-- Aquí se renderizan los resultados -->
+        </ul>
         <div class="pagination-items">
             <div class="items-counter">0 de 0</div>
-            <ul class="pagination">
-                <!-- Aquí se renderiza la paginación -->
-            </ul>
         </div>
-    </footer>
+    </div>
 </div>
 ```
 
