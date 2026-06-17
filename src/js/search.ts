@@ -9,7 +9,6 @@ const search1 = new Search({
     procesServer: true,
     cacheEnabled: true,
     keyboardEnabled: true,
-    developmentMode: true,
     template: `<div>{{name}} - {{id_ciudad}}</div>`,
     translation: {
         searchPlaceholder: 'Escribe la busqueda aqui.'
@@ -56,7 +55,6 @@ search1.on('itemSelected', (data: any) => {
 
 const search2 = new Search({
     element: '.app-search2',
-    developmentMode: true,
 });
 
 search2.on('search', (data: any) => {
@@ -69,12 +67,10 @@ search2.on('pageChange', (data: any) => {
 
 const search3 = new Search({
     element: '.app-search3',
-    developmentMode: true,
 });
 
 const search4 = new Search({
     element: '.app-search4',
-    developmentMode: true,
     data: [
         {
             country: 'VE',

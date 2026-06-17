@@ -68,9 +68,11 @@ Descarga los archivos del proyecto e importa la clase Search:
 ### Dependencias
 
 **Requeridas:**
+
 - Ninguna (Vanilla JavaScript + TypeScript)
 
 **Opcionales (para mejor visualización):**
+
 - Bootstrap CSS y JS
 - Popper.js (para componentes de Bootstrap)
 
@@ -124,6 +126,7 @@ El componente sigue una arquitectura orientada a objetos (OOP) con separación d
 ### Patrón OOP y Composición
 
 El componente utiliza:
+
 - **Encapsulamiento**: Propiedades privadas con `#` y métodos públicos bien definidos
 - **Composición**: Search compone instancias de SearchingLocal, SearchingServer, Pagination, etc.
 - **Herencia**: Clases especializadas extienden funcionalidades base
@@ -143,6 +146,7 @@ El componente ha migrado de XMLHttpRequest a **Fetch API** por las siguientes ve
 ### Sistema de Gestión de Errores
 
 El sistema ErrorHandler proporciona:
+
 - Validación centralizada de parámetros
 - Códigos de error estandarizados
 - Mensajes de error con guías de solución
@@ -152,6 +156,7 @@ El sistema ErrorHandler proporciona:
 ### Sistema de Eventos
 
 El EventEmitter permite:
+
 - Suscripción a eventos personalizados
 - Múltiples listeners por evento
 - Remoción de listeners
@@ -161,6 +166,7 @@ El EventEmitter permite:
 ### Sistema de Caché LRU con TTL
 
 El sistema de caché implementa:
+
 - **LRU (Least Recently Used)**: Elimina los items menos usados
 - **TTL (Time To Live)**: Expiración por tiempo
 - **Configuración de tamaño máximo**
@@ -286,16 +292,25 @@ La clase Search requiere un contenedor con una clase CSS:
 Si tienes datos ya en el HTML, puedes incluir elementos con data attributes:
 
 ```html
-<div class="app-search">
-    <main class="items-search">
-        <li class="items" data-country="VE" data-name="Venezuela"
-            data-descripcion="El pais mas rico en petroleo.">
-        </li>
-        <li class="items" data-country="CO" data-name="Colombia"
-            data-descripcion="Un pais con una gran riqueza cultural.">
-        </li>
-        <!-- ... más items -->
-    </main>
+<div class="app-search app-search1">
+    <search class="input-search prueba">
+        <input type="text" name="filterSearch" id="filter-search" class="filter-search form-control input-sm"
+            placeholder="Ingrese palabra clave...">
+    </search>
+    <div class="content-pagination-items">
+        <ul class="items-search scroll-personalize">
+            <li class="items" data-country="VE" data-name="Venezuela"
+                data-descripcion="El pais mas rico en petroleo.">
+            </li>
+            <li class="items" data-country="CO" data-name="Colombia"
+                data-descripcion="Un pais con una gran riqueza cultural.">
+            </li>
+            <!-- ... más items -->
+        </ul>
+        <div class="pagination-items">
+            <div class="items-counter">20 de 498</div>
+        </div>
+    </div>
 </div>
 ```
 
@@ -446,6 +461,7 @@ search.init();
 ```
 
 **Cómo funciona:**
+
 - Los datos se pasan directamente en el parámetro `data`
 - La búsqueda se realiza filtrando el array en el cliente
 - La paginación se calcula basándose en los resultados filtrados
@@ -461,6 +477,7 @@ search.init();
 ```
 
 **Cómo funciona:**
+
 - La clase busca elementos `.items` dentro del contenedor
 - Extrae los datos de los atributos `data-*` de cada elemento
 - También captura el `innerHTML` del elemento en la propiedad `children`
@@ -501,6 +518,7 @@ search.init();
 ```
 
 **Cómo funciona:**
+
 - La clase usa Fetch API para hacer peticiones al servidor
 - Envía parámetros: `searchTerm`, `page`, `itemsPerPage`
 - El servidor debe responder con JSON conteniendo: `data`, `page`, `countPage`
@@ -578,6 +596,7 @@ Si la petición excede el timeout, se cancela automáticamente y se emite un err
 ### Soporte para Diferentes Content-Type
 
 **JSON:**
+
 ```javascript
 fetch: {
     headers: {
@@ -588,6 +607,7 @@ fetch: {
 ```
 
 **URL-encoded:**
+
 ```javascript
 fetch: {
     headers: {
@@ -601,6 +621,7 @@ fetch: {
 ```
 
 **FormData:**
+
 ```javascript
 const formData = new FormData();
 formData.append('page', '1');
@@ -711,6 +732,7 @@ search.init();
 **Retorna:** Instancia de Search para encadenamiento
 
 **Funcionamiento:**
+
 - Valida que el contenedor exista
 - Extrae datos del DOM si es modo local
 - Renderiza la estructura del DOM
@@ -727,12 +749,14 @@ await search.draw('venezuela', true);
 ```
 
 **Parámetros:**
+
 - `searchTerm` (string): Término de búsqueda (opcional, usa `this.searchTerm` si no se proporciona)
 - `isEvent` (boolean): Si fue iniciado por evento del usuario (default: false)
 
 **Retorna:** Promise<Search> para encadenamiento
 
 **Funcionamiento:**
+
 - Resetea el scroll si cambia el término de búsqueda
 - Ejecuta la búsqueda (local o servidor)
 - Procesa scroll infinito
@@ -747,12 +771,14 @@ search.sort('name', 'asc');
 ```
 
 **Parámetros:**
+
 - `field` (string): Campo por el cual ordenar
 - `order` (string): Orden de ordenamiento ('asc' o 'desc', default: 'asc')
 
 **Retorna:** Instancia de Search para encadenamiento
 
 **Funcionamiento:**
+
 - En modo local: ordena el array `_data`
 - En modo servidor: envía parámetros de ordenamiento al servidor
 - Emite evento `sortChange`
@@ -768,6 +794,7 @@ search.clearSort();
 **Retorna:** Instancia de Search para encadenamiento
 
 **Funcionamiento:**
+
 - Reinicia `sortBy` a null
 - Reinicia `sortOrder` a 'asc'
 - Limpia el caché
@@ -784,6 +811,7 @@ search.on('search', (data) => {
 ```
 
 **Parámetros:**
+
 - `eventName` (string): Nombre del evento
 - `callback` (function): Función a ejecutar
 
@@ -809,6 +837,7 @@ const key = search.getCacheKey('venezuela', 1);
 ```
 
 **Parámetros:**
+
 - `searchTerm` (string): Término de búsqueda
 - `page` (number): Página actual
 
@@ -823,6 +852,7 @@ search.clearCacheByPrefix('venezuela');
 ```
 
 **Parámetros:**
+
 - `prefix` (string): Prefijo de búsqueda a limpiar
 
 **Retorna:** Instancia de Search para encadenamiento
@@ -838,6 +868,7 @@ search.setupKeyboardNavigation();
 **Retorna:** Instancia de Search para encadenamiento
 
 **Funcionamiento:**
+
 - Requiere que `keyboardEnabled` sea true
 - Habilita teclas: ArrowUp, ArrowDown, Enter
 - Emite eventos `itemHighlighted` y `itemSelected`
@@ -853,6 +884,7 @@ search.destroy();
 **Retorna:** void
 
 **Funcionamiento:**
+
 - Emite evento `destroy`
 - Limpia IntersectionObserver
 - Limpia timeouts de animación
@@ -1073,6 +1105,7 @@ search.init();
 ### Caché LRU con TTL
 
 El sistema de caché implementa:
+
 - **LRU (Least Recently Used)**: Elimina los items menos usados cuando se llena
 - **TTL (Time To Live)**: Expira items después de un tiempo configurable
 - **Claves únicas**: Cada búsqueda tiene una clave única basada en término y página
@@ -1109,6 +1142,7 @@ search.clearCacheByPrefix('venezuela');
 ### Invalidación de Caché
 
 El caché se invalida automáticamente:
+
 - Cuando se llama a `clearSort()`
 - Cuando expira el TTL
 - Cuando se llena el caché (política LRU)
@@ -1356,6 +1390,7 @@ app.listen(3000, () => {
 ### Nota Sobre Implementación
 
 Puedes implementar el backend con:
+
 - Cualquier lenguaje de programación (PHP, Node.js, Python, Ruby, etc.)
 - Cualquier framework (Laravel, Express, Django, Rails, etc.)
 - Cualquier base de datos (MySQL, PostgreSQL, MongoDB, etc.)
@@ -1769,6 +1804,7 @@ interface PageChangeEventData {
 ### Autocompletado en IDEs
 
 Al usar TypeScript, obtienes:
+
 - Autocompletado de métodos y propiedades
 - Type checking en tiempo de compilación
 - Documentación inline en el IDE
@@ -1833,6 +1869,7 @@ Esto evita hacer peticiones excesivas mientras el usuario escribe.
 ### Caché de Resultados
 
 El sistema de caché LRU con TTL optimiza el rendimiento:
+
 - Evita peticiones repetidas al servidor
 - Almacena resultados temporalmente
 - Expira automáticamente después del TTL
@@ -1841,12 +1878,14 @@ El sistema de caché LRU con TTL optimiza el rendimiento:
 ### Scroll Infinito vs Paginación Tradicional
 
 **Scroll Infinito:**
+
 - Mejor UX para grandes cantidades de datos
 - Carga progresiva de contenido
 - Mejor en dispositivos móviles
 - Requiere Intersection Observer
 
 **Paginación Tradicional:**
+
 - Mejor para datos pequeños
 - Control explícito del usuario
 - Más fácil de implementar
@@ -1855,6 +1894,7 @@ El sistema de caché LRU con TTL optimiza el rendimiento:
 ### Fetch API vs XMLHttpRequest
 
 **Fetch API (actual):**
+
 - API moderna basada en Promises
 - Mejor manejo de streams
 - Soporte nativo para AbortController
@@ -1862,6 +1902,7 @@ El sistema de caché LRU con TTL optimiza el rendimiento:
 - Mejor integración con async/await
 
 **XMLHttpRequest (antiguo):**
+
 - API basada en callbacks
 - Manejo más complejo de streams
 - Timeout manual
@@ -1921,6 +1962,7 @@ translation: {
 ### Soporte de Screen Readers
 
 El componente es compatible con screen readers gracias a:
+
 - ARIA attributes
 - Roles semánticos
 - Labels descriptivos
@@ -1932,34 +1974,41 @@ El componente es compatible con screen readers gracias a:
 ### Errores Comunes
 
 **Error: "No existe el contenedor"**
+
 - Causa: El selector CSS no coincide con ningún elemento
 - Solución: Verifica que el selector sea correcto y que el elemento exista en el DOM
 
 **Error: "fetch.url es requerido"**
+
 - Causa: `procesServer: true` pero no se configuró `fetch.url`
 - Solución: Configura la URL del endpoint en `fetch.url`
 
 **Error: Timeout de petición**
+
 - Causa: El servidor tarda más que el timeout configurado
 - Solución: Aumenta el timeout o verifica el rendimiento del servidor
 
 **Error: "Error al parsear JSON"**
+
 - Causa: El servidor no retorna JSON válido
 - Solución: Verifica que el servidor retorne JSON con el formato correcto
 
 ### Soluciones a Problemas Frecuentes
 
 **El scroll infinito no funciona:**
+
 - Verifica que IntersectionObserver esté disponible en el navegador
 - Verifica que el contenedor tenga altura fija o max-height
 - Verifica que haya suficientes items para activar el scroll
 
 **La navegación por teclado no funciona:**
+
 - Verifica que `keyboardEnabled: true`
 - Verifica que el input tenga foco
 - Verifica que haya items renderizados
 
 **El caché no funciona:**
+
 - Verifica que `cacheEnabled: true`
 - Verifica que `cacheMaxSize` sea mayor a 0
 - Verifica que `cacheTtlSeconds` sea mayor a 0
@@ -1975,6 +2024,7 @@ const search = new Search({
 ```
 
 En modo development:
+
 - Se muestran logs de errores detallados
 - Se muestran logs de eventos
 - Se muestran logs de caché
@@ -2014,6 +2064,7 @@ console.log('Configuración:', {
 El componente ha migrado de XMLHttpRequest a Fetch API:
 
 **Antes (XMLHttpRequest):**
+
 ```javascript
 ajax(config) {
     return new Promise((resolve, reject) => {
@@ -2033,6 +2084,7 @@ ajax(config) {
 ```
 
 **Después (Fetch API):**
+
 ```javascript
 async ajax(config) {
     const controller = new AbortController();
@@ -2077,6 +2129,7 @@ async ajax(config) {
 Si tienes código antiguo con XMLHttpRequest:
 
 1. **Reemplazar llamadas ajax con fetch:**
+
 ```javascript
 // Antes
 search.ajax({ url: '/api', method: 'POST', body: data });
@@ -2085,7 +2138,8 @@ search.ajax({ url: '/api', method: 'POST', body: data });
 // El componente usa fetch internamente
 ```
 
-2. **Actualizar configuración de fetch:**
+1. **Actualizar configuración de fetch:**
+
 ```javascript
 fetch: {
     url: '/api',
@@ -2097,7 +2151,8 @@ fetch: {
 }
 ```
 
-3. **Manejar errores con callbacks:**
+1. **Manejar errores con callbacks:**
+
 ```javascript
 fetch: {
     error: (err) => {
@@ -2109,6 +2164,7 @@ fetch: {
 ### Compatibilidad con Navegadores Antiguos
 
 Fetch API es compatible con:
+
 - Chrome 42+
 - Firefox 39+
 - Safari 10.1+
@@ -2116,6 +2172,7 @@ Fetch API es compatible con:
 - Opera 29+
 
 Para navegadores antiguos, usa un polyfill:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.2/dist/fetch.umd.min.js"></script>
 ```
@@ -2125,6 +2182,7 @@ Para navegadores antiguos, usa un polyfill:
 ### Versión 2.0.0 (Actual)
 
 **Nuevas características:**
+
 - Migración a TypeScript
 - Migración de XMLHttpRequest a Fetch API
 - Sistema de gestión de errores centralizado (ErrorHandler)
@@ -2138,12 +2196,14 @@ Para navegadores antiguos, usa un polyfill:
 - Timeout configurable con AbortController
 
 **Breaking changes:**
+
 - Requiere TypeScript o transpilación
 - XMLHttpRequest reemplazado por Fetch API
 - Mixins reemplazados por clases
 - Nueva estructura de archivos
 
 **Mejoras:**
+
 - Mejor performance con caché
 - Mejor UX con scroll infinito
 - Mejor accesibilidad con ARIA
@@ -2153,6 +2213,7 @@ Para navegadores antiguos, usa un polyfill:
 ### Versión 1.0.0
 
 **Características iniciales:**
+
 - Búsqueda local y por servidor
 - Paginación
 - XMLHttpRequest para AJAX
@@ -2166,6 +2227,7 @@ MIT License - Puedes usar este componente en proyectos personales y comerciales.
 ## Soporte
 
 Para más información, ejemplos y soporte:
+
 - Revisa el código fuente en `src/js/`
 - Ejecuta los ejemplos en `index.html`
 - Revisa los tests en `src/tests/`
