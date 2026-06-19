@@ -27,6 +27,8 @@ export class SearchingServer {
                 if (this.searchInstance.cacheEnabled) {
                     this.searchInstance.cache.clearCacheByPrefix(this.searchInstance.searchTerm);
                 }
+
+                this.searchInstance.showLoading();
             }
 
             if (this.searchInstance.pagination.getCurrentPage() !== this.searchInstance.fetch.body.page) {
