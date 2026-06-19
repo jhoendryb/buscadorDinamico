@@ -1428,22 +1428,15 @@ search.init();
 
 ```html
 <div class="app-search app-search1">
-    <search class="input-search prueba">
-        <input type="text" name="filterSearch" id="filter-search" class="filter-search form-control input-sm"
-            placeholder="Ingrese palabra clave...">
-    </search>
     <div class="content-pagination-items">
         <ul class="items-search scroll-personalize">
             <li class="items" data-country="VE" data-name="Venezuela"
                 data-descripcion="El pais mas rico en petroleo.">
-            </li>
+            </li>****
             <li class="items" data-country="CO" data-name="Colombia"
                 data-descripcion="Un pais con una gran riqueza cultural.">
-        </li>
+            </li>
         </ul>
-        <div class="pagination-items">
-            <div class="items-counter">20 de 498</div>
-        </div>
     </div>
 </div>
 
