@@ -65,6 +65,8 @@ Descarga los archivos del proyecto e importa la clase Search:
 </script>
 ```
 
+**Nota:** El proyecto usa TypeScript pero compila a JavaScript. Si estás usando el código fuente directamente, usa `./src/js/app.ts`.
+
 ### Dependencias
 
 **Requeridas:**
@@ -1935,8 +1937,7 @@ El componente incluye atributos ARIA para accesibilidad:
 <input type="text" 
     aria-label="Campo de búsqueda"
     placeholder="Ingrese palabra clave..."
-    role="searchbox"
-    aria-autocomplete="list">
+    role="searchbox">
 ```
 
 ### Navegación por Teclado
@@ -2123,7 +2124,7 @@ async fetch(config) {
 ### Diferencias entre XHR y Fetch
 
 | Aspecto | XMLHttpRequest | Fetch API |
-|---------|----------------|------------|
+|---------|----------------|-----------|
 | API | Callbacks | Promises |
 | Timeout | Manual | AbortController |
 | Streams | Limitado | Nativo |

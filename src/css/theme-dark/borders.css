@@ -1,0 +1,23 @@
+.app-search {
+    border-radius: var(--search-border-radius);
+}
+
+.app-search:has(.content-pagination-items.content-pagination-visible) {
+    border-radius: var(--search-border-radius-open);
+}
+
+.items-search .items {
+    border-radius: var(--search-border-radius);
+}
+
+.pagination-items .items-counter {
+    border-top: 1px solid var(--search-border-color);
+    border-radius: 0 0 var(--search-border-radius) var(--search-border-radius); /* Esquinas redondeadas solo abajo */
+}
+
+/* Si .content-pagination-items es el contenedor de la lista en sí, también queremos que tenga bordes redondeados, */
+/* especialmente si el 'app-search' tiene overflow: hidden. */
+.content-pagination-items {
+    border-radius: var(--search-border-radius); /* Redondea todo el contenido de la lista */
+    overflow-y: auto; /* Para permitir el scroll dentro de la lista */
+}
