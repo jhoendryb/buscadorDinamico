@@ -2093,7 +2093,7 @@ ajax(config) {
 **Después (Fetch API):**
 
 ```javascript
-async ajax(config) {
+async fetch(config) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), config.timeout);
     
