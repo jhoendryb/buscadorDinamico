@@ -151,8 +151,8 @@ const search4 = new Search({
 });
 
 search1.init();
-search2.init();
-search3.init();
-search4.init();
+// search2.init();
+// search3.init();
+// search4.init();
 
-search2.sort('name', 'asc').draw();
+// search2.sort('name', 'asc').draw();

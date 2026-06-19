@@ -16,7 +16,48 @@
     width: 100%;
     position: relative;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    /* Centra verticalmente el input y el icono */
+    padding: var(--search-padding);
+    /* Usar la variable de padding global */
+    border-radius: var(--search-border-radius);
+    /* Redondear el contenedor */
+    /* background-color: var(--search-item-bg-color); */
+    /* Fondo para la barra de búsqueda (puede ser diferente al contenedor principal) */
+    /* border: 1px solid var(--search-border-color); */
+    /* Borde para la barra de búsqueda */
+}
+
+.input-search input {
+    flex-grow: 1;
+    /* Hace que el input ocupe todo el espacio disponible */
+    border: none;
+    /* Eliminar el borde predeterminado del input */
+    outline: none;
+    /* Eliminar el outline al enfocar */
+    background-color: transparent;
+    /* Fondo transparente para el input */
+    color: var(--search-text-color);
+    /* Color del texto del input */
+    /* Reiniciar el padding del input para controlarlo desde .input-search */
+}
+
+.input-search:has(.search-icon) input {
+    padding-right: 35px;
+}
+
+.search-icon {
+    /* Estilos básicos para el icono */
+    margin-left: var(--search-padding);
+    /* Espacio a la izquierda del icono */
+    color: var(--search-placeholder-color);
+    /* Color del icono, similar al placeholder */
+    font-size: 1.2em;
+    /* Tamaño del icono */
+    cursor: pointer;
+    /* Indicar que es clickeable, si es el caso */
+    position: absolute;
+    right: 15px;
 }
 
 .items-search {

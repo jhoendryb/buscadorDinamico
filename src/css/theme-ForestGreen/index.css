@@ -1,5 +1,5 @@
 @import './variables.css';
-@import '../theme-BlueBlack/colors.css';
-@import '../theme-BlueBlack/dimensions.css';
-@import '../theme-BlueBlack/borders.css';
-@import '../theme-BlueBlack/typography.css';
+@import '../theme/colors.css';
+@import '../theme/dimensions.css';
+@import '../theme/borders.css';
+@import '../theme/typography.css';

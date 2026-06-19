@@ -1,39 +1,65 @@
 :root {
     /* Colores principales - ¡ACTUALIZAR AQUÍ! */
-    --search-bg-color: #21213e; /* Fondo principal del componente y barra de búsqueda */
-    --search-border-color: #3f3f5a; /* Borde sutil */
-    --search-text-color: #a0a0a0; /* Color de texto general */
-    --search-text-color-items: #e0e0e0; /* Color de texto general */
-    --search-placeholder-color: #a0a0a0; /* Color específico para el placeholder */
-    --search-light-text-color: #a0a0a0; /* Color específico para texto secundario */
+    --search-bg-color: #21213e;
+    /* Fondo principal del componente y barra de búsqueda */
+    --search-border-color: #3f3f5a;
+    /* Borde sutil */
+    --search-text-color: #a0a0a0;
+    /* Color de texto general */
+    --search-text-color-items: #e0e0e0;
+    /* Color de texto general */
+    --search-placeholder-color: #a0a0a0;
+    /* Color específico para el placeholder */
+    --search-light-text-color: #a0a0a0;
+    /* Color específico para texto secundario */
 
-    --search-item-bg-color: #2a2a4a; /* Fondo de cada elemento de la lista (no seleccionado) */
-    --search-item-hover-bg-color: #0f4c75; /* Fondo de cada elemento de la lista al pasar el ratón (accent-color) */
+    --search-item-bg-color: #2a2a4a;
+    /* Fondo de cada elemento de la lista (no seleccionado) */
+    --search-item-hover-bg-color: #0f4c75;
+    /* Fondo de cada elemento de la lista al pasar el ratón (accent-color) */
 
-    --search-selected-bg-color: #1b6b9c; /* Fondo del elemento seleccionado (accent-hover) */
-    --search-selected-border-color: #2196f3; /* Este podrías mantenerlo o cambiarlo a un azul más oscuro si quieres más contraste */
+    --search-selected-bg-color: #1b6b9c;
+    /* Fondo del elemento seleccionado (accent-hover) */
+    --search-selected-border-color: #2196f3;
+    /* Este podrías mantenerlo o cambiarlo a un azul más oscuro si quieres más contraste */
 
-    --search-counter-color: #bbbbbb; /* Color del texto del contador inferior */
-    --search-counter-bg-color: #21213e; /* Fondo del contador inferior (igual que el fondo principal o similar) */
+    --search-counter-color: #bbbbbb;
+    /* Color del texto del contador inferior */
+    --search-counter-bg-color: #21213e;
+    /* Fondo del contador inferior (igual que el fondo principal o similar) */
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    /* Color de la sombra */
 
     /* Scrollbar */
-    --scrollbar-thumb-color: #525282; /* Color del "pulgar" del scrollbar */
+    --scrollbar-thumb-color: #525282;
+    /* Color del "pulgar" del scrollbar */
 
     /* Loading */
-    --spinner-border-color: #3f3f5a; /* Color de borde del spinner */
-    --spinner-top-color: #0f4c75; /* Color superior del spinner (accent-color) */
+    --spinner-border-color: #3f3f5a;
+    /* Color de borde del spinner */
+    --spinner-top-color: #0f4c75;
+    /* Color superior del spinner (accent-color) */
 
     /* Dimensiones (ajusta si lo necesitas para el diseño sugerido) */
-    --search-width: 280px; /* Un poco más ancho para mejor legibilidad */
-    --search-max-height: 400px; /* Mayor altura para más elementos visibles */
-    --search-padding: 10px; /* Un poco más de padding general */
-    --search-gap: 10px; /* Espacio entre la barra de búsqueda y la lista */
-    --search-border-radius: 8px; /* Un poco más de redondez para un look moderno */
-    --items-search-border-radius: 8px 8px 0 0; /* Si tienes un contenedor específico para los ítems */
-    --search-border-radius-open: 8px 8px 0 0; /* Cuando la búsqueda está activa/abierta */
+    --search-width: 280px;
+    /* Un poco más ancho para mejor legibilidad */
+    --search-max-height: 400px;
+    /* Mayor altura para más elementos visibles */
+    --search-padding: 10px;
+    /* Un poco más de padding general */
+    --search-gap: 10px;
+    /* Espacio entre la barra de búsqueda y la lista */
+    --search-border-radius: 8px;
+    /* Un poco más de redondez para un look moderno */
+    --items-search-border-radius: 8px 8px 0 0;
+    /* Si tienes un contenedor específico para los ítems */
+    --search-border-radius-open: 8px 8px 0 0;
+    /* Cuando la búsqueda está activa/abierta */
 
     /* Tipografía */
-    --search-font-size: 15px; /* Un poco más grande para mejor legibilidad */
-    --search-counter-font-size: 0.9em; /* Tamaño del texto del contador */
+    --search-font-size: 15px;
+    /* Un poco más grande para mejor legibilidad */
+    --search-counter-font-size: 0.9em;
+    /* Tamaño del texto del contador */
     --search-counter-text-align: center;
 }

@@ -1,5 +1,5 @@
 @import './variables.css';
-@import './colors.css';
-@import './dimensions.css';
-@import './borders.css';
-@import './typography.css';
+@import '../theme/colors.css';
+@import '../theme/dimensions.css';
+@import '../theme/borders.css';
+@import '../theme/typography.css';
