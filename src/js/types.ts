@@ -191,5 +191,6 @@ export interface CreateElementConfig {
     child?: HTMLElement;
     event?: Record<string, (e: any) => void>;
     attributes?: Record<string, string>;
+    style?: Record<string, string>;
     [key: string]: any;
 }

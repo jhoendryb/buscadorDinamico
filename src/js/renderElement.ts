@@ -45,7 +45,7 @@ import * as Types from './types';
  * });
  */
 
-function createElement({ element, dataset, children, child, event, attributes, ...propertys }: Types.CreateElementConfig): HTMLElement {
+function createElement({ element, dataset, children, child, event, attributes, style, ...propertys }: Types.CreateElementConfig): HTMLElement {
     const specialAttributes = {
         value: ["input", "textarea", "select"],
         selected: ["option"]
@@ -70,6 +70,7 @@ function createElement({ element, dataset, children, child, event, attributes, .
 
     if (dataset) Object.assign(el.dataset, dataset);
     if (child) el.appendChild(child);
+    if (style) Object.assign(el.style, style);
 
     if (event) {
         Object.keys(event).forEach(key => {

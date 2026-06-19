@@ -1432,7 +1432,7 @@ search.init();
         <ul class="items-search scroll-personalize">
             <li class="items" data-country="VE" data-name="Venezuela"
                 data-descripcion="El pais mas rico en petroleo.">
-            </li>****
+            </li>
             <li class="items" data-country="CO" data-name="Colombia"
                 data-descripcion="Un pais con una gran riqueza cultural.">
             </li>
@@ -1948,20 +1948,20 @@ El componente incluye atributos ARIA para accesibilidad:
 ### Roles Semánticos
 
 ```html
-<search class="input-search" role="search">
-    <label for="filter-search">Filtrar por Busqueda</label>
-    <input type="text" name="filterSearch" role="searchbox">
+<search class="input-search">
+    <input type="text" name="filterSearch" class="filter-search" role="searchbox">
 </search>
-<main class="items-search" role="listbox">
-    <li class="items" role="option"></li>
-</main>
+<div class="content-pagination-items">
+    <ul class="items-search scroll-personalize" role="listbox">
+        <li class="items" role="option"></li>
+    </ul>
+</div>
 ```
 
 ### Labels Descriptivos
 
 ```javascript
 translation: {
-    searchLabel: 'Campo de búsqueda',
     searchPlaceholder: 'Ingrese palabra clave...'
 }
 ```

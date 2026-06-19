@@ -90,9 +90,7 @@ export class SearchRenderer {
             className: this.#classDefault(`${this.getUniqueClassName("filter-search")}`, inputSearch?.className),
             attributes: {
                 "aria-label": ariaLabel || 'Filtrar por Búsqueda',
-                "aria-autocomplete": "list",
-                "aria-expanded": "false",
-                "role": "combobox",
+                "role": "searchbox",
                 "aria-controls": this.getUniqueClassName('items-search')
             },
             event: {
@@ -145,9 +143,10 @@ export class SearchRenderer {
                 'aria-label': 'Resultados de búsqueda',
                 'role': 'listbox',
                 'aria-activedescendant': '',
-                'hidden': 'true',
-                'style': `z-index: ${zIndex};`
+                'aria-hidden': 'true',
             },
+            style: { zIndex },
+            hidden: 'true',
             ...(!renderItems ? {
                 element: "ul",
                 id: this.getUniqueClassName('items-search')
