@@ -3,7 +3,9 @@
     --search-bg-color: #2c3e2e; /* Verde bosque muy oscuro */
     --search-border-color: #5a6b5c; /* Verde grisáceo oscuro para bordes */
     --search-text-color: #e8e8e8; /* Blanco roto para texto principal */
-    --light-text-color: #a0a0a0; /* Gris cálido para placeholders o texto secundario */
+    --search-text-color-items: #e8e8e8; /* Blanco roto para texto de los items */
+    --search-placeholder-color: #a0a0a0; /* Gris cálido para placeholders */
+    --search-light-text-color: #a0a0a0; /* Gris cálido para texto secundario */
 
     --search-item-bg-color: #3b503e; /* Fondo de cada elemento de la lista (un poco más claro) */
     --search-item-hover-bg-color: #4a7c59; /* Un verde oliva más vibrante para hover */

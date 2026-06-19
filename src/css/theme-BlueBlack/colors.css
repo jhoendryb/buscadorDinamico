@@ -9,7 +9,7 @@
 
 .items-search .items {
     background-color: var(--search-item-bg-color);
-    color: var(--search-text-color);
+    color: var(--search-text-color-items);
     /* Asegurarse de que el texto de los items use el color general */
     padding: 10px;
     /* Añade un poco más de padding para que se vea como en el diseño */

@@ -3,7 +3,9 @@
     --search-bg-color: #ffffff; /* Blanco puro para el fondo principal */
     --search-border-color: #e0e0e0; /* Gris muy claro para bordes sutiles */
     --search-text-color: #333333; /* Negro oscuro para texto principal */
-    --light-text-color: #777777; /* Gris medio para placeholders o texto secundario */
+    --search-text-color-items: #333333; /* Color de texto general */
+    --search-placeholder-color: #a0a0a0; /* Color específico para el placeholder */
+    --search-light-text-color: #a0a0a0; /* Gris claro para texto secundario */
 
     --search-item-bg-color: #f8f8f8; /* Fondo de cada elemento de la lista (casi blanco) */
     --search-item-hover-bg-color: #e6f7ff; /* Un azul muy claro para hover */

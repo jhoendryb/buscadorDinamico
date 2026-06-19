@@ -6,8 +6,12 @@
     /* Gris oscuro para bordes */
     --search-text-color: #f0f0f0;
     /* Blanco casi puro para texto principal */
-    --light-text-color: #bbbbbb;
-    /* Para placeholders o texto secundario, si lo añades en typography.css */
+    --search-text-color-items: #f0f0f0;
+    /* Blanco casi puro para texto de los items */
+    --search-placeholder-color: #a0a0a0;
+    /* Gris cálido para placeholders */
+    --search-light-text-color: #a0a0a0;
+    /* Gris cálido para texto secundario */
 
     --search-item-bg-color: #1e1e1e;
     /* Fondo de cada elemento de la lista (un poco más claro que el principal) */

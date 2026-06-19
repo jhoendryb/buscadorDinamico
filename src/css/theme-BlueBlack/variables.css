@@ -2,7 +2,10 @@
     /* Colores principales - ¡ACTUALIZAR AQUÍ! */
     --search-bg-color: #21213e; /* Fondo principal del componente y barra de búsqueda */
     --search-border-color: #3f3f5a; /* Borde sutil */
-    --search-text-color: #e0e0e0; /* Color de texto general */
+    --search-text-color: #a0a0a0; /* Color de texto general */
+    --search-text-color-items: #e0e0e0; /* Color de texto general */
+    --search-placeholder-color: #a0a0a0; /* Color específico para el placeholder */
+    --search-light-text-color: #a0a0a0; /* Color específico para texto secundario */
 
     --search-item-bg-color: #2a2a4a; /* Fondo de cada elemento de la lista (no seleccionado) */
     --search-item-hover-bg-color: #0f4c75; /* Fondo de cada elemento de la lista al pasar el ratón (accent-color) */
