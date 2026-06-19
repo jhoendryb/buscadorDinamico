@@ -71,6 +71,7 @@ const search3 = new Search({
 
 const search4 = new Search({
     element: '.app-search4',
+    dom: 'sci',
     data: [
         {
             country: 'VE',
@@ -153,6 +154,6 @@ const search4 = new Search({
 search1.init();
 // search2.init();
 // search3.init();
-// search4.init();
+search4.init();
 
 // search2.sort('name', 'asc').draw();
