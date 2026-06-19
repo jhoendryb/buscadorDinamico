@@ -1,4 +1,4 @@
-:root {
+.theme-clean-white {
     /* Colores principales - Clean White */
     --search-bg-color: #ffffff; /* Blanco puro para el fondo principal */
     --search-border-color: #e0e0e0; /* Gris muy claro para bordes sutiles */
@@ -22,27 +22,4 @@
     /* Loading */
     --spinner-border-color: #f3f3f3; /* Borde del spinner */
     --spinner-top-color: #007bff; /* Azul para la parte superior del spinner */
-
-    /* Dimensiones (ajusta si lo necesitas para el diseño sugerido) */
-    --search-width: 280px;
-    /* Un poco más ancho para mejor legibilidad */
-    --search-max-height: 400px;
-    /* Mayor altura para más elementos visibles */
-    --search-padding: 10px;
-    /* Un poco más de padding general */
-    --search-gap: 10px;
-    /* Espacio entre la barra de búsqueda y la lista */
-    --search-border-radius: 8px;
-    /* Un poco más de redondez para un look moderno */
-    --items-search-border-radius: 8px 8px 0 0;
-    /* Si tienes un contenedor específico para los ítems */
-    --search-border-radius-open: 8px 8px 0 0;
-    /* Cuando la búsqueda está activa/abierta */
-
-    /* Tipografía */
-    --search-font-size: 15px;
-    /* Un poco más grande para mejor legibilidad */
-    --search-counter-font-size: 0.9em;
-    /* Tamaño del texto del contador */
-    --search-counter-text-align: center;
 }

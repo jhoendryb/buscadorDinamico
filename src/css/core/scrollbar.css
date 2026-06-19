@@ -15,4 +15,5 @@
 
 .scroll-personalize::-webkit-scrollbar-thumb {
     border-radius: 4px;
+    background-color: var(--scrollbar-thumb-color, #cccccc);
 }

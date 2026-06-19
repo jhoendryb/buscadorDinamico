@@ -1,13 +1,6 @@
-@import './core/structure.css';
-@import './core/visibility.css';
-@import './core/animations.css';
-@import './core/states.css';
-@import './core/scrollbar.css';
-@import './theme/variables.css';
-@import './theme/colors.css';
-@import './theme/dimensions.css';
-@import './theme/borders.css';
-@import './theme/typography.css';
+@import './core/index.css';
+@import './theme/index.css';
+@import './themes/index.css';
 
 * {
     margin: 0;

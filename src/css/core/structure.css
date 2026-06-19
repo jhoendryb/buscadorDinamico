@@ -1,5 +1,5 @@
 .app-search {
-    width: 250px;
+    width: var(--search-width, 250px);
     /* Mínimo para ser visible */
     min-height: auto;
     /* Mínimo para ser usable */
@@ -7,9 +7,7 @@
     flex-direction: column;
     position: relative;
     z-index: 100;
-    /* padding: 5px;           Mínimo para espaciado */
-    gap: 10px;
-    /* Mínimo para separación */
+    gap: var(--search-gap, 10px);
 }
 
 .input-search {

@@ -59,6 +59,7 @@
     /* Si tienes un contenedor específico para los ítems */
     --search-border-radius-open: 8px 8px 0 0;
     /* Cuando la búsqueda está activa/abierta */
+    --search-item-padding: 10px;
 
     /* Tipografía */
     --search-font-size: 15px;

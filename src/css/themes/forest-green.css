@@ -1,4 +1,4 @@
-:root {
+.theme-forest-green {
     /* Colores principales - Forest Green */
     --search-bg-color: #2c3e2e; /* Verde bosque muy oscuro */
     --search-border-color: #5a6b5c; /* Verde grisáceo oscuro para bordes */
@@ -22,27 +22,4 @@
     /* Loading */
     --spinner-border-color: #5a6b5c; /* Borde del spinner */
     --spinner-top-color: #6a9c7b; /* Verde para la parte superior del spinner */
-
-    /* Dimensiones (ajusta si lo necesitas para el diseño sugerido) */
-    --search-width: 280px;
-    /* Un poco más ancho para mejor legibilidad */
-    --search-max-height: 400px;
-    /* Mayor altura para más elementos visibles */
-    --search-padding: 10px;
-    /* Un poco más de padding general */
-    --search-gap: 10px;
-    /* Espacio entre la barra de búsqueda y la lista */
-    --search-border-radius: 8px;
-    /* Un poco más de redondez para un look moderno */
-    --items-search-border-radius: 8px 8px 0 0;
-    /* Si tienes un contenedor específico para los ítems */
-    --search-border-radius-open: 8px 8px 0 0;
-    /* Cuando la búsqueda está activa/abierta */
-
-    /* Tipografía */
-    --search-font-size: 15px;
-    /* Un poco más grande para mejor legibilidad */
-    --search-counter-font-size: 0.9em;
-    /* Tamaño del texto del contador */
-    --search-counter-text-align: center;
 }

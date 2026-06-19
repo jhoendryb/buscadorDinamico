@@ -7,13 +7,16 @@
     background-color: var(--search-bg-color);
 }
 
+/* Y el placeholder */
+.input-search input::placeholder {
+    color: var(--search-placeholder-color);
+}
+
 .items-search .items {
     background-color: var(--search-item-bg-color);
     color: var(--search-text-color-items);
     /* Asegurarse de que el texto de los items use el color general */
-    padding: 10px;
-    /* Añade un poco más de padding para que se vea como en el diseño */
-    /* margin-bottom: 5px; */
+    padding: var(--search-item-padding, 10px);
     /* Espacio entre items */
     border-radius: var(--search-border-radius);
     /* Para que cada item tenga sus propias esquinas redondeadas */

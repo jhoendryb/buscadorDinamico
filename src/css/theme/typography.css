@@ -7,14 +7,8 @@
     color: var(--search-text-color);
 } */
 
-/* Y el placeholder */
-.input-search input::placeholder {
-    color: var(--search-placeholder-color);
-}
-
 .pagination-items .items-counter {
     font-size: var(--search-counter-font-size);
     text-align: var(--search-counter-text-align);
-    color: var(--search-counter-color);
     /* <-- Asegúrate de que el color se aplique aquí también */
 }
