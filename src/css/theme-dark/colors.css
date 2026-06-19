@@ -1,7 +1,6 @@
 .app-search {
     background-color: var(--search-bg-color);
     color: var(--search-text-color);
-    /* <-- Añadir esta línea para que el texto general también use la variable */
 }
 
 .items-search {
@@ -12,7 +11,8 @@
     background-color: var(--search-item-bg-color);
     color: var(--search-text-color);
     /* Asegurarse de que el texto de los items use el color general */
-    padding: 10px 15px;
+    padding: 10px;
+    /* Añade un poco más de padding para que se vea como en el diseño */
     /* margin-bottom: 5px; */
     /* Espacio entre items */
     border-radius: var(--search-border-radius);
@@ -53,17 +53,21 @@
 }
 
 /* Scrollbar styling (Añadir si no lo tienes ya en otro sitio o si quieres overrides) */
-/* .scroll-personalize::-webkit-scrollbar {
+.scroll-personalize::-webkit-scrollbar {
     width: 8px;
+    /* Ancho del scrollbar */
 }
 
 .scroll-personalize::-webkit-scrollbar-track {
     background: var(--search-bg-color);
+    /* Fondo de la pista del scrollbar */
     border-radius: 10px;
 }
 
 .scroll-personalize::-webkit-scrollbar-thumb {
     background-color: var(--scrollbar-thumb-color);
+    /* Color del "pulgar" */
     border-radius: 10px;
     border: 2px solid var(--search-bg-color);
-} */
+    /* Un pequeño borde para separarlo de la pista */
+}

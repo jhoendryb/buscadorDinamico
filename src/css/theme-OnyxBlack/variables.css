@@ -1,0 +1,59 @@
+:root {
+    /* Colores principales - Onyx Black */
+    --search-bg-color: #121212;
+    /* Un negro muy oscuro */
+    --search-border-color: #333333;
+    /* Gris oscuro para bordes */
+    --search-text-color: #f0f0f0;
+    /* Blanco casi puro para texto principal */
+    --light-text-color: #bbbbbb;
+    /* Para placeholders o texto secundario, si lo añades en typography.css */
+
+    --search-item-bg-color: #1e1e1e;
+    /* Fondo de cada elemento de la lista (un poco más claro que el principal) */
+    --search-item-hover-bg-color: #0056b3;
+    /* Un azul más intenso para hover */
+
+    --search-selected-bg-color: #007bff;
+    /* Azul brillante para elemento seleccionado */
+    --search-selected-border-color: #007bff;
+    /* El mismo azul para el borde de selección */
+
+    --search-counter-color: #aaaaaa;
+    /* Gris medio para el contador */
+    --search-counter-bg-color: #121212;
+    /* Fondo del contador igual que el principal */
+
+    /* Scrollbar */
+    --scrollbar-thumb-color: #555555;
+    /* Gris oscuro para el pulgar del scrollbar */
+
+    /* Loading */
+    --spinner-border-color: #333333;
+    /* Borde del spinner */
+    --spinner-top-color: #007bff;
+    /* Azul para la parte superior del spinner */
+
+    /* Dimensiones (ajusta si lo necesitas para el diseño sugerido) */
+    --search-width: 280px;
+    /* Un poco más ancho para mejor legibilidad */
+    --search-max-height: 400px;
+    /* Mayor altura para más elementos visibles */
+    --search-padding: 10px;
+    /* Un poco más de padding general */
+    --search-gap: 10px;
+    /* Espacio entre la barra de búsqueda y la lista */
+    --search-border-radius: 8px;
+    /* Un poco más de redondez para un look moderno */
+    --items-search-border-radius: 8px 8px 0 0;
+    /* Si tienes un contenedor específico para los ítems */
+    --search-border-radius-open: 8px 8px 0 0;
+    /* Cuando la búsqueda está activa/abierta */
+
+    /* Tipografía */
+    --search-font-size: 15px;
+    /* Un poco más grande para mejor legibilidad */
+    --search-counter-font-size: 0.9em;
+    /* Tamaño del texto del contador */
+    --search-counter-text-align: center;
+}

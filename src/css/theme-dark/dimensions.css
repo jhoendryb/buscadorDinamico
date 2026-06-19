@@ -2,16 +2,19 @@
     width: var(--search-width);
     max-height: var(--search-max-height);
     gap: var(--search-gap);
+    /* Asegura que haya un espacio entre los elementos internos (input, lista, contador) */
     display: flex;
+    /* Para organizar los elementos internos */
     flex-direction: column;
+    /* Para que los elementos se apilen verticalmente */
 }
 
 .input-search {
     padding: var(--search-padding);
-    background-color: var(--search-item-bg-color);
+    /* background-color: var(--search-item-bg-color); */
     /* Para que el input tenga un fondo ligeramente diferente al principal */
-    border: 1px solid var(--search-border-color);
-    border-radius: var(--search-border-radius);
+    /* border: 1px solid var(--search-border-color); */
+    /* border-radius: var(--search-border-radius); */
     color: var(--search-text-color);
     /* Asegura que el texto dentro del input sea legible */
 }
@@ -19,8 +22,12 @@
 .items-search {
     padding: var(--search-padding);
     gap: var(--search-padding);
-    display: flex; /* Para organizar los items */
-    flex-direction: column; /* Para que los items se apilen verticalmente */
+    /* o podría usarse para espaciar el contenedor de la búsqueda de la lista. */
+    /* Sugiero que el gap del app-search sea suficiente. */
+    display: flex;
+    /* Para organizar los items */
+    flex-direction: column;
+    /* Para que los items se apilen verticalmente */
 }
 
 .pagination-items .items-counter {
@@ -28,8 +35,11 @@
 }
 
 .content-pagination-items {
-    max-height: 300px; /* Aquí se controla la altura máxima de la lista desplazable */
-    overflow-y: auto; /* Permite el scroll vertical si el contenido excede el max-height */
+    max-height: 300px;
+    /* Aquí se controla la altura máxima de la lista desplazable */
+    overflow-y: auto;
+    /* Permite el scroll vertical si el contenido excede el max-height */
     /* border-radius: var(--search-border-radius); <-- Esto ya lo pusimos en borders.css */
-    padding: 0 var(--search-padding); /* Padding horizontal para los items dentro del scroll, si lo necesitas */
+    /* padding: 0 var(--search-padding); */
+    /* Padding horizontal para los items dentro del scroll, si lo necesitas */
 }

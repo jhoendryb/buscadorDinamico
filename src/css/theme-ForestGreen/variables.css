@@ -1,0 +1,46 @@
+:root {
+    /* Colores principales - Forest Green */
+    --search-bg-color: #2c3e2e; /* Verde bosque muy oscuro */
+    --search-border-color: #5a6b5c; /* Verde grisáceo oscuro para bordes */
+    --search-text-color: #e8e8e8; /* Blanco roto para texto principal */
+    --light-text-color: #a0a0a0; /* Gris cálido para placeholders o texto secundario */
+
+    --search-item-bg-color: #3b503e; /* Fondo de cada elemento de la lista (un poco más claro) */
+    --search-item-hover-bg-color: #4a7c59; /* Un verde oliva más vibrante para hover */
+
+    --search-selected-bg-color: #6a9c7b; /* Verde más claro para elemento seleccionado */
+    --search-selected-border-color: #6a9c7b; /* El mismo verde para el borde de selección */
+
+    --search-counter-color: #c0c0c0; /* Gris claro para el contador */
+    --search-counter-bg-color: #2c3e2e; /* Fondo del contador igual que el principal */
+
+    /* Scrollbar */
+    --scrollbar-thumb-color: #7b9e80; /* Verde más claro para el pulgar del scrollbar */
+
+    /* Loading */
+    --spinner-border-color: #5a6b5c; /* Borde del spinner */
+    --spinner-top-color: #6a9c7b; /* Verde para la parte superior del spinner */
+
+    /* Dimensiones (ajusta si lo necesitas para el diseño sugerido) */
+    --search-width: 280px;
+    /* Un poco más ancho para mejor legibilidad */
+    --search-max-height: 400px;
+    /* Mayor altura para más elementos visibles */
+    --search-padding: 10px;
+    /* Un poco más de padding general */
+    --search-gap: 10px;
+    /* Espacio entre la barra de búsqueda y la lista */
+    --search-border-radius: 8px;
+    /* Un poco más de redondez para un look moderno */
+    --items-search-border-radius: 8px 8px 0 0;
+    /* Si tienes un contenedor específico para los ítems */
+    --search-border-radius-open: 8px 8px 0 0;
+    /* Cuando la búsqueda está activa/abierta */
+
+    /* Tipografía */
+    --search-font-size: 15px;
+    /* Un poco más grande para mejor legibilidad */
+    --search-counter-font-size: 0.9em;
+    /* Tamaño del texto del contador */
+    --search-counter-text-align: center;
+}
