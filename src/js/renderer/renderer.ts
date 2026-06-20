@@ -25,7 +25,7 @@ export class SearchRenderer {
         this.hideTimeout = null; // Nuevo: timeout para delay al ocultar
         this.animationTimeouts = [];
     }
-    setTheme(theme: string): SearchRenderer{
+    setTheme(theme: string): SearchRenderer {
         this.body.content = createElement({
             element: this.body.content,
             className: `${this.body.content.classList} theme-${theme}`
@@ -229,31 +229,41 @@ export class SearchRenderer {
      * @param {string|Function} template - Template personalizado
      * @param {string} noResults - Mensaje sin resultados
      * @param {EventEmitter} events - Instancia de EventEmitter
-     * @returns {void}
+     * @param {boolean} firtsLoad - Si es la primera carga
+     * @returns {SearchRenderer} Instancia actual para encadenamiento
      */
-    appendItems(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter) {
+    appendItems(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter, firtsLoad: boolean = false): boolean {
         const container = this.body.renderItems;
-        if (!container) return;
+
+        if (!container) return false;
+
+        if (firtsLoad) container.innerHTML = '';
+
+        const jsonItem: Types.CreateElementConfig = {
+            element: "li",
+            className: "items",
+            tabindex: '0',
+            attributes: { 'role': 'option' },
+            event: {
+                mousedown: (e: MouseEvent) => {
+                    e.preventDefault();
+                    this.isVisible = true;
+                }
+            }
+        };
 
         // Si es la primera carga y no hay items, mostrar mensaje
         if (container.children.length === 0 && (!data || data.length === 0)) {
-            const noResultsElement = createElement({
-                element: "div",
-                className: "items",
-                textContent: noResults
-            });
-            container.appendChild(noResultsElement);
-            return;
+            jsonItem.textContent = noResults;
+            container.appendChild(createElement(jsonItem));
+            // Ocultar si no hay resultados
+            // this.hideResults();
+            return false;
         }
 
         // Añadir items al final
         data.forEach(item => {
-            const itemElement = createElement({
-                element: "div",
-                className: "items",
-                attributes: { 'role': 'option' }
-            });
-
+            const itemElement = createElement(jsonItem);
             if (template) {
                 if (typeof template === 'function') {
                     itemElement.innerHTML = template(item);
@@ -275,6 +285,8 @@ export class SearchRenderer {
             items: data,
             content: container
         });
+
+        return true;
     }
     /**
      * Actualiza el contador de registros.
@@ -315,77 +327,6 @@ export class SearchRenderer {
                 domMap[char]();
             }
         }
-    }
-
-
-    /**
-     * Renderiza los items en el contenedor de resultados.
-     * Usa el template personalizado si está configurado, sino muestra los valores del objeto.
-     * @param {Array<Object>} data - Array de items a renderizar
-     * @param {string|Function} template - Template personalizado (string o función)
-     * @param {string} noResults - Mensaje cuando no hay resultados
-     * @param {EventEmitter} events - Instancia de EventEmitter para emitir eventos
-     * @returns {boolean} Retorna false si no hay contenedor, true en caso contrario
-     */
-    renderItemsContent(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter): boolean {
-        const container = this.body.renderItems;
-
-        if (!container) return false;
-
-        container.innerHTML = '';
-
-        const jsonItem: Types.CreateElementConfig = {
-            element: "li",
-            className: "items",
-            tabindex: '0',
-            attributes: { 'role': 'option' },
-            event: {
-                // Nuevo: mantener visible al hacer clic
-                mousedown: (e: MouseEvent) => {
-                    e.preventDefault(); // Evitar blur inmediato
-                    this.isVisible = true; // Mantener estado visible
-                }
-            }
-        };
-
-        if (!data || data.length === 0) {
-            jsonItem.textContent = noResults || 'No se encontraron resultados';
-            container.appendChild(createElement(jsonItem as Types.CreateElementConfig));
-
-            // Ocultar si no hay resultados
-            // this.hideResults();
-            return false;
-        }
-
-        data.forEach(item => {
-            if (template) {
-                let templateStr: any = template;
-                if (typeof template === 'function') {
-                    jsonItem.innerHTML = template(item);
-                } else if (typeof template === 'string') {
-                    Object.keys(item).forEach(key => {
-                        templateStr = templateStr.replace(`{{${key}}}`, item[key]);
-                    });
-                    jsonItem.innerHTML = templateStr;
-                }
-                container.appendChild(createElement(jsonItem as Types.CreateElementConfig));
-                return
-            }
-            jsonItem.textContent = Object.values(item).join(' ');
-            container.appendChild(createElement(jsonItem as Types.CreateElementConfig));
-        });
-
-        // Mostrar si hay resultados y el input tiene foco
-        if (document.activeElement === this.body.inputSearch) {
-            this.showResults();
-        }
-
-        events.emit('renderItems', {
-            items: data,
-            content: container
-        });
-
-        return true;
     }
 
     /**

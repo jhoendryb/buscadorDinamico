@@ -131,7 +131,7 @@ describe('SearchRenderer', () => {
         renderer.renderItems();
 
         const data = [{ name: 'Juan', age: 25 }];
-        renderer.renderItemsContent(data, '<div>{{name}} - {{age}}</div>', 'No results', events);
+        renderer.appendItems(data, '<div>{{name}} - {{age}}</div>', 'No results', events);
 
         const items = renderer.body.renderItems?.querySelectorAll('.items');
         expect(items?.length).toBe(1);
@@ -143,7 +143,7 @@ describe('SearchRenderer', () => {
 
         const data = [{ name: 'Juan', age: 25 }];
         const templateFn = (item: any) => `<div>${item.name.toUpperCase()}</div>`;
-        renderer.renderItemsContent(data, templateFn, 'No results', events);
+        renderer.appendItems(data, templateFn, 'No results', events);
 
         const items = renderer.body.renderItems?.querySelectorAll('.items');
         expect(items?.length).toBe(1);
@@ -154,7 +154,7 @@ describe('SearchRenderer', () => {
         renderer.renderItems();
 
         const data = [{ name: 'Juan', age: 25 }];
-        renderer.renderItemsContent(data, null, 'No results', events);
+        renderer.appendItems(data, null, 'No results', events);
 
         const items = renderer.body.renderItems?.querySelectorAll('.items');
         expect(items?.length).toBe(1);
@@ -164,21 +164,21 @@ describe('SearchRenderer', () => {
     test('debe mostrar mensaje cuando no hay resultados', () => {
         renderer.renderItems();
 
-        renderer.renderItemsContent([], null, 'Sin resultados', events);
+        renderer.appendItems([], null, 'Sin resultados', events);
 
         const items = renderer.body.renderItems?.querySelectorAll('.items');
         expect(items?.length).toBe(1);
         expect(items?.[0].textContent).toBe('Sin resultados');
     });
 
-    test('debe emitir evento renderItems', () => {
+    test('debe emitir evento appendItems', () => {
         renderer.renderItems();
 
         const mockCallback = jest.fn();
-        events.on('renderItems', mockCallback);
+        events.on('appendItems', mockCallback);
 
         const data = [{ name: 'Juan' }];
-        renderer.renderItemsContent(data, null, 'No results', events);
+        renderer.appendItems(data, null, 'No results', events, true);
 
         expect(mockCallback).toHaveBeenCalledWith({
             items: data,
@@ -187,7 +187,7 @@ describe('SearchRenderer', () => {
     });
 
     test('debe retornar false si no hay contenedor de items', () => {
-        const result = renderer.renderItemsContent([], null, 'No results', events);
+        const result = renderer.appendItems([], null, 'No results', events);
         expect(result).toBe(false);
     });
 
@@ -195,7 +195,7 @@ describe('SearchRenderer', () => {
         renderer.renderItems();
 
         const data1 = [{ name: 'Juan' }];
-        renderer.renderItemsContent(data1, null, 'No results', events);
+        renderer.appendItems(data1, null, 'No results', events);
 
         const data2 = [{ name: 'Maria' }];
         renderer.appendItems(data2, null, 'No results', events);

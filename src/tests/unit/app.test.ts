@@ -199,7 +199,7 @@ describe('Search', () => {
         });
 
         const mockCallback = jest.fn();
-        search.on('renderItems', mockCallback);
+        search.on('appendItems', mockCallback);
 
         await search.init();
 

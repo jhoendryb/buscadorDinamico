@@ -9,7 +9,7 @@ const search1 = new Search({
     procesServer: true,
     cacheEnabled: true,
     keyboardEnabled: true,
-    theme: "clean-white",
+    // theme: "clean-white",
     template: `<div>{{name}} - {{id_ciudad}}</div>`,
     translation: {
         searchPlaceholder: 'Escribe la busqueda aqui.'
@@ -72,7 +72,7 @@ const search3 = new Search({
 
 const search4 = new Search({
     element: '.app-search4',
-    dom: 'sci',
+    dom: 'scip',
     data: [
         {
             country: 'VE',

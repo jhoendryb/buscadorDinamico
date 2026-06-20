@@ -1655,7 +1655,7 @@ const search = new Search({
 });
 
 // Sobrescribe el método de renderizado
-search.renderer.renderItemsContent = function(data, template, noResults, events) {
+search.renderer.appendItems = function(data, template, noResults, events) {
     const container = this.body.renderItems;
     container.innerHTML = data.map((item, index) => {
         return `

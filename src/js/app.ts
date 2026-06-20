@@ -202,23 +202,13 @@ class Search {
 
         const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
 
-        // Si es la primera página, renderizar items
-        if (this.pagination.getCurrentPage() === 1) {
-            this.renderer.renderItemsContent(
-                next,
-                this.template,
-                this.t.noResults,
-                this.events
-            );
-        } else {
-            // Si es una página adicional, añadir items
-            this.renderer.appendItems(
-                next,
-                this.template,
-                this.t.noResults,
-                this.events
-            );
-        }
+        this.renderer.appendItems(
+            next,
+            this.template,
+            this.t.noResults,
+            this.events,
+            (this.pagination.getCurrentPage() === 1)
+        );
 
         // Actualizar contador
         const loaded = this.pagination.getTotalLoaded();
@@ -291,9 +281,6 @@ class Search {
     async #loadMore(): Promise<Search> {
         if (!this.pagination.hasMorePages()) return this;
 
-        // Mostrar indicador de carga
-        this.#showLoadingMore();
-
         const nextPage = this.pagination.loadNextPage();
 
         if (this.procesServer) {
@@ -323,9 +310,6 @@ class Search {
         const total = this.pagination.getTotalItems();
         this.renderer.updateCounter(loaded, total);
 
-        // Ocultar indicador de carga
-        this.#hideLoadingMore();
-
         // Si no hay más páginas, ocultar botón de cargar más
         if (!this.pagination.hasMorePages()) {
             const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button') as HTMLButtonElement;
@@ -334,30 +318,6 @@ class Search {
             }
         }
 
-        return this;
-    }
-    /**
-     * Muestra indicador de carga al cargar más items.
-     * @returns {void}
-     */
-    #showLoadingMore(): Search {
-        const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button') as HTMLButtonElement;
-        if (loadMoreButton) {
-            loadMoreButton.textContent = 'Cargando...';
-            loadMoreButton.disabled = true;
-        }
-        return this;
-    }
-    /**
-     * Oculta indicador de carga al cargar más items.
-     * @returns {void}
-     */
-    #hideLoadingMore(): Search {
-        const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button') as HTMLButtonElement;
-        if (loadMoreButton) {
-            loadMoreButton.textContent = 'Cargar más...';
-            loadMoreButton.disabled = false;
-        }
         return this;
     }
     /**
