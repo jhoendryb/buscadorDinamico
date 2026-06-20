@@ -29,7 +29,7 @@ const search1 = new Search({
         },
         // body: formData,
 
-        // sucess: function (resp, instance) {
+        // success: function (resp, instance) {
         //     if (resp) {
         //         console.log(resp)
         //     }

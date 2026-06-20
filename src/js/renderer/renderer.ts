@@ -192,8 +192,6 @@ export class SearchRenderer {
             } : {})
         }
 
-        console.log(this.body.content.classList);
-
         const newPaginationItems = createElement(jsonPaginationItems);
 
         if (!paginationItems && element) {

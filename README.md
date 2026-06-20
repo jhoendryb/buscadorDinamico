@@ -221,7 +221,7 @@ const search = new Search({
         headers: {},
         body: {},
         timeout: 10000,
-        sucess: () => {},
+        success: () => {},
         error: () => {}
     }
 });
@@ -265,7 +265,7 @@ fetch: {
         itemsPerPage: 10
     },
     timeout: 10000,                      // Timeout en milisegundos
-    sucess: (resp, instance) => {        // Callback de éxito
+    success: (resp, instance) => {        // Callback de éxito
         console.log('Respuesta:', resp);
     },
     error: (err) => {                    // Callback de error
@@ -580,7 +580,7 @@ fetch: {
         itemsPerPage: 10
     },
     timeout: 10000,
-    sucess: (resp, instance) => {
+    success: (resp, instance) => {
         console.log('Respuesta:', resp);
     },
     error: (err) => {
@@ -643,7 +643,7 @@ fetch: {
 
 ```javascript
 fetch: {
-    sucess: (resp, instance) => {
+    success: (resp, instance) => {
         console.log('Datos recibidos:', resp.data);
         console.log('Instancia:', instance);
     },
@@ -1781,7 +1781,7 @@ interface FetchConfig {
     headers?: Record<string, string>;
     body?: Record<string, any>;
     timeout?: number;
-    sucess?: (resp: any, instance: any) => void;
+    success?: (resp: any, instance: any) => void;
     error?: (err: any) => void;
 }
 ```

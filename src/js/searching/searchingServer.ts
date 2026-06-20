@@ -176,8 +176,8 @@ export class SearchingServer {
             }
 
             // Ejecutar callback de éxito si existe
-            if (config.sucess) {
-                config.sucess(data, this.searchInstance);
+            if (config.success) {
+                config.success(data, this.searchInstance);
             }
 
             return data;

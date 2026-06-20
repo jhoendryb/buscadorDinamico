@@ -44,7 +44,7 @@ export interface SearchParams {
  * @property {'GET'|'POST'|'PUT'|'PATCH'} [method='POST'] - Método HTTP
  * @property {Object} [body] - Cuerpo de la petición
  * @property {Object} [header] - Headers adicionales
- * @property {Function} [sucess] - Callback de éxito
+ * @property {Function} [success] - Callback de éxito
  * @property {Function} [error] - Callback de error
  */
 
@@ -54,7 +54,7 @@ export interface FetchConfig {
     headers?: Record<string, string>;
     body?: Record<string, any>;
     timeout?: number;
-    sucess?: (resp: any, instance: any) => void;
+    success?: (resp: any, instance: any) => void;
     error?: (err: any) => void;
 }
 
