@@ -16,6 +16,7 @@ import {
 class Search {
     // Declaraciones de propiedades
     element: string;
+    theme: string;
     searchTerm: string;
     data: Record<string, any>[];
     _data: Record<string, any>[] | null;
@@ -66,6 +67,7 @@ class Search {
         this.cacheEnabled = false;
         this.template = null;
         this.sortBy = null;
+        this.theme = Constants.DEFAULT_THEME;
         this.zIndex = Constants.DEFAULT_Z_INDEX;
         this.sortOrder = Constants.SORT_ORDER;
         this.itemsPerPage = Constants.DEFAULT_ITEMS_PER_PAGE;
@@ -136,6 +138,8 @@ class Search {
     init(): Search {
         try {
             this.errorHandler.validateElementExists(this.element, ErrorCode.ELEMENT_NOT_FOUND);
+
+            this.renderer.setTheme(this.theme);
 
             if (!this.procesServer && typeof this.searchingLocal.isExtractData === 'function') {
                 this.searchingLocal.isExtractData();

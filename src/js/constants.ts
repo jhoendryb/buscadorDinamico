@@ -9,6 +9,7 @@ export const DEFAULT_CACHE_MAX_SIZE = 50;
 export const DEFAULT_CACHE_TTL = 50;
 export const DEFAULT_Z_INDEX = 1000;
 export const DEFAULT_DEVELOPMENT_MODE = true;
+export const DEFAULT_THEME = "blue-black";
 
 // Valores especiales
 export const NO_SELECTION = -1;

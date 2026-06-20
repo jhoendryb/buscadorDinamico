@@ -2,3 +2,6 @@ node_modules
 .vscode
 .devin
 dist
+.claude
+.agents
+skills-lock.json

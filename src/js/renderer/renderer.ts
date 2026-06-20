@@ -25,6 +25,13 @@ export class SearchRenderer {
         this.hideTimeout = null; // Nuevo: timeout para delay al ocultar
         this.animationTimeouts = [];
     }
+    setTheme(theme: string): SearchRenderer{
+        this.body.content = createElement({
+            element: this.body.content,
+            className: `${this.body.content.classList} theme-${theme}`
+        })
+        return this;
+    }
     /**
      * Genera un nombre de clase único usando la función proporcionada.
      * @param {string} baseClass - Clase base (ej: "input-search")

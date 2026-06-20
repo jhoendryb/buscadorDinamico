@@ -18,6 +18,7 @@
  */
 export interface SearchParams {
     element: string;
+    theme?: string;
     searchTerm?: string;
     data?: Object[];
     procesServer?: boolean;

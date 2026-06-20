@@ -9,6 +9,7 @@ const search1 = new Search({
     procesServer: true,
     cacheEnabled: true,
     keyboardEnabled: true,
+    theme: "clean-white",
     template: `<div>{{name}} - {{id_ciudad}}</div>`,
     translation: {
         searchPlaceholder: 'Escribe la busqueda aqui.'
