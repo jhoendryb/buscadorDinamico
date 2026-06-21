@@ -10,6 +10,7 @@ export const DEFAULT_CACHE_TTL = 50;
 export const DEFAULT_Z_INDEX = 1000;
 export const DEFAULT_DEVELOPMENT_MODE = true;
 export const DEFAULT_THEME = "blue-black";
+export const DEFAULT_TIME_HIDDEN_RESULTS = 200;
 
 // Valores especiales
 export const NO_SELECTION = -1;

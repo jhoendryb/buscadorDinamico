@@ -13,18 +13,26 @@ export class SearchRenderer {
     public isVisible: boolean;
     public hideTimeout: ReturnType<typeof setTimeout> | null;
     public animationTimeouts: ReturnType<typeof setTimeout>[];
+    private timeHiddenResults: number;
     /**
      * Crea una instancia de SearchRenderer.
      * @param {Types.BodyConfig} body - Objeto con referencias a elementos del DOM
      * @param {Function} uniqueClassNameFn - Función para generar nombres de clase únicos
+     * @param {number} timeHiddenResults - Tiempo en milisegundos para ocultar los resultados
      */
-    constructor(body: Types.BodyConfig, uniqueClassNameFn: (baseClass: string) => string) {
+    constructor(body: Types.BodyConfig, uniqueClassNameFn: (baseClass: string) => string, timeHiddenResults: number) {
         this.body = body;
         this.uniqueClassNameFn = uniqueClassNameFn;
         this.isVisible = false; // Nuevo: estado de visibilidad
         this.hideTimeout = null; // Nuevo: timeout para delay al ocultar
         this.animationTimeouts = [];
+        this.timeHiddenResults = timeHiddenResults;
     }
+    /**
+     * Agrega una clase de tema al contenedor principal y devuelve la instancia actual.
+     * @param {string} theme - Nombre del tema (ej: "light", "dark")
+     * @returns {SearchRenderer} Instancia actual de SearchRenderer
+     */
     setTheme(theme: string): SearchRenderer {
         this.body.content = createElement({
             element: this.body.content,
@@ -40,6 +48,13 @@ export class SearchRenderer {
     getUniqueClassName(baseClass: string): string {
         return this.uniqueClassNameFn(baseClass);
     }
+
+    /**
+     * Helper para unir clases y eliminar duplicados.
+     * @param {string} baseClass - Clase base (ej: "input-search")
+     * @param {string} [classImport=""] - Clases adicionales (ej: "red blue")
+     * @returns {string} Clases unidas y sin duplicados (ej: "input-search red")
+     */
     #classDefault(baseClass: string, classImport: string = ''): string {
         return `${baseClass} ${classImport}`.trim().split(' ')
             .filter((cls, index, array) => !classImport.includes(cls) || array.indexOf(cls) === index)
@@ -259,8 +274,12 @@ export class SearchRenderer {
             return false;
         }
 
+        const length = this.body.renderItems?.children.length;
+        let idNum: number = (length ? (length - 1) : 0);
+
         // Añadir items al final
         data.forEach(item => {
+            jsonItem.id = this.getUniqueClassName(`items-${idNum++}`);
             const itemElement = createElement(jsonItem);
             if (template) {
                 if (typeof template === 'function') {
@@ -363,10 +382,11 @@ export class SearchRenderer {
      * Permite que el usuario haga clic en un resultado antes de ocultar.
      */
     hideResultsWithDelay(): void {
+        
         // Delay de 200ms para permitir clic en resultados
         this.hideTimeout = setTimeout(() => {
             this.hideResults();
-        }, 200);
+        }, this.timeHiddenResults);
     }
 
     /**

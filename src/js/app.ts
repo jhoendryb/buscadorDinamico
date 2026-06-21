@@ -110,7 +110,7 @@ class Search {
                 inputSearch: undefined, // "#filter-search" - input donde se escribe la búsqueda
                 renderItems: undefined, // ".items-search" - elemento donde se muestran los items
                 paginationItems: undefined // ".index-search" - elemento donde se muestra la paginación
-            }, this.#getUniqueClassName.bind(this));
+            }, this.#getUniqueClassName.bind(this), Constants.DEFAULT_TIME_HIDDEN_RESULTS);
             this.cache = new LRUCache(this.cacheMaxSize, this.cacheTtlSeconds);
             this.events = new EventEmitter();
             this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
@@ -184,6 +184,7 @@ class Search {
         if (searchTerm !== this.searchTerm && this.renderer.body.renderItems) {
             this.renderer.body.renderItems.scrollTop = 0;
             this.renderer.body.renderItems.innerHTML = '';
+            this.renderer.body.renderItems.removeAttribute('aria-activedescendant');
             this.pagination.goToPage(1);
         }
 
@@ -479,6 +480,7 @@ class Search {
         items.forEach((item, index) => {
             if (index === this.selectedIndex) {
                 item.classList.add('selected');
+                this.renderer.body.renderItems?.setAttribute('aria-activedescendant', item.id);
                 this.events.emit('itemHighlighted', { item, index } as Types.ItemHighlightedEventData);
             } else {
                 item.classList.remove('selected');
