@@ -15,27 +15,20 @@
 .items-search .items {
     background-color: var(--search-item-bg-color);
     color: var(--search-text-color-items);
-    /* Asegurarse de que el texto de los items use el color general */
     padding: var(--search-item-padding);
-    /* Espacio entre items */
     border-radius: var(--search-border-radius);
-    /* Para que cada item tenga sus propias esquinas redondeadas */
 }
 
 .items-search .items:hover {
     background-color: var(--search-item-hover-bg-color);
     cursor: pointer;
-    /* Indica que es interactivo */
 }
 
 .items.selected {
     background-color: var(--search-selected-bg-color);
     border-left: 4px solid var(--search-selected-border-color);
-    /* Un borde lateral para indicar selección */
     padding-left: 11px;
-    /* Ajustar padding por el borde */
     color: var(--search-text-color);
-    /* Asegurar que el texto sea visible */
 }
 
 .pagination-items .items-counter {
@@ -43,7 +36,6 @@
     background-color: var(--search-counter-bg-color);
     border-top-color: var(--search-border-color);
     padding: var(--search-padding);
-    /* Para que use el padding global */
 }
 
 .spinner {
@@ -55,22 +47,17 @@
     background-color: var(--scrollbar-thumb-color);
 }
 
-/* Scrollbar styling (Añadir si no lo tienes ya en otro sitio o si quieres overrides) */
 .scroll-personalize::-webkit-scrollbar {
     width: 8px;
-    /* Ancho del scrollbar */
 }
 
 .scroll-personalize::-webkit-scrollbar-track {
     background: var(--search-bg-color);
-    /* Fondo de la pista del scrollbar */
     border-radius: 10px;
 }
 
 .scroll-personalize::-webkit-scrollbar-thumb {
     background-color: var(--scrollbar-thumb-color);
-    /* Color del "pulgar" */
     border-radius: 10px;
     border: 2px solid var(--search-bg-color);
-    /* Un pequeño borde para separarlo de la pista */
 }

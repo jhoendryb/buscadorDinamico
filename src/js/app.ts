@@ -327,7 +327,6 @@ class Search {
     #cleanupScrollDetection(): Search {
         if (this.scrollObserver) {
             this.scrollObserver.disconnect();
-            this.scrollObserver = null;
         }
         return this;
     }
@@ -345,14 +344,14 @@ class Search {
      * Registra un listener para un evento.
      * @param {string} eventName - Nombre del evento (ej: "search", "pageChange")
      * @param {Function} callback - Función a ejecutar cuando se emite el evento
-     * @returns {{off: Function}} Objeto con método off para remover el listener
+     * @returns {EventEmitter} - {@link EventEmitter} para poder concatenar métodos
      */
     on(eventName: string, callback: Function): EventEmitter {
         return this.events.on(eventName, callback);
     }
     /**
      * Muestra el indicador de carga.
-     * @returns {void}
+     * @returns {Search} - La instancia actual de {@link Search} para encadenar métodos.
      */
     showLoading(): Search {
         if (this.renderer.body.renderItems) {
@@ -376,19 +375,19 @@ class Search {
         return this;
     }
     /**
-     * Genera una clave única para el caché basada en el término de búsqueda y página.
+     * Genera la clave de caché para una búsqueda en particular y una página determinada.
      * @param {string} searchTerm - Término de búsqueda
-     * @param {number} page - Página actual
-     * @returns {string} Clave única para el caché
+     * @param {number} page - Número de página
+     * @returns {string} Clave de caché
      */
     getCacheKey(searchTerm: string, page: number): string {
         return `${searchTerm}_${page}`;
     }
     /**
      * Ordena los datos por un campo específico.
-     * @param {string} field - Campo por el cual ordenar
-     * @param {'asc'|'desc'} [order='asc'] - Orden de ordenamiento
-     * @returns {void}
+     * @param {string} field - Campo por el cual se va a ordenar los datos.
+     * @param {'asc'|'desc'} [order='asc'] - Orden de ordenamiento. Por defecto, 'asc' (ascendente).
+     * @returns {Search} - La instancia actual de {@link Search} para encadenar métodos.
      */
     sort(field: string, order: 'asc' | 'desc' = 'asc'): Search {
         this.sortBy = field;
@@ -409,7 +408,7 @@ class Search {
     }
     /**
      * Elimina el orden actual y reinicia a orden natural.
-     * @returns {Search} Instancia actual para encadenamiento
+     * @returns {Search} - La instancia actual de {@link Search} para encadenar métodos.
      */
     clearSort(): Search {
         this.sortBy = null;
@@ -426,16 +425,15 @@ class Search {
         return this;
     }
     /**
-     * Configura la navegación por teclado para el componente.
-     * Habilita las siguientes teclas:
-     * - ArrowUp/ArrowDown: Navegar entre items
-     * - ArrowLeft/ArrowRight: Navegar entre páginas
-     * - Enter: Seleccionar item destacado
-     * 
-     * Requiere que keyboardEnabled sea true.
-     * 
-     * @public
-     * @returns {Search} Instancia actual para encadenamiento
+     * Configures keyboard navigation for the component.
+     * Enables the following keys:
+     * - ArrowUp/ArrowDown: Navigate between items
+     * - ArrowLeft/ArrowRight: Navigate between pages
+     * - Enter: Select highlighted item
+     *
+     * Requires that `keyboardEnabled` is true.
+     *
+     * @return {Search} - The current instance of {@link Search} for chaining methods.
      */
     setupKeyboardNavigation(): Search {
         if (!this.keyboardEnabled) return this;
@@ -517,11 +515,9 @@ class Search {
         this.events.emit('destroy', { timestamp: new Date().toISOString() } as Types.DestroyEventData);
 
         if (this.scrollObserver) {
-            this.scrollObserver.disconnect();
+            this.#cleanupScrollDetection();
             this.scrollObserver = null;
         }
-
-        this.#cleanupScrollDetection();
 
         if (this.renderer.animationTimeouts) {
             this.renderer.animationTimeouts.forEach((timeout: any) => clearTimeout(timeout));
