@@ -50,15 +50,17 @@
     display: flex;
 }
 
-/* Lógica de :has() para paginación */
-.app-search:has(.content-pagination-items:has(.items-search[hidden="true"])) .pagination-items {
+.pagination-items {
     display: none;
 }
 
-.app-search:has(.content-pagination-items:has(.items-search:not([hidden="true"]))) .pagination-items {
-    display: flex;
-}
-
-.app-search:has(.content-pagination-items:has(.items-search.items-search-hidden)) .pagination-items {
-    display: none;
+@supports selector(:has(*)) {
+    .content-pagination-items:has(.items-search:not([hidden="true"])) .pagination-items {
+        display: flex;
+    }
+    
+    .content-pagination-items:has(.items-search[hidden="true"]) .pagination-items,
+    .content-pagination-items:has(.items-search.items-search-hidden) .pagination-items {
+        display: none;
+    }
 }

@@ -16,7 +16,7 @@
     background-color: var(--search-item-bg-color);
     color: var(--search-text-color-items);
     /* Asegurarse de que el texto de los items use el color general */
-    padding: var(--search-item-padding, 10px);
+    padding: var(--search-item-padding);
     /* Espacio entre items */
     border-radius: var(--search-border-radius);
     /* Para que cada item tenga sus propias esquinas redondeadas */

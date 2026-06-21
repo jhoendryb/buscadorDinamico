@@ -1,7 +1,18 @@
-.items-search {
+.items-search,
+.content-pagination-items {
+    will-change: opacity, transform;
     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
 
-.content-pagination-items {
-    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+/* src/css/core/animations.css */
+@media (prefers-reduced-motion: reduce) {
+
+    .items-search,
+    .content-pagination-items {
+        transition: none;
+    }
+
+    .spinner {
+        animation: none;
+    }
 }
