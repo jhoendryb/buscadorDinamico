@@ -16,8 +16,7 @@ export class SearchingLocal {
     isExtractData(): boolean {
         try {
             const data = this.searchInstance.data;
-            
-            // Validación con ErrorHandler
+
             if (!Array.isArray(data)) {
                 this.errorHandler.validateType(data, 'array', 'data', ErrorCode.INVALID_DATA_FORMAT);
             }
@@ -25,7 +24,7 @@ export class SearchingLocal {
             if (data.length > 0) return false;
 
             const items = this.searchInstance.renderer.body.content.querySelectorAll('.items') as HTMLElement[];
-            
+
             if (items.length === 0) return false;
 
             this.searchInstance.data = Array.from(items).map((item: HTMLElement) => {
@@ -58,7 +57,6 @@ export class SearchingLocal {
                 return this.searchInstance;
             }
 
-            // Validaciones con ErrorHandler
             if (!Array.isArray(this.searchInstance.data)) {
                 this.errorHandler.throwCustomError(ErrorCode.INVALID_DATA_FORMAT, {
                     context: 'searchingLocal',
@@ -74,7 +72,7 @@ export class SearchingLocal {
 
             const cacheKey = this.searchInstance.getCacheKey(searchTerm, this.searchInstance.pagination.getCurrentPage());
             const cachedData = this.searchInstance.cache.get(cacheKey);
-            
+
             if (this.searchInstance.cacheEnabled && cachedData && !isEvent) {
                 this.searchInstance._data = cachedData;
                 this.searchInstance.processInfiniteScroll();

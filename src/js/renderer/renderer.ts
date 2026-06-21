@@ -238,12 +238,12 @@ export class SearchRenderer {
     }
     /**
      * Añade items al contenedor sin reemplazar el contenido existente.
-     * @param {Array<Object>} data - Items a añadir
-     * @param {string|Function} template - Template personalizado
-     * @param {string} noResults - Mensaje sin resultados
+     * @param {Record<string, any>[]} data - Items a añadir
+     * @param {string|Function|null} template - Template personalizado (opcional)
+     * @param {string} [noResults="No hay resultados."] - Mensaje sin resultados
      * @param {EventEmitter} events - Instancia de EventEmitter
-     * @param {boolean} firtsLoad - Si es la primera carga
-     * @returns {SearchRenderer} Instancia actual para encadenamiento
+     * @param {boolean} [firtsLoad=false] - Si es la primera carga
+     * @returns {boolean} Indica si se pudo añadir los items exitosamente
      */
     appendItems(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter, firtsLoad: boolean = false): boolean {
         const container = this.body.renderItems;
@@ -319,20 +319,16 @@ export class SearchRenderer {
     }
     /**
      * Renderiza los componentes en el orden especificado por la propiedad 'dom'.
-     * @param {string} domString - String con el orden (ej: 'sip' = search, items, pagination)
+     * @param {string} domString - String con el orden (ej: 'scip' = search, ContentItemPagination, Items, Pagination)
      * @param {Object} options - Opciones para cada componente
      * @param {Object} options.search - Opciones para el componente de búsqueda
-     * @param {boolean} options.infiniteScroll - Si debe usar scroll infinito
      * @returns {void}
      */
     renderByDom(domString: string, options: Record<string, any>): void {
-        // const content = this.body.content;
-        // content.innerHTML = '';
-
         const domMap: Record<string, () => void> = {
             's': () => {
                 this.contentSearch();
-                this.renderSearch(options.search || {});
+                this.renderSearch({ ...options.search });
             },
             'c': () => this.renderContentPaginationItems(),
             'i': () => this.renderItems(),
@@ -382,7 +378,7 @@ export class SearchRenderer {
      * Permite que el usuario haga clic en un resultado antes de ocultar.
      */
     hideResultsWithDelay(): void {
-        
+
         // Delay de 200ms para permitir clic en resultados
         this.hideTimeout = setTimeout(() => {
             this.hideResults();

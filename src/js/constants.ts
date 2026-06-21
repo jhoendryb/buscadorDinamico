@@ -6,7 +6,7 @@
 export const DEFAULT_ITEMS_PER_PAGE = 10;
 export const DEFAULT_DEBOUNCE_TIME = 500;
 export const DEFAULT_CACHE_MAX_SIZE = 50;
-export const DEFAULT_CACHE_TTL = 50;
+export const DEFAULT_CACHE_TTL = 300;
 export const DEFAULT_Z_INDEX = 1000;
 export const DEFAULT_DEVELOPMENT_MODE = true;
 export const DEFAULT_THEME = "blue-black";

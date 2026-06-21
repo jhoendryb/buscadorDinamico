@@ -9,7 +9,7 @@ export class EventEmitter {
      * Registra un listener para un evento.
      * @param {string} eventName - Nombre del evento
      * @param {Function} callback - Función a ejecutar cuando se emite el evento
-     * @returns {Function} Función para remover el listener
+     * @returns {EventEmitter} - {@link EventEmitter} para concatenar
      */
     on(eventName: string, callback: Function): EventEmitter {
         if (!this.events[eventName]) {
@@ -24,12 +24,25 @@ export class EventEmitter {
      * Remueve un listener de un evento.
      * @param {string} eventName - Nombre del evento
      * @param {Function} callback - Función a remover
-     * @returns {{on: Function}} Objeto con método on para volver a registrar
+     * @returns {EventEmitter} - {@link EventEmitter} para concatenar
      */
     off(eventName: string, callback: Function): EventEmitter {
         if (!this.events[eventName]) return this;
         this.events[eventName] = this.events[eventName].filter(cb => cb !== callback);
         return this;
+    }
+    /** 
+     * Registra un listener para un evento que se activa solo una vez
+     * @param {string} eventName - Nombre del evento
+     * @param {Function} callback - Función a ejecutar cuando se emite el evento
+     * @returns {EventEmitter} - {@link EventEmitter} para concatenar
+    */
+    once(eventName: string, callback: Function): EventEmitter {
+        const wrappedCallback = (data?: any) => {
+            callback(data);
+            this.off(eventName, wrappedCallback);
+        };
+        return this.on(eventName, wrappedCallback);
     }
 
     /**
@@ -63,5 +76,13 @@ export class EventEmitter {
      */
     listenerCount(eventName: string): number {
         return this.events[eventName] ? this.events[eventName].length : 0;
+    }
+    
+    /**
+     * Obtiene todos los nombres de eventos registrados.
+     * @returns {string[]} Array con los nombres de eventos
+     */
+    eventNames(): string[] {
+        return Object.keys(this.events);
     }
 }

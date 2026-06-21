@@ -16,7 +16,6 @@ export class SearchingServer {
      */
     async searching(searchTerm: string, isEvent: boolean = false): Promise<any> {
         try {
-            // Validaciones con ErrorHandler
             this.errorHandler.validateRequired(this.searchInstance.fetch?.url, 'fetch.url', ErrorCode.FETCH_URL_REQUIRED);
 
             if (searchTerm !== this.searchInstance.searchTerm) {

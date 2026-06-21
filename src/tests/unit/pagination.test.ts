@@ -28,7 +28,7 @@ describe('Pagination', () => {
         const pagination = new Pagination(10);
         pagination.setCountFunction(() => 30);
 
-        expect(pagination.nextPage()).toBe(2);
+        expect(pagination.loadNextPage()).toBe(2);
         expect(pagination.getCurrentPage()).toBe(2);
     });
 
@@ -37,7 +37,7 @@ describe('Pagination', () => {
         pagination.setCountFunction(() => 15);
         pagination.goToPage(2);
 
-        expect(pagination.nextPage()).toBe(2);
+        expect(pagination.loadNextPage()).toBe(2);
     });
 
     test('debe retroceder a página anterior', () => {

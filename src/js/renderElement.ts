@@ -1,30 +1,30 @@
 import * as Types from './types';
 
 /**
- * Crea un elemento HTML con los atributos y opciones especificadas.
- * Función auxiliar para crear elementos DOM de forma declarativa.
- * 
+ * Creates an HTML element with the specified attributes and options.
+ * Auxiliary function to create DOM elements declaratively.
+ *
  * @public
- * @param {Object} config - Configuración del elemento a crear
- * @param {string|HTMLElement} config.element - Nombre del elemento HTML a crear o elemento existente
- * @param {Object} [config.dataset] - Objeto con pares clave-valor para atributos data-*
- * @param {Array<Object>} [config.children] - Arreglo de objetos con configuración de elementos hijos
- * @param {HTMLElement} [config.child] - Elemento hijo único
- * @param {Object} [config.event] - Objeto con eventos a agregar (clave: nombre evento, valor: callback)
- * @param {Object} [config.attributes] - Objeto con atributos HTML a establecer
- * @param {Object} [config.*] - Cualquier otra propiedad opcional se asigna directamente al elemento. Debe ser el último parámetro.
- * @returns {HTMLElement} El elemento HTML creado
- * 
+ * @param {Object} config - Element creation configuration
+ * @param {string|HTMLElement} config.element - Name of the HTML element to create or existing element
+ * @param {Object} [config.dataset] - Object with key-value pairs for data-* attributes
+ * @param {Array<Object>} [config.children] - Array of configuration objects for child elements
+ * @param {HTMLElement} [config.child] - Single child element
+ * @param {Object} [config.event] - Object with events to add (key: event name, value: callback)
+ * @param {Object} [config.attributes] - Object with HTML attributes to set
+ * @param {Object} [config.*] - Any other optional property. Must be the last parameter.
+ * @returns {HTMLElement} The created HTML element
+ *
  * @example
- * // Crear un input simple
+ * // Create a simple input
  * const input = createElement({
  *     element: 'input',
  *     type: 'text',
- *     placeholder: 'Buscar...'
+ *     placeholder: 'Search...'
  * });
- * 
+ *
  * @example
- * // Crear un div con hijos y eventos
+ * // Create a div with children and events
  * const container = createElement({
  *     element: 'div',
  *     className: 'container',
@@ -33,15 +33,15 @@ import * as Types from './types';
  *         click: (e) => console.log('Clicked', e)
  *     },
  *     children: [
- *         { element: 'span', textContent: 'Hola' }
+ *         { element: 'span', textContent: 'Hello' }
  *     ]
  * });
- * 
+ *
  * @example
- * // Crear con dataset
+ * // Create with dataset
  * const item = createElement({
  *     element: 'div',
- *     dataset: { id: '123', name: 'Juan' }
+ *     dataset: { id: '123', name: 'John' }
  * });
  */
 

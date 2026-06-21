@@ -66,7 +66,14 @@ export class LRUCache {
      * @returns {boolean} True si existe, false si no
      */
     has(key: string): boolean {
-        return (this.cache.has(key) && (this.get(key) !== undefined));
+        const entry = this.cache.get(key);
+        if (!entry) return false;
+
+        if (Date.now() > entry.expiresAt) {
+            return false;
+        }
+
+        return true;
     }
     /**
      * Obtiene la cantidad de items almacenados en el caché.

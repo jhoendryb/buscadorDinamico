@@ -234,7 +234,7 @@ describe('Search', () => {
 
         expect(search.pagination.getCurrentPage()).toBe(1);
 
-        search.pagination.nextPage();
+        search.pagination.loadNextPage();
         expect(search.pagination.getCurrentPage()).toBe(2);
 
         search.pagination.prevPage();

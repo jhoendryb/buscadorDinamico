@@ -5,7 +5,6 @@
 export class Pagination {
     private currentPage: number;
     public itemsPerPage: number;
-    private loadedPages: Set<number>;
     private countFn?: () => number;
     private dataItemsFn?: () => Object[];
     /**
@@ -16,7 +15,6 @@ export class Pagination {
     constructor(itemsPerPage: number = 10, firstPage: number = 1) {
         this.currentPage = firstPage;
         this.itemsPerPage = itemsPerPage;
-        this.loadedPages = new Set([firstPage]); // Rastrear páginas cargadas
     }
     /**
      * Carga la siguiente página en modo scroll infinito.
@@ -26,8 +24,6 @@ export class Pagination {
         const totalPages = this.getTotalPages();
         if (this.currentPage < totalPages) {
             this.currentPage++;
-            this.loadedPages.add(this.currentPage);
-            return this.currentPage;
         }
         return this.currentPage; // No hay más páginas
     }
@@ -88,17 +84,6 @@ export class Pagination {
     getTotalPages(): number {
         const totalItems = this.getTotalItems();
         return Math.ceil(totalItems / this.itemsPerPage) || 1;
-    }
-    /**
-     * Avanza a la siguiente página si existe.
-     * @returns {number} Nueva página actual
-     */
-    nextPage(): number {
-        const totalPages = this.getTotalPages();
-        if (this.currentPage < totalPages) {
-            this.currentPage++;
-        }
-        return this.currentPage;
     }
     /**
      * Retrocede a la página anterior si existe.
