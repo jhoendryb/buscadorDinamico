@@ -186,6 +186,7 @@ class Search {
             this.renderer.body.renderItems.innerHTML = '';
             this.renderer.body.renderItems.removeAttribute('aria-activedescendant');
             this.pagination.goToPage(1);
+            this.selectedIndex = -1;
         }
 
         await this.searching(searchTerm, isEvent);
@@ -440,25 +441,40 @@ class Search {
         if (!this.keyboardEnabled) return this;
 
         const content = this.renderer.body.content;
-        content.addEventListener('keydown', (e: KeyboardEvent) => {
-            const contentItems = this.renderer.body.renderItems;
-            if (!contentItems) return;
+        const renderItems = this.renderer.body.renderItems;
 
-            const items = contentItems.querySelectorAll('.items') as any;
+        renderItems?.addEventListener('click', (e: Event) => {
+            e.preventDefault();
+            if (!renderItems) return;
+
+            const item = (e.target as HTMLElement).closest('.items');
+            const items = renderItems.querySelectorAll('.items') as any;
+            if (item) {
+                this.selectedIndex = Array.from(items).indexOf(item);
+                this.#highlightItem(items);
+                this.#selectItem(item);
+                // this.renderer.hideResults();
+            }
+        });
+
+        content.addEventListener('keydown', (e: KeyboardEvent) => {
+            if (!renderItems) return;
+
+            const items = renderItems.querySelectorAll('.items') as any;
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
                 this.#highlightItem(items);
-                this.renderer.showResults();
+                // this.renderer.showResults();
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
                 this.#highlightItem(items);
-                this.renderer.showResults();
-            } else if (e.key === 'Enter' && this.selectedIndex >= 0) {
+                // this.renderer.showResults();
+            } else if (['enter', 'click'].includes(e.key.toLowerCase()) && this.selectedIndex >= 0) {
                 e.preventDefault();
                 this.#selectItem(items[this.selectedIndex]);
-                this.renderer.hideResults();
+                // this.renderer.hideResults();
             }
         });
 
@@ -481,6 +497,10 @@ class Search {
             if (index === this.selectedIndex) {
                 item.classList.add('selected');
                 this.renderer.body.renderItems?.setAttribute('aria-activedescendant', item.id);
+                item.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
                 this.events.emit('itemHighlighted', { item, index } as Types.ItemHighlightedEventData);
             } else {
                 item.classList.remove('selected');

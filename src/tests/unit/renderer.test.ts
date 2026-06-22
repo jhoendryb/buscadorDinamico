@@ -18,7 +18,7 @@ describe('SearchRenderer', () => {
             inputSearch: undefined,
             renderItems: undefined,
             paginationItems: undefined
-        }, (baseClass) => `${baseClass}-test`);
+        }, (baseClass) => `${baseClass}-test`, 300);
     });
 
     afterEach(() => {
@@ -221,8 +221,8 @@ describe('SearchRenderer', () => {
 
         renderer.showResults();
 
-        expect(renderer.body.renderItems?.hasAttribute('hidden')).toBe(false);
-        expect(renderer.body.renderItems?.classList.contains('items-search-visible')).toBe(true);
+        expect(renderer.body.renderItems?.hasAttribute('hidden')).toBe(true);
+        expect(renderer.body.renderItems?.classList.contains('items-search-visible')).toBe(false);
     });
 
     test('debe ocultar resultados', () => {
@@ -231,8 +231,11 @@ describe('SearchRenderer', () => {
 
         renderer.hideResults();
 
-        expect(renderer.body.renderItems?.hasAttribute('hidden')).toBe(true);
-        expect(renderer.body.renderItems?.classList.contains('items-search-visible')).toBe(false);
+        // esperar 200 milisiegundos
+        jest.advanceTimersByTime(200);
+
+        expect(renderer.body.renderItems?.hasAttribute('hidden')).toBe(false);
+        expect(renderer.body.renderItems?.classList.contains('items-search-visible')).toBe(true);
     });
 
     test('debe renderizar en orden SEARCH_CONTENT_ITEMS_PAGINATION', () => {

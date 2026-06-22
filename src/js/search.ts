@@ -51,7 +51,8 @@ const prueba = search1.on('renderItems', (data: any) => {
 console.log("Esto es pruebas", prueba);
 
 search1.on('itemSelected', (data: any) => {
-    console.log('Item seleccionado:', data.item);
+    console.log('Item seleccionado:', data);
+    // window.location.href = data.item.dataset.url;
 });
 
 const search2 = new Search({
