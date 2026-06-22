@@ -168,7 +168,6 @@ export class SearchRenderer {
                 'aria-hidden': 'true',
             },
             style: { zIndex },
-            hidden: 'true',
             ...(!renderItems ? {
                 element: "ul",
                 id: this.getUniqueClassName('items-search')
@@ -348,25 +347,15 @@ export class SearchRenderer {
      */
     showResults(): void {
         const contentPagination = this.body.contentPaginationItems;
-        const itemsSearch = this.body.renderItems;
 
-        if (!contentPagination || !itemsSearch) return;
+        if (!contentPagination) return;
 
-        if (contentPagination) {
-            contentPagination.classList.remove('content-pagination-hidden');
-            contentPagination.classList.add('content-pagination-visible');
-            contentPagination.removeAttribute('hidden');
-        }
-
-        if (itemsSearch) {
-            itemsSearch.classList.remove('items-search-hidden');
-            itemsSearch.classList.add('items-search-visible');
-            itemsSearch.removeAttribute('hidden');
-        }
+        contentPagination.classList.remove('content-pagination-hidden');
+        contentPagination.classList.add('content-pagination-visible');
+        contentPagination.removeAttribute('hidden');
 
         this.isVisible = true;
 
-        // Cancelar cualquier timeout de ocultamiento pendiente
         if (this.hideTimeout) {
             clearTimeout(this.hideTimeout);
             this.hideTimeout = null;
@@ -391,7 +380,6 @@ export class SearchRenderer {
      */
     hideResults(): void {
         const contentPagination = this.body.contentPaginationItems;
-        const itemsSearch = this.body.renderItems;
 
         let timeout;
 
@@ -402,17 +390,6 @@ export class SearchRenderer {
             timeout = setTimeout(() => {
                 if (contentPagination.classList.contains('content-pagination-hidden')) {
                     contentPagination.setAttribute('hidden', 'true');
-                }
-            }, 200);
-            this.animationTimeouts.push(timeout);
-        }
-
-        if (itemsSearch) {
-            itemsSearch.classList.remove('items-search-visible');
-            itemsSearch.classList.add('items-search-hidden');
-            timeout = setTimeout(() => {
-                if (itemsSearch.classList.contains('items-search-hidden')) {
-                    itemsSearch.setAttribute('hidden', 'true');
                 }
             }, 200);
             this.animationTimeouts.push(timeout);

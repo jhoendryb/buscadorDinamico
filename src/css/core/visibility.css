@@ -1,29 +1,3 @@
-.items-search {
-    opacity: 0;
-    transform: translateY(-10px);
-    pointer-events: none;
-}
-
-.items-search.items-search-visible {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-}
-
-.items-search.items-search-hidden {
-    opacity: 0;
-    transform: translateY(-10px);
-    pointer-events: none;
-}
-
-.items-search[hidden="true"] {
-    display: none;
-}
-
-.items-search:not([hidden="true"]).items-search-visible {
-    display: flex;
-}
-
 .content-pagination-items {
     opacity: 0;
     transform: translateY(-10px);
@@ -50,17 +24,5 @@
     display: flex;
 }
 
-.pagination-items {
-    display: none;
-}
 
-@supports selector(:has(*)) {
-    .content-pagination-items:has(.items-search:not([hidden="true"])) .pagination-items {
-        display: flex;
-    }
-    
-    .content-pagination-items:has(.items-search[hidden="true"]) .pagination-items,
-    .content-pagination-items:has(.items-search.items-search-hidden) .pagination-items {
-        display: none;
-    }
-}
+@supports selector(:has(*)) {}
