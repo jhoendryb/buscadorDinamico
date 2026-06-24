@@ -9,7 +9,7 @@ const search1 = new Search({
     procesServer: true,
     cacheEnabled: true,
     keyboardEnabled: true,
-    // theme: "clean-white",
+    theme: "clean-white",
     template: `<div>{{name}} - {{id_ciudad}}</div>`,
     translation: {
         searchPlaceholder: 'Escribe la busqueda aqui.'
@@ -41,35 +41,35 @@ const search1 = new Search({
 });
 
 
-const prueba = search1.on('renderItems', (data: any) => {
-    const { content } = data;
-    const item = content.children;
-    console.log('Page change event:', item[0]);
-    console.log('Item content:', item[0].innerHTML);
-});
+// const prueba = search1.on('renderItems', (data: any) => {
+//     const { content } = data;
+//     const item = content.children;
+//     console.log('Page change event:', item[0]);
+//     console.log('Item content:', item[0].innerHTML);
+// });
 
-console.log("Esto es pruebas", prueba);
+// console.log("Esto es pruebas", prueba);
 
-search1.on('itemSelected', (data: any) => {
-    console.log('Item seleccionado:', data);
-    // window.location.href = data.item.dataset.url;
-});
+// search1.on('itemSelected', (data: any) => {
+//     console.log('Item seleccionado:', data);
+//     // window.location.href = data.item.dataset.url;
+// });
 
-const search2 = new Search({
-    element: '.app-search2',
-});
+// const search2 = new Search({
+//     element: '.app-search2',
+// });
 
-search2.on('search', (data: any) => {
-    console.log('Search event:', data);
-});
+// search2.on('search', (data: any) => {
+//     console.log('Search event:', data);
+// });
 
-search2.on('pageChange', (data: any) => {
-    console.log('Page change event:', data);
-});
+// search2.on('pageChange', (data: any) => {
+//     console.log('Page change event:', data);
+// });
 
-const search3 = new Search({
-    element: '.app-search3',
-});
+// const search3 = new Search({
+//     element: '.app-search3',
+// });
 
 const search4 = new Search({
     element: '.app-search4',

@@ -1,25 +1,56 @@
 .theme-clean-white {
     /* Colores principales - Clean White */
-    --search-bg-color: #ffffff; /* Blanco puro para el fondo principal */
-    --search-border-color: #e0e0e0; /* Gris muy claro para bordes sutiles */
-    --search-text-color: #333333; /* Negro oscuro para texto principal */
-    --search-text-color-items: #333333; /* Color de texto general */
-    --search-placeholder-color: #a0a0a0; /* Color específico para el placeholder */
-    --search-light-text-color: #a0a0a0; /* Gris claro para texto secundario */
+    --search-bg-color: #ffffff;
+    /* Blanco puro para el fondo principal */
+    --search-border-color: #e0e0e0;
+    /* Gris muy claro para bordes sutiles */
+    --search-text-color: #333333;
+    /* Negro oscuro para texto principal */
+    --search-text-color-items: #333333;
+    /* Color de texto general */
+    --search-placeholder-color: #a0a0a0;
+    /* Color específico para el placeholder */
+    --search-light-text-color: #a0a0a0;
+    /* Gris claro para texto secundario */
 
-    --search-item-bg-color: #f8f8f8; /* Fondo de cada elemento de la lista (casi blanco) */
-    --search-item-hover-bg-color: #e6f7ff; /* Un azul muy claro para hover */
+    --search-item-bg-color: #f8f8f8;
+    /* Fondo de cada elemento de la lista (casi blanco) */
+    --search-item-hover-bg-color: #e6f7ff;
+    /* Un azul muy claro para hover */
 
-    --search-selected-bg-color: #cceeff; /* Azul claro para elemento seleccionado */
-    --search-selected-border-color: #007bff; /* Azul brillante para el borde de selección */
+    --search-selected-bg-color: #cceeff;
+    /* Azul claro para elemento seleccionado */
+    --search-selected-border-color: #007bff;
+    /* Azul brillante para el borde de selección */
 
-    --search-counter-color: #666666; /* Gris oscuro para el contador */
-    --search-counter-bg-color: #ffffff; /* Fondo del contador igual que el principal */
+    --search-counter-color: #666666;
+    /* Gris oscuro para el contador */
+    --search-counter-bg-color: #ffffff;
+    /* Fondo del contador igual que el principal */
 
     /* Scrollbar */
-    --scrollbar-thumb-color: #cccccc; /* Gris claro para el pulgar del scrollbar */
+    --scrollbar-thumb-color: #cccccc;
+    /* Gris claro para el pulgar del scrollbar */
 
     /* Loading */
-    --spinner-border-color: #f3f3f3; /* Borde del spinner */
-    --spinner-top-color: #007bff; /* Azul para la parte superior del spinner */
+    --spinner-border-color: #f3f3f3;
+    /* Borde del spinner */
+    --spinner-top-color: #007bff;
+    /* Azul para la parte superior del spinner */
+    /* Nuevas variables para el input de búsqueda */
+    --search-input-bg-color: #ffffff;
+    /* Por defecto igual al bg principal */
+    --search-input-border-color: #e0e0e0;
+    /* Por defecto un gris claro */
+}
+
+.theme-clean-white .input-search {
+    background-color: var(--search-input-bg-color);
+    /* Nueva variable */
+    border-radius: var(--search-border-radius);
+    /* Mantener el redondeo */
+}
+
+.theme-clean-white .items-search {
+    background-color: var(--search-bg-color);
 }

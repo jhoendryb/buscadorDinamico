@@ -1,6 +1,7 @@
 .app-search {
     background-color: var(--search-bg-color);
     color: var(--search-text-color);
+    /* border: 1px solid var(--search-border-color); */
 }
 
 .items-search {

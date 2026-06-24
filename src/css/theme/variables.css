@@ -4,6 +4,10 @@
     /* Fondo principal del componente y barra de búsqueda */
     --search-border-color: #3f3f5a;
     /* Borde sutil */
+    --search-input-bg-color: #21213e;
+    /* Por defecto igual al bg principal */
+    --search-input-border-color: #e0e0e0;
+    /* Por defecto un gris claro */
     --search-text-color: #a0a0a0;
     /* Color de texto general */
     --search-text-color-items: #e0e0e0;

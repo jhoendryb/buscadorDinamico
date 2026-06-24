@@ -339,7 +339,7 @@ class Search {
      * @private
      */
     #getUniqueClassName(baseClass: string): string {
-        const parentSelector = this.element.replace(/^\.|^\#/, '');
+        const parentSelector = this.element.replace(/^[.#]/, '');
         return `${baseClass}-${parentSelector}`;
     }
     /**

@@ -4,6 +4,12 @@ export default defineConfig({
     base: './',
     root: '.',
     build: {
+        lib: {
+            entry: './src/js/main.ts',
+            name: 'BuscadorDinamico',
+            fileName: (format) => `buscador-dinamico.${format === 'es' ? 'es' : format}.js`,
+            formats: ['es', 'umd']
+        },
         outDir: 'dist',
         emptyOutDir: true,
         rollupOptions: {
