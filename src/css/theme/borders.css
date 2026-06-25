@@ -2,9 +2,9 @@
     border-radius: var(--search-border-radius);
 }
 
-.app-search:has(.content-pagination-items.content-pagination-visible) {
+.app-search:has(.content-pagination-items.content-pagination-visible),
+.app-search:has(.content-pagination-items.content-pagination-visible) .input-search {
     border-radius: var(--search-border-radius-open);
-    box-shadow: 0 4px 20px var(--shadow-color);
 }
 
 /* El comentario sugiere que '.items-search' tenía un border-radius. Si '.items-search' es el contenedor de todos los items */

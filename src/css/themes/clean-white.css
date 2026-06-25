@@ -13,6 +13,11 @@
     --search-light-text-color: #a0a0a0;
     /* Gris claro para texto secundario */
 
+    --search-input-bg-color: #ffffff;
+    /* Por defecto igual al bg principal */
+    --search-input-border-color: #e0e0e0;
+    /* Por defecto un gris claro */
+
     --search-item-bg-color: #f8f8f8;
     /* Fondo de cada elemento de la lista (casi blanco) */
     --search-item-hover-bg-color: #e6f7ff;
@@ -37,20 +42,32 @@
     /* Borde del spinner */
     --spinner-top-color: #007bff;
     /* Azul para la parte superior del spinner */
-    /* Nuevas variables para el input de búsqueda */
-    --search-input-bg-color: #ffffff;
-    /* Por defecto igual al bg principal */
-    --search-input-border-color: #e0e0e0;
-    /* Por defecto un gris claro */
 }
 
 .theme-clean-white .input-search {
     background-color: var(--search-input-bg-color);
-    /* Nueva variable */
+    border: 1px solid var(--search-input-border-color, transparent);
     border-radius: var(--search-border-radius);
-    /* Mantener el redondeo */
 }
 
 .theme-clean-white .items-search {
     background-color: var(--search-bg-color);
+}
+
+.app-search:has(.content-pagination-items.content-pagination-visible),
+.app-search:has(.content-pagination-items.content-pagination-visible) .input-search {
+    border-bottom: none;
+}
+
+.theme-clean-white .content-pagination-items.content-pagination-visible {
+    border: 1px solid var(--search-input-border-color, transparent);
+    border-top: none;
+}
+
+.app-search.theme-clean-white:has(.content-pagination-items:last-child) .content-pagination-items {
+    border-radius: 0 0 var(--search-border-radius, 8px) var(--search-border-radius, 8px);
+}
+
+.app-search.theme-clean-white:has(.content-pagination-items:first-child) .content-pagination-items {
+    border-radius: var(--search-border-radius, 8px) var(--search-border-radius, 8px) 0 0;
 }
