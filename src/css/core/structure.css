@@ -1,5 +1,5 @@
 .app-search {
-    width: var(--search-width, 250px);
+    width: var(--search-width, 100%);
     min-height: auto;
     display: flex;
     flex-direction: column;

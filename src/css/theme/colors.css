@@ -3,10 +3,13 @@
     color: var(--search-text-color);
 }
 
+.input-search {
+    color: var(--search-text-color);
+}
+
 .items-search {
     background-color: var(--search-bg-color);
 }
-
 
 .input-search input::placeholder {
     color: var(--search-placeholder-color);

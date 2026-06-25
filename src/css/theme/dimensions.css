@@ -1,21 +1,10 @@
 .app-search {
-    width: var(--search-width);
     max-height: var(--search-max-height);
-    gap: var(--search-gap);
-    display: flex;
-    flex-direction: column;
-}
-
-.input-search {
-    padding: var(--search-padding);
-    color: var(--search-text-color);
 }
 
 .items-search {
     padding: var(--search-padding);
     gap: var(--search-padding);
-    display: flex;
-    flex-direction: column;
 }
 
 .pagination-items .items-counter {
