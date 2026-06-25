@@ -39,4 +39,6 @@
     /* Color de borde del spinner */
     --spinner-top-color: #0f4c75;
     /* Color superior del spinner (accent-color) */
+
+    --search-input-border-color: #3f3f5a;
 }

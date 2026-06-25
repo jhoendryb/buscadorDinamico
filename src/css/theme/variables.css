@@ -1,5 +1,5 @@
 :root {
-    /* ===== COLORES NEUTROS POR DEFECTO ===== */
+    /* Background */
     --search-bg-color: #ffffff;
     --search-border-color: #d0d0d0;
     --search-input-bg-color: #ffffff;
@@ -9,19 +9,24 @@
     --search-placeholder-color: #888888;
     --search-light-text-color: #666666;
 
+    /* Items */
     --search-item-bg-color: #f5f5f5;
     --search-item-hover-bg-color: #e8e8e8;
 
+    /* Selección */
     --search-selected-bg-color: #d4edff;
     --search-selected-border-color: #0066cc;
 
+    /* Contador */
     --search-counter-color: #666666;
     --search-counter-bg-color: #f8f8f8;
     --shadow-color: rgba(0, 0, 0, 0.1);
 
+    /* Iconos & Scrollbar */
     --search-icon-color: #666666;
     --scrollbar-thumb-color: #cccccc;
 
+    /* Spinner */
     --spinner-border-color: #e0e0e0;
     --spinner-top-color: #0066cc;
 

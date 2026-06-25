@@ -6,6 +6,7 @@ import { Search } from './app';
 
 const search1 = new Search({
     element: '.app-search1',
+    theme: 'blue-black',
     procesServer: true,
     cacheEnabled: true,
     keyboardEnabled: true,
@@ -74,6 +75,7 @@ const search4 = new Search({
     element: '.app-search4',
     dom: 'scip',
     keyboardEnabled: true,
+    theme: 'clean-white',
     data: [
         {
             country: 'VE',
