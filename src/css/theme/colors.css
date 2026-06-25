@@ -36,20 +36,11 @@
     color: var(--search-counter-color);
     background-color: var(--search-counter-bg-color);
     border-top-color: var(--search-border-color);
-    padding: var(--search-padding);
 }
 
 .spinner {
     border-color: var(--spinner-border-color);
     border-top-color: var(--spinner-top-color);
-}
-
-.scroll-personalize::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-thumb-color);
-}
-
-.scroll-personalize::-webkit-scrollbar {
-    width: 8px;
 }
 
 .scroll-personalize::-webkit-scrollbar-track {
@@ -58,7 +49,6 @@
 }
 
 .scroll-personalize::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-thumb-color);
     border-radius: 10px;
     border: 2px solid var(--search-bg-color);
 }

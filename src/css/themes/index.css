@@ -2,17 +2,3 @@
 @import "./clean-white.css";
 @import "./forest-green.css";
 @import "./onyx-black.css";
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --search-bg-color: #21213e;
-        --search-text-color: #e0e0e0;
-    }
-}
-
-@media (prefers-color-scheme: light) {
-    :root {
-        --search-bg-color: #ffffff;
-        --search-text-color: #333333;
-    }
-}

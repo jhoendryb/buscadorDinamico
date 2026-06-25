@@ -9,7 +9,6 @@ const search1 = new Search({
     procesServer: true,
     cacheEnabled: true,
     keyboardEnabled: true,
-    theme: "clean-white",
     template: `<div>{{name}} - {{id_ciudad}}</div>`,
     translation: {
         searchPlaceholder: 'Escribe la busqueda aqui.'
@@ -74,6 +73,7 @@ const search1 = new Search({
 const search4 = new Search({
     element: '.app-search4',
     dom: 'scip',
+    keyboardEnabled: true,
     data: [
         {
             country: 'VE',

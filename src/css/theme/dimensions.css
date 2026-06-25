@@ -36,10 +36,4 @@
 
 .content-pagination-items {
     max-height: 300px;
-    /* Aquí se controla la altura máxima de la lista desplazable */
-    overflow-y: auto;
-    /* Permite el scroll vertical si el contenido excede el max-height */
-    /* border-radius: var(--search-border-radius); <-- Esto ya lo pusimos en borders.css */
-    /* padding: 0 var(--search-padding); */
-    /* Padding horizontal para los items dentro del scroll, si lo necesitas */
 }

@@ -34,10 +34,12 @@ export class SearchRenderer {
      * @returns {SearchRenderer} Instancia actual de SearchRenderer
      */
     setTheme(theme: string): SearchRenderer {
-        this.body.content = createElement({
-            element: this.body.content,
-            className: `${this.body.content.classList} theme-${theme}`
-        })
+        if(theme !== "default") {
+            this.body.content = createElement({
+                element: this.body.content,
+                className: `${this.body.content.classList} theme-${theme}`
+            })
+        }
         return this;
     }
     /**
