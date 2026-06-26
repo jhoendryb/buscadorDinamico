@@ -75,3 +75,20 @@
     left: 0;
     max-height: var(--search-max-height, 300px);
 }
+
+.app-search:has(.content-pagination-items:first-child) .content-pagination-items {
+    top: unset;
+    bottom: 100%;
+}
+
+.app-search:has(.content-pagination-items:last-child.content-pagination-visible),
+.app-search:has(.content-pagination-items:last-child.content-pagination-visible) .input-search {
+    border-radius: var(--search-border-radius-open);
+    border-bottom: none;
+}
+
+.app-search:has(.content-pagination-items:first-child.content-pagination-visible),
+.app-search:has(.content-pagination-items:first-child.content-pagination-visible) .input-search {
+    border-radius: 0 0 var(--search-border-radius) var(--search-border-radius);
+    border-top: none;
+}

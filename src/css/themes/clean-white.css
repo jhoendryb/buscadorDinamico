@@ -54,14 +54,15 @@
     background-color: var(--search-bg-color);
 }
 
-.app-search:has(.content-pagination-items.content-pagination-visible),
-.app-search:has(.content-pagination-items.content-pagination-visible) .input-search {
-    border-bottom: none;
-}
-
 .theme-clean-white .content-pagination-items.content-pagination-visible {
     border: 1px solid var(--search-input-border-color, transparent);
+}
+
+.theme-clean-white .content-pagination-items:last-child.content-pagination-visible {
     border-top: none;
+}
+.theme-clean-white .content-pagination-items:first-child.content-pagination-visible {
+    border-bottom: none;
 }
 
 .app-search.theme-clean-white:has(.content-pagination-items:last-child) .content-pagination-items {

@@ -2,11 +2,6 @@
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.input-search:focus-within {
-    border-color: var(--search-selected-border-color);
-    box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.15);
-}
-
 .content-pagination-items {
     will-change: opacity, transform;
     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;

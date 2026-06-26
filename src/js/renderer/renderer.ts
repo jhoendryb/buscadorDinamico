@@ -34,7 +34,7 @@ export class SearchRenderer {
      * @returns {SearchRenderer} Instancia actual de SearchRenderer
      */
     setTheme(theme: string): SearchRenderer {
-        if(theme !== "default") {
+        if (theme !== "default") {
             this.body.content = createElement({
                 element: this.body.content,
                 className: `${this.body.content.classList} theme-${theme}`
@@ -336,8 +336,16 @@ export class SearchRenderer {
             'p': () => this.renderPagination()
         };
 
-        for (const char of domString) {
+        const order = domString.split('');
+
+        const brothers = order.filter((c: string) => 'sc'.includes(c)).join('');
+        const children = order.filter((c: string) => 'ip'.includes(c)).join('');
+
+        console.log(`${brothers}${children}`);
+
+        for (const char of `${brothers}${children}`) {
             if (domMap[char]) {
+                console.log(`Rendering ${char}`);
                 domMap[char]();
             }
         }

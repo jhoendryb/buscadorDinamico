@@ -13,16 +13,6 @@
     margin: 0 auto 10px;
 }
 
-.input-search input:focus-visible {
-    outline: 2px solid var(--search-selected-border-color);
-    outline-offset: 2px;
-}
-
-.items-search .items:focus-visible {
-    outline: 2px solid var(--search-selected-border-color);
-    outline-offset: -2px;
-}
-
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }

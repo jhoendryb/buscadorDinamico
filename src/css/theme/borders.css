@@ -2,20 +2,20 @@
     border-radius: var(--search-border-radius);
 }
 
-.app-search:has(.content-pagination-items.content-pagination-visible),
-.app-search:has(.content-pagination-items.content-pagination-visible) .input-search {
-    transition: border-radius 0.1s ease-in-out;
-    border-radius: var(--search-border-radius-open);
-}
-
 .items-search .items {
     border-radius: var(--search-border-radius);
 }
 
-.pagination-items .items-counter {
+.app-search:has(.content-pagination-items:last-child.content-pagination-visible) .items-counter {
     border-top: 1px solid var(--search-border-color);
     border-radius: 0 0 var(--search-border-radius) var(--search-border-radius);
 }
+
+.app-search:has(.content-pagination-items:first-child.content-pagination-visible) .items-counter {
+    border-bottom: 1px solid var(--search-border-color);
+    border-radius: var(--search-border-radius) var(--search-border-radius) 0 0;
+}
+
 
 .content-pagination-items:not(:has(.pagination-items:last-child)) {
     border-radius: 0 0 var(--search-border-radius) var(--search-border-radius);
