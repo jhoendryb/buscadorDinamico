@@ -299,7 +299,7 @@ const search = new Search({
     translation: {},
     
     // Desarrollo
-    developmentMode: false,
+    developmentMode: true,
     
     // Fetch API (modo servidor)
     fetch: {
@@ -343,7 +343,7 @@ const search = new Search({
 ```typescript
 fetch: {
     url: "./src/php/responseAjax.php",  // URL del endpoint (requerido)
-    method: "POST",                      // Método HTTP (GET, POST, PUT, PATCH)
+    method: "POST",                      // Método HTTP (GET, POST, PUT, DELETE, PATCH)
     headers: {                           // Headers adicionales
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
     },
@@ -352,7 +352,7 @@ fetch: {
         searchTerm: "",
         itemsPerPage: 10
     },
-    timeout: 10000,                      // Timeout en milisegundos
+    timeout: 30000,                      // Timeout en milisegundos (default: 30000)
     success: (resp, instance) => {        // Callback de éxito
         console.log('Respuesta:', resp);
     },
@@ -738,7 +738,7 @@ fetch: {
         searchTerm: "",
         itemsPerPage: 10
     },
-    timeout: 10000,
+    timeout: 30000,
     success: (resp, instance) => {
         console.log('Respuesta:', resp);
     },
@@ -753,7 +753,7 @@ fetch: {
 ```javascript
 fetch: {
     url: "./src/php/responseAjax.php",
-    timeout: 10000  // 10 segundos
+    timeout: 30000  // 30 segundos por defecto
 }
 ```
 
@@ -824,8 +824,7 @@ fetch: {
 | `sortChange` | Al cambiar el ordenamiento | `{ field, order }` |
 | `itemSelected` | Al seleccionar un item | `{ item, index }` |
 | `itemHighlighted` | Al destacar un item con teclado | `{ item, index }` |
-| `renderItems` | Al renderizar items | `{ items, content }` |
-| `appendItems` | Al añadir items (scroll infinito) | `{ items, content }` |
+| `appendItems` | Al añadir items al DOM | `{ items, content }` |
 | `destroy` | Al destruir la instancia | `{ timestamp }` |
 | `error` | Al ocurrir un error | `{ code, message, solution }` |
 
@@ -1034,19 +1033,19 @@ const key = search.getCacheKey('venezuela', 1);
 
 **Retorna:** string con clave única
 
-### clearCacheByPrefix(prefix)
+### cache.clearCacheByPrefix(prefix)
 
-Limpia el caché por prefijo de búsqueda.
+Limpia el caché por prefijo de búsqueda. Este método pertenece a la instancia `cache` del componente.
 
 ```javascript
-search.clearCacheByPrefix('venezuela');
+search.cache.clearCacheByPrefix('venezuela');
 ```
 
 **Parámetros:**
 
 - `prefix` (string): Prefijo de búsqueda a limpiar
 
-**Retorna:** Instancia de Search para encadenamiento
+**Retorna:** Instancia de LRUCache para encadenamiento
 
 ### setupKeyboardNavigation()
 
@@ -1319,9 +1318,9 @@ template: (item) => {
 | Clave | Default | Descripción |
 |-------|---------|-------------|
 | `searchPlaceholder` | "Ingrese palabra clave..." | Placeholder del input |
-| `searchLabel` | "Campo de búsqueda" | Label del input (aria-label) |
+| `searchLabel` | "Filtrar por Búsqueda" | Label del input (aria-label) |
 | `noResults` | "No se encontraron resultados" | Mensaje sin resultados |
-| `loading` | "Cargando..." | Mensaje de carga |
+| `loading` | "Buscando..." | Mensaje de carga |
 
 ### Configuración de Traducciones Personalizadas
 
@@ -1342,12 +1341,12 @@ search.init();
 
 ### Traducciones por Defecto
 
-```javascript
+```typescript
 static #defaultTranslations = {
+    searchLabel: "Filtrar por Búsqueda",
     searchPlaceholder: "Ingrese palabra clave...",
-    searchLabel: "Campo de búsqueda",
     noResults: "No se encontraron resultados",
-    loading: "Cargando..."
+    loading: "Buscando..."
 };
 ```
 
@@ -1387,7 +1386,7 @@ const search = new Search({
     element: '.app-search',
     cacheEnabled: true,
     cacheMaxSize: 50,      // Máximo 50 items en caché
-    cacheTtlSeconds: 60,   // Expirar después de 60 segundos
+    cacheTtlSeconds: 300,  // Expirar después de 300 segundos (5 min)
     procesServer: true,
     fetch: {
         url: "./src/php/responseAjax.php",
@@ -1406,7 +1405,7 @@ search.init();
 const key = search.getCacheKey('venezuela', 1);
 
 // Limpiar caché por prefijo
-search.clearCacheByPrefix('venezuela');
+search.cache.clearCacheByPrefix('venezuela');
 ```
 
 ### Invalidación de Caché
@@ -1416,7 +1415,7 @@ El caché se invalida automáticamente:
 - Cuando se llama a `clearSort()`
 - Cuando expira el TTL
 - Cuando se llena el caché (política LRU)
-- Manualmente con `clearCacheByPrefix()`
+- Manualmente con `search.cache.clearCacheByPrefix()`
 
 ### Ejemplos de Uso
 
@@ -1441,7 +1440,7 @@ await search.draw('venezuela');
 await search.draw('venezuela');
 
 // Limpiar caché manualmente
-search.clearCacheByPrefix('venezuela');
+search.cache.clearCacheByPrefix('venezuela');
 ```
 
 ## Gestión de Errores
@@ -1980,16 +1979,7 @@ search.init();
 
 ### Variables CSS
 
-```css
-:root {
-    --search-width: 400px;
-    --search-bg-color: #f5f5f5;
-    --search-selected-bg-color: #ffeb3b;
-    --search-border-radius: 8px;
-    --search-font-size: 16px;
-    --search-padding: 12px;
-}
-```
+Consulta la sección [Variables CSS Personalizables](#variables-css-personalizables) para ver la lista completa de variables disponibles.
 
 ### Creación de Temas
 
@@ -2023,6 +2013,7 @@ El componente incluye interfaces TypeScript completas:
 ```typescript
 interface SearchParams {
     element: string;
+    theme?: string;
     searchTerm?: string;
     data?: Object[];
     procesServer?: boolean;
@@ -2057,6 +2048,7 @@ interface FetchConfig {
 
 ```typescript
 interface TranslationCache {
+    searchLabel?: string;
     searchPlaceholder?: string;
     loading?: string;
     noResults?: string;
@@ -2117,7 +2109,7 @@ const config: SearchParams = {
 
 const search = new Search(config);
 
-search.on('renderItems', (data: any) => {
+search.on('appendItems', (data: any) => {
     const { content } = data;
     const item = content.children;
     console.log('Item content:', item[0].innerHTML);
@@ -2190,9 +2182,8 @@ El sistema de caché LRU con TTL optimiza el rendimiento:
 1. **Debounce**: Reduce peticiones al escribir
 2. **Caché LRU**: Evita peticiones repetidas
 3. **Scroll Infinito**: Carga progresiva
-4. **Virtual DOM**: Solo renderiza cambios necesarios
-5. **Intersection Observer**: Detección eficiente de scroll
-6. **AbortController**: Cancela peticiones timeout
+4. **Intersection Observer**: Detección eficiente de scroll
+5. **AbortController**: Cancela peticiones timeout
 
 ## Accesibilidad
 
@@ -2413,7 +2404,7 @@ search.ajax({ url: '/api', method: 'POST', body: data });
 // El componente usa fetch internamente
 ```
 
-1. **Actualizar configuración de fetch:**
+2. **Actualizar configuración de fetch:**
 
 ```javascript
 fetch: {
@@ -2426,7 +2417,7 @@ fetch: {
 }
 ```
 
-1. **Manejar errores con callbacks:**
+3. **Manejar errores con callbacks:**
 
 ```javascript
 fetch: {
