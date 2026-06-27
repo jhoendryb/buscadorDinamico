@@ -1,6 +1,6 @@
 # Search Component
 
-Una clase TypeScript flexible y moderna para crear buscadores dinámicos con soporte para paginación, scroll infinito, búsqueda en tiempo real, navegación por teclado y gestión de errores centralizada. Compatible con datos locales y peticiones AJAX al servidor usando Fetch API.
+Una clase TypeScript flexible y moderna para crear buscadores dinámicos con soporte para paginación, scroll infinito, búsqueda en tiempo real, navegación por teclado, temas CSS predefinidos y gestión de errores centralizada. Compatible con datos locales y peticiones AJAX al servidor usando Fetch API.
 
 ## Características Principales
 
@@ -12,10 +12,13 @@ Una clase TypeScript flexible y moderna para crear buscadores dinámicos con sop
 - **Caché LRU** con TTL para optimizar rendimiento
 - **Templates personalizados** para renderizado de items
 - **Internacionalización** (i18n) con traducciones configurables
+- **Temas CSS predefinidos** (clean-white, blue-black, onyx-black, forest-green)
+- **30+ variables CSS** personalizables
 - **Gestión de errores centralizada** con mensajes claros
 - **TypeScript** con type safety completo
 - **Múltiples instancias** en la misma página sin conflictos
 - **Accesibilidad** con ARIA attributes
+- **Build moderno** con Vite (ES Module + UMD)
 
 ## Tabla de Contenidos
 
@@ -28,6 +31,7 @@ Una clase TypeScript flexible y moderna para crear buscadores dinámicos con sop
 - [API Fetch](#api-fetch)
 - [Sistema de Eventos](#sistema-de-eventos)
 - [Métodos Públicos](#métodos-públicos)
+- [Métodos de Paginación](#métodos-de-paginación)
 - [Scroll Infinito](#scroll-infinito)
 - [Navegación por Teclado](#navegación-por-teclado)
 - [Templates Personalizados](#templates-personalizados)
@@ -85,29 +89,109 @@ Descarga los archivos del proyecto e importa la clase Search:
 <script src="./node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
 ```
 
+### Scripts de Desarrollo
+
+El proyecto usa Vite como bundler y Jest para tests:
+
+```bash
+# Instalar dependencias
+pnpm install
+
+# Desarrollo con hot reload
+pnpm dev
+
+# Build de producción
+pnpm build
+
+# Ejecutar tests
+pnpm test
+
+# Verificar tipos TypeScript
+pnpm type-check
+```
+
+### Salida del Build
+
+El build genera dos versiones en `dist/`:
+
+- **ES Module:** `buscador-dinamico.es.js` (para import/export)
+- **UMD:** `buscador-dinamico.umd.js` (para script tags, exporta `window.BuscadorDinamico`)
+- **CSS:** `css/buscador-dinamico.*.css` (CSS bundle con hash)
+
 ### Estructura de Archivos
 
 ```
 buscadorDinamico/
 ├── src/
 │   ├── js/
-│   │   ├── app.ts              # Clase principal Search
-│   │   ├── search.ts           # Ejemplos de uso
-│   │   ├── types.ts            # Interfaces TypeScript
+│   │   ├── main.ts                 # Entry point del build (importa CSS + re-exporta)
+│   │   ├── index.ts                # Barrel export de todo el módulo
+│   │   ├── app.ts                  # Clase principal Search
+│   │   ├── types.ts                # Interfaces TypeScript
+│   │   ├── constants.ts            # Constantes y valores por defecto
+│   │   ├── renderElement.ts        # Función helper createElement
+│   │   ├── search.ts               # Ejemplos de uso / demo
 │   │   ├── searching/
-│   │   │   ├── searchingLocal.ts    # Búsqueda local
-│   │   │   └── searchingServer.ts   # Búsqueda por servidor
-│   │   ├── error-handler/      # Sistema de errores
-│   │   ├── cache/              # Sistema de caché LRU
-│   │   ├── events/             # Sistema de eventos
-│   │   ├── pagination/         # Paginación
-│   │   └── renderer/           # Renderizado de DOM
+│   │   │   ├── index.ts            # Barrel export
+│   │   │   ├── searchingLocal.ts   # Búsqueda local
+│   │   │   └── searchingServer.ts  # Búsqueda por servidor
+│   │   ├── error-handler/
+│   │   │   ├── index.ts            # Barrel export
+│   │   │   ├── error-handler.ts    # SearchError + ErrorHandler
+│   │   │   └── error-codes.ts      # Enum ErrorCode + ErrorDetails
+│   │   ├── cache/
+│   │   │   ├── index.ts            # Barrel export
+│   │   │   └── cache.ts            # Sistema de caché LRU
+│   │   ├── events/
+│   │   │   ├── index.ts            # Barrel export
+│   │   │   └── eventEmitter.ts     # Sistema de eventos
+│   │   ├── pagination/
+│   │   │   ├── index.ts            # Barrel export
+│   │   │   └── pagination.ts       # Lógica de paginación
+│   │   └── renderer/
+│   │       ├── index.ts            # Barrel export
+│   │       └── renderer.ts         # SearchRenderer
 │   ├── css/
-│   │   └── index.css          # Estilos del componente
-│   └── php/
-│       └── responseAjax.php   # Ejemplo de backend
-├── index.html                 # Ejemplo de uso
-└── README.md                  # Documentación
+│   │   ├── index.css               # CSS entry point
+│   │   ├── core/                   # CSS obligatorio
+│   │   │   ├── index.css
+│   │   │   ├── structure.css       # Layout del componente
+│   │   │   ├── visibility.css      # Visibilidad/ocultamiento
+│   │   │   ├── animations.css      # Transiciones y reduced-motion
+│   │   │   ├── states.css          # Loading spinner
+│   │   │   └── scrollbar.css       # Scrollbar personalizado
+│   │   ├── theme/                  # Variables y estilos base
+│   │   │   ├── index.css
+│   │   │   ├── variables.css       # CSS custom properties
+│   │   │   ├── colors.css          # Colores de componentes
+│   │   │   ├── dimensions.css      # Dimensiones y espaciados
+│   │   │   ├── borders.css         # Bordes y border-radius
+│   │   │   └── typography.css      # Tipografía
+│   │   └── themes/                 # Temas predefinidos
+│   │       ├── index.css
+│   │       ├── clean-white.css     # Tema blanco limpio
+│   │       ├── blue-black.css      # Tema azul oscuro
+│   │       ├── onyx-black.css      # Tema negro onyx
+│   │       └── forest-green.css    # Tema verde bosque
+│   ├── php/
+│   │   ├── modelo.php              # Conexión BD (ejemplo)
+│   │   └── responseAjax.php        # Endpoint de ejemplo
+│   ├── json/
+│   │   └── search.json             # Estructura HTML de referencia
+│   └── tests/
+│       └── unit/                   # Tests unitarios
+├── dist/                           # Build de producción
+│   ├── buscador-dinamico.es.js     # Módulo ES
+│   ├── buscador-dinamico.umd.js    # UMD (window.BuscadorDinamico)
+│   └── css/
+│       └── buscador-dinamico.*.css # CSS bundle
+├── index.html                      # Ejemplo de uso
+├── README.md                       # Documentación
+├── package.json                    # Configuración del paquete
+├── vite.config.ts                  # Configuración de build
+├── tsconfig.json                   # Configuración de TypeScript
+├── jest.config.cjs                 # Configuración de tests
+└── babel.config.js                 # Configuración de Babel
 ```
 
 ## Arquitectura del Componente
@@ -184,6 +268,9 @@ const search = new Search({
     // Requerido
     element: '.app-search',
     
+    // Tema
+    theme: 'default',
+    
     // Datos y búsqueda
     data: [],
     procesServer: false,
@@ -198,7 +285,7 @@ const search = new Search({
     // Caché
     cacheEnabled: false,
     cacheMaxSize: 50,
-    cacheTtlSeconds: 60,
+    cacheTtlSeconds: 300,
     
     // Ordenamiento
     sortBy: null,
@@ -232,6 +319,7 @@ const search = new Search({
 | Parámetro | Tipo | Default | Descripción |
 |-----------|------|---------|-------------|
 | `element` | String | - | Selector CSS del contenedor (requerido) |
+| `theme` | String | `"default"` | Nombre del tema CSS (`default`, `clean-white`, `blue-black`, `onyx-black`, `forest-green`) |
 | `data` | Array | `[]` | Array de objetos para búsqueda local |
 | `procesServer` | Boolean | `false` | Habilita búsqueda por servidor (AJAX) |
 | `searchTerm` | String | `""` | Término de búsqueda inicial |
@@ -239,7 +327,7 @@ const search = new Search({
 | `debounceTime` | Number | `500` | Tiempo de debounce en milisegundos |
 | `cacheEnabled` | Boolean | `false` | Habilita caché LRU |
 | `cacheMaxSize` | Number | `50` | Tamaño máximo del caché |
-| `cacheTtlSeconds` | Number | `60` | Tiempo de vida del caché en segundos |
+| `cacheTtlSeconds` | Number | `300` | Tiempo de vida del caché en segundos |
 | `keyboardEnabled` | Boolean | `false` | Habilita navegación por teclado |
 | `sortBy` | String | `null` | Campo para ordenamiento |
 | `sortOrder` | String | `'asc'` | Orden: `'asc'` o `'desc'` |
@@ -247,7 +335,7 @@ const search = new Search({
 | `dom` | String | `'scip'` | Orden de renderizado (s=search, c=content, i=items, p=pagination) |
 | `template` | String/Function | `null` | Template personalizado para items |
 | `translation` | Object | `{}` | Traducciones personalizadas |
-| `developmentMode` | Boolean | `false` | Modo desarrollo con logs detallados |
+| `developmentMode` | Boolean | `true` | Modo desarrollo con logs detallados |
 | `fetch` | Object | `{}` | Configuración de Fetch API (solo si `procesServer: true`) |
 
 ### Configuración del Objeto `fetch`
@@ -392,11 +480,53 @@ CSS de estilización personalizable:
 
 ```css
 :root {
-    --search-width: 300px;
-    --search-bg-color: #f0f0f0;
-    --search-selected-bg-color: #ffeb3b;
-    --search-border-radius: 4px;
-    --search-font-size: 14px;
+    /* Dimensiones */
+    --search-width: 280px;
+    --search-max-height: 400px;
+    --search-padding: 10px;
+    --search-gap: 10px;
+    --search-item-padding: 10px;
+    --search-font-size: 15px;
+    --search-counter-font-size: 0.9em;
+    --search-counter-text-align: center;
+    --search-icon-size: 1.2em;
+    
+    /* Colores principales */
+    --search-bg-color: #ffffff;
+    --search-border-color: #d0d0d0;
+    --search-text-color: #333333;
+    --search-text-color-items: #444444;
+    --search-light-text-color: #666666;
+    --search-placeholder-color: #888888;
+    
+    /* Colores del input */
+    --search-input-bg-color: #ffffff;
+    --search-input-border-color: #cccccc;
+    
+    /* Colores de items */
+    --search-item-bg-color: #f5f5f5;
+    --search-item-hover-bg-color: #e8e8e8;
+    --search-selected-bg-color: #d4edff;
+    --search-selected-border-color: #0066cc;
+    
+    /* Colores del contador/paginación */
+    --search-counter-color: #666666;
+    --search-counter-bg-color: #f8f8f8;
+    
+    /* Bordes */
+    --search-border-radius: 8px;
+    --search-border-radius-open: 8px 8px 0 0;
+    
+    /* Sombras e iconos */
+    --shadow-color: rgba(0,0,0,0.1);
+    --search-icon-color: #666666;
+    
+    /* Scrollbar */
+    --scrollbar-thumb-color: #cccccc;
+    
+    /* Spinner de carga */
+    --spinner-border-color: #e0e0e0;
+    --spinner-top-color: #0066cc;
 }
 ```
 
@@ -405,6 +535,35 @@ CSS de estilización personalizable:
 ```html
 <link rel="stylesheet" href="./src/css/index.css">
 <link rel="stylesheet" href="./mi-tema-personalizado.css">
+```
+
+### Temas Predefinidos
+
+El componente incluye 4 temas predefinidos que puedes usar directamente:
+
+| Tema | Descripción |
+|------|-------------|
+| `default` | Tema por defecto con colores neutros |
+| `clean-white` | Blanco limpio, bordes sutiles, azul para selección |
+| `blue-black` | Azul oscuro (#21213e), hover azul intenso |
+| `onyx-black` | Negro puro (#121212), azul brillante para selección |
+| `forest-green` | Verde bosque (#2c3e2e), verde oliva para hover |
+
+Para usar un tema predefinido:
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    theme: 'clean-white',  // Usar tema blanco limpio
+    data: [/* datos */]
+});
+```
+
+O aplicar vía CSS:
+
+```html
+<link rel="stylesheet" href="./src/css/index.css">
+<link rel="stylesheet" href="./src/css/themes/clean-white.css">
 ```
 
 ### Ejemplo de Personalización
@@ -722,8 +881,33 @@ const listener = search.on('search', (data) => {
     console.log('Búsqueda:', data);
 });
 
-// Remover el listener
+// Remover el listener específico
 listener.off();
+
+// Remover todos los listeners de un evento
+search.events.removeAllListeners('search');
+
+// Remover todos los listeners de todos los eventos
+search.events.removeAllListeners();
+```
+
+### Listener de Una Sola Vez
+
+```javascript
+// Ejecutar solo la primera vez que se emita el evento
+search.events.once('init', (data) => {
+    console.log('Solo se ejecuta una vez:', data);
+});
+```
+
+### Información de Listeners
+
+```javascript
+// Obtener cantidad de listeners de un evento
+const count = search.events.listenerCount('search');
+
+// Obtener nombres de todos los eventos registrados
+const eventNames = search.events.eventNames();
 ```
 
 ## Métodos Públicos
@@ -898,6 +1082,85 @@ search.destroy();
 - Remueve event listeners del input
 - Limpia todas las referencias internas
 - No elimina el HTML del DOM
+
+## Métodos de Paginación
+
+### prevPage()
+
+Retrocede una página si no es la primera.
+
+```javascript
+search.pagination.prevPage();
+```
+
+**Retorna:** number (página actual)
+
+### goToPage(page)
+
+Va a una página específica si es válida (1..totalPages).
+
+```javascript
+search.pagination.goToPage(3);
+```
+
+**Parámetros:**
+- `page` (number): Número de página
+
+**Retorna:** number (página actual)
+
+### firstPage()
+
+Va a la primera página.
+
+```javascript
+search.pagination.firstPage();
+```
+
+**Retorna:** number (página actual, siempre 1)
+
+### lastPage()
+
+Va a la última página.
+
+```javascript
+search.pagination.lastPage();
+```
+
+**Retorna:** number (página actual)
+
+### getCurrentPage()
+
+Retorna la página actual.
+
+```javascript
+const currentPage = search.pagination.getCurrentPage();
+```
+
+**Retorna:** number
+
+### getPageItems(data?)
+
+Retorna los items de la página actual (slice de datos).
+
+```javascript
+const pageItems = search.pagination.getPageItems(search._data);
+```
+
+**Parámetros:**
+- `data` (Array, opcional): Array de datos a filtrar
+
+**Retorna:** Array de items de la página actual
+
+### setItemsPerPage(itemsPerPage)
+
+Cambia la cantidad de items por página.
+
+```javascript
+search.pagination.setItemsPerPage(20);
+```
+
+**Parámetros:**
+- `itemsPerPage` (number): Nueva cantidad de items por página
 
 ## Scroll Infinito
 
@@ -1194,12 +1457,16 @@ El componente incluye un sistema robusto de gestión de errores que proporciona 
 | SEARCH_001 | El parámetro 'element' es requerido | Proporciona el selector CSS del contenedor |
 | SEARCH_002 | El parámetro 'element' debe ser un string | Usa un selector CSS válido |
 | SEARCH_003 | El parámetro 'fetch.url' es requerido | Configura la URL del endpoint |
+| SEARCH_004 | itemsPerPage debe ser un número | Configura itemsPerPage con un número |
+| SEARCH_005 | itemsPerPage debe ser mayor a 0 | Configura itemsPerPage con un valor positivo |
 | SEARCH_010 | No existe el contenedor especificado | Verifica el selector CSS |
+| SEARCH_011 | No existe el contenedor de resultados | Verifica la estructura DOM del componente |
 | SEARCH_020 | Error de conexión al servidor | Verifica tu conexión a internet |
-| SEARCH_021 | Timeout de la petición | Aumenta el timeout o verifica el servidor |
-| SEARCH_030 | Error al parsear JSON del servidor | Verifica que el servidor retorne JSON válido |
-| SEARCH_031 | itemsPerPage debe ser mayor a 0 | Configura itemsPerPage con un valor positivo |
-| SEARCH_032 | itemsPerPage debe ser un número | Configura itemsPerPage con un número |
+| SEARCH_021 | Error en la petición Fetch | Verifica la URL, método HTTP y configuración del servidor |
+| SEARCH_030 | Formato de datos inválido | Verifica que los datos tengan el formato correcto |
+| SEARCH_031 | Respuesta vacía del servidor | Verifica que el servidor retorne datos |
+| SEARCH_040 | Error al inicializar el componente | Revisa la configuración y el DOM |
+| SEARCH_041 | Error al renderizar el componente | Verifica la configuración de templates y DOM |
 
 ### Manejo de Errores en Eventos
 
@@ -2187,7 +2454,31 @@ Para navegadores antiguos, usa un polyfill:
 
 ## Changelog
 
-### Versión 2.0.0 (Actual)
+### Versión 2.1.0 (Actual)
+
+**Nuevas características:**
+
+- Temas CSS predefinidos (clean-white, blue-black, onyx-black, forest-green)
+- Propiedad `theme` para seleccionar tema desde configuración
+- 30+ variables CSS personalizables
+- Métodos de paginación: `prevPage()`, `goToPage()`, `firstPage()`, `lastPage()`, `getCurrentPage()`, `getPageItems()`, `setItemsPerPage()`
+- Métodos de EventEmitter: `once()`, `removeAllListeners()`, `listenerCount()`, `eventNames()`
+- Build con Vite (ES Module + UMD)
+- Tests unitarios con Jest
+- Función helper `createElement` para renderizado de DOM
+- Soporte para métodos HTTP: GET, POST, PUT, DELETE, PATCH
+- Validación de Content-Type automática (JSON, FormData, URL-encoded)
+- Soporte para `prefers-reduced-motion` en animaciones
+
+**Cambios:**
+
+- `developmentMode` ahora es `true` por defecto (antes `false`)
+- `cacheTtlSeconds` ahora es `300` segundos por defecto (antes `60`)
+- Códigos de error actualizados y expandidos (SEARCH_001 a SEARCH_041)
+- Estructura de archivos reorganizada con barrel exports
+- CSS separado en 3 capas: core, theme, themes
+
+### Versión 2.0.0
 
 **Nuevas características:**
 
