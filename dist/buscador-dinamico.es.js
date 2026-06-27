@@ -337,10 +337,10 @@ var i = class {
 		this.body = e, this.uniqueClassNameFn = t, this.isVisible = !1, this.hideTimeout = null, this.animationTimeouts = [], this.timeHiddenResults = n;
 	}
 	setTheme(e) {
-		return this.body.content = r({
+		return e !== "default" && (this.body.content = r({
 			element: this.body.content,
 			className: `${this.body.content.classList} theme-${e}`
-		}), this;
+		})), this;
 	}
 	getUniqueClassName(e) {
 		return this.uniqueClassNameFn(e);
@@ -478,8 +478,9 @@ var i = class {
 			c: () => this.renderContentPaginationItems(),
 			i: () => this.renderItems(),
 			p: () => this.renderPagination()
-		};
-		for (let t of e) n[t] && n[t]();
+		}, r = e.split(""), i = r.filter((e) => "sc".includes(e)).join(""), a = r.filter((e) => "ip".includes(e)).join("");
+		console.log(`${i}${a}`);
+		for (let e of `${i}${a}`) n[e] && (console.log(`Rendering ${e}`), n[e]());
 	}
 	showResults() {
 		let e = this.body.contentPaginationItems;
@@ -767,7 +768,7 @@ var i = class {
 	SORT_ASC: () => -1,
 	SORT_DESC: () => 1,
 	SORT_ORDER: () => "asc"
-}), m = 1e3, h = "onyx-black", g = {
+}), m = 1e3, h = "default", g = {
 	searchLabel: "Filtrar por Búsqueda",
 	searchPlaceholder: "Ingrese palabra clave...",
 	noResults: "No se encontraron resultados",
