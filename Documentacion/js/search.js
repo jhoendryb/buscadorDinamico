@@ -34,10 +34,8 @@ const SearchDocs = {
 
             data.close();
 
-            const input = document.querySelector(".filter-search-app-search1");
-            if (input) {
-                input.blur();
-            }
+            const input = document.querySelector(".filter-search-doc-search");
+            if (input) input.blur();
 
             const el = data.item;
             const section = el.getAttribute('data-section')
