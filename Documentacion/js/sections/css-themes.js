@@ -36,7 +36,7 @@ export const cssThemes = Object.assign(function() {
 
             <h2 id="adaptative">Tema Adaptative</h2>
 
-            <p>El tema <code>adaptative</code> detecta automáticamente el atributo <code>data-theme</code> en el elemento <code>&lt;html&gt;</code> y cambia los colores del buscador sin necesidad de干预 manual.</p>
+            <p>El tema <code>adaptative</code> detecta automáticamente el atributo <code>data-theme</code> en el elemento <code>&lt;html&gt;</code> y cambia los colores del buscador sin necesidad de intervención manual.</p>
 
             <p>Esto es útil cuando tu aplicación ya tiene un sistema de temas claro/oscuro:</p>
 
