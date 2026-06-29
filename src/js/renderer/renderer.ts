@@ -248,7 +248,6 @@ export class SearchRenderer {
      */
     appendItems(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter, firtsLoad: boolean = false): boolean {
         const container = this.body.renderItems;
-
         if (!container) return false;
 
         if (firtsLoad) container.innerHTML = '';

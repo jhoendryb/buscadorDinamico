@@ -188,11 +188,8 @@ class Search {
             this.pagination.goToPage(1);
             this.selectedIndex = -1;
         }
-
         await this.searching(searchTerm, isEvent);
-
         this.processInfiniteScroll();
-
         return this;
     }
     /**
