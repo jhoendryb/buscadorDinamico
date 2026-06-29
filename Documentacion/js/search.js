@@ -217,6 +217,8 @@ const SearchDocs = {
             { title: 'Blue black', group: 'CSS', section: 'css-themes', anchor: 'predefined' },
             { title: 'Forest green', group: 'CSS', section: 'css-themes', anchor: 'predefined' },
             { title: 'Clean white', group: 'CSS', section: 'css-themes', anchor: 'predefined' },
+            { title: 'Adaptative', group: 'CSS', section: 'css-themes', anchor: 'adaptative' },
+            { title: 'Tema adaptativo', group: 'CSS', section: 'css-themes', anchor: 'adaptative' },
             { title: 'Spinner', group: 'CSS', section: 'css-themes', anchor: 'variables' },
             { title: 'Scrollbar', group: 'CSS', section: 'css-themes', anchor: 'variables' },
             { title: 'Border radius', group: 'CSS', section: 'css-themes', anchor: 'variables' },

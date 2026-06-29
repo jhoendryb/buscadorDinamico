@@ -3,7 +3,7 @@ export const cssThemes = Object.assign(function() {
         <div class="hero">
             <span class="badge badge--primary hero__badge">Personalización</span>
             <h1 class="hero__title">CSS y Themes</h1>
-            <p class="hero__desc">4 temas predefinidos y 30+ variables CSS personalizables.</p>
+            <p class="hero__desc">6 temas predefinidos y 30+ variables CSS personalizables.</p>
         </div>
 
         <div class="doc">
@@ -19,6 +19,7 @@ export const cssThemes = Object.assign(function() {
                     <tr><td><code>blue-black</code></td><td>Azul oscuro (#21213e), hover azul intenso</td></tr>
                     <tr><td><code>onyx-black</code></td><td>Negro puro (#121212), azul brillante para selección</td></tr>
                     <tr><td><code>forest-green</code></td><td>Verde bosque (#2c3e2e), verde oliva para hover</td></tr>
+                    <tr><td><code>adaptative</code></td><td>Se adapta automáticamente al tema claro/oscuro del documento via <code>[data-theme]</code></td></tr>
                 </tbody>
             </table>
 
@@ -26,12 +27,40 @@ export const cssThemes = Object.assign(function() {
             ${codeBlock('javascript', `const search = new Search({
     element: '.app-search',
     theme: 'clean-white',
-    data: [/* datos */]
-});`)}
+    data: [/* datos */}
+]);`)}
 
             <h3>Uso via CSS</h3>
             ${codeBlock('html', `<link rel="stylesheet" href="./src/css/index.css">
 <link rel="stylesheet" href="./src/css/themes/clean-white.css">`)}
+
+            <h2 id="adaptative">Tema Adaptative</h2>
+
+            <p>El tema <code>adaptative</code> detecta automáticamente el atributo <code>data-theme</code> en el elemento <code>&lt;html&gt;</code> y cambia los colores del buscador sin necesidad de干预 manual.</p>
+
+            <p>Esto es útil cuando tu aplicación ya tiene un sistema de temas claro/oscuro:</p>
+
+            ${codeBlock('html', `<!-- HTML -->
+<html data-theme="light">
+<head>
+    <link rel="stylesheet" href="./src/css/index.css">
+    <link rel="stylesheet" href="./src/css/themes/adaptative.css">
+</head>
+<body>
+    <div class="app-search"></div>
+</body>
+</html>`)}
+
+            ${codeBlock('javascript', `// Cambiar tema dinámicamente
+document.documentElement.setAttribute('data-theme', 'dark');
+// El buscador se adapta automáticamente`)}
+
+            <div class="callout callout--info">
+                <span class="callout__icon">ℹ️</span>
+                <div class="callout__content">
+                    <p>El tema <code>adaptative</code> usa selectores <code>[data-theme="light"]</code> y <code>[data-theme="dark"]</code> para aplicar diferentes valores de variables CSS según el tema actual.</p>
+                </div>
+            </div>
 
             <h2 id="variables">Variables CSS Personalizables</h2>
 
@@ -108,7 +137,7 @@ export const cssThemes = Object.assign(function() {
                 <tbody>
                     <tr><td><strong>Core</strong></td><td><code>css/core/</code></td><td>Layout, visibilidad, animaciones, estados, scrollbar</td></tr>
                     <tr><td><strong>Theme</strong></td><td><code>css/theme/</code></td><td>Variables CSS, colores, dimensiones, bordes, tipografía</td></tr>
-                    <tr><td><strong>Themes</strong></td><td><code>css/themes/</code></td><td>Temas predefinidos (clean-white, blue-black, etc.)</td></tr>
+                    <tr><td><strong>Themes</strong></td><td><code>css/themes/</code></td><td>Temas predefinidos (clean-white, blue-black, adaptative, etc.)</td></tr>
                 </tbody>
             </table>
 
