@@ -1,9 +1,16 @@
+import { SearchError, ErrorCode, ErrorHandler } from '../error-handler/index';
+
 /**
  * Implementación de EventEmitter para manejo de eventos personalizados.
  * @class
  */
 export class EventEmitter {
     private events: { [key: string]: Function[] } = {};
+    private errorHandler: ErrorHandler;
+
+    constructor(errorHandler: ErrorHandler) {
+        this.errorHandler = errorHandler;
+    }
 
     /**
      * Registra un listener para un evento.
@@ -52,8 +59,20 @@ export class EventEmitter {
      * @returns {void}
      */
     emit(eventName: string, data?: Object): void {
-        if (!this.events[eventName]) return;
-        this.events[eventName].forEach(callback => callback(data));
+        const listeners = this.events[eventName];
+        if (listeners) {
+            listeners.forEach(callback => {
+                try {
+                    this.errorHandler.validateType(callback, 'function', 'callback', ErrorCode.INVALID_TYPE_FORMAT);
+                    callback(data);
+                } catch (error) {
+                    if (error instanceof SearchError) {
+                        this.errorHandler.logError(error, this);
+                    }
+                    throw error;
+                }
+            });
+        }
     }
 
     /**
@@ -77,7 +96,7 @@ export class EventEmitter {
     listenerCount(eventName: string): number {
         return this.events[eventName] ? this.events[eventName].length : 0;
     }
-    
+
     /**
      * Obtiene todos los nombres de eventos registrados.
      * @returns {string[]} Array con los nombres de eventos

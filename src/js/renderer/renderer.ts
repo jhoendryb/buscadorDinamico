@@ -259,7 +259,7 @@ export class SearchRenderer {
             tabindex: '0',
             attributes: { 'role': 'option' },
             event: {
-                mousedown: (e: MouseEvent) => {
+                pointerdown: (e: PointerEvent) => {
                     e.preventDefault();
                     this.isVisible = true;
                 }
@@ -341,11 +341,8 @@ export class SearchRenderer {
         const brothers = order.filter((c: string) => 'sc'.includes(c)).join('');
         const children = order.filter((c: string) => 'ip'.includes(c)).join('');
 
-        console.log(`${brothers}${children}`);
-
         for (const char of `${brothers}${children}`) {
             if (domMap[char]) {
-                console.log(`Rendering ${char}`);
                 domMap[char]();
             }
         }
@@ -376,11 +373,10 @@ export class SearchRenderer {
      * Oculta el contenedor de resultados con delay.
      * Permite que el usuario haga clic en un resultado antes de ocultar.
      */
-    hideResultsWithDelay(): void {
-        // Delay de 200ms para permitir clic en resultados
+    hideResultsWithDelay(delay: number = this.timeHiddenResults): void {
         this.hideTimeout = setTimeout(() => {
             this.hideResults();
-        }, this.timeHiddenResults);
+        }, delay);
     }
 
     /**

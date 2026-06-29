@@ -112,7 +112,7 @@ class Search {
                 paginationItems: undefined // ".index-search" - elemento donde se muestra la paginación
             }, this.#getUniqueClassName.bind(this), Constants.DEFAULT_TIME_HIDDEN_RESULTS);
             this.cache = new LRUCache(this.cacheMaxSize, this.cacheTtlSeconds);
-            this.events = new EventEmitter();
+            this.events = new EventEmitter(this.errorHandler);
             this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
             this.pagination.setCountFunction(() => {
                 return this.procesServer ? this._ajaxResponse.success?.countPage || 0 : this._data?.length || 0;

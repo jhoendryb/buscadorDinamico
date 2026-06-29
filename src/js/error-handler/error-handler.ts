@@ -72,6 +72,13 @@ export class ErrorHandler {
             documentation: "#configuration-pagination"
         });
 
+        this.errorMessages.set(ErrorCode.INVALID_TYPE_FORMAT, {
+            code: ErrorCode.INVALID_TYPE_FORMAT,
+            message: "El parámetro tiene un formato de tipo inválido",
+            solution: "Verifica que el parámetro tenga el formato correcto.",
+            documentation: "#configuration-invalid-type"
+        });
+
         // Errores de DOM
         this.errorMessages.set(ErrorCode.ELEMENT_NOT_FOUND, {
             code: ErrorCode.ELEMENT_NOT_FOUND,
