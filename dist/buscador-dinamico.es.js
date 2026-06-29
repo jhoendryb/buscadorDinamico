@@ -769,7 +769,7 @@ var i = class {
 	SORT_ASC: () => -1,
 	SORT_DESC: () => 1,
 	SORT_ORDER: () => "asc"
-}), m = 1e3, h = "default", g = {
+}), m = 1e3, h = "adaptative", g = {
 	searchLabel: "Filtrar por Búsqueda",
 	searchPlaceholder: "Ingrese palabra clave...",
 	noResults: "No se encontraron resultados",

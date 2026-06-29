@@ -592,7 +592,7 @@ hr {
 }
 
 /* ── Search Component Theme Variables ── */
-[data-theme="light"] .app-search {
+/* [data-theme="light"] .app-search {
     --search-bg-color: var(--bg-primary);
     --search-text-color: var(--text-primary);
     --search-text-color-items: var(--text-secondary);
@@ -624,4 +624,4 @@ hr {
     --search-selected-border-color: var(--brand-primary);
     --search-counter-color: var(--text-muted);
     --search-counter-bg-color: var(--bg-tertiary);
-}
+} */
