@@ -377,7 +377,6 @@ export class SearchRenderer {
      * Permite que el usuario haga clic en un resultado antes de ocultar.
      */
     hideResultsWithDelay(): void {
-
         // Delay de 200ms para permitir clic en resultados
         this.hideTimeout = setTimeout(() => {
             this.hideResults();

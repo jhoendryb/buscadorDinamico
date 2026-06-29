@@ -166,7 +166,8 @@ var e = Object.defineProperty, t = (t, n) => {
 	#o(e) {
 		this.events.emit("itemSelected", {
 			item: e,
-			index: this.selectedIndex
+			index: this.selectedIndex,
+			close: () => this.renderer.hideResults()
 		});
 	}
 	destroy() {

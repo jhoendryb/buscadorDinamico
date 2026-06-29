@@ -519,7 +519,7 @@ class Search {
      * this.#selectItem(items[0]);
      */
     #selectItem(item: Record<string, any>): void {
-        this.events.emit('itemSelected', { item, index: this.selectedIndex } as Types.ItemSelectedEventData);
+        this.events.emit('itemSelected', { item, index: this.selectedIndex, close: () => this.renderer.hideResults() } as Types.ItemSelectedEventData);
     }
     /**
      * Destruye la instancia de Search, limpiando recursos y event listeners.

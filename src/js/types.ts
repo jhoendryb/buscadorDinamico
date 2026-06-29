@@ -79,6 +79,7 @@ export interface SortChangeEventData {
 export interface ItemSelectedEventData {
     item: HTMLElement;
     index: number;
+    close: () => void;
 }
 
 export interface ItemHighlightedEventData {
