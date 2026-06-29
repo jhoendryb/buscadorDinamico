@@ -1,0 +1,91 @@
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .main {
+        margin-left: 0;
+    }
+
+    .navbar__menu-toggle {
+        display: flex;
+    }
+
+    .navbar__brand {
+        min-width: auto;
+    }
+
+    .content {
+        padding: var(--space-8) var(--space-6);
+    }
+
+    .page-nav {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+    .navbar {
+        padding: 0 var(--space-4);
+    }
+
+    .navbar__brand-version {
+        display: none;
+    }
+
+    .navbar__search {
+        max-width: none;
+    }
+
+    .content {
+        padding: var(--space-6) var(--space-4);
+    }
+
+    .doc h1 {
+        font-size: var(--text-3xl);
+    }
+
+    .doc h2 {
+        font-size: var(--text-xl);
+    }
+
+    .doc h3 {
+        font-size: var(--text-lg);
+    }
+
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .code-block pre {
+        padding: var(--space-3);
+        font-size: var(--text-xs);
+    }
+
+    .doc-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .hero__desc {
+        font-size: var(--text-base);
+    }
+
+    .sidebar {
+        width: 280px;
+        background: var(--bg-sidebar);
+    }
+}
+
+/* ── Large screens ── */
+@media (min-width: 1400px) {
+    .content {
+        padding: var(--space-12) var(--space-10);
+    }
+}
