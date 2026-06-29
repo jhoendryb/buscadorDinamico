@@ -19,6 +19,7 @@ export const errores = Object.assign(function() {
                     <tr><td><code>SEARCH_003</code></td><td>El parámetro 'fetch.url' es requerido</td><td>Configura la URL del endpoint</td></tr>
                     <tr><td><code>SEARCH_004</code></td><td>itemsPerPage debe ser un número</td><td>Configura itemsPerPage con un número</td></tr>
                     <tr><td><code>SEARCH_005</code></td><td>itemsPerPage debe ser mayor a 0</td><td>Configura itemsPerPage con un valor positivo</td></tr>
+                    <tr><td><code>SEARCH_006</code></td><td>El parámetro tiene un formato de tipo inválido</td><td>Verifica que el parámetro tenga el formato correcto</td></tr>
                     <tr><td><code>SEARCH_010</code></td><td>No existe el contenedor especificado</td><td>Verifica el selector CSS</td></tr>
                     <tr><td><code>SEARCH_011</code></td><td>No existe el contenedor de resultados</td><td>Verifica la estructura DOM</td></tr>
                     <tr><td><code>SEARCH_020</code></td><td>Error de conexión al servidor</td><td>Verifica tu conexión a internet</td></tr>
