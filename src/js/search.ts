@@ -50,10 +50,16 @@ const search1 = new Search({
 
 // console.log("Esto es pruebas", prueba);
 
-// search1.on('itemSelected', (data: any) => {
-//     console.log('Item seleccionado:', data);
-//     // window.location.href = data.item.dataset.url;
-// });
+search1.on('itemSelected', (data: any) => {
+    if (!data.item) return;
+
+    data.close();
+
+    const input = document.querySelector(".filter-search-app-search1");
+    if (input) {
+        (input as HTMLInputElement).blur();
+    }
+});
 
 // const search2 = new Search({
 //     element: '.app-search2',
