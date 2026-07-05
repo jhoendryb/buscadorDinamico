@@ -1,0 +1,61 @@
+.doc-content pre code .keyword { color: #cba6f7; }
+.doc-content pre code .string { color: #a6e3a1; }
+.doc-content pre code .number { color: #fab387; }
+.doc-content pre code .comment { color: #6c7086; font-style: italic; }
+.doc-content pre code .function { color: #89b4fa; }
+.doc-content pre code .class-name { color: #f9e2af; }
+.doc-content pre code .operator { color: #89dceb; }
+.doc-content pre code .property { color: #89b4fa; }
+.doc-content pre code .punctuation { color: #9399b2; }
+.doc-content pre code .tag { color: #f38ba8; }
+.doc-content pre code .attr-name { color: #f9e2af; }
+.doc-content pre code .attr-value { color: #a6e3a1; }
+.doc-content pre code .type { color: #f9e2af; }
+.doc-content pre code .param { color: #eba0ac; }
+.doc-content pre code .decorator { color: #cba6f7; }
+.doc-content pre code .variable { color: #cdd6f4; }
+
+.doc-content .line-number {
+    display: inline-block;
+    width: 2.5em;
+    text-align: right;
+    padding-right: 1em;
+    color: var(--doc-text-tertiary);
+    user-select: none;
+    opacity: 0.5;
+}
+
+.doc-content .line-highlight {
+    background: var(--doc-accent-light);
+    display: block;
+    margin: 0 calc(-1 * var(--doc-spacing-lg));
+    padding: 0 var(--doc-spacing-lg);
+    border-left: 3px solid var(--doc-accent-primary);
+}
+
+.doc-content .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    font-size: var(--doc-font-size-xs);
+    border-radius: var(--doc-radius-sm);
+    background: rgba(255,255,255,0.1);
+    color: var(--doc-text-tertiary);
+    opacity: 0;
+    transition: all var(--doc-transition-fast);
+}
+
+.doc-content pre:hover .copy-btn {
+    opacity: 1;
+}
+
+.doc-content .copy-btn:hover {
+    background: rgba(255,255,255,0.15);
+    color: var(--doc-text-primary);
+}
+
+.doc-content .copy-btn.copied {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--doc-success);
+}

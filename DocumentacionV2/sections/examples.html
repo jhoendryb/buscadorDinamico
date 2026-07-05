@@ -1,0 +1,200 @@
+<h1>Ejemplos</h1>
+
+<p>Ejemplos prácticos de uso del componente en diferentes escenarios.</p>
+
+<h2>Búsqueda básica local</h2>
+
+<pre data-lang="html"><code>&lt;div id="buscador"&gt;&lt;/div&gt;
+
+&lt;script type="module"&gt;
+    import { Search } from './dist/buscador-dinamico.es.js';
+
+    const productos = [
+        { id: 1, nombre: 'Laptop HP', precio: 999, categoria: 'Electrónica' },
+        { id: 2, nombre: 'Mouse Logitech', precio: 29, categoria: 'Accesorios' },
+        { id: 3, nombre: 'Teclado Mecánico', precio: 89, categoria: 'Accesorios' },
+        { id: 4, nombre: 'Monitor Samsung', precio: 349, categoria: 'Electrónica' },
+        { id: 5, nombre: 'Auriculares Sony', precio: 199, categoria: 'Audio' }
+    ];
+
+    new Search({
+        element: '#buscador',
+        data: productos,
+        theme: 'clean-white',
+        itemsPerPage: 3,
+        keyboardEnabled: true
+    }).init();
+&lt;/script&gt;</code></pre>
+
+<h2>Con plantilla personalizada</h2>
+
+<pre data-lang="javascript"><code>new Search({
+    element: '#app',
+    data: productos,
+    template: (item) => `
+        &lt;div class="product-card"&gt;
+            &lt;h3&gt;${item.nombre}&lt;/h3&gt;
+            &lt;p&gt;Precio: $${item.precio}&lt;/p&gt;
+            &lt;span class="badge"&gt;${item.categoria}&lt;/span&gt;
+        &lt;/div&gt;
+    `
+}).init();</code></pre>
+
+<h2>Búsqueda desde DOM</h2>
+
+<p>Extrae datos automáticamente de elementos HTML existentes:</p>
+
+<pre data-lang="html"><code>&lt;div id="buscador"&gt;
+    &lt;div data-nombre="Laptop HP" data-precio="999"&gt;Laptop HP&lt;/div&gt;
+    &lt;div data-nombre="Mouse" data-precio="29"&gt;Mouse Logitech&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script type="module"&gt;
+    import { Search } from './dist/buscador-dinamico.es.js';
+
+    new Search({
+        element: '#buscador'
+    }).init();
+&lt;/script&gt;</code></pre>
+
+<h2>Búsqueda remota (servidor)</h2>
+
+<pre data-lang="javascript"><code>new Search({
+    element: '#app',
+    procesServer: true,
+    fetch: {
+        url: 'https://api.miapp.com/buscar',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer mi-token'
+        },
+        body: {
+            query: '',
+            page: 1,
+            limit: 10
+        },
+        timeout: 10000
+    },
+    template: (item) => `
+        &lt;div class="result"&gt;
+            &lt;h3&gt;${item.title}&lt;/h3&gt;
+            &lt;p&gt;${item.description}&lt;/p&gt;
+        &lt;/div&gt;
+    `
+}).init();</code></pre>
+
+<h2>Múltiples instancias</h2>
+
+<pre data-lang="javascript"><code>// Buscador de productos
+const searchProductos = new Search({
+    element: '#productos',
+    data: productos,
+    theme: 'clean-white'
+}).init();
+
+// Buscador de usuarios
+const searchUsuarios = new Search({
+    element: '#usuarios',
+    data: usuarios,
+    theme: 'onyx-black',
+    itemsPerPage: 5
+}).init();</code></pre>
+
+<h2>Con eventos</h2>
+
+<pre data-lang="javascript"><code>const search = new Search({
+    element: '#app',
+    data: items
+}).init();
+
+search
+    .on('init', () => console.log('Componente listo'))
+    .on('search', (data) => {
+        console.log(`Buscando: ${data.searchTerm}`);
+        console.log(`Resultados: ${data.results.length}`);
+    })
+    .on('itemSelected', ({ item, close }) => {
+        alert(`Seleccionaste: ${item.nombre}`);
+        close();
+    })
+    .on('pageChange', (data) => {
+        console.log(`Página ${data.page}/${data.totalPages}`);
+    });</code></pre>
+
+<h2>Con caché y sort</h2>
+
+<pre data-lang="javascript"><code>const search = new Search({
+    element: '#app',
+    data: productos,
+    cacheEnabled: true,
+    cacheMaxSize: 100,
+    cacheTtlSeconds: 600,
+    sortBy: 'precio',
+    sortOrder: 'asc'
+}).init();
+
+// Ordenar dinámicamente
+document.getElementById('btn-ordenar').addEventListener('click', () => {
+    search.sort('nombre', 'asc');
+});
+
+// Limpiar orden
+document.getElementById('btn-reset').addEventListener('click', () => {
+    search.clearSort();
+    search.draw('');
+});</code></pre>
+
+<h2>Integración con frameworks</h2>
+
+<h3>React</h3>
+
+<pre data-lang="javascript"><code>import { useEffect, useRef } from 'react';
+import { Search } from 'buscador-dinamico';
+import 'buscador-dinamico/css/buscador-dinamico.css';
+
+function SearchComponent({ data }) {
+    const containerRef = useRef(null);
+    const searchRef = useRef(null);
+
+    useEffect(() => {
+        searchRef.current = new Search({
+            element: '#react-search',
+            data: data,
+            theme: 'clean-white'
+        }).init();
+
+        return () => {
+            searchRef.current?.destroy();
+        };
+    }, [data]);
+
+    return &lt;div id="react-search" ref={containerRef}&gt;&lt;/div&gt;;
+}</code></pre>
+
+<h3>Vue</h3>
+
+<pre data-lang="javascript"><code>&lt;template&gt;
+    &lt;div id="vue-search"&gt;&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+import { onMounted, onUnmounted } from 'vue';
+import { Search } from 'buscador-dinamico';
+import 'buscador-dinamico/css/buscador-dinamico.css';
+
+const props = defineProps({ data: Array });
+let search = null;
+
+onMounted(() => {
+    search = new Search({
+        element: '#vue-search',
+        data: props.data,
+        theme: 'clean-white'
+    }).init();
+});
+
+onUnmounted(() => {
+    search?.destroy();
+});
+&lt;/script&gt;</code></pre>

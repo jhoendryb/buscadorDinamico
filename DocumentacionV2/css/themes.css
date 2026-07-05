@@ -1,0 +1,42 @@
+body {
+    transition: background-color var(--doc-transition-normal), color var(--doc-transition-normal);
+}
+
+[data-theme="light"] {
+    color-scheme: light;
+}
+
+[data-theme="dark"] {
+    color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    [data-theme="auto"] {
+        color-scheme: dark;
+    }
+}
+
+.doc-content pre {
+    position: relative;
+}
+
+.doc-content pre::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 4px 12px;
+    font-size: var(--doc-font-size-xs);
+    font-family: var(--doc-font-sans);
+    color: var(--doc-text-tertiary);
+    background: rgba(255,255,255,0.05);
+    border-radius: 0 var(--doc-radius-lg) 0 var(--doc-radius-md);
+}
+
+.doc-content pre[data-lang="js"]::before { content: 'JavaScript'; }
+.doc-content pre[data-lang="typescript"]::before { content: 'TypeScript'; }
+.doc-content pre[data-lang="html"]::before { content: 'HTML'; }
+.doc-content pre[data-lang="css"]::before { content: 'CSS'; }
+.doc-content pre[data-lang="json"]::before { content: 'JSON'; }
+.doc-content pre[data-lang="php"]::before { content: 'PHP'; }
+.doc-content pre[data-lang="bash"]::before { content: 'Terminal'; }

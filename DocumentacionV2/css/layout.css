@@ -1,0 +1,266 @@
+.doc-layout {
+    display: grid;
+    grid-template-areas:
+        "header header"
+        "sidebar content";
+    grid-template-columns: var(--doc-sidebar-width) 1fr;
+    grid-template-rows: var(--doc-header-height) 1fr;
+    min-height: 100vh;
+}
+
+.doc-header {
+    grid-area: header;
+    position: sticky;
+    top: 0;
+    z-index: var(--doc-z-header);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--doc-header-height);
+    padding: 0 var(--doc-spacing-lg);
+    background: var(--doc-bg-header);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--doc-border-primary);
+}
+
+.doc-header__left {
+    display: flex;
+    align-items: center;
+    gap: var(--doc-spacing-md);
+    min-width: 0;
+}
+
+.doc-header__menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--doc-radius-md);
+    transition: background var(--doc-transition-fast);
+}
+
+.doc-header__menu-btn:hover {
+    background: var(--doc-bg-hover);
+}
+
+.hamburger {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: var(--doc-text-primary);
+    position: relative;
+    transition: background var(--doc-transition-fast);
+}
+
+.hamburger::before,
+.hamburger::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--doc-text-primary);
+    transition: transform var(--doc-transition-normal);
+}
+
+.hamburger::before {
+    top: -6px;
+}
+
+.hamburger::after {
+    bottom: -6px;
+}
+
+.doc-header__menu-btn.active .hamburger {
+    background: transparent;
+}
+
+.doc-header__menu-btn.active .hamburger::before {
+    transform: rotate(45deg) translate(4px, 4px);
+}
+
+.doc-header__menu-btn.active .hamburger::after {
+    transform: rotate(-45deg) translate(4px, -4px);
+}
+
+.doc-header__brand {
+    display: flex;
+    align-items: center;
+    gap: var(--doc-spacing-sm);
+    text-decoration: none;
+    color: var(--doc-text-heading);
+    font-weight: 600;
+    font-size: var(--doc-font-size-md);
+    white-space: nowrap;
+}
+
+.doc-header__icon {
+    font-size: 1.25rem;
+}
+
+.doc-header__badge {
+    font-size: var(--doc-font-size-xs);
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: var(--doc-radius-full);
+    background: var(--doc-bg-badge);
+    color: var(--doc-accent-primary);
+}
+
+.doc-header__center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    max-width: 480px;
+    margin: 0 var(--doc-spacing-xl);
+}
+
+.doc-header__right {
+    display: flex;
+    align-items: center;
+    gap: var(--doc-spacing-sm);
+}
+
+.doc-header__theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--doc-radius-md);
+    color: var(--doc-text-secondary);
+    transition: all var(--doc-transition-fast);
+}
+
+.doc-header__theme-toggle:hover {
+    background: var(--doc-bg-hover);
+    color: var(--doc-text-primary);
+}
+
+[data-theme="light"] .icon-moon { display: none; }
+[data-theme="dark"] .icon-sun { display: none; }
+
+.doc-header__github {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--doc-radius-md);
+    color: var(--doc-text-secondary);
+    transition: all var(--doc-transition-fast);
+}
+
+.doc-header__github:hover {
+    background: var(--doc-bg-hover);
+    color: var(--doc-text-primary);
+}
+
+.doc-sidebar {
+    grid-area: sidebar;
+    position: sticky;
+    top: var(--doc-header-height);
+    height: calc(100vh - var(--doc-header-height));
+    overflow-y: auto;
+    background: var(--doc-bg-sidebar);
+    border-right: 1px solid var(--doc-border-primary);
+    padding: var(--doc-spacing-lg) 0;
+}
+
+.doc-sidebar__nav {
+    padding: 0 var(--doc-spacing-md);
+}
+
+.doc-sidebar__section {
+    margin-bottom: var(--doc-spacing-lg);
+}
+
+.doc-sidebar__heading {
+    display: block;
+    font-size: var(--doc-font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--doc-text-tertiary);
+    padding: var(--doc-spacing-sm) var(--doc-spacing-md);
+    margin-bottom: var(--doc-spacing-xs);
+}
+
+.doc-sidebar__list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.doc-sidebar__link {
+    display: block;
+    padding: var(--doc-spacing-sm) var(--doc-spacing-md);
+    font-size: var(--doc-font-size-sm);
+    color: var(--doc-text-secondary);
+    border-radius: var(--doc-radius-md);
+    transition: all var(--doc-transition-fast);
+    text-decoration: none;
+}
+
+.doc-sidebar__link:hover {
+    color: var(--doc-text-primary);
+    background: var(--doc-bg-hover);
+}
+
+.doc-sidebar__link.active {
+    color: var(--doc-accent-primary);
+    background: var(--doc-accent-light);
+    font-weight: 500;
+}
+
+.doc-sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: var(--doc-z-overlay);
+    background: var(--doc-bg-overlay);
+    opacity: 0;
+    transition: opacity var(--doc-transition-normal);
+}
+
+.doc-sidebar-overlay.visible {
+    display: block;
+    opacity: 1;
+}
+
+.doc-content {
+    grid-area: content;
+    min-height: calc(100vh - var(--doc-header-height));
+    padding: var(--doc-spacing-3xl) var(--doc-spacing-3xl);
+    overflow-y: auto;
+}
+
+.doc-content__inner {
+    max-width: var(--doc-content-max-width);
+    margin: 0 auto;
+}
+
+.doc-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--doc-spacing-3xl);
+    color: var(--doc-text-tertiary);
+    gap: var(--doc-spacing-md);
+}
+
+.doc-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--doc-border-primary);
+    border-top-color: var(--doc-accent-primary);
+    border-radius: 50%;
+    animation: doc-spin 0.8s linear infinite;
+}
+
+@keyframes doc-spin {
+    to { transform: rotate(360deg); }
+}

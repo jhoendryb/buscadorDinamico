@@ -1,0 +1,90 @@
+<h1>Instalación</h1>
+
+<p>Múltiples formas de instalar el componente según tu entorno de desarrollo.</p>
+
+<h2>Vía npm / pnpm</h2>
+
+<p>La forma recomendada para proyectos con bundler (Vite, Webpack, Rollup, etc.):</p>
+
+<pre data-lang="bash"><code># Con npm
+npm install buscador-dinamico
+
+# Con pnpm (recomendado)
+pnpm add buscador-dinamico</code></pre>
+
+<p>Luego impórtalo en tu JavaScript:</p>
+
+<pre data-lang="typescript"><code>import { Search } from 'buscador-dinamico';
+import 'buscador-dinamico/css/buscador-dinamico.css';</code></pre>
+
+<h2>Vía CDN (UMD)</h2>
+
+<p>Para proyectos sin bundler o inclusiones rápidas:</p>
+
+<pre data-lang="html"><code>&lt;!-- CSS --&gt;
+&lt;link rel="stylesheet" href="https://unpkg.com/buscador-dinamico/dist/css/buscador-dinamico.css"&gt;
+
+&lt;!-- JavaScript (UMD) --&gt;
+&lt;script src="https://unpkg.com/buscador-dinamico/dist/buscador-dinamico.umd.js"&gt;&lt;/script&gt;
+
+&lt;script&gt;
+  const search = new BuscadorDinamico.Search({
+    element: '#my-search',
+    data: [...]
+  }).init();
+&lt;/script&gt;</code></pre>
+
+<h2>Vía script tag (ES Module)</h2>
+
+<pre data-lang="html"><code>&lt;link rel="stylesheet" href="./dist/css/buscador-dinamico.css"&gt;
+
+&lt;script type="module"&gt;
+  import { Search } from './dist/buscador-dinamico.es.js';
+
+  const search = new Search({
+    element: '#my-search',
+    data: [...]
+  }).init();
+&lt;/script&gt;</code></pre>
+
+<h2>Descarga manual</h2>
+
+<p>Puedes descargar los archivos directamente desde la sección de releases de GitHub:</p>
+
+<ol>
+    <li>Descarga <code>buscador-dinamico.es.js</code> (módulo ES) o <code>buscador-dinamico.umd.js</code> (UMD)</li>
+    <li>Descarga <code>buscador-dinamico.css</code> desde <code>dist/css/</code></li>
+    <li>Inclúyelos en tu proyecto</li>
+</ol>
+
+<h2>Estructura de archivos</h2>
+
+<p>Después de la instalación, tu proyecto debería tener:</p>
+
+<pre><code>tu-proyecto/
+├── node_modules/
+│   └── buscador-dinamico/
+│       ├── dist/
+│       │   ├── buscador-dinamico.es.js
+│       │   ├── buscador-dinamico.umd.js
+│       │   └── css/
+│       │       └── buscador-dinamico.css
+│       └── src/
+│           └── css/ (estilos fuente)</code></pre>
+
+<div class="doc-callout doc-callout--tip">
+    <span class="doc-callout__icon">💡</span>
+    <div class="doc-callout__content">
+        <strong>Con Vite</strong>
+        <p>Vite detecta automáticamente los archivos CSS importados y los incluye en el bundle final.</p>
+    </div>
+</div>
+
+<h2>Verificación</h2>
+
+<p>Para verificar que la instalación fue exitosa, abre la consola del navegador y ejecuta:</p>
+
+<pre data-lang="javascript"><code>console.log(typeof BuscadorDinamico.Search); // "function" (UMD)
+// o
+import { Search } from 'buscador-dinamico';
+console.log(typeof Search); // "function" (ES Module)</code></pre>

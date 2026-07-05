@@ -1,0 +1,137 @@
+<h1>Eventos</h1>
+
+<p>El componente emite eventos personalizados que permiten reaccionar a diferentes acciones del usuario y del sistema.</p>
+
+<h2>Uso básico</h2>
+
+<pre data-lang="javascript"><code>const search = new BuscadorDinamico.Search({
+    element: '#app',
+    data: items
+}).init();
+
+search.on('search', (data) => {
+    console.log('Término de búsqueda:', data.searchTerm);
+    console.log('Resultados encontrados:', data.results.length);
+});</code></pre>
+
+<h2>Lista de eventos</h2>
+
+<h3>init</h3>
+
+<p>Se emite cuando el componente termina de inicializarse.</p>
+
+<pre data-lang="typescript"><code>// Tipo del dato emitido
+interface SearchEventInit {
+    searchTerm: string;
+    itemsPerPage: number;
+    procesServer: boolean;
+}</code></pre>
+
+<pre data-lang="javascript"><code>search.on('init', (data) => {
+    console.log('Componente inicializado:', data);
+});</code></pre>
+
+<h3>search</h3>
+
+<p>Se emite después de cada búsqueda ejecutada.</p>
+
+<pre data-lang="typescript"><code>interface SearchEventData {
+    searchTerm: string;
+    results: Record&lt;string, any&gt;[];
+    count: number;
+}</code></pre>
+
+<h3>pageChange</h3>
+
+<p>Se emite cuando cambia la página actual (scroll infinito o paginación manual).</p>
+
+<pre data-lang="typescript"><code>interface PageChangeEventData {
+    page: number;
+    totalPages: number;
+    itemsOnPage: number;
+    totalLoaded: number;
+}</code></pre>
+
+<pre data-lang="javascript"><code>search.on('pageChange', (data) => {
+    console.log(`Página ${data.page} de ${data.totalPages}`);
+    console.log(`Items cargados: ${data.totalLoaded}`);
+});</code></pre>
+
+<h3>sortChange</h3>
+
+<p>Se emite cuando cambia el ordenamiento de los datos.</p>
+
+<pre data-lang="typescript"><code>interface SortChangeEventData {
+    field: string;
+    order: 'asc' | 'desc';
+}</code></pre>
+
+<h3>itemSelected</h3>
+
+<p>Se emite cuando el usuario selecciona un item (clic o Enter).</p>
+
+<pre data-lang="typescript"><code>interface ItemSelectedEventData {
+    item: Record&lt;string, any&gt;;
+    index: number;
+    close: () =&gt; void; // Función para cerrar los resultados
+}</code></pre>
+
+<pre data-lang="javascript"><code>search.on('itemSelected', ({ item, index, close }) => {
+    console.log('Item seleccionado:', item);
+    console.log('Índice:', index);
+    close(); // Cierra el panel de resultados
+});</code></pre>
+
+<h3>itemHighlighted</h3>
+
+<p>Se emite cuando un item recibe foco visual (navegación por teclado o clic).</p>
+
+<pre data-lang="typescript"><code>interface ItemHighlightedEventData {
+    item: Record&lt;string, any&gt;;
+    index: number;
+}</code></pre>
+
+<h3>appendItems</h3>
+
+<p>Se emite cuando se añaden nuevos items al DOM (scroll infinito).</p>
+
+<pre data-lang="typescript"><code>interface AppendItemsEventData {
+    items: Record&lt;string, any&gt;[];
+    isFirstPage: boolean;
+}</code></pre>
+
+<h3>destroy</h3>
+
+<p>Se emite justo antes de destruir la instancia.</p>
+
+<pre data-lang="typescript"><code>interface DestroyEventData {
+    timestamp: string;
+}</code></pre>
+
+<h3>error</h3>
+
+<p>Se emite cuando ocurre un error durante la búsqueda o inicialización.</p>
+
+<pre data-lang="javascript"><code>search.on('error', (error) => {
+    console.error('Error en el componente:', error);
+});</code></pre>
+
+<h2>Remover listeners</h2>
+
+<pre data-lang="javascript"><code>// Remover un listener específico
+const callback = (data) => console.log(data);
+search.on('search', callback);
+search.events.off('search', callback);
+
+// Remover todos los listeners de un evento
+search.events.removeAllListeners('search');
+
+// Remover todos los listeners
+search.events.removeAllListeners();</code></pre>
+
+<h2>Una sola vez</h2>
+
+<pre data-lang="javascript"><code>// Se ejecuta solo la primera vez que se emite
+search.events.once('init', (data) => {
+    console.log('Inicialización (solo una vez):', data);
+});</code></pre>

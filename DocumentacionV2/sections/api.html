@@ -1,0 +1,165 @@
+<h1>API</h1>
+
+<p>Referencia completa de la interfaz pública del componente.</p>
+
+<h2>Constructor</h2>
+
+<pre data-lang="typescript"><code>new Search(params: SearchParams): Search</code></pre>
+
+<p>Crea una nueva instancia del componente. Ver <a href="#/configuration">Configuración</a> para los parámetros disponibles.</p>
+
+<h2>Métodos públicos</h2>
+
+<h3>init()</h3>
+
+<pre data-lang="typescript"><code>init(): Search</code></pre>
+
+<p>Inicializa el componente, renderiza la estructura DOM y configura los event listeners. Debe llamarse después del constructor.</p>
+
+<pre data-lang="javascript"><code>const search = new Search({ element: '#app', data: items }).init();</code></pre>
+
+<h3>draw(searchTerm?, isEvent?)</h3>
+
+<pre data-lang="typescript"><code>draw(searchTerm?: string, isEvent?: boolean): Promise&lt;Search&gt;</code></pre>
+
+<p>Ejecuta una búsqueda y renderiza los resultados. Se llama automáticamente al escribir en el input.</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Parámetro</th>
+            <th>Tipo</th>
+            <th>Default</th>
+            <th>Descripción</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>searchTerm</code></td>
+            <td><code>string</code></td>
+            <td><code>this.searchTerm</code></td>
+            <td>Término de búsqueda</td>
+        </tr>
+        <tr>
+            <td><code>isEvent</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Si fue iniciado por evento del usuario</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>sort(field, order?)</h3>
+
+<pre data-lang="typescript"><code>sort(field: string, order?: 'asc' | 'desc'): Search</code></pre>
+
+<p>Ordena los datos por un campo específico. En modo servidor, ejecuta una nueva búsqueda.</p>
+
+<pre data-lang="javascript"><code>search.sort('nombre', 'asc');
+search.sort('precio', 'desc');</code></pre>
+
+<h3>clearSort()</h3>
+
+<pre data-lang="typescript"><code>clearSort(): Search</code></pre>
+
+<p>Elimina el orden actual y reinicia al orden natural de los datos.</p>
+
+<h3>showLoading()</h3>
+
+<pre data-lang="typescript"><code>showLoading(): Search</code></pre>
+
+<p>Muestra un indicador de carga en el contenedor de resultados.</p>
+
+<h3>on(eventName, callback)</h3>
+
+<pre data-lang="typescript"><code>on(eventName: string, callback: Function): EventEmitter</code></pre>
+
+<p>Registra un listener para un evento. Retorna el <code>EventEmitter</code> para encadenamiento.</p>
+
+<pre data-lang="javascript"><code>search
+    .on('search', (data) => console.log('Búsqueda:', data))
+    .on('pageChange', (data) => console.log('Página:', data.page))
+    .on('itemSelected', (data) => console.log('Seleccionado:', data.item));</code></pre>
+
+<h3>getCacheKey(searchTerm, page)</h3>
+
+<pre data-lang="typescript"><code>getCacheKey(searchTerm: string, page: number): string</code></pre>
+
+<p>Genera la clave de caché para una búsqueda y página específicas.</p>
+
+<h3>setupKeyboardNavigation()</h3>
+
+<pre data-lang="typescript"><code>setupKeyboardNavigation(): Search</code></pre>
+
+<p>Configura la navegación por teclado (flechas arriba/abajo, Enter para seleccionar).</p>
+
+<h3>destroy()</h3>
+
+<pre data-lang="typescript"><code>destroy(): void</code></pre>
+
+<p>Destruye la instancia, limpiando todos los event listeners, observer de scroll y referencias internas.</p>
+
+<pre data-lang="javascript"><code>search.destroy(); // Limpia todo</code></pre>
+
+<h2>Propiedades públicas</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Propiedad</th>
+            <th>Tipo</th>
+            <th>Descripción</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>element</code></td>
+            <td><code>string</code></td>
+            <td>Selector CSS del contenedor</td>
+        </tr>
+        <tr>
+            <td><code>searchTerm</code></td>
+            <td><code>string</code></td>
+            <td>Término de búsqueda actual</td>
+        </tr>
+        <tr>
+            <td><code>data</code></td>
+            <td><code>Array</code></td>
+            <td>Array de datos originales</td>
+        </tr>
+        <tr>
+            <td><code>theme</code></td>
+            <td><code>string</code></td>
+            <td>Tema CSS activo</td>
+        </tr>
+        <tr>
+            <td><code>pagination</code></td>
+            <td><code>Pagination</code></td>
+            <td>Instancia del módulo de paginación</td>
+        </tr>
+        <tr>
+            <td><code>events</code></td>
+            <td><code>EventEmitter</code></td>
+            <td>Instancia del sistema de eventos</td>
+        </tr>
+        <tr>
+            <td><code>cache</code></td>
+            <td><code>LRUCache</code></td>
+            <td>Instancia del sistema de caché</td>
+        </tr>
+        <tr>
+            <td><code>renderer</code></td>
+            <td><code>SearchRenderer</code></td>
+            <td>Instancia del motor de renderizado</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Encadenamiento</h2>
+
+<p>La mayoría de métodos retornan <code>this</code> para permitir encadenamiento:</p>
+
+<pre data-lang="javascript"><code>search
+    .sort('nombre', 'asc')
+    .draw('laptop')
+    .then(() => console.log('Búsqueda completada'));</code></pre>

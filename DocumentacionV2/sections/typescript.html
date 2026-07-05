@@ -1,0 +1,164 @@
+<h1>TypeScript</h1>
+
+<p>El componente está escrito en TypeScript e incluye tipos completos para una experiencia de desarrollo segura.</p>
+
+<h2>Tipos exportados</h2>
+
+<pre data-lang="typescript"><code>import {
+    Search,
+    SearchParams,
+    FetchConfig,
+    TranslationCache,
+    SearchEventInit,
+    PageChangeEventData,
+    SortChangeEventData,
+    ItemSelectedEventData,
+    ItemHighlightedEventData,
+    DestroyEventData,
+    ErrorCode,
+    SearchError
+} from 'buscador-dinamico';</code></pre>
+
+<h2>Interfaz SearchParams</h2>
+
+<pre data-lang="typescript"><code>interface SearchParams {
+    element: string;
+    data?: Record&lt;string, any&gt;[];
+    theme?: string;
+    itemsPerPage?: number;
+    debounceTime?: number;
+    keyboardEnabled?: boolean;
+    cacheEnabled?: boolean;
+    cacheMaxSize?: number;
+    cacheTtlSeconds?: number;
+    zIndex?: number;
+    dom?: string;
+    sortBy?: string | null;
+    sortOrder?: 'asc' | 'desc';
+    template?: string | Function | null;
+    translation?: Partial&lt;TranslationCache&gt;
+    procesServer?: boolean;
+    fetch?: FetchConfig;
+    developmentMode?: boolean;
+}</code></pre>
+
+<h2>Interfaz FetchConfig</h2>
+
+<pre data-lang="typescript"><code>interface FetchConfig {
+    url: string;
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+    headers?: Record&lt;string, string&gt;;
+    body?: Record&lt;string, any&gt;;
+    timeout?: number;
+}</code></pre>
+
+<h2>Interfaz TranslationCache</h2>
+
+<pre data-lang="typescript"><code>interface TranslationCache {
+    searchPlaceholder: string;
+    searchLabel: string;
+    noResults: string;
+    loading: string;
+}</code></pre>
+
+<h2>Eventos tipados</h2>
+
+<pre data-lang="typescript"><code>// Cada evento tiene su propio tipo de dato
+interface SearchEventInit {
+    searchTerm: string;
+    itemsPerPage: number;
+    procesServer: boolean;
+}
+
+interface PageChangeEventData {
+    page: number;
+    totalPages: number;
+    itemsOnPage: number;
+    totalLoaded: number;
+}
+
+interface SortChangeEventData {
+    field: string;
+    order: 'asc' | 'desc';
+}
+
+interface ItemSelectedEventData {
+    item: Record&lt;string, any&gt;;
+    index: number;
+    close: () =&gt; void;
+}
+
+interface ItemHighlightedEventData {
+    item: Record&lt;string, any&gt;;
+    index: number;
+}
+
+interface DestroyEventData {
+    timestamp: string;
+}</code></pre>
+
+<h2>Uso con tipos</h2>
+
+<pre data-lang="typescript"><code>import { Search, SearchParams } from 'buscador-dinamico';
+
+// Definir tipos para tus datos
+interface Producto {
+    id: number;
+    nombre: string;
+    precio: number;
+    categoria: string;
+}
+
+const productos: Producto[] = [
+    { id: 1, nombre: 'Laptop', precio: 999, categoria: 'Electrónica' }
+];
+
+// Configuración tipada
+const config: SearchParams = {
+    element: '#app',
+    data: productos,
+    theme: 'clean-white',
+    template: (item: Producto) => `
+        &lt;div&gt;
+            &lt;h3&gt;${item.nombre}&lt;/h3&gt;
+            &lt;p&gt;$${item.precio}&lt;/p&gt;
+        &lt;/div&gt;
+    `
+};
+
+const search = new Search(config).init();
+
+// Eventos tipados
+search.on('itemSelected', (data: ItemSelectedEventData) => {
+    const producto = data.item as Producto;
+    console.log(producto.nombre);
+});</code></pre>
+
+<h2>Generación de tipos</h2>
+
+<p>Los archivos de tipos se generan automáticamente durante el build:</p>
+
+<pre><code>dist/
+├── buscador-dinamico.es.js
+├── buscador-dinamico.umd.js
+├── buscador-dinamico.d.ts        ← Tipos principales
+├── buscador-dinamico.d.ts.map    ← Source map de tipos
+└── css/
+    └── buscador-dinamico.css</code></pre>
+
+<h2>Type narrowing</h2>
+
+<pre data-lang="typescript"><code>search.on('itemSelected', (data) => {
+    // TypeScript sabe que data.item es Record&lt;string, any&gt;
+    // Puedes hacer type assertion si conoces la estructura
+    const item = data.item as Producto;
+    console.log(item.nombre); // OK
+});</code></pre>
+
+<div class="doc-callout doc-callout--info">
+    <span class="doc-callout__icon">💡</span>
+    <div class="doc-callout__content">
+        <strong>tsconfig.json</strong>
+        <p>Asegúrate de que tu <code>tsconfig.json</code> incluya <code>"moduleResolution": "node"</code> o <code>"moduleResolution": "bundler"</code> para resolver correctamente los tipos.</p>
+    </div>
+</div>

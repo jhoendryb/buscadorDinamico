@@ -1,0 +1,120 @@
+<h1>Internacionalización</h1>
+
+<p>El componente incluye soporte integrado para múltiples idiomas mediante un sistema de traducciones configurable.</p>
+
+<h2>Idioma por defecto</h2>
+
+<p>Por defecto, el componente usa español. Las traducciones predeterminadas son:</p>
+
+<pre data-lang="typescript"><code>const DEFAULT_TRANSLATIONS = {
+    searchPlaceholder: 'Escriba para buscar...',
+    searchLabel: 'Campo de búsqueda',
+    noResults: 'No se encontraron resultados',
+    loading: 'Cargando...'
+};</code></pre>
+
+<h2>Personalizar traducciones</h2>
+
+<p>Pasa un objeto <code>translation</code> al constructor para reemplazar las cadenas:</p>
+
+<pre data-lang="javascript"><code>const search = new BuscadorDinamico.Search({
+    element: '#app',
+    data: items,
+    translation: {
+        searchPlaceholder: 'Search...',
+        searchLabel: 'Search field',
+        noResults: 'No results found',
+        loading: 'Loading...'
+    }
+}).init();</code></pre>
+
+<h2>Soporte multiidioma completo</h2>
+
+<p>Ejemplo para múltiples idiomas:</p>
+
+<pre data-lang="javascript"><code>const translations = {
+    es: {
+        searchPlaceholder: 'Escriba para buscar...',
+        searchLabel: 'Campo de búsqueda',
+        noResults: 'No se encontraron resultados',
+        loading: 'Cargando...'
+    },
+    en: {
+        searchPlaceholder: 'Type to search...',
+        searchLabel: 'Search field',
+        noResults: 'No results found',
+        loading: 'Loading...'
+    },
+    pt: {
+        searchPlaceholder: 'Digite para pesquisar...',
+        searchLabel: 'Campo de pesquisa',
+        noResults: 'Nenhum resultado encontrado',
+        loading: 'Carregando...'
+    }
+};
+
+// Seleccionar idioma dinámicamente
+const userLang = navigator.language.substring(0, 2);
+const search = new BuscadorDinamico.Search({
+    element: '#app',
+    data: items,
+    translation: translations[userLang] || translations.es
+}).init();</code></pre>
+
+<h2>Referencia de claves</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Clave</th>
+            <th>Descripción</th>
+            <th>Ubicación</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>searchPlaceholder</code></td>
+            <td>Texto placeholder del input de búsqueda</td>
+            <td>Input del buscador</td>
+        </tr>
+        <tr>
+            <td><code>searchLabel</code></td>
+            <td>Label accesible del input (aria-label)</td>
+            <td>Input del buscador</td>
+        </tr>
+        <tr>
+            <td><code>noResults</code></td>
+            <td>Mensaje cuando no hay resultados</td>
+            <td>Panel de resultados</td>
+        </tr>
+        <tr>
+            <td><code>loading</code></td>
+            <td>Mensaje de carga</td>
+            <td>Indicador de carga</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Cambiar idioma dinámicamente</h2>
+
+<pre data-lang="javascript"><code>// Para cambiar las traducciones después de la inicialización,
+// necesitas crear una nueva instancia:
+function changeLanguage(lang) {
+    // Destruir la instancia anterior
+    search.destroy();
+
+    // Crear nueva instancia con el nuevo idioma
+    search = new BuscadorDinamico.Search({
+        element: '#app',
+        data: items,
+        translation: translations[lang]
+    }).init();
+}</code></pre>
+
+<div class="doc-callout doc-callout--tip">
+    <span class="doc-callout__icon">💡</span>
+    <div class="doc-callout__content">
+        <strong>Consejo</strong>
+        <p>Las traducciones se aplican solo al momento de la inicialización. Para cambiar el idioma en tiempo de ejecución, debes destruir y recrear la instancia.</p>
+    </div>
+</div>

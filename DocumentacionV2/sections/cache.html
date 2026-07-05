@@ -1,0 +1,105 @@
+<h1>Caché</h1>
+
+<p>El sistema de caché LRU (Least Recently Used) almacena resultados de búsquedas anteriores para mejorar el rendimiento.</p>
+
+<h2>Habilitar caché</h2>
+
+<pre data-lang="javascript"><code>const search = new BuscadorDinamico.Search({
+    element: '#app',
+    data: items,
+    cacheEnabled: true,
+    cacheMaxSize: 50,        // Máximo 50 entradas
+    cacheTtlSeconds: 300     // Expira después de 5 minutos
+}).init();</code></pre>
+
+<h2>Configuración</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Parámetro</th>
+            <th>Tipo</th>
+            <th>Default</th>
+            <th>Descripción</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>cacheEnabled</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Habilita el sistema de caché</td>
+        </tr>
+        <tr>
+            <td><code>cacheMaxSize</code></td>
+            <td><code>number</code></td>
+            <td><code>50</code></td>
+            <td>Número máximo de entradas en caché</td>
+        </tr>
+        <tr>
+            <td><code>cacheTtlSeconds</code></td>
+            <td><code>number</code></td>
+            <td><code>300</code></td>
+            <td>Tiempo de vida de cada entrada en segundos</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Cómo funciona</h2>
+
+<ol>
+    <li>Al ejecutar una búsqueda, se genera una clave basada en el término y la página</li>
+    <li>Si la clave existe en caché y no ha expirado, se retorna el resultado almacenado</li>
+    <li>Si no existe o expiró, se ejecuta la búsqueda normal y se almacena el resultado</li>
+    <li>Al superar el tamaño máximo, se eliminan las entradas menos usadas</li>
+</ol>
+
+<h2>Generación de claves</h2>
+
+<pre data-lang="javascript"><code>// La clave se genera automáticamente como: "término_página"
+// Ejemplo: "laptop_1", "laptop_2", "tablet_1"
+
+const key = search.getCacheKey('laptop', 1);
+console.log(key); // "laptop_1"</code></pre>
+
+<h2>Limpiar caché</h2>
+
+<pre data-lang="javascript"><code>// Limpiar toda la caché
+search.cache.clear();
+
+// Limpiar entradas con un prefijo específico
+search.cache.clearCacheByPrefix('laptop');
+
+// Eliminar una entrada específica
+search.cache.delete('laptop_1');
+
+// Verificar tamaño actual
+console.log('Entradas en caché:', search.cache.size());</code></pre>
+
+<h2>Uso con datos del servidor</h2>
+
+<p>La caché es especialmente útil con búsquedas remotas para reducir peticiones HTTP:</p>
+
+<pre data-lang="javascript"><code>const search = new BuscadorDinamico.Search({
+    element: '#app',
+    procesServer: true,
+    cacheEnabled: true,
+    cacheMaxSize: 100,
+    cacheTtlSeconds: 600, // 10 minutos
+    fetch: {
+        url: 'https://api.ejemplo.com/buscar',
+        method: 'POST'
+    }
+}).init();
+
+// Las búsquedas repetidas usarán caché
+// "laptop" -> petición HTTP
+// "laptop" -> resultado de caché (sin petición)</code></pre>
+
+<div class="doc-callout doc-callout--tip">
+    <span class="doc-callout__icon">💡</span>
+    <div class="doc-callout__content">
+        <strong>Rendimiento</strong>
+        <p>La caché LRU es ideal para patrones de búsqueda donde los usuarios tienden a repetir términos. Reduce significativamente la carga en servidores y mejora la experiencia de usuario.</p>
+    </div>
+</div>

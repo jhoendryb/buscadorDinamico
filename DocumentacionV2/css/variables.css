@@ -1,0 +1,130 @@
+:root {
+    --doc-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    --doc-font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+
+    --doc-font-size-xs: 0.75rem;
+    --doc-font-size-sm: 0.8125rem;
+    --doc-font-size-base: 0.9375rem;
+    --doc-font-size-md: 1rem;
+    --doc-font-size-lg: 1.125rem;
+    --doc-font-size-xl: 1.25rem;
+    --doc-font-size-2xl: 1.5rem;
+    --doc-font-size-3xl: 1.875rem;
+
+    --doc-line-height-tight: 1.3;
+    --doc-line-height-normal: 1.6;
+    --doc-line-height-relaxed: 1.8;
+
+    --doc-sidebar-width: 260px;
+    --doc-header-height: 56px;
+    --doc-content-max-width: 780px;
+    --doc-toc-width: 200px;
+
+    --doc-spacing-xs: 0.25rem;
+    --doc-spacing-sm: 0.5rem;
+    --doc-spacing-md: 1rem;
+    --doc-spacing-lg: 1.5rem;
+    --doc-spacing-xl: 2rem;
+    --doc-spacing-2xl: 3rem;
+    --doc-spacing-3xl: 4rem;
+
+    --doc-radius-sm: 4px;
+    --doc-radius-md: 8px;
+    --doc-radius-lg: 12px;
+    --doc-radius-xl: 16px;
+    --doc-radius-full: 9999px;
+
+    --doc-shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --doc-shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+    --doc-shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.03);
+    --doc-shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.02);
+
+    --doc-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --doc-transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --doc-transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    --doc-z-sidebar: 100;
+    --doc-z-overlay: 90;
+    --doc-z-header: 110;
+    --doc-z-dropdown: 120;
+}
+
+[data-theme="light"] {
+    --doc-bg-primary: #ffffff;
+    --doc-bg-secondary: #f8f9fb;
+    --doc-bg-tertiary: #f0f2f5;
+    --doc-bg-code: #f4f5f7;
+    --doc-bg-code-block: #1e1e2e;
+    --doc-bg-inline-code: rgba(99, 102, 241, 0.08);
+    --doc-bg-hover: rgba(99, 102, 241, 0.06);
+    --doc-bg-active: rgba(99, 102, 241, 0.1);
+    --doc-bg-sidebar: #fafbfc;
+    --doc-bg-header: rgba(255, 255, 255, 0.85);
+    --doc-bg-overlay: rgba(0, 0, 0, 0.4);
+    --doc-bg-badge: rgba(99, 102, 241, 0.1);
+
+    --doc-text-primary: #1a1d26;
+    --doc-text-secondary: #555b6e;
+    --doc-text-tertiary: #878d9e;
+    --doc-text-inverse: #ffffff;
+    --doc-text-link: #6366f1;
+    --doc-text-code: #e06c75;
+    --doc-text-heading: #111827;
+
+    --doc-border-primary: #e2e5eb;
+    --doc-border-secondary: #d1d5de;
+    --doc-border-focus: #6366f1;
+
+    --doc-accent-primary: #6366f1;
+    --doc-accent-hover: #5558e6;
+    --doc-accent-light: rgba(99, 102, 241, 0.12);
+
+    --doc-success: #10b981;
+    --doc-warning: #f59e0b;
+    --doc-error: #ef4444;
+    --doc-info: #3b82f6;
+
+    --doc-scrollbar-track: #f0f2f5;
+    --doc-scrollbar-thumb: #c5c9d4;
+    --doc-scrollbar-thumb-hover: #a0a5b2;
+}
+
+[data-theme="dark"] {
+    --doc-bg-primary: #0f1117;
+    --doc-bg-secondary: #161822;
+    --doc-bg-tertiary: #1c1f2e;
+    --doc-bg-code: #1a1d2b;
+    --doc-bg-code-block: #0d0f18;
+    --doc-bg-inline-code: rgba(129, 140, 248, 0.12);
+    --doc-bg-hover: rgba(129, 140, 248, 0.08);
+    --doc-bg-active: rgba(129, 140, 248, 0.14);
+    --doc-bg-sidebar: #12141e;
+    --doc-bg-header: rgba(15, 17, 23, 0.88);
+    --doc-bg-overlay: rgba(0, 0, 0, 0.6);
+    --doc-bg-badge: rgba(129, 140, 248, 0.15);
+
+    --doc-text-primary: #e4e6ed;
+    --doc-text-secondary: #9ca0b0;
+    --doc-text-tertiary: #6b7084;
+    --doc-text-inverse: #0f1117;
+    --doc-text-link: #818cf8;
+    --doc-text-code: #f78c6c;
+    --doc-text-heading: #f0f1f5;
+
+    --doc-border-primary: #252836;
+    --doc-border-secondary: #2e3143;
+    --doc-border-focus: #818cf8;
+
+    --doc-accent-primary: #818cf8;
+    --doc-accent-hover: #6d78e6;
+    --doc-accent-light: rgba(129, 140, 248, 0.15);
+
+    --doc-success: #34d399;
+    --doc-warning: #fbbf24;
+    --doc-error: #f87171;
+    --doc-info: #60a5fa;
+
+    --doc-scrollbar-track: #1a1d2b;
+    --doc-scrollbar-thumb: #3a3d4e;
+    --doc-scrollbar-thumb-hover: #4f5266;
+}
