@@ -1,0 +1,126 @@
+<h1>Errores</h1>
+
+<p>El componente incluye un sistema centralizado de gestión de errores con códigos específicos y soluciones documentadas.</p>
+
+<h2>Tipos de error</h2>
+
+<p>El componente lanza <code>SearchError</code> con códigos específicos:</p>
+
+<pre data-lang="typescript"><code>class SearchError extends Error {
+    code: ErrorCode;
+    solution: string;
+    context?: Record&lt;string, any&gt;;
+}</code></pre>
+
+<h2>Códigos de error</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Solución</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>SEARCH_001</code></td>
+            <td>El parámetro <code>element</code> es requerido</td>
+            <td>Proporcione un selector CSS válido</td>
+        </tr>
+        <tr>
+            <td><code>SEARCH_002</code></td>
+            <td>El parámetro <code>element</code> debe ser un string</td>
+            <td>Pase un selector como <code>'#mi-buscador'</code></td>
+        </tr>
+        <tr>
+            <td><code>SEARCH_003</code></td>
+            <td>El elemento no fue encontrado en el DOM</td>
+            <td>Verifique que el elemento exista antes de inicializar</td>
+        </tr>
+        <tr>
+            <td><code>SEARCH_004</code></td>
+            <td><code>fetch.url</code> es requerido en modo servidor</td>
+            <td>Configure la URL del endpoint</td>
+        </tr>
+        <tr>
+            <td><code>SEARCH_005</code></td>
+            <td><code>itemsPerPage</code> debe ser un número</td>
+            <td>Pase un valor numérico mayor a 0</td>
+        </tr>
+        <tr>
+            <td><code>SEARCH_006</code></td>
+            <td><code>itemsPerPage</code> debe ser mayor a 0</td>
+            <td>Use un valor de 1 o superior</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Manejo de errores</h2>
+
+<h3>Try/Catch</h3>
+
+<pre data-lang="javascript"><code>try {
+    const search = new BuscadorDinamico.Search({
+        element: '#app',
+        data: items
+    }).init();
+} catch (error) {
+    if (error.code) {
+        console.error(`Error ${error.code}: ${error.message}`);
+        console.error('Solución:', error.solution);
+    } else {
+        console.error('Error inesperado:', error);
+    }
+}</code></pre>
+
+<h3>Evento de error</h3>
+
+<pre data-lang="javascript"><code>search.on('error', (error) => {
+    console.error('Error capturado:', error);
+    // Mostrar notificación al usuario
+    showToast(error.message);
+});</code></pre>
+
+<h3>Modo desarrollo</h3>
+
+<p>Activa el modo desarrollo para logs detallados en consola:</p>
+
+<pre data-lang="javascript"><code>const search = new BuscadorDinamico.Search({
+    element: '#app',
+    data: items,
+    developmentMode: true // Activa logs detallados
+}).init();</code></pre>
+
+<p>En modo desarrollo, el componente imprime:</p>
+<ul>
+    <li>Validación de parámetros</li>
+    <li>Timing de búsquedas</li>
+    <li>Estadísticas de caché</li>
+    <li>Detalles de peticiones HTTP</li>
+</ul>
+
+<h2>Errores de red (modo servidor)</h2>
+
+<pre data-lang="javascript"><code>// El componente maneja automáticamente:
+// - Timeouts (configurable via fetch.timeout)
+// - Errores HTTP (4xx, 5xx)
+// - Errores de parseo JSON
+// - AbortController para cancelar peticiones
+
+const search = new BuscadorDinamico.Search({
+    element: '#app',
+    procesServer: true,
+    fetch: {
+        url: 'https://api.ejemplo.com/buscar',
+        timeout: 10000 // 10 segundos
+    }
+}).init();</code></pre>
+
+<div class="doc-callout doc-callout--danger">
+    <span class="doc-callout__icon">🚨</span>
+    <div class="doc-callout__content">
+        <strong>Errores fatales</strong>
+        <p>Ciertos errores como <code>ELEMENT_REQUIRED</code> y <code>ELEMENT_NOT_FOUND</code> son fatales y impiden la inicialización. Asegúrate de validar el DOM antes de crear la instancia.</p>
+    </div>
+</div>

@@ -1,128 +1,98 @@
 const Navigation = {
-    sections: [],
-    currentSection: null,
+    sidebar: null,
+    overlay: null,
+    menuBtn: null,
+    isOpen: false,
+    mediaQuery: null,
 
-    init(sections) {
-        this.sections = sections;
-        this.renderSidebar();
-        this.setupMobileMenu();
-        this.setupScrollSpy();
+    init() {
+        this.sidebar = document.getElementById('doc-sidebar');
+        this.overlay = document.getElementById('sidebar-overlay');
+        this.menuBtn = document.getElementById('menu-toggle');
+
+        if (!this.sidebar || !this.overlay || !this.menuBtn) return;
+
+        this.mediaQuery = window.matchMedia('(max-width: 768px)');
+
+        this.bindEvents();
+        this.handleMediaChange();
+
+        this.mediaQuery.addEventListener('change', () => this.handleMediaChange());
     },
 
-    renderSidebar() {
-        const sidebar = document.getElementById('sidebar-nav');
-        if (!sidebar) return;
+    bindEvents() {
+        this.menuBtn.addEventListener('click', () => this.toggle());
 
-        const groups = {};
-        this.sections.forEach(s => {
-            const group = s.group || 'General';
-            if (!groups[group]) groups[group] = [];
-            groups[group].push(s);
-        });
+        this.overlay.addEventListener('click', () => this.close());
 
-        sidebar.innerHTML = Object.entries(groups).map(([group, items]) => `
-            <div class="sidebar__section">
-                <div class="sidebar__heading">${group}</div>
-                <nav class="sidebar__nav">
-                    ${items.map(item => `
-                        <a href="#${item.id}" class="sidebar__link" data-section="${item.id}">
-                            ${item.icon ? `<span class="sidebar__link-icon">${item.icon}</span>` : ''}
-                            ${item.title}
-                        </a>
-                        ${item.subsections ? `
-                            <div class="sidebar__subnav">
-                                ${item.subsections.map(sub => `
-                                    <a href="#${sub.id}" class="sidebar__sublink" data-section="${sub.id}">${sub.title}</a>
-                                `).join('')}
-                            </div>
-                        ` : ''}
-                    `).join('')}
-                </nav>
-            </div>
-        `).join('');
-
-        sidebar.querySelectorAll('.sidebar__link, .sidebar__sublink').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 1024) {
-                    // this.closeMobileMenu();
+        this.sidebar.querySelectorAll('.doc-sidebar__link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (this.mediaQuery.matches) {
+                    this.close();
                 }
             });
         });
-    },
-
-    setupMobileMenu() {
-        const toggle = document.querySelector('.navbar__menu-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        const overlay = document.querySelector('.overlay');
-        const isMobile = () => window.innerWidth <= 1024;
-
-        if (toggle) {
-            toggle.addEventListener('click', (e) => {
-                console.log("Que fue");
-                const isOpen = sidebar.classList.toggle('open');
-                if (isMobile()) {
-                    overlay.classList.toggle('visible', isOpen);
-                }
-            });
-        }
-
-        if (overlay) {
-            overlay.addEventListener('click', (e) => {
-                if (!e.target.closest('.sidebar')) {
-                    console.log("mira marico me di click");
-                    this.closeMobileMenu();
-                }
-            });
-        }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') this.closeMobileMenu();
+            if (e.key === 'Escape' && this.isOpen) {
+                this.close();
+            }
         });
     },
 
-    closeMobileMenu() {
-        const sidebar = document.querySelector('.sidebar');
-        const overlay = document.querySelector('.overlay');
-
-        sidebar.classList.remove('open');
-        overlay.classList.remove('visible');
-    },
-
-    setupScrollSpy() {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    this.setActive(entry.target.id);
-                }
-            });
-        }, {
-            rootMargin: '-80px 0px -70% 0px',
-            threshold: 0
-        });
-
-        document.querySelectorAll('[data-section-id]').forEach(el => {
-            observer.observe(el);
-        });
-    },
-
-    setActive(sectionId) {
-        if (this.currentSection === sectionId) return;
-        this.currentSection = sectionId;
-
-        document.querySelectorAll('.sidebar__link, .sidebar__sublink').forEach(link => {
-            link.classList.toggle('active', link.getAttribute('data-section') === sectionId);
-        });
-
-        const activeLink = document.querySelector(`.sidebar__link[data-section="${sectionId}"]`);
-        if (activeLink) {
-            activeLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    handleMediaChange() {
+        if (!this.mediaQuery.matches) {
+            this.close();
+            this.sidebar.classList.remove('open');
+            this.overlay.classList.remove('visible');
+            document.body.style.overflow = '';
         }
     },
 
-    scrollToSection(id) {
-        const el = document.getElementById(id);
-        if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    toggle() {
+        if (this.isOpen) {
+            this.close();
+        } else {
+            this.open();
         }
+    },
+
+    open() {
+        if (this.isOpen) return;
+        this.isOpen = true;
+
+        this.sidebar.classList.add('open');
+        this.overlay.classList.add('visible');
+        this.menuBtn.classList.add('active');
+        document.body.style.overflow = 'hidden';
+
+        this.menuBtn.setAttribute('aria-expanded', 'true');
+        this.sidebar.setAttribute('aria-hidden', 'false');
+    },
+
+    close() {
+        if (!this.isOpen) return;
+        this.isOpen = false;
+
+        this.sidebar.classList.remove('open');
+        this.overlay.classList.remove('visible');
+        this.menuBtn.classList.remove('active');
+        document.body.style.overflow = '';
+
+        this.menuBtn.setAttribute('aria-expanded', 'false');
+        this.sidebar.setAttribute('aria-hidden', 'true');
+    },
+
+    setActive(sectionName) {
+        this.sidebar.querySelectorAll('.doc-sidebar__link').forEach(link => {
+            const isActive = link.dataset.section === sectionName;
+            link.classList.toggle('active', isActive);
+
+            if (isActive && this.mediaQuery?.matches) {
+                link.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+        });
     }
 };
+
+export default Navigation;

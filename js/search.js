@@ -1,263 +1,418 @@
-const SearchDocs = {
+import { Search } from '../dist/buscador-dinamico.es.js';
+
+/**
+ * Slugify — genera IDs de ancla consistentes a partir del texto de los encabezados.
+ * Normaliza tildes, elimina caracteres especiales y convierte espacios en guiones.
+ */
+function slugify(text) {
+    return text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+}
+
+/**
+ * Índice completo de búsqueda.
+ * Cada entrada representa un segmento navegable dentro de una sección.
+ * - route:    hash destino (ej. '#/templates')
+ * - segment:  ID del encabezado h2/h3 dentro de la sección (auto-generado si está vacío)
+ * - category: etiqueta de agrupación
+ * - badge:    color del badge (info, success, warning)
+ * - title:    texto visible del resultado
+ * - description: contexto breve
+ * - keywords: términos adicionales para mejorar la búsqueda
+ */
+const SEARCH_DATA = [
+    // ── Introducción ───────────────────────────────────────────────
+    { title: 'Introducción', route: '#/introduction', segment: '', category: 'Inicio', badge: 'info', description: 'Visión general del componente Buscador Dinámico', keywords: 'intro bienvenida inicio about overview' },
+    { title: '¿Por qué Buscador Dinámico?', route: '#/introduction', segment: 'por-que-buscador-dinamico', category: 'Inicio', badge: 'info', description: 'Ventajas y comparación con otras soluciones', keywords: 'ventajas por que razones' },
+    { title: 'Arquitectura', route: '#/introduction', segment: 'arquitectura', category: 'Inicio', badge: 'info', description: 'Módulos principales y patrón de composición OOP', keywords: 'arquitectura modulos oop clases composition' },
+    { title: 'Modos de uso', route: '#/introduction', segment: 'modos-de-uso', category: 'Inicio', badge: 'info', description: 'Local, DOM, servidor, múltiples instancias', keywords: 'modos uso local servidor dom multiple' },
+    { title: 'Requisitos mínimos', route: '#/introduction', segment: 'requisitos-minimos', category: 'Inicio', badge: 'info', description: 'Navegadores compatibles y APIs requeridas', keywords: 'requisitos navegadores compatibilidad browsers' },
+
+    // ── Instalación ────────────────────────────────────────────────
+    { title: 'Instalación', route: '#/installation', segment: '', category: 'Inicio', badge: 'info', description: 'Cómo instalar el componente via npm, pnpm o CDN', keywords: 'install npm pnpm setup download instalar' },
+    { title: 'Vía npm / pnpm', route: '#/installation', segment: 'via-npm-pnpm', category: 'Inicio', badge: 'info', description: 'Instalación con gestores de paquetes', keywords: 'npm pnpm yarn install paquetes' },
+    { title: 'Vía CDN', route: '#/installation', segment: 'via-cdn-umd', category: 'Inicio', badge: 'info', description: 'Uso directo sin bundler via unpkg', keywords: 'cdn unpkg script tag umd' },
+    { title: 'Vía script tag ES Module', route: '#/installation', segment: 'via-script-tag-es-module', category: 'Inicio', badge: 'info', description: 'Módulo ES con import en navegador', keywords: 'script module es import' },
+    { title: 'Descarga manual', route: '#/installation', segment: 'descarga-manual', category: 'Inicio', badge: 'info', description: 'Descargar archivos directamente desde GitHub', keywords: 'descarga manual github release' },
+    { title: 'Verificación', route: '#/installation', segment: 'verificacion', category: 'Inicio', badge: 'info', description: 'Confirmar que la instalación fue exitosa', keywords: 'verificar comprobar test instalar' },
+
+    // ── Configuración ──────────────────────────────────────────────
+    { title: 'Configuración', route: '#/configuration', segment: '', category: 'Inicio', badge: 'info', description: 'Parámetros de configuración del constructor', keywords: 'config setup opciones parametros settings' },
+    { title: 'Parámetros básicos', route: '#/configuration', segment: 'parametros-basicos', category: 'Inicio', badge: 'info', description: 'Opciones fundamentales del constructor', keywords: 'parametros basicos element data theme' },
+    { title: 'Referencia de parámetros', route: '#/configuration', segment: 'referencia-de-parametros', category: 'Inicio', badge: 'info', description: 'Tabla completa con todos los parámetros disponibles', keywords: 'referencia tabla parametros opciones' },
+    { title: 'Configuración del servidor', route: '#/configuration', segment: 'configuracion-del-servidor-fetch', category: 'Inicio', badge: 'info', description: 'Setup de fetch para búsquedas remotas', keywords: 'fetch server servidor api remote ajax' },
+    { title: 'Múltiples instancias', route: '#/configuration', segment: 'multiples-instancias', category: 'Inicio', badge: 'info', description: 'Varios buscadores independientes en la misma página', keywords: 'multiples instancias varios search' },
+
+    // ── Plantillas ─────────────────────────────────────────────────
+    { title: 'Plantillas', route: '#/templates', segment: '', category: 'Guías', badge: 'success', description: 'Personalización de plantillas de renderizado', keywords: 'templates plantillas render html custom' },
+    { title: 'Plantilla de string', route: '#/templates', segment: 'plantilla-de-string', category: 'Guías', badge: 'success', description: 'HTML con interpolación simple de campos', keywords: 'string template interpolacion campos' },
+    { title: 'Plantilla con función', route: '#/templates', segment: 'plantilla-con-funcion', category: 'Guías', badge: 'success', description: 'Función JavaScript que retorna HTML dinámico', keywords: 'function template funcion html dinamico' },
+    { title: 'Ejemplo práctico', route: '#/templates', segment: 'ejemplo-practico', category: 'Guías', badge: 'success', description: 'Tarjeta de producto completa con template', keywords: 'ejemplo practico card producto tarjeta' },
+    { title: 'Plantilla por defecto', route: '#/templates', segment: 'plantilla-por-defecto', category: 'Guías', badge: 'success', description: 'Estructura HTML que usa el componente sin template', keywords: 'default defecto por defecto' },
+    { title: 'Acceso a datos del item', route: '#/templates', segment: 'acceso-a-datos-del-item', category: 'Guías', badge: 'success', description: 'Cómo acceder a todas las propiedades del objeto item', keywords: 'datos item propiedades objeto acceso' },
+
+    // ── Internacionalización ────────────────────────────────────────
+    { title: 'Internacionalización', route: '#/i18n', segment: '', category: 'Guías', badge: 'success', description: 'Soporte multiidioma y traducciones configurables', keywords: 'i18n internationalization idiomas traducciones languages' },
+    { title: 'Idioma por defecto', route: '#/i18n', segment: 'idioma-por-defecto', category: 'Guías', badge: 'success', description: 'Traducciones predeterminadas en español', keywords: 'idioma defecto español spanish default' },
+    { title: 'Personalizar traducciones', route: '#/i18n', segment: 'personalizar-traducciones', category: 'Guías', badge: 'success', description: 'Sobrescribir cadenas con el parámetro translation', keywords: 'personalizar traducciones custom translation' },
+    { title: 'Soporte multiidioma completo', route: '#/i18n', segment: 'soporte-multiidioma-completo', category: 'Guías', badge: 'success', description: 'Ejemplo con múltiples idiomas y selección dinámica', keywords: 'multiidioma multiple languages soporte' },
+    { title: 'Referencia de claves', route: '#/i18n', segment: 'referencia-de-claves', category: 'Guías', badge: 'success', description: 'Tabla con las 4 claves de traducción disponibles', keywords: 'claves keys referencia searchPlaceholder noResults' },
+    { title: 'Cambiar idioma dinámicamente', route: '#/i18n', segment: 'cambiar-idioma-dinamicamente', category: 'Guías', badge: 'success', description: 'Recrear instancia para cambiar idioma en runtime', keywords: 'cambiar idioma dinamico runtime ejecucion' },
+
+    // ── Caché ──────────────────────────────────────────────────────
+    { title: 'Caché', route: '#/cache', segment: '', category: 'Guías', badge: 'success', description: 'Sistema de caché LRU con TTL configurable', keywords: 'cache lru ttl performance memoria' },
+    { title: 'Habilitar caché', route: '#/cache', segment: 'habilitar-cache', category: 'Guías', badge: 'success', description: 'Activar caché con cacheEnabled: true', keywords: 'habilitar activar cacheEnabled' },
+    { title: 'Configuración de caché', route: '#/cache', segment: 'configuracion', category: 'Guías', badge: 'success', description: 'Parámetros maxSize y ttlSeconds', keywords: 'configuracion cache maxSize ttl' },
+    { title: 'Cómo funciona', route: '#/cache', segment: 'como-funciona', category: 'Guías', badge: 'success', description: 'Algoritmo LRU y flujo de datos en caché', keywords: 'como funciona algoritmo lru flujo' },
+    { title: 'Generación de claves', route: '#/cache', segment: 'generacion-de-claves', category: 'Guías', badge: 'success', description: 'Claves generadas automáticamente por término y página', keywords: 'claves key generate cacheKey' },
+    { title: 'Limpiar caché', route: '#/cache', segment: 'limpiar-cache', category: 'Guías', badge: 'success', description: 'Métodos clear, delete y clearCacheByPrefix', keywords: 'limpiar borrar clear delete reset' },
+    { title: 'Uso con datos del servidor', route: '#/cache', segment: 'uso-con-datos-del-servidor', category: 'Guías', badge: 'success', description: 'Caché con búsquedas remotas para reducir peticiones HTTP', keywords: 'servidor http peticiones remote fetch' },
+
+    // ── Temas CSS ──────────────────────────────────────────────────
+    { title: 'Temas CSS', route: '#/css-themes', segment: '', category: 'Guías', badge: 'success', description: 'Temas predefinidos y variables CSS personalizables', keywords: 'css themes styling dark light variables custom' },
+    { title: 'Temas disponibles', route: '#/css-themes', segment: 'temas-disponibles', category: 'Guías', badge: 'success', description: '5 temas: adaptative, clean-white, blue-black, onyx-black, forest-green', keywords: 'temas disponibles adaptative clean onyx forest' },
+    { title: 'Aplicar un tema', route: '#/css-themes', segment: 'aplicar-un-tema', category: 'Guías', badge: 'success', description: 'Configurar tema en el constructor con theme', keywords: 'aplicar tema configurar theme' },
+    { title: 'Cambiar tema dinámicamente', route: '#/css-themes', segment: 'cambiar-tema-dinamicamente', category: 'Guías', badge: 'success', description: 'Usar renderer.setTheme() después de inicializar', keywords: 'cambiar tema dinamico setTheme' },
+    { title: 'Variables CSS personalizables', route: '#/css-themes', segment: 'variables-css-personalizables', category: 'Guías', badge: 'success', description: 'Dimensiones, colores y bordes editables vía CSS', keywords: 'variables css custom properties dimensiones colores' },
+    { title: 'Crear un tema personalizado', route: '#/css-themes', segment: 'crear-un-tema-personalizado', category: 'Guías', badge: 'success', description: 'Definir .app-search.theme-mi-tema con variables', keywords: 'crear tema personalizado custom theme' },
+    { title: 'Soporte dark/light mode', route: '#/css-themes', segment: 'soporte-dark-light-mode', category: 'Guías', badge: 'success', description: 'Tema adaptative con prefers-color-scheme', keywords: 'dark light mode prefer system' },
+
+    // ── API ────────────────────────────────────────────────────────
+    { title: 'API', route: '#/api', segment: '', category: 'Referencia', badge: 'warning', description: 'Referencia completa de la interfaz pública', keywords: 'api referencia publica interfaz' },
+    { title: 'Constructor', route: '#/api', segment: 'constructor', category: 'Referencia', badge: 'warning', description: 'new Search(params: SearchParams): Search', keywords: 'constructor new crear instancia' },
+    { title: 'init()', route: '#/api', segment: 'init', category: 'Referencia', badge: 'warning', description: 'Inicializa el componente y renderiza la estructura DOM', keywords: 'init inicializar render setup' },
+    { title: 'draw()', route: '#/api', segment: 'draw-searchterm-isevent', category: 'Referencia', badge: 'warning', description: 'Ejecuta búsqueda y renderiza resultados', keywords: 'draw buscar search render resultados' },
+    { title: 'sort()', route: '#/api', segment: 'sort-field-order', category: 'Referencia', badge: 'warning', description: 'Ordena datos por campo específico', keywords: 'sort ordenar ascending descending' },
+    { title: 'clearSort()', route: '#/api', segment: 'clearsort', category: 'Referencia', badge: 'warning', description: 'Elimina ordenamiento y reinicia a orden natural', keywords: 'clearsort limpiar orden reset' },
+    { title: 'showLoading()', route: '#/api', segment: 'showloading', category: 'Referencia', badge: 'warning', description: 'Muestra indicador de carga en resultados', keywords: 'showloading carga spinner indicator' },
+    { title: 'on()', route: '#/api', segment: 'oneventname-callback', category: 'Referencia', badge: 'warning', description: 'Registra listener para eventos del componente', keywords: 'on event listener registrar callback' },
+    { title: 'getCacheKey()', route: '#/api', segment: 'getcachekey-searchterm-page', category: 'Referencia', badge: 'warning', description: 'Genera clave de caché para búsqueda y página', keywords: 'getcachekey cache key clave' },
+    { title: 'setupKeyboardNavigation()', route: '#/api', segment: 'setupkeyboardnavigation', category: 'Referencia', badge: 'warning', description: 'Habilita navegación con flechas y Enter', keywords: 'keyboard teclado flechas navigation' },
+    { title: 'destroy()', route: '#/api', segment: 'destroy', category: 'Referencia', badge: 'warning', description: 'Destruye instancia y limpia todos los recursos', keywords: 'destroy destruir limpiar cleanup dispose' },
+    { title: 'Propiedades públicas', route: '#/api', segment: 'propiedades-publicas', category: 'Referencia', badge: 'warning', description: 'element, searchTerm, data, theme, pagination, events, cache, renderer', keywords: 'propiedades publicas properties attributes' },
+    { title: 'Encadenamiento', route: '#/api', segment: 'encadenamiento', category: 'Referencia', badge: 'warning', description: 'Métodos que retornan this para chaining', keywords: 'encadenamiento chaining methods fluent' },
+
+    // ── Eventos ────────────────────────────────────────────────────
+    { title: 'Eventos', route: '#/events', segment: '', category: 'Referencia', badge: 'warning', description: 'Sistema de eventos personalizado con EventEmitter', keywords: 'events emit on event emitter callback' },
+    { title: 'Uso básico de eventos', route: '#/events', segment: 'uso-basico', category: 'Referencia', badge: 'warning', description: 'Cómo registrar y escuchar eventos', keywords: 'uso basico como registrar escuchar' },
+    { title: 'Evento init', route: '#/events', segment: 'init', category: 'Referencia', badge: 'warning', description: 'Emite al inicializar el componente', keywords: 'init evento initialize setup' },
+    { title: 'Evento search', route: '#/events', segment: 'search', category: 'Referencia', badge: 'warning', description: 'Emite después de cada búsqueda ejecutada', keywords: 'search evento buscar ejecutado' },
+    { title: 'Evento pageChange', route: '#/events', segment: 'pagechange', category: 'Referencia', badge: 'warning', description: 'Emite al cambiar de página (scroll infinito)', keywords: 'pageChange pagina scroll infinito' },
+    { title: 'Evento sortChange', route: '#/events', segment: 'sortchange', category: 'Referencia', badge: 'warning', description: 'Emite al cambiar el ordenamiento', keywords: 'sortChange orden sort' },
+    { title: 'Evento itemSelected', route: '#/events', segment: 'itemselected', category: 'Referencia', badge: 'warning', description: 'Emite al seleccionar un item (clic o Enter)', keywords: 'itemSelected seleccionar click enter' },
+    { title: 'Evento itemHighlighted', route: '#/events', segment: 'itemhighlighted', category: 'Referencia', badge: 'warning', description: 'Emite al destacar un item visualmente', keywords: 'itemHighlighted destacar hover focus' },
+    { title: 'Evento appendItems', route: '#/events', segment: 'appenditems', category: 'Referencia', badge: 'warning', description: 'Emite al añadir nuevos items al DOM', keywords: 'appendItems agregar items render' },
+    { title: 'Evento destroy', route: '#/events', segment: 'destroy', category: 'Referencia', badge: 'warning', description: 'Emite antes de destruir la instancia', keywords: 'destroy destruir cleanup' },
+    { title: 'Evento error', route: '#/events', segment: 'error', category: 'Referencia', badge: 'warning', description: 'Emite cuando ocurre un error', keywords: 'error evento excepcion fallo' },
+    { title: 'Remover listeners', route: '#/events', segment: 'remover-listeners', category: 'Referencia', badge: 'warning', description: 'Métodos off() y removeAllListeners()', keywords: 'remover off remove listener unsubscribe' },
+    { title: 'Una sola vez', route: '#/events', segment: 'una-sola-vez', category: 'Referencia', badge: 'warning', description: 'Registrarse una sola vez con events.once()', keywords: 'once una sola vez primer vez' },
+
+    // ── Errores ────────────────────────────────────────────────────
+    { title: 'Errores', route: '#/errors', segment: '', category: 'Referencia', badge: 'warning', description: 'Sistema centralizado de gestión de errores', keywords: 'errors error handling gestion excepciones' },
+    { title: 'Tipos de error', route: '#/errors', segment: 'tipos-de-error', category: 'Referencia', badge: 'warning', description: 'Clase SearchError con código, solución y contexto', keywords: 'tipos error searcherror clase' },
+    { title: 'Códigos de error', route: '#/errors', segment: 'codigos-de-error', category: 'Referencia', badge: 'warning', description: '14 códigos desde SEARCH_001 hasta SEARCH_041', keywords: 'codigos error codes SEARCH_001 SEARCH_002' },
+    { title: 'Manejo de errores', route: '#/errors', segment: 'manejo-de-errores', category: 'Referencia', badge: 'warning', description: 'Try/catch, eventos y modo desarrollo', keywords: 'manejo errores try catch handling' },
+    { title: 'Try/Catch', route: '#/errors', segment: 'try-catch', category: 'Referencia', badge: 'warning', description: 'Capturar errores del constructor e init()', keywords: 'try catch capturar exception' },
+    { title: 'Evento de error', route: '#/errors', segment: 'evento-de-error', category: 'Referencia', badge: 'warning', description: 'Escuchar errores vía events.on("error", ...)', keywords: 'evento error on emit' },
+    { title: 'Modo desarrollo', route: '#/errors', segment: 'modo-desarrollo', category: 'Referencia', badge: 'warning', description: 'Logs detallados con developmentMode: true', keywords: 'desarrollo development mode logs debug' },
+    { title: 'Errores de red', route: '#/errors', segment: 'errores-de-red', category: 'Referencia', badge: 'warning', description: 'Timeouts, HTTP errors, AbortController', keywords: 'red network timeout http error' },
+
+    // ── TypeScript ─────────────────────────────────────────────────
+    { title: 'TypeScript', route: '#/typescript', segment: '', category: 'Referencia', badge: 'warning', description: 'Tipados e interfaces completas de TypeScript', keywords: 'typescript types interfaces typings ts' },
+    { title: 'Tipos exportados', route: '#/typescript', segment: 'tipos-exportados', category: 'Referencia', badge: 'warning', description: 'Search, SearchParams, FetchConfig, eventos, etc.', keywords: 'tipos exportados exports types' },
+    { title: 'SearchParams', route: '#/typescript', segment: 'interfaz-searchparams', category: 'Referencia', badge: 'warning', description: 'Interfaz completa de parámetros del constructor', keywords: 'SearchParams interfaz parametros constructor' },
+    { title: 'FetchConfig', route: '#/typescript', segment: 'interfaz-fetchconfig', category: 'Referencia', badge: 'warning', description: 'Configuración de peticiones HTTP', keywords: 'FetchConfig interfaz fetch http' },
+    { title: 'TranslationCache', route: '#/typescript', segment: 'interfaz-translationcache', category: 'Referencia', badge: 'warning', description: 'Estructura de traducciones', keywords: 'TranslationCache traducciones idiomas' },
+    { title: 'Eventos tipados', route: '#/typescript', segment: 'eventos-tipados', category: 'Referencia', badge: 'warning', description: 'SearchEventInit, PageChangeEventData, etc.', keywords: 'eventos tipados typed events data' },
+    { title: 'Uso con tipos', route: '#/typescript', segment: 'uso-con-tipos', category: 'Referencia', badge: 'warning', description: 'Ejemplo completo con interfaces y type assertions', keywords: 'uso tipos example tipos interfaces' },
+    { title: 'Generación de tipos', route: '#/typescript', segment: 'generacion-de-tipos', category: 'Referencia', badge: 'warning', description: 'Archivos .d.ts generados por el build', keywords: 'generacion tipos declarations d.ts build' },
+    { title: 'Type narrowing', route: '#/typescript', segment: 'type-narrowing', category: 'Referencia', badge: 'warning', description: 'Type assertion en eventos y callbacks', keywords: 'type narrowing assertion cast' },
+
+    // ── Ejemplos ───────────────────────────────────────────────────
+    { title: 'Ejemplos', route: '#/examples', segment: '', category: 'Recursos', badge: 'info', description: 'Ejemplos prácticos de uso en diferentes escenarios', keywords: 'examples ejemplos demo usage casos uso' },
+    { title: 'Búsqueda básica local', route: '#/examples', segment: 'busqueda-basica-local', category: 'Recursos', badge: 'info', description: 'Ejemplo mínimo con array de objetos', keywords: 'basica local simple array objetos' },
+    { title: 'Con plantilla personalizada', route: '#/examples', segment: 'con-plantilla-personalizada', category: 'Recursos', badge: 'info', description: 'Renderizado custom con función template', keywords: 'plantilla personalizada template custom' },
+    { title: 'Búsqueda desde DOM', route: '#/examples', segment: 'busqueda-desde-dom', category: 'Recursos', badge: 'info', description: 'Extraer datos de elementos HTML data-*', keywords: 'dom data attributes extraer html' },
+    { title: 'Búsqueda remota', route: '#/examples', segment: 'busqueda-remota', category: 'Recursos', badge: 'info', description: 'Peticiones HTTP con Fetch API', keywords: 'remota server fetch api http ajax' },
+    { title: 'Múltiples instancias', route: '#/examples', segment: 'multiples-instancias-ejemplo', category: 'Recursos', badge: 'info', description: 'Varios buscadores en la misma página', keywords: 'multiples instancias varios search' },
+    { title: 'Con eventos', route: '#/examples', segment: 'con-eventos', category: 'Recursos', badge: 'info', description: 'Escuchar init, search, itemSelected, pageChange', keywords: 'eventos on escuchar init search' },
+    { title: 'Con caché y sort', route: '#/examples', segment: 'con-cache-y-sort', category: 'Recursos', badge: 'info', description: 'Ordenamiento y caché LRU para performance', keywords: 'cache sort ordenamiento performance' },
+    { title: 'React', route: '#/examples', segment: 'react', category: 'Recursos', badge: 'info', description: 'Integración con useRef y useEffect', keywords: 'react hook useRef useEffect jsx' },
+    { title: 'Vue', route: '#/examples', segment: 'vue', category: 'Recursos', badge: 'info', description: 'Integración con onMounted y onUnmounted', keywords: 'vue composition api setup onMounted' },
+
+    // ── Changelog ──────────────────────────────────────────────────
+    { title: 'Changelog', route: '#/changelog', segment: '', category: 'Recursos', badge: 'info', description: 'Historial de versiones y cambios', keywords: 'changelog versiones releases history cambios' },
+    { title: 'v1.0.0', route: '#/changelog', segment: 'v100', category: 'Recursos', badge: 'info', description: 'Versión inicial con todas las funcionalidades', keywords: 'v1 version inicial release first' }
+];
+
+/**
+ * DocSearch — módulo de búsqueda para la documentación.
+ *
+ * Inicializa el componente BuscadorDinamico como buscador principal del sitio,
+ * indexa todas las secciones y segmentos de la documentación, y gestiona la
+ * navegación al seleccionar un resultado.
+ */
+const DocSearch = {
+    /** Instancia del componente Search */
     instance: null,
-    sectionsData: [],
+    /** Referencia al contenedor DOM del componente */
+    container: null,
+    /** ID del segmento pendiente de scroll tras cambio de sección */
+    pendingScrollTo: null,
+    /** Observer para detectar carga de nuevo contenido */
+    contentObserver: null,
 
+    /**
+     * Punto de entrada. Crea el contenedor, inicializa el componente
+     * y configura los event listeners.
+     */
     init() {
-        if (typeof BuscadorDinamico === 'undefined') {
-            console.warn('BuscadorDinamico not loaded');
-            return;
-        }
+        this.container = document.getElementById('doc-search-container');
+        if (!this.container) return;
 
-        this.sectionsData = this.buildSearchData();
+        this.createSearchContainer();
+        this.initializeSearch();
+        this.setupContentObserver();
+        this.setupHashScrollListener();
+        this.setupKeyboardShortcut();
+    },
 
-        this.instance = new BuscadorDinamico.Search({
-            element: '.doc-search',
-            data: this.sectionsData,
-            template: (item) => {
-                return `<div data-section="${item.section}" data-anchor="${item.anchor || ''}" style="padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--border-secondary, #f3f4f6);">
-                    <div style="font-weight: 600; font-size: 0.875rem;">${item.title}</div>
-                    <div style="font-size: 0.75rem; opacity: 0.6; margin-top: 2px;">${item.group}${item.sub ? ' › ' + item.sub : ''}</div>
-                </div>`;
-            },
-            keyboardEnabled: true,
+    /**
+     * Crea el contenedor interno con la clase .app-search que el componente
+     * necesita para aplicar sus estilos CSS correctamente.
+     */
+    createSearchContainer() {
+        this.container.innerHTML = '';
+        const wrapper = document.createElement('div');
+        wrapper.className = 'app-search';
+        wrapper.id = 'doc-search';
+        this.container.appendChild(wrapper);
+    },
+
+    /**
+     * Inicializa la instancia del componente BuscadorDinamico.Search
+     * con la configuración optimizada para la barra de búsqueda del header.
+     */
+    initializeSearch() {
+        this.instance = new Search({
+            element: '#doc-search',
+            data: SEARCH_DATA,
+            theme: this.getCurrentTheme(),
             itemsPerPage: 8,
             debounceTime: 200,
+            keyboardEnabled: true,
+            cacheEnabled: true,
+            cacheMaxSize: 30,
+            cacheTtlSeconds: 300,
+            dom: 'search-content-items-pagination',
+            zIndex: 200,
+            template: (item) => this.renderResult(item),
             translation: {
                 searchPlaceholder: 'Buscar en la documentación...',
+                searchLabel: 'Buscar en la documentación',
                 noResults: 'No se encontraron resultados',
                 loading: 'Buscando...'
             }
+        }).init();
+
+        this.instance.on('itemSelected', ({ item, close }) => {
+            this.handleResultSelection(item);
+            close();
         });
+    },
 
-        this.instance.on('itemSelected', (data) => {
-            if (!data.item) return;
+    /**
+     * Renderiza el HTML interno de cada resultado de búsqueda.
+     * Almacena route y segment como data-* attributes para la navegación.
+     *
+     * @param {Object} item - Objeto del índice de búsqueda
+     * @returns {string} HTML del resultado
+     */
+    renderResult(item) {
+        const categoryClass = `doc-search-result__badge--${item.badge}`;
+        return `
+            <div class="doc-search-result" data-route="${item.route}" data-segment="${item.segment}">
+                <div class="doc-search-result__header">
+                    <span class="doc-search-result__badge ${categoryClass}">${item.category}</span>
+                    <span class="doc-search-result__title">${item.title}</span>
+                </div>
+                <div class="doc-search-result__desc">${item.description}</div>
+            </div>
+        `;
+    },
 
-            data.close();
+    /**
+     * Maneja la selección de un resultado de búsqueda.
+     * Lee route y segment del DOM y navega al hash correspondiente.
+     *
+     * @param {HTMLElement} itemEl - Elemento <li> seleccionado
+     */
+    handleResultSelection(itemEl) {
+        const result = itemEl.querySelector('.doc-search-result');
+        if (!result) return;
 
-            const input = document.querySelector(".filter-search-doc-search");
-            if (input) input.blur();
+        const route = result.dataset.route;
+        const segment = result.dataset.segment || '';
 
-            const el = data.item;
-            const section = el.getAttribute('data-section')
-                || el.querySelector?.('[data-section]')?.getAttribute('data-section');
-            const anchor = el.getAttribute('data-anchor')
-                || el.querySelector?.('[data-anchor]')?.getAttribute('data-anchor');
+        if (!route) return;
 
-            if (section) {
-                const hash = anchor ? `${section}/${anchor}` : section;
-                window.location.hash = hash;
+        const targetSection = route.replace('#\/', '');
 
-                if (anchor) {
-                    setTimeout(() => {
-                        const target = document.getElementById(anchor);
-                        if (target) {
-                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
-                    }, 100);
+        if (this.isCurrentSection(targetSection) && !segment) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (this.isCurrentSection(targetSection)) {
+            this.scrollToSegment(segment);
+        } else {
+            this.pendingScrollTo = segment;
+            window.location.hash = route;
+        }
+
+        const input = this.container.querySelector('.filter-search');
+        if (input) {
+            input.value = '';
+            input.blur();
+        }
+    },
+
+    /**
+     * Verifica si la sección proporcionada es la actual.
+     *
+     * @param {string} sectionName - Nombre de la sección (ej. 'templates')
+     * @returns {boolean}
+     */
+    isCurrentSection(sectionName) {
+        return window.location.hash === `#/${sectionName}`;
+    },
+
+    /**
+     * Desplazamiento suave hacia un segmento dentro de la sección actual.
+     * Auto-genera IDs en los encabezados si no existen.
+     *
+     * @param {string} segmentId - ID del encabezado destino
+     * @param {number} [retries=15] - Intentos máximos de búsqueda del elemento
+     */
+    scrollToSegment(segmentId, retries = 15) {
+        if (!segmentId) {
+            const contentArea = document.querySelector('.doc-content');
+            if (contentArea) contentArea.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
+        this.ensureHeadingIds();
+
+        const target = document.getElementById(segmentId);
+        if (target) {
+            const contentArea = document.querySelector('.doc-content');
+            const headerOffset = 70;
+            const targetPosition = target.getBoundingClientRect().top + (contentArea?.scrollTop || window.scrollY) - headerOffset;
+            window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+            return;
+        }
+
+        if (retries > 0) {
+            requestAnimationFrame(() => {
+                setTimeout(() => this.scrollToSegment(segmentId, retries - 1), 100);
+            });
+        }
+    },
+
+    /**
+     * Recorre todos los encabezados h1-h4 dentro de #doc-view y les asigna
+     * un id basado en su texto (slugify) si no lo tienen.
+     * Esto permite la navegación por segmento desde el buscador.
+     */
+    ensureHeadingIds() {
+        const content = document.getElementById('doc-view');
+        if (!content) return;
+
+        const headings = content.querySelectorAll('h1, h2, h3, h4');
+        headings.forEach(heading => {
+            if (!heading.id) {
+                heading.id = slugify(heading.textContent);
+            }
+        });
+    },
+
+    /**
+     * Configura un MutationObserver en #doc-view para detectar cuando el Router
+     * inyecta nuevo contenido HTML. Al detectar cambios:
+     * 1. Auto-genera IDs en los encabezados
+     * 2. Resuelve scrolls pendientes de navegación por segmento
+     */
+    setupContentObserver() {
+        const contentEl = document.getElementById('doc-view');
+        if (!contentEl) return;
+
+        this.contentObserver = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                    this.ensureHeadingIds();
+
+                    if (this.pendingScrollTo) {
+                        const segment = this.pendingScrollTo;
+                        this.pendingScrollTo = null;
+                        setTimeout(() => this.scrollToSegment(segment), 50);
+                    }
                 }
             }
         });
 
-        this.instance.init();
+        this.contentObserver.observe(contentEl, { childList: true, subtree: true });
     },
 
-    buildSearchData() {
-        const data = [];
-
-        const sections = [
-            { title: 'Inicio', section: 'inicio', group: 'Principal' },
-            { title: 'Instalación', section: 'instalacion', group: 'Principal' },
-            { title: 'Configuración', section: 'configuracion', group: 'Guía' },
-            { title: 'Parámetros del Constructor', section: 'configuracion', group: 'Guía', anchor: 'parametros' },
-            { title: 'Configuración de Fetch', section: 'configuracion', group: 'Guía', anchor: 'fetch' },
-            { title: 'Estructura HTML', section: 'estructura-html', group: 'Guía' },
-            { title: 'Contenedor Básico', section: 'estructura-html', group: 'Guía', anchor: 'basico' },
-            { title: 'ARIA y Accesibilidad', section: 'estructura-html', group: 'Guía', anchor: 'accesibilidad' },
-            { title: 'API y Métodos', section: 'api', group: 'Referencia' },
-            { title: 'init()', section: 'api', group: 'Referencia', anchor: 'init' },
-            { title: 'draw()', section: 'api', group: 'Referencia', anchor: 'draw' },
-            { title: 'sort()', section: 'api', group: 'Referencia', anchor: 'sort' },
-            { title: 'clearSort()', section: 'api', group: 'Referencia', anchor: 'clearSort' },
-            { title: 'on()', section: 'api', group: 'Referencia', anchor: 'on' },
-            { title: 'showLoading()', section: 'api', group: 'Referencia', anchor: 'showLoading' },
-            { title: 'getCacheKey()', section: 'api', group: 'Referencia', anchor: 'getCacheKey' },
-            { title: 'cache.clearCacheByPrefix()', section: 'api', group: 'Referencia', anchor: 'clearCacheByPrefix' },
-            { title: 'setupKeyboardNavigation()', section: 'api', group: 'Referencia', anchor: 'setupKeyboard' },
-            { title: 'destroy()', section: 'api', group: 'Referencia', anchor: 'destroy' },
-            { title: 'Métodos de Paginación', section: 'api', group: 'Referencia', anchor: 'pagination-methods' },
-            { title: 'Eventos', section: 'eventos', group: 'Referencia' },
-            { title: 'Uso de Eventos', section: 'eventos', group: 'Referencia', anchor: 'usage' },
-            { title: 'Remover Listeners', section: 'eventos', group: 'Referencia', anchor: 'remove' },
-            { title: 'Listener de Una Sola Vez', section: 'eventos', group: 'Referencia', anchor: 'once' },
-            { title: 'Templates', section: 'templates', group: 'Personalización' },
-            { title: 'Sintaxis de Variables', section: 'templates', group: 'Personalización', anchor: 'syntax' },
-            { title: 'Ejemplos de Templates', section: 'templates', group: 'Personalización', anchor: 'examples' },
-            { title: 'Internacionalización (i18n)', section: 'i18n', group: 'Personalización' },
-            { title: 'Traducciones Disponibles', section: 'i18n', group: 'Personalización', anchor: 'available' },
-            { title: 'Traducciones Personalizadas', section: 'i18n', group: 'Personalización', anchor: 'custom' },
-            { title: 'Caché', section: 'cache', group: 'Personalización' },
-            { title: 'Configuración de Caché', section: 'cache', group: 'Personalización', anchor: 'config' },
-            { title: 'Métodos de Caché', section: 'cache', group: 'Personalización', anchor: 'methods' },
-            { title: 'Invalidación', section: 'cache', group: 'Personalización', anchor: 'invalidation' },
-            { title: 'Gestión de Errores', section: 'errores', group: 'Referencia' },
-            { title: 'CSS y Themes', section: 'css-themes', group: 'Personalización' },
-            { title: 'Temas Predefinidos', section: 'css-themes', group: 'Personalización', anchor: 'predefined' },
-            { title: 'Variables CSS', section: 'css-themes', group: 'Personalización', anchor: 'variables' },
-            { title: 'Estructura CSS', section: 'css-themes', group: 'Personalización', anchor: 'structure' },
-            { title: 'Ejemplos', section: 'ejemplos', group: 'Guía' },
-            { title: 'Búsqueda por Servidor', section: 'ejemplos', group: 'Guía', anchor: 'server' },
-            { title: 'Múltiples Instancias', section: 'ejemplos', group: 'Guía', anchor: 'multiple' },
-            { title: 'Ejemplo con Eventos', section: 'ejemplos', group: 'Guía', anchor: 'events' },
-            { title: 'Ejemplo con Teclado', section: 'ejemplos', group: 'Guía', anchor: 'keyboard' },
-            { title: 'TypeScript', section: 'typescript', group: 'Avanzado' },
-            { title: 'Uso con TypeScript', section: 'typescript', group: 'Avanzado', anchor: 'usage' },
-            { title: 'Changelog', section: 'changelog', group: 'General' },
-        ];
-
-        const shortcuts = [
-            // Accesos directos - Navegación
-            { title: 'Guía rápida', group: 'Acceso rápido', section: 'inicio' },
-            { title: 'Cómo empezar', group: 'Acceso rápido', section: 'inicio' },
-            { title: 'Introducción', group: 'Acceso rápido', section: 'inicio' },
-            { title: 'Características', group: 'Acceso rápido', section: 'inicio', anchor: 'features' },
-            { title: 'Compatibilidad', group: 'Acceso rápido', section: 'inicio' },
-
-            // Instalación
-            { title: 'Instalar con npm', group: 'Instalación', section: 'instalacion', anchor: 'npm' },
-            { title: 'Script tag', group: 'Instalación', section: 'instalacion', anchor: 'cdn' },
-            { title: 'UMD', group: 'Instalación', section: 'instalacion', anchor: 'cdn' },
-            { title: 'CDN', group: 'Instalación', section: 'instalacion', anchor: 'cdn' },
-            { title: 'Dependencias', group: 'Instalación', section: 'instalacion', anchor: 'dependencies' },
-            { title: 'Estructura de archivos', group: 'Instalación', section: 'instalacion', anchor: 'structure' },
-            { title: 'Vite', group: 'Instalación', section: 'instalacion' },
-            { title: 'Instalación Manual', group: 'Instalación', section: 'instalacion', anchor: 'manual' },
-
-            // Configuración
-            { title: 'Parámetros del constructor', group: 'Configuración', section: 'configuracion', anchor: 'parametros' },
-            { title: 'Configurar Fetch API', group: 'Configuración', section: 'configuracion', anchor: 'fetch' },
-            { title: 'Debounce time', group: 'Configuración', section: 'configuracion', anchor: 'parametros' },
-            { title: 'Scroll infinito', group: 'Configuración', section: 'configuracion', anchor: 'parametros' },
-            { title: 'Ordenamiento', group: 'Configuración', section: 'configuracion', anchor: 'parametros' },
-            { title: 'DOM order', group: 'Configuración', section: 'configuracion', anchor: 'parametros' },
-            { title: 'Z-index', group: 'Configuración', section: 'configuracion', anchor: 'parametros' },
-            { title: 'Modo desarrollo', group: 'Configuración', section: 'configuracion', anchor: 'parametros' },
-            { title: 'Método HTTP', group: 'Configuración', section: 'configuracion', anchor: 'fetch' },
-            { title: 'Headers', group: 'Configuración', section: 'configuracion', anchor: 'fetch' },
-            { title: 'Timeout', group: 'Configuración', section: 'configuracion', anchor: 'fetch' },
-
-            // Estructura HTML
-            { title: 'Clases CSS', group: 'HTML', section: 'estructura-html', anchor: 'basico' },
-            { title: 'Data attributes', group: 'HTML', section: 'estructura-html', anchor: 'basico' },
-            { title: 'Accesibilidad', group: 'HTML', section: 'estructura-html', anchor: 'accesibilidad' },
-            { title: 'ARIA', group: 'HTML', section: 'estructura-html', anchor: 'accesibilidad' },
-            { title: 'Múltiples instancias', group: 'HTML', section: 'estructura-html', anchor: 'basico' },
-            { title: 'Screen reader', group: 'HTML', section: 'estructura-html', anchor: 'accesibilidad' },
-
-            // API
-            { title: 'Método init', group: 'API', section: 'api', anchor: 'init' },
-            { title: 'Método draw', group: 'API', section: 'api', anchor: 'draw' },
-            { title: 'Método sort', group: 'API', section: 'api', anchor: 'sort' },
-            { title: 'Método destroy', group: 'API', section: 'api', anchor: 'destroy' },
-            { title: 'Método clearSort', group: 'API', section: 'api', anchor: 'clearSort' },
-            { title: 'Método on', group: 'API', section: 'api', anchor: 'on' },
-            { title: 'Método showLoading', group: 'API', section: 'api', anchor: 'showLoading' },
-            { title: 'Método getCacheKey', group: 'API', section: 'api', anchor: 'getCacheKey' },
-            { title: 'Paginación', group: 'API', section: 'api', anchor: 'pagination-methods' },
-            { title: 'Teclado', group: 'API', section: 'api', anchor: 'setupKeyboard' },
-            { title: 'Loading', group: 'API', section: 'api', anchor: 'showLoading' },
-            { title: 'Promesa', group: 'API', section: 'api', anchor: 'draw' },
-            { title: 'Encadenamiento', group: 'API', section: 'api', anchor: 'init' },
-
-            // Eventos
-            { title: 'Eventos disponibles', group: 'Eventos', section: 'eventos', anchor: 'usage' },
-            { title: 'itemSelected', group: 'Eventos', section: 'eventos', anchor: 'usage' },
-            { title: 'search event', group: 'Eventos', section: 'eventos', anchor: 'usage' },
-            { title: 'pageChange', group: 'Eventos', section: 'eventos', anchor: 'usage' },
-            { title: 'Callback', group: 'Eventos', section: 'eventos', anchor: 'usage' },
-            { title: 'Emitter', group: 'Eventos', section: 'eventos', anchor: 'usage' },
-            { title: 'Remover listeners', group: 'Eventos', section: 'eventos', anchor: 'remove' },
-            { title: 'Once', group: 'Eventos', section: 'eventos', anchor: 'once' },
-
-            // Templates
-            { title: 'Template personalizado', group: 'Templates', section: 'templates', anchor: 'syntax' },
-            { title: 'Variable template', group: 'Templates', section: 'templates', anchor: 'syntax' },
-            { title: 'Renderizado custom', group: 'Templates', section: 'templates', anchor: 'examples' },
-            { title: 'HTML dinámico', group: 'Templates', section: 'templates', anchor: 'examples' },
-
-            // i18n
-            { title: 'Internacionalización', group: 'i18n', section: 'i18n', anchor: 'available' },
-            { title: 'Traducciones', group: 'i18n', section: 'i18n', anchor: 'available' },
-            { title: 'Idioma', group: 'i18n', section: 'i18n', anchor: 'available' },
-            { title: 'Placeholder', group: 'i18n', section: 'i18n', anchor: 'available' },
-            { title: 'Localización', group: 'i18n', section: 'i18n', anchor: 'custom' },
-
-            // Cache
-            { title: 'Caché LRU', group: 'Caché', section: 'cache', anchor: 'config' },
-            { title: 'TTL', group: 'Caché', section: 'cache', anchor: 'config' },
-            { title: 'Rendimiento', group: 'Caché', section: 'cache', anchor: 'config' },
-            { title: 'Performance', group: 'Caché', section: 'cache', anchor: 'config' },
-            { title: 'Limpiar caché', group: 'Caché', section: 'cache', anchor: 'methods' },
-            { title: 'Optimización', group: 'Caché', section: 'cache', anchor: 'invalidation' },
-
-            // Errores
-            { title: 'Códigos de error', group: 'Errores', section: 'errores' },
-            { title: 'SEARCH_001', group: 'Errores', section: 'errores' },
-            { title: 'Debug', group: 'Errores', section: 'errores' },
-            { title: 'Try catch', group: 'Errores', section: 'errores' },
-            { title: 'Troubleshooting', group: 'Errores', section: 'errores' },
-            { title: 'Conexión', group: 'Errores', section: 'errores' },
-            { title: 'Validación', group: 'Errores', section: 'errores' },
-
-            // CSS y Themes
-            { title: 'Dark mode', group: 'CSS', section: 'css-themes', anchor: 'predefined' },
-            { title: 'Variables CSS', group: 'CSS', section: 'css-themes', anchor: 'variables' },
-            { title: 'Personalizar colores', group: 'CSS', section: 'css-themes', anchor: 'variables' },
-            { title: 'Custom theme', group: 'CSS', section: 'css-themes', anchor: 'variables' },
-            { title: 'Onyx black', group: 'CSS', section: 'css-themes', anchor: 'predefined' },
-            { title: 'Blue black', group: 'CSS', section: 'css-themes', anchor: 'predefined' },
-            { title: 'Forest green', group: 'CSS', section: 'css-themes', anchor: 'predefined' },
-            { title: 'Clean white', group: 'CSS', section: 'css-themes', anchor: 'predefined' },
-            { title: 'Adaptative', group: 'CSS', section: 'css-themes', anchor: 'adaptative' },
-            { title: 'Tema adaptativo', group: 'CSS', section: 'css-themes', anchor: 'adaptative' },
-            { title: 'Spinner', group: 'CSS', section: 'css-themes', anchor: 'variables' },
-            { title: 'Scrollbar', group: 'CSS', section: 'css-themes', anchor: 'variables' },
-            { title: 'Border radius', group: 'CSS', section: 'css-themes', anchor: 'variables' },
-            { title: 'Estructura CSS', group: 'CSS', section: 'css-themes', anchor: 'structure' },
-
-            // Ejemplos
-            { title: 'Ejemplos completos', group: 'Ejemplos', section: 'ejemplos' },
-            { title: 'Tutorial', group: 'Ejemplos', section: 'ejemplos' },
-            { title: 'Ejemplo básico', group: 'Ejemplos', section: 'ejemplos' },
-            { title: 'Ejemplo servidor', group: 'Ejemplos', section: 'ejemplos', anchor: 'server' },
-            { title: 'Ejemplo múltiples instancias', group: 'Ejemplos', section: 'ejemplos', anchor: 'multiple' },
-            { title: 'Casos de uso', group: 'Ejemplos', section: 'ejemplos' },
-            { title: 'AJAX', group: 'Ejemplos', section: 'ejemplos', anchor: 'server' },
-            { title: 'Ejemplo con eventos', group: 'Ejemplos', section: 'ejemplos', anchor: 'events' },
-            { title: 'Ejemplo con teclado', group: 'Ejemplos', section: 'ejemplos', anchor: 'keyboard' },
-
-            // TypeScript
-            { title: 'TypeScript', group: 'Avanzado', section: 'typescript', anchor: 'usage' },
-            { title: 'Types', group: 'Avanzado', section: 'typescript', anchor: 'usage' },
-            { title: 'Interfaces', group: 'Avanzado', section: 'typescript', anchor: 'usage' },
-            { title: 'Beneficios', group: 'Avanzado', section: 'typescript', anchor: 'benefits' },
-
-            // Changelog
-            { title: 'Changelog', group: 'General', section: 'changelog' },
-            { title: 'Versión', group: 'General', section: 'changelog' },
-            { title: 'Novedades', group: 'General', section: 'changelog' },
-            { title: 'Actualizaciones', group: 'General', section: 'changelog' },
-        ];
-
-        sections.forEach(item => data.push(item));
-
-        const seen = new Set(data.map(d => d.title.toLowerCase()));
-        shortcuts.forEach(item => {
-            if (!seen.has(item.title.toLowerCase())) {
-                seen.add(item.title.toLowerCase());
-                data.push(item);
+    /**
+     * Listener de respaldo para hashchange por si el MutationObserver
+     * no captura el cambio a tiempo.
+     */
+    setupHashScrollListener() {
+        window.addEventListener('hashchange', () => {
+            if (this.pendingScrollTo) {
+                const segment = this.pendingScrollTo;
+                this.pendingScrollTo = null;
+                setTimeout(() => this.scrollToSegment(segment), 150);
             }
         });
+    },
 
-        return data;
+    /**
+     * Atajo de teclado Ctrl+K / Cmd+K para enfocar el buscador.
+     */
+    setupKeyboardShortcut() {
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const input = this.container?.querySelector('.filter-search');
+                if (input) {
+                    input.focus();
+                    input.select();
+                }
+            }
+        });
+    },
+
+    /**
+     * Retorna el nombre del tema del componente según el atributo data-theme del HTML.
+     *
+     * @returns {string} Nombre del tema ('clean-white' o 'onyx-black')
+     */
+    getCurrentTheme() {
+        const theme = document.documentElement.getAttribute('data-theme');
+        return theme === 'dark' ? 'onyx-black' : 'clean-white';
+    },
+
+    /**
+     * Sincroniza el tema del buscador con el tema activo del sitio.
+     * Llamado desde App.setupThemeSync() al cambiar el tema.
+     */
+    updateTheme() {
+        if (this.instance?.renderer) {
+            this.instance.renderer.setTheme(this.getCurrentTheme());
+        }
     }
 };
+
+export default DocSearch;

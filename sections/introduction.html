@@ -1,0 +1,102 @@
+<h1>Introducción</h1>
+
+<p>
+    <strong>Buscador Dinámico</strong> es un componente de búsqueda modular, ligero y altamente personalizable
+    escrito en TypeScript. Está diseñado para integrarse fácilmente en cualquier proyecto web, ofreciendo
+    búsqueda local o remota con soporte para scroll infinito, caché LRU y internacionalización.
+</p>
+
+<div class="doc-callout doc-callout--info">
+    <span class="doc-callout__icon">💡</span>
+    <div class="doc-callout__content">
+        <strong>Características principales</strong>
+        <p>Búsqueda en tiempo real, paginación por scroll infinito, sistema de eventos, múltiples temas CSS y soporte completo de TypeScript.</p>
+    </div>
+</div>
+
+<h2>¿Por qué Buscador Dinámico?</h2>
+
+<p>Las soluciones de búsqueda existentes suelen ser demasiado genéricas o dependientes de frameworks pesados.
+   Buscador Dinámico ofrece un enfoque diferente:</p>
+
+<ul>
+    <li><strong>Sin dependencias</strong> — Vanilla JavaScript/TypeScript, funciona con cualquier framework o sin ellos.</li>
+    <li><strong>Modular</strong> — Arquitectura OOP con clases independientes que se pueden extender o reemplazar.</li>
+    <li><strong>Performante</strong> — Caché LRU, debounce configurable, scroll infinito con Intersection Observer.</li>
+    <li><strong>Accesible</strong> — Navegación por teclado, roles ARIA, soporte para lectores de pantalla.</li>
+    <li><strong>Personalizable</strong> — Templates, temas CSS con variables, sistema i18n integrado.</li>
+</ul>
+
+<h2>Arquitectura</h2>
+
+<p>El componente sigue un patrón de composición OOP con 8 módulos principales:</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Módulo</th>
+            <th>Responsabilidad</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>Search</code></td>
+            <td>Clase principal orquestadora</td>
+        </tr>
+        <tr>
+            <td><code>SearchRenderer</code></td>
+            <td>Renderizado del DOM y gestión visual</td>
+        </tr>
+        <tr>
+            <td><code>SearchingLocal</code></td>
+            <td>Búsqueda en memoria local</td>
+        </tr>
+        <tr>
+            <td><code>SearchingServer</code></td>
+            <td>Búsqueda remota vía Fetch API</td>
+        </tr>
+        <tr>
+            <td><code>Pagination</code></td>
+            <td>Gestión de paginación y scroll infinito</td>
+        </tr>
+        <tr>
+            <td><code>LRUCache</code></td>
+            <td>Caché de resultados con TTL</td>
+        </tr>
+        <tr>
+            <td><code>EventEmitter</code></td>
+            <td>Sistema de eventos personalizado</td>
+        </tr>
+        <tr>
+            <td><code>ErrorHandler</code></td>
+            <td>Gestión centralizada de errores</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Modos de uso</h2>
+
+<p>El componente soporta múltiples modos de operación:</p>
+
+<ol>
+    <li><strong>Búsqueda local</strong> — Datos en memoria, ideal para listas pequeñas/medianas.</li>
+    <li><strong>Búsqueda desde DOM</strong> — Extrae datos automáticamente de elementos HTML existentes.</li>
+    <li><strong>Búsqueda remota</strong> — Peticiones HTTP con Fetch API, soporte para JSON, FormData y URL-encoded.</li>
+    <li><strong>Instancias múltiples</strong> — Varios buscadores independientes en la misma página.</li>
+</ol>
+
+<h2>Requisitos mínimos</h2>
+
+<ul>
+    <li>Navegador moderno (Chrome 80+, Firefox 78+, Safari 14+, Edge 80+)</li>
+    <li>Soporte para ES2020 (para uso directo) o cualquier bundler moderno</li>
+    <li>Intersection Observer API (para scroll infinito)</li>
+</ul>
+
+<div class="doc-callout doc-callout--tip">
+    <span class="doc-callout__icon">🚀</span>
+    <div class="doc-callout__content">
+        <strong>¿Listo para empezar?</strong>
+        <p>Visita la sección de <a href="#/installation">Instalación</a> para configurar el componente en tu proyecto.</p>
+    </div>
+</div>

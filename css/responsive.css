@@ -1,91 +1,140 @@
-/* ── Tablet ── */
 @media (max-width: 1024px) {
-    .sidebar {
-        transform: translateX(-100%);
+    .doc-content {
+        padding: var(--doc-spacing-2xl) var(--doc-spacing-xl);
+    }
+}
+
+@media (max-width: 768px) {
+    .doc-layout {
+        grid-template-areas:
+            "header"
+            "content";
+        grid-template-columns: 1fr;
     }
 
-    .sidebar.open {
-        transform: translateX(0);
-    }
-
-    .main {
-        margin-left: 0;
-    }
-
-    .navbar__menu-toggle {
+    .doc-header__menu-btn {
         display: flex;
     }
 
-    .navbar__brand {
-        min-width: auto;
-    }
-
-    .content {
-        padding: var(--space-8) var(--space-6);
-    }
-
-    .page-nav {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* ── Mobile ── */
-@media (max-width: 640px) {
-    .navbar {
-        padding: 0 var(--space-4);
-    }
-
-    .navbar__brand-version {
+    .doc-header__center {
         display: none;
     }
 
-    .navbar__search {
-        max-width: none;
+    .doc-header__brand {
+        font-size: var(--doc-font-size-sm);
     }
 
-    .content {
-        padding: var(--space-6) var(--space-4);
+    .doc-header__badge {
+        display: none;
     }
 
-    .doc h1 {
-        font-size: var(--text-3xl);
+    .doc-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: var(--doc-z-sidebar);
+        width: var(--doc-sidebar-width);
+        height: 100vh;
+        transform: translateX(-100%);
+        transition: transform var(--doc-transition-slow);
+        background: var(--doc-bg-primary);
+        padding-top: var(--doc-spacing-lg);
+        box-shadow: var(--doc-shadow-xl);
     }
 
-    .doc h2 {
-        font-size: var(--text-xl);
+    .doc-sidebar.open {
+        transform: translateX(0);
     }
 
-    .doc h3 {
-        font-size: var(--text-lg);
+    .doc-content {
+        padding: var(--doc-spacing-xl) var(--doc-spacing-md);
+        grid-area: content;
     }
 
-    .card-grid {
-        grid-template-columns: 1fr;
+    .doc-content h1 {
+        font-size: var(--doc-font-size-2xl);
     }
 
-    .code-block pre {
-        padding: var(--space-3);
-        font-size: var(--text-xs);
+    .doc-content h2 {
+        font-size: var(--doc-font-size-xl);
     }
 
-    .doc-table {
+    .doc-content pre {
+        padding: var(--doc-spacing-md);
+        border-radius: var(--doc-radius-md);
+        font-size: var(--doc-font-size-xs);
+        margin-left: calc(-1 * var(--doc-spacing-md));
+        margin-right: calc(-1 * var(--doc-spacing-md));
+    }
+
+    .doc-content table {
         display: block;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
-    .hero__desc {
-        font-size: var(--text-base);
+    .doc-header__right .doc-header__github {
+        display: none;
     }
 
-    .sidebar {
-        width: 280px;
-        background: var(--bg-sidebar);
+    .doc-step {
+        gap: var(--doc-spacing-md);
+    }
+
+    .doc-step__number {
+        width: 28px;
+        height: 28px;
+        font-size: var(--doc-font-size-xs);
     }
 }
 
-/* ── Large screens ── */
-@media (min-width: 1400px) {
-    .content {
-        padding: var(--space-12) var(--space-10);
+@media (max-width: 480px) {
+    .doc-content {
+        padding: var(--doc-spacing-lg) var(--doc-spacing-md);
+    }
+
+    .doc-content h1 {
+        font-size: var(--doc-font-size-xl);
+    }
+
+    .doc-content h2 {
+        font-size: var(--doc-font-size-lg);
+    }
+
+    .doc-content h3 {
+        font-size: var(--doc-font-size-md);
+    }
+
+    .doc-content pre {
+        font-size: 0.7rem;
+        line-height: 1.5;
+    }
+
+    .doc-card {
+        padding: var(--doc-spacing-md);
+    }
+}
+
+@media (min-width: 769px) {
+    .doc-sidebar-overlay {
+        display: none !important;
+    }
+}
+
+@media print {
+    .doc-header,
+    .doc-sidebar,
+    .doc-sidebar-overlay {
+        display: none !important;
+    }
+
+    .doc-layout {
+        grid-template-areas: "content";
+        grid-template-columns: 1fr;
+    }
+
+    .doc-content {
+        padding: 0;
+        max-width: 100%;
     }
 }

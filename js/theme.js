@@ -1,34 +1,61 @@
 const Theme = {
-    STORAGE_KEY: 'docs-theme',
+    STORAGE_KEY: 'doc-theme',
+    toggleBtn: null,
+    mediaQuery: null,
 
     init() {
-        const saved = localStorage.getItem(this.STORAGE_KEY);
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = saved || (prefersDark ? 'dark' : 'light');
-        this.apply(theme);
+        this.toggleBtn = document.getElementById('theme-toggle');
+        this.mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-            if (!localStorage.getItem(this.STORAGE_KEY)) {
-                this.apply(e.matches ? 'dark' : 'light');
+        const saved = this.getSavedTheme();
+        this.apply(saved);
+
+        if (this.toggleBtn) {
+            this.toggleBtn.addEventListener('click', () => this.toggle());
+        }
+
+        this.mediaQuery.addEventListener('change', (e) => {
+            if (!this.getSavedTheme() || this.getSavedTheme() === 'auto') {
+                this.apply('auto');
             }
-        });
-
-        document.querySelectorAll('.theme-toggle').forEach(btn => {
-            btn.addEventListener('click', () => this.toggle());
         });
     },
 
+    getSavedTheme() {
+        try {
+            return localStorage.getItem(this.STORAGE_KEY) || 'auto';
+        } catch {
+            return 'auto';
+        }
+    },
+
+    saveTheme(theme) {
+        try {
+            localStorage.setItem(this.STORAGE_KEY, theme);
+        } catch {}
+    },
+
     apply(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem(this.STORAGE_KEY, theme);
+        if (theme === 'auto') {
+            const prefersDark = this.mediaQuery.matches;
+            document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+        } else {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
     },
 
     toggle() {
         const current = document.documentElement.getAttribute('data-theme');
-        this.apply(current === 'dark' ? 'light' : 'dark');
+        const next = current === 'dark' ? 'light' : 'dark';
+        this.saveTheme(next);
+        this.apply(next);
+
+        window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: next } }));
     },
 
-    get current() {
+    getCurrent() {
         return document.documentElement.getAttribute('data-theme') || 'light';
     }
 };
+
+export default Theme;

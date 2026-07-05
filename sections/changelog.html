@@ -1,0 +1,77 @@
+<h1>Changelog</h1>
+
+<p>Historial de versiones y cambios del componente.</p>
+
+<h2>v1.0.0 <span class="doc-badge doc-badge--success">Latest</span></h2>
+
+<p><em>Fecha: 2026</em></p>
+
+<h3>Características iniciales</h3>
+
+<ul>
+    <li>Búsqueda local en tiempo real con debounce configurable</li>
+    <li>Búsqueda remota vía Fetch API con soporte para JSON, FormData y URL-encoded</li>
+    <li>Paginación por scroll infinito con Intersection Observer</li>
+    <li>Sistema de caché LRU con TTL configurable</li>
+    <li>5 temas CSS predefinidos (adaptative, clean-white, blue-black, onyx-black, forest-green)</li>
+    <li>Sistema de eventos personalizado con 8 eventos</li>
+    <li>Navegación por teclado (flechas arriba/abajo, Enter)</li>
+    <li>Plantillas personalizables (string y funciones)</li>
+    <li>Sistema i18n con traducciones configurables</li>
+    <li>Gestión centralizada de errores con 14 códigos específicos</li>
+    <li>Soporte completo de TypeScript con tipos exportados</li>
+    <li>Arquitectura modular OOP con 8 clases independientes</li>
+    <li>Build dual: ES Module + UMD</li>
+    <li>Accesibilidad: roles ARIA, navegación por teclado, labels</li>
+    <li>Soporte para múltiples instancias en la misma página</li>
+</ul>
+
+<h3>Temas CSS</h3>
+
+<ul>
+    <li><code>adaptative</code> — Se adapta al tema del sistema (light/dark)</li>
+    <li><code>clean-white</code> — Diseño limpio y minimalista en blanco</li>
+    <li><code>blue-black</code> — Tema oscuro con acentos azules</li>
+    <li><code>onyx-black</code> — Tema completamente oscuro</li>
+    <li><code>forest-green</code> — Tema oscuro con tonos verdes</li>
+</ul>
+
+<h3>Eventos</h3>
+
+<ul>
+    <li><code>init</code> — Emite al inicializar el componente</li>
+    <li><code>search</code> — Emite después de cada búsqueda</li>
+    <li><code>pageChange</code> — Emite al cambiar de página</li>
+    <li><code>sortChange</code> — Emite al cambiar el ordenamiento</li>
+    <li><code>itemSelected</code> — Emite al seleccionar un item</li>
+    <li><code>itemHighlighted</code> — Emite al destacar un item</li>
+    <li><code>appendItems</code> — Emite al añadir items al DOM</li>
+    <li><code>destroy</code> — Emite antes de destruir la instancia</li>
+</ul>
+
+<h3>Códigos de error</h3>
+
+<ul>
+    <li><code>SEARCH_001</code> — element requerido</li>
+    <li><code>SEARCH_002</code> — element debe ser string</li>
+    <li><code>SEARCH_003</code> — elemento no encontrado</li>
+    <li><code>SEARCH_004</code> — fetch.url requerido</li>
+    <li><code>SEARCH_005</code> — itemsPerPage debe ser número</li>
+    <li><code>SEARCH_006</code> — itemsPerPage debe ser mayor a 0</li>
+    <li><code>SEARCH_007</code> — fetch.body debe ser objeto</li>
+    <li><code>SEARCH_008</code> — timeout inválido</li>
+    <li><code>SEARCH_009</code> — method HTTP inválido</li>
+    <li><code>SEARCH_010</code> — response no es JSON válido</li>
+    <li><code>SEARCH_011</code> — request abortado por timeout</li>
+    <li><code>SEARCH_012</code> — error de red</li>
+    <li><code>SEARCH_013</code> — cacheMaxSize debe ser número</li>
+    <li><code>SEARCH_014</code> — cacheTtlSeconds debe ser número</li>
+</ul>
+
+<div class="doc-callout doc-callout--info">
+    <span class="doc-callout__icon">📋</span>
+    <div class="doc-callout__content">
+        <strong>Próximamente</strong>
+        <p>Soporte para búsqueda fuzzy, virtual scrolling, SSR, y plugin system.</p>
+    </div>
+</div>

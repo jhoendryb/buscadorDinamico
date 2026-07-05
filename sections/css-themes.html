@@ -1,0 +1,169 @@
+<h1>Temas CSS</h1>
+
+<p>El componente incluye 5 temas CSS predefinidos y un sistema completo de variables personalizables.</p>
+
+<h2>Temas disponibles</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Tema</th>
+            <th>Descripción</th>
+            <th>Ideal para</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>adaptative</code></td>
+            <td>Se adapta al tema del sistema (light/dark)</td>
+            <td>Cualquier sitio web</td>
+        </tr>
+        <tr>
+            <td><code>clean-white</code></td>
+            <td>Diseño limpio y minimalista en blanco</td>
+            <td>Sitios corporativos</td>
+        </tr>
+        <tr>
+            <td><code>blue-black</code></td>
+            <td>Tema oscuro con acentos azules</td>
+            <td>Paneles de administración</td>
+        </tr>
+        <tr>
+            <td><code>onyx-black</code></td>
+            <td>Tema completamente oscuro</td>
+            <td>Aplicaciones nocturnas</td>
+        </tr>
+        <tr>
+            <td><code>forest-green</code></td>
+            <td>Tema oscuro con tonos verdes</td>
+            <td>Sitios de naturaleza</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Aplicar un tema</h2>
+
+<pre data-lang="javascript"><code>const search = new BuscadorDinamico.Search({
+    element: '#app',
+    data: items,
+    theme: 'onyx-black'
+}).init();</code></pre>
+
+<h2>Cambiar tema dinámicamente</h2>
+
+<pre data-lang="javascript"><code>// Cambiar tema después de la inicialización
+search.renderer.setTheme('forest-green');</code></pre>
+
+<h2>Variables CSS personalizables</h2>
+
+<p>Cada tema define un conjunto de variables CSS que puedes sobrescribir:</p>
+
+<h3>Dimensiones</h3>
+
+<pre data-lang="css"><code>.app-search {
+    /* Ancho del componente */
+    --app-width: 100%;
+
+    /* Altura del input */
+    --input-height: 40px;
+
+    /* Ancho del input */
+    --input-width: 100%;
+
+    /* Radio de bordes */
+    --border-radius: 8px;
+
+    /* Máxima altura del panel de resultados */
+    --max-height-results: 300px;
+
+    /* Ancho del scrollbar */
+    --scrollbar-width: 6px;
+}</code></pre>
+
+<h3>Colores</h3>
+
+<pre data-lang="css"><code>.app-search {
+    /* Color de fondo principal */
+    --bg-primary: #ffffff;
+
+    /* Color de fondo del input */
+    --bg-input: #ffffff;
+
+    /* Color de fondo de items */
+    --bg-items: #ffffff;
+
+    /* Color de fondo al pasar el mouse */
+    --bg-hover: #f3f4f6;
+
+    /* Color de fondo item seleccionado */
+    --bg-selected: #e5e7eb;
+
+    /* Color de texto principal */
+    --text-primary: #111827;
+
+    /* Color de texto secundario */
+    --text-secondary: #6b7280;
+
+    /* Color de bordes */
+    --border-color: #e5e7eb;
+
+    /* Color del input focus */
+    --border-focus: #6366f1;
+
+    /* Color de la sombra */
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}</code></pre>
+
+<h3>Bordes</h3>
+
+<pre data-lang="css"><code>.app-search {
+    --border-width: 1px;
+    --border-style: solid;
+    --border-radius: 8px;
+    --border-radius-sm: 4px;
+    --border-radius-lg: 12px;
+}</code></pre>
+
+<h2>Crear un tema personalizado</h2>
+
+<pre data-lang="css"><code>/* Mi tema personalizado */
+.app-search.theme-mi-tema {
+    --bg-primary: #1a1b2e;
+    --bg-input: #252640;
+    --bg-items: #1a1b2e;
+    --bg-hover: #2d2e4a;
+    --bg-selected: #3d3e5a;
+    --text-primary: #e4e6ed;
+    --text-secondary: #9ca0b0;
+    --border-color: #2e3143;
+    --border-focus: #818cf8;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}</code></pre>
+
+<pre data-lang="javascript"><code>// Aplicar tema personalizado
+const search = new BuscadorDinamico.Search({
+    element: '#app',
+    data: items,
+    theme: 'mi-tema'
+}).init();</code></pre>
+
+<h2>Soporte dark/light mode</h2>
+
+<p>El tema <code>adaptative</code> detecta automáticamente la preferencia del sistema:</p>
+
+<pre data-lang="css"><code>/* El tema adaptative usa */
+@media (prefers-color-scheme: dark) {
+    .app-search {
+        --bg-primary: #1a1b2e;
+        --text-primary: #e4e6ed;
+        /* ... */
+    }
+}</code></pre>
+
+<div class="doc-callout doc-callout--tip">
+    <span class="doc-callout__icon">💡</span>
+    <div class="doc-callout__content">
+        <strong>Consejo</strong>
+        <p>Para un control total, crea tu tema personalizado copiando las variables de un tema existente y modificándolas. Esto garantiza compatibilidad con futuras actualizaciones.</p>
+    </div>
+</div>

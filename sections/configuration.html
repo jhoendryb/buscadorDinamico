@@ -1,0 +1,176 @@
+<h1>Configuración</h1>
+
+<p>El componente se configura mediante un objeto de parámetros pasado al constructor.</p>
+
+<h2>Parámetros básicos</h2>
+
+<pre data-lang="javascript"><code>const search = new BuscadorDinamico.Search({
+    element: '#mi-buscador',     // Required: selector del contenedor
+    data: [],                     // Datos iniciales (modo local)
+    theme: 'adaptative',          // Tema CSS
+    itemsPerPage: 10,             // Items por página
+    debounceTime: 500,            // Delay de búsqueda en ms
+    keyboardEnabled: false,       // Navegación por teclado
+    cacheEnabled: false,          // Habilitar caché LRU
+    zIndex: 1000,                 // Z-index del componente
+    dom: 'search-content-items-pagination', // Orden de elementos DOM
+    developmentMode: false        // Modo desarrollo (logs detallados)
+}).init();</code></pre>
+
+<h2>Referencia de parámetros</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Parámetro</th>
+            <th>Tipo</th>
+            <th>Default</th>
+            <th>Descripción</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>element</code></td>
+            <td><code>string</code></td>
+            <td>—</td>
+            <td><strong>Requerido.</strong> Selector CSS del contenedor</td>
+        </tr>
+        <tr>
+            <td><code>data</code></td>
+            <td><code>Array</code></td>
+            <td><code>[]</code></td>
+            <td>Array de objetos con los datos a buscar</td>
+        </tr>
+        <tr>
+            <td><code>theme</code></td>
+            <td><code>string</code></td>
+            <td><code>'adaptative'</code></td>
+            <td>Tema CSS: adaptative, clean-white, blue-black, onyx-black, forest-green</td>
+        </tr>
+        <tr>
+            <td><code>itemsPerPage</code></td>
+            <td><code>number</code></td>
+            <td><code>10</code></td>
+            <td>Cantidad de items por página</td>
+        </tr>
+        <tr>
+            <td><code>debounceTime</code></td>
+            <td><code>number</code></td>
+            <td><code>500</code></td>
+            <td>Tiempo de espera en ms antes de ejecutar la búsqueda</td>
+        </tr>
+        <tr>
+            <td><code>keyboardEnabled</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Habilitar navegación con teclado (flechas, Enter)</td>
+        </tr>
+        <tr>
+            <td><code>cacheEnabled</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Habilitar caché LRU de resultados</td>
+        </tr>
+        <tr>
+            <td><code>cacheMaxSize</code></td>
+            <td><code>number</code></td>
+            <td><code>50</code></td>
+            <td>Número máximo de entradas en caché</td>
+        </tr>
+        <tr>
+            <td><code>cacheTtlSeconds</code></td>
+            <td><code>number</code></td>
+            <td><code>300</code></td>
+            <td>Tiempo de vida de la caché en segundos</td>
+        </tr>
+        <tr>
+            <td><code>zIndex</code></td>
+            <td><code>number</code></td>
+            <td><code>1000</code></td>
+            <td>Z-index del componente</td>
+        </tr>
+        <tr>
+            <td><code>dom</code></td>
+            <td><code>string</code></td>
+            <td><code>'search-content-items-pagination'</code></td>
+            <td>Orden de renderizado de elementos DOM</td>
+        </tr>
+        <tr>
+            <td><code>developmentMode</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Activa logs detallados y validaciones extra</td>
+        </tr>
+        <tr>
+            <td><code>sortBy</code></td>
+            <td><code>string</code></td>
+            <td><code>null</code></td>
+            <td>Campo por el cual ordenar inicialmente</td>
+        </tr>
+        <tr>
+            <td><code>sortOrder</code></td>
+            <td><code>'asc' | 'desc'</code></td>
+            <td><code>'asc'</code></td>
+            <td>Dirección del ordenamiento</td>
+        </tr>
+        <tr>
+            <td><code>template</code></td>
+            <td><code>string | Function</code></td>
+            <td><code>null</code></td>
+            <td>Plantilla personalizada para renderizar items</td>
+        </tr>
+        <tr>
+            <td><code>translation</code></td>
+            <td><code>Object</code></td>
+            <td><code>{}</code></td>
+            <td>Traducciones personalizadas (ver sección i18n)</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Configuración del servidor (fetch)</h2>
+
+<p>Para búsquedas remotas, usa el parámetro <code>fetch</code>:</p>
+
+<pre data-lang="javascript"><code>const search = new BuscadorDinamico.Search({
+    element: '#mi-buscador',
+    procesServer: true,
+    fetch: {
+        url: 'https://api.ejemplo.com/buscar',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: {
+            query: '',
+            page: 1,
+            limit: 10
+        },
+        timeout: 10000
+    }
+}).init();</code></pre>
+
+<h2>Múltiples instancias</h2>
+
+<p>Puedes crear múltiples buscadores independientes en la misma página:</p>
+
+<pre data-lang="javascript"><code>const search1 = new BuscadorDinamico.Search({
+    element: '#buscador-1',
+    data: productos,
+    theme: 'clean-white'
+}).init();
+
+const search2 = new BuscadorDinamico.Search({
+    element: '#buscador-2',
+    data: usuarios,
+    theme: 'onyx-black',
+    itemsPerPage: 5
+}).init();</code></pre>
+
+<div class="doc-callout doc-callout--warning">
+    <span class="doc-callout__icon">⚠️</span>
+    <div class="doc-callout__content">
+        <strong>Validación de parámetros</strong>
+        <p>El componente valida los parámetros en el constructor. Si <code>element</code> no es un string o <code>itemsPerPage</code> es menor a 1, se lanzará un <code>SearchError</code>.</p>
+    </div>
+</div>
