@@ -11,9 +11,13 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      - name: Clean and copy dist to Documentation
+        run: |
+          rm -rf ./DocumentacionV2/dist
+          cp -r ./dist ./DocumentacionV2/dist
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./Documentacion
+          publish_dir: ./DocumentacionV2
           publish_branch: gh-pages

@@ -21,7 +21,7 @@ export default defineConfig({
                     if (assetInfo.name === 'theme.css') {
                         return 'css/theme.css';
                     }
-                    return 'css/[name].[hash][extname]';
+                    return 'css/[name][extname]';
                 }
             }
         }
