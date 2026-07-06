@@ -54,8 +54,13 @@
     background-color: var(--search-bg-color);
 }
 
-.theme-clean-white .content-pagination-items.content-pagination-visible {
+.theme-clean-white .content-pagination-items {
     border: 1px solid var(--search-input-border-color, transparent);
+    border-top: none; /* Mantenemos la unión limpia con el input */
+}
+
+.theme-clean-white .content-pagination-items.content-pagination-visible {
+    /* border: 1px solid var(--search-input-border-color, transparent); */
 }
 
 .theme-clean-white .content-pagination-items:last-child.content-pagination-visible {

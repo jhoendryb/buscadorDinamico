@@ -90,5 +90,5 @@
 .app-search:has(.content-pagination-items:first-child.content-pagination-visible),
 .app-search:has(.content-pagination-items:first-child.content-pagination-visible) .input-search {
     border-radius: 0 0 var(--search-border-radius) var(--search-border-radius);
-    border-top: none;
+    border-bottom-color: transparent; /* Cambiado de 'border-bottom: none' a transparente */
 }
