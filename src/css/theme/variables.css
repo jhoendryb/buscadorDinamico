@@ -17,6 +17,10 @@
     --search-selected-bg-color: #d4edff;
     --search-selected-border-color: #0066cc;
 
+    /* Highlight */
+    --search-highlight-bg-color: #ffeb3b;
+    --search-highlight-text-color: #000;
+
     /* Contador */
     --search-counter-color: #666666;
     --search-counter-bg-color: #f8f8f8;
@@ -32,7 +36,7 @@
 
     /* Dimensiones */
     --search-width: 280px;
-    --search-max-height: 400px;
+    --search-max-height: 300px;
     --search-padding: 10px;
     --search-gap: 10px;
     --search-border-radius: 8px;

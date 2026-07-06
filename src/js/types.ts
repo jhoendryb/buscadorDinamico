@@ -18,6 +18,8 @@ export interface SearchParams {
     fetch?: FetchConfig;
     translation?: TranslationCache;
     developmentMode?: boolean;
+    highlightEnabled?: boolean;
+    highlightClass?: string;
 }
 
 export interface FetchConfig {
@@ -117,4 +119,11 @@ export interface CreateElementConfig {
     attributes?: Record<string, string>;
     style?: Record<string, string>;
     [key: string]: any;
+}
+
+export enum DomComponent {
+    SEARCH = 's',
+    CONTENT = 'c',
+    ITEMS = 'i',
+    PAGINATION = 'p'
 }

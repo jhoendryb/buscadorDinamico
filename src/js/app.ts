@@ -44,6 +44,8 @@ class Search {
     fetch?: Types.FetchConfig;
     isExtractData?: () => void | undefined;
     searching: (searchTerm: string, isEvent: boolean) => Promise<void> = async () => { };
+    highlightEnabled: boolean;
+    highlightClass: string;
     private errorHandler: ErrorHandler;
     private searchingLocal: SearchingLocal;
     private searchingServer: SearchingServer;
@@ -77,23 +79,15 @@ class Search {
         this.dom = Constants.DOM_ORDERS.SEARCH_CONTENT_ITEMS_PAGINATION;
         this.selectedIndex = Constants.NO_SELECTION;
         this.developmentMode = Constants.DEFAULT_DEVELOPMENT_MODE;
+        this.highlightEnabled = Constants.DEFAULT_HIGHLIGHT_ENABLED;
+        this.highlightClass = "";
 
         Object.assign(this, newParams);
 
         this.errorHandler = ErrorHandler.getInstance(this.developmentMode);
 
         try {
-            this.errorHandler.validateRequired(this.element, 'element', ErrorCode.ELEMENT_REQUIRED);
-            this.errorHandler.validateType(this.element, 'string', 'element', ErrorCode.ELEMENT_TYPE_INVALID);
-
-            if (this.procesServer) {
-                this.errorHandler.validateRequired(this.fetch?.url, 'fetch.url', ErrorCode.FETCH_URL_REQUIRED);
-            }
-
-            if (this.itemsPerPage) {
-                this.errorHandler.validateType(this.itemsPerPage, 'number', 'itemsPerPage', ErrorCode.ITEMSPERPAGE_TYPE_INVALID);
-                this.errorHandler.validateRange(this.itemsPerPage, 1, 'itemsPerPage', ErrorCode.ITEMSPERPAGE_VALUE_INVALID);
-            }
+            this.#validateParameters()
 
             this.scrollObserver = null;
             this._ajaxResponse = {};
@@ -173,6 +167,29 @@ class Search {
             throw error;
         }
     }
+    #validateParameters(): void {
+        this.errorHandler.validateRequired(this.element, 'element', ErrorCode.ELEMENT_REQUIRED);
+        this.errorHandler.validateType(this.element, 'string', 'element', ErrorCode.ELEMENT_TYPE_INVALID);
+
+        if (this.procesServer) {
+            this.errorHandler.validateRequired(this.fetch?.url, 'fetch.url', ErrorCode.FETCH_URL_REQUIRED);
+        }
+
+        if (this.itemsPerPage) {
+            this.errorHandler.validateType(this.itemsPerPage, 'number', 'itemsPerPage', ErrorCode.ITEMSPERPAGE_TYPE_INVALID);
+            this.errorHandler.validateRange(this.itemsPerPage, 1, 'itemsPerPage', ErrorCode.ITEMSPERPAGE_VALUE_INVALID);
+        }
+
+        if (this.highlightClass) {
+            this.errorHandler.validateType(this.highlightClass, 'string', 'highlightClass', ErrorCode.INVALID_TYPE_FORMAT);
+        }
+    }
+    #highlightText(text: string): string {
+        if (!this.highlightEnabled || !this.searchTerm) return text;
+
+        const regex = new RegExp(`(${this.searchTerm})`, 'gi');
+        return text.replace(regex, `<span class="${['search-highlight', this.highlightClass].filter(cls => cls).join(' ')}">$1</span>`);
+    }
     /**
      * Ejecuta una búsqueda y renderiza los resultados.
      * @param {string} [searchTerm] - Término de búsqueda (usa this.searchTerm si no se proporciona)
@@ -206,7 +223,8 @@ class Search {
             this.template,
             this.t.noResults,
             this.events,
-            (this.pagination.getCurrentPage() === 1)
+            (this.pagination.getCurrentPage() === 1),
+            this.#highlightText.bind(this)
         );
 
         // Actualizar contador
@@ -450,7 +468,6 @@ class Search {
                 this.selectedIndex = Array.from(items).indexOf(item);
                 this.#highlightItem(items);
                 this.#selectItem(item);
-                // this.renderer.hideResults();
             }
         });
 
@@ -462,16 +479,13 @@ class Search {
                 e.preventDefault();
                 this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
                 this.#highlightItem(items);
-                // this.renderer.showResults();
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
                 this.#highlightItem(items);
-                // this.renderer.showResults();
             } else if (['enter', 'click'].includes(e.key.toLowerCase()) && this.selectedIndex >= 0) {
                 e.preventDefault();
                 this.#selectItem(items[this.selectedIndex]);
-                // this.renderer.hideResults();
             }
         });
 

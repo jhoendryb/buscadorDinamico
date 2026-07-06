@@ -7,10 +7,14 @@
     gap: var(--search-padding);
 }
 
+.items-search .items {
+    padding: var(--search-item-padding);
+}
+
 .pagination-items .items-counter {
     padding: var(--search-padding);
 }
 
 .content-pagination-items {
-    max-height: 300px;
+    max-height: var(--search-max-height, 300px);
 }

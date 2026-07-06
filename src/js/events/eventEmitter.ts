@@ -8,8 +8,8 @@ export class EventEmitter {
     private events: { [key: string]: Function[] } = {};
     private errorHandler: ErrorHandler;
 
-    constructor(errorHandler: ErrorHandler) {
-        this.errorHandler = errorHandler;
+    constructor(errorHandler?: ErrorHandler) {
+        this.errorHandler = errorHandler || ErrorHandler.getInstance(true);
     }
 
     /**

@@ -7,6 +7,14 @@
     color: var(--search-text-color);
 }
 
+.search-highlight {
+    background-color: var(--search-highlight-bg-color, #ffeb3b);
+    color: var(--search-highlight-text-color, #000);
+    font-weight: bold;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
 .items-search {
     background-color: var(--search-bg-color);
 }
@@ -18,7 +26,6 @@
 .items-search .items {
     background-color: var(--search-item-bg-color);
     color: var(--search-text-color-items);
-    padding: var(--search-item-padding);
     border-radius: var(--search-border-radius);
 }
 

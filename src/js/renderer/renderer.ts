@@ -34,11 +34,14 @@ export class SearchRenderer {
      * @returns {SearchRenderer} Instancia actual de SearchRenderer
      */
     setTheme(theme: string): SearchRenderer {
-        if (theme !== "default") {
-            this.body.content = createElement({
-                element: this.body.content,
-                className: `${this.body.content.classList} theme-${theme}`
-            })
+        const existingThemeClass = Array.from(this.body.content.classList)
+            .find(cls => cls.startsWith('theme-'));
+
+        if (existingThemeClass) {
+            this.body.content.classList.remove(existingThemeClass);
+        }
+        if (theme && theme !== 'default') {
+            this.body.content.classList.add(`theme-${theme}`);
         }
         return this;
     }
@@ -246,7 +249,7 @@ export class SearchRenderer {
      * @param {boolean} [firtsLoad=false] - Si es la primera carga
      * @returns {boolean} Indica si se pudo añadir los items exitosamente
      */
-    appendItems(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter, firtsLoad: boolean = false): boolean {
+    appendItems(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter, firtsLoad: boolean = false, highlightText?: (text?: string) => string): boolean {
         const container = this.body.renderItems;
         if (!container) return false;
 
@@ -283,16 +286,18 @@ export class SearchRenderer {
             const itemElement = createElement(jsonItem);
             if (template) {
                 if (typeof template === 'function') {
-                    itemElement.innerHTML = template(item);
+                    itemElement.innerHTML = template(item, highlightText);
                 } else if (typeof template === 'string') {
                     let templateStr = template;
                     Object.keys(item).forEach(key => {
-                        templateStr = templateStr.replace(`{{${key}}}`, item[key]);
+                        const value = highlightText ? highlightText(item[key]) : item[key];
+                        templateStr = templateStr.replace(`{{${key}}}`, value);
                     });
                     itemElement.innerHTML = templateStr;
                 }
             } else {
-                itemElement.textContent = Object.values(item).join(' ');
+                const value = Object.values(item).join(' ');
+                itemElement.textContent = highlightText ? highlightText(value) : value;
             }
 
             container.appendChild(itemElement);
@@ -326,13 +331,13 @@ export class SearchRenderer {
      */
     renderByDom(domString: string, options: Record<string, any>): void {
         const domMap: Record<string, () => void> = {
-            's': () => {
+            [Types.DomComponent.SEARCH]: () => {
                 this.contentSearch();
                 this.renderSearch({ ...options.search });
             },
-            'c': () => this.renderContentPaginationItems(),
-            'i': () => this.renderItems(),
-            'p': () => this.renderPagination()
+            [Types.DomComponent.CONTENT]: () => this.renderContentPaginationItems(),
+            [Types.DomComponent.ITEMS]: () => this.renderItems(),
+            [Types.DomComponent.PAGINATION]: () => this.renderPagination()
         };
 
         const order = domString.split('');

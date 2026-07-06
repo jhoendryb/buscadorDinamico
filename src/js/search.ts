@@ -10,11 +10,13 @@ const search1 = new Search({
     procesServer: true,
     cacheEnabled: true,
     keyboardEnabled: true,
+    highlightEnabled: true,
     template: `<div>{{name}} - {{id_ciudad}}</div>`,
     translation: {
         searchPlaceholder: 'Escribe la busqueda aqui.'
     },
     dom: 'scip',
+    developmentMode: true,
     fetch: {
         url: "/buscadorDinamico/src/php/responseAjax.php",
         method: "POST",

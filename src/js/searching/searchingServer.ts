@@ -88,53 +88,89 @@ export class SearchingServer {
             throw error;
         }
     }
+    #validateFetchConfig(config: Types.FetchConfig): void {
+        this.errorHandler.validateRequired(config.url, 'url', ErrorCode.FETCH_URL_REQUIRED);
+        this.errorHandler.validateRequired(config.method, 'method', ErrorCode.FETCH_URL_REQUIRED);
+        this.errorHandler.validateType(config.method, 'string', 'method', ErrorCode.FETCH_URL_REQUIRED);
+
+        // Validar método HTTP
+        const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+        if (!validMethods.includes(config.method.toUpperCase())) {
+            this.errorHandler.throwCustomError(ErrorCode.FETCH_FAILED, {
+                context: 'invalid_http_method',
+                providedMethod: config.method,
+                validMethods
+            });
+        }
+    }
+    #configureHeaders(config: Types.FetchConfig): Headers {
+        const headers = new Headers(config.headers || {});
+
+        if (config.method.toUpperCase() !== 'GET' && config.body) {
+            if (!headers.has('Content-Type')) {
+                headers.set('Content-Type', 'application/json');
+            }
+        }
+
+        return headers;
+    }
+    #configureBody(config: Types.FetchConfig, headers: Headers): BodyInit | undefined {
+        if (config.method.toUpperCase() === 'GET' || !config.body) {
+            return undefined;
+        }
+
+        this.errorHandler.validateType(config.body, 'object', 'body', ErrorCode.INVALID_DATA_FORMAT);
+
+        if (config.body instanceof FormData) {
+            return config.body;
+        } else if (headers.get('Content-Type')?.includes('application/x-www-form-urlencoded')) {
+            return new URLSearchParams(config.body as Record<string, string>);
+        } else {
+            return JSON.stringify(config.body);
+        }
+    }
+    #handleFetchError(error: unknown, url: string, timeout: number): never {
+        if (error instanceof Error && error.name === 'AbortError') {
+            this.errorHandler.throwCustomError(ErrorCode.NETWORK_ERROR, {
+                context: 'request_timeout',
+                url: url,
+                timeout: timeout
+            });
+        }
+
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+            this.errorHandler.throwCustomError(ErrorCode.NETWORK_ERROR, {
+                context: 'network_error',
+                url: url,
+                originalError: error
+            });
+        }
+
+        if (error instanceof SearchError) {
+            throw error;
+        }
+
+        this.errorHandler.throwCustomError(ErrorCode.FETCH_FAILED, {
+            context: 'unknown_error',
+            url: url,
+            originalError: error
+        });
+    }
+
 
     /**
      * Realiza petición HTTP con Fetch API.
      */
     async fetch(config: Types.FetchConfig): Promise<any> {
         try {
-            // Validaciones con ErrorHandler
-            this.errorHandler.validateRequired(config.url, 'url', ErrorCode.FETCH_URL_REQUIRED);
-            this.errorHandler.validateRequired(config.method, 'method', ErrorCode.FETCH_URL_REQUIRED);
-            this.errorHandler.validateType(config.method, 'string', 'method', ErrorCode.FETCH_URL_REQUIRED);
+            this.#validateFetchConfig(config);
 
-            // Validar método HTTP
-            const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
-            if (!validMethods.includes(config.method.toUpperCase())) {
-                this.errorHandler.throwCustomError(ErrorCode.FETCH_FAILED, {
-                    context: 'invalid_http_method',
-                    providedMethod: config.method,
-                    validMethods
-                });
-            }
-
-            // Configurar AbortController para timeout
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), config.timeout || this.defaultTimeout);
 
-            // Configurar headers
-            const headers = new Headers(config.headers || {});
+            const headers = this.#configureHeaders(config);
+            const body = this.#configureBody(config, headers);
 
-            // Configurar body
-            let body: BodyInit | undefined;
-            if (config.method.toUpperCase() !== 'GET' && config.body) {
-                // Validar que body sea un objeto
-                this.errorHandler.validateType(config.body, 'object', 'body', ErrorCode.INVALID_DATA_FORMAT);
-
-                if (config.body instanceof FormData) {
-                    body = config.body;
-                } else if (headers.get('Content-Type')?.includes('application/x-www-form-urlencoded')) {
-                    body = new URLSearchParams(config.body as Record<string, string>);
-                } else {
-                    if (!headers.has('Content-Type')) {
-                        headers.set('Content-Type', 'application/json');
-                    }
-                    body = JSON.stringify(config.body);
-                }
-            }
-
-            // Realizar petición fetch
             const response = await fetch(config.url, {
                 method: config.method,
                 headers,
@@ -144,7 +180,6 @@ export class SearchingServer {
 
             clearTimeout(timeoutId);
 
-            // Manejar errores HTTP
             if (!response.ok) {
                 this.errorHandler.throwCustomError(ErrorCode.FETCH_FAILED, {
                     context: 'http_error',
@@ -154,7 +189,6 @@ export class SearchingServer {
                 });
             }
 
-            // Parsear respuesta JSON
             let data;
             try {
                 data = await response.json();
@@ -166,7 +200,6 @@ export class SearchingServer {
                 });
             }
 
-            // Validar que la respuesta tenga datos
             if (!data || (Array.isArray(data) && data.length === 0)) {
                 this.errorHandler.throwCustomError(ErrorCode.EMPTY_RESPONSE, {
                     context: 'empty_response',
@@ -174,7 +207,6 @@ export class SearchingServer {
                 });
             }
 
-            // Ejecutar callback de éxito si existe
             if (config.success) {
                 config.success(data, this.searchInstance);
             }
@@ -182,35 +214,8 @@ export class SearchingServer {
             return data;
 
         } catch (error) {
-            // Manejar error de timeout
-            if (error instanceof Error && error.name === 'AbortError') {
-                this.errorHandler.throwCustomError(ErrorCode.NETWORK_ERROR, {
-                    context: 'request_timeout',
-                    url: config.url,
-                    timeout: config.timeout || this.defaultTimeout
-                });
-            }
-
-            // Manejar error de red
-            if (error instanceof TypeError && error.message.includes('fetch')) {
-                this.errorHandler.throwCustomError(ErrorCode.NETWORK_ERROR, {
-                    context: 'network_error',
-                    url: config.url,
-                    originalError: error
-                });
-            }
-
-            // Si ya es SearchError, relanzarlo
-            if (error instanceof SearchError) {
-                throw error;
-            }
-
-            // Error genérico
-            this.errorHandler.throwCustomError(ErrorCode.FETCH_FAILED, {
-                context: 'unknown_error',
-                url: config.url,
-                originalError: error
-            });
+            this.#handleFetchError(error, config.url, config.timeout || this.defaultTimeout);
         }
     }
+
 }
