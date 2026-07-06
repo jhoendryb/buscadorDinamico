@@ -14,7 +14,9 @@
     cacheEnabled: false,          // Habilitar caché LRU
     zIndex: 1000,                 // Z-index del componente
     dom: 'search-content-items-pagination', // Orden de elementos DOM
-    developmentMode: false        // Modo desarrollo (logs detallados)
+    developmentMode: false,       // Modo desarrollo (logs detallados)
+    highlightEnabled: false,      // Resaltar términos de búsqueda
+    highlightClass: ''            // Clase CSS adicional para resaltado
 }).init();</code></pre>
 
 <h2>Referencia de parámetros</h2>
@@ -100,6 +102,18 @@
             <td><code>boolean</code></td>
             <td><code>false</code></td>
             <td>Activa logs detallados y validaciones extra</td>
+        </tr>
+        <tr>
+            <td><code>highlightEnabled</code></td>
+            <td><code>boolean</code></td>
+            <td><code>false</code></td>
+            <td>Habilita el resaltado del término de búsqueda en los resultados</td>
+        </tr>
+        <tr>
+            <td><code>highlightClass</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Clase CSS adicional para el elemento de resaltado</td>
         </tr>
         <tr>
             <td><code>sortBy</code></td>

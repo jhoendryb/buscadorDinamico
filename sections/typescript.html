@@ -40,6 +40,8 @@
     procesServer?: boolean;
     fetch?: FetchConfig;
     developmentMode?: boolean;
+    highlightEnabled?: boolean;
+    highlightClass?: string;
 }</code></pre>
 
 <h2>Interfaz FetchConfig</h2>
@@ -118,9 +120,11 @@ const config: SearchParams = {
     element: '#app',
     data: productos,
     theme: 'clean-white',
-    template: (item: Producto) => `
+    highlightEnabled: true,
+    highlightClass: 'my-highlight',
+    template: (item: Producto, highlightText) => `
         &lt;div&gt;
-            &lt;h3&gt;${item.nombre}&lt;/h3&gt;
+            &lt;h3&gt;${highlightText(item.nombre)}&lt;/h3&gt;
             &lt;p&gt;$${item.precio}&lt;/p&gt;
         &lt;/div&gt;
     `

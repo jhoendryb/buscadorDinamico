@@ -97,7 +97,7 @@ var e = Object.defineProperty, t = (t, n) => {
 		if (this.procesServer) this.fetch?.body && (this.fetch.body.page = e), await this.searching(this.searchTerm, !1), this.#r();
 		else {
 			let e = this.pagination.getPageItems(this._data);
-			this.renderer.appendItems(e, this.template, this.t.noResults, this.events), this.#r();
+			this.renderer.appendItems(e, this.template, this.t.noResults, this.events, this.#n.bind(this)), this.#r();
 		}
 		let t = this.pagination.getTotalLoaded(), n = this.pagination.getTotalItems();
 		if (this.renderer.updateCounter(t, n), !this.pagination.hasMorePages()) {
