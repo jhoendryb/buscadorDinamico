@@ -271,9 +271,8 @@ const DocSearch = {
             window.location.hash = route;
         }
 
-        const input = this.container.querySelector('.filter-search');
+        const input = this.container.querySelector('.filter-search-doc-search');
         if (input) {
-            input.value = '';
             input.blur();
         }
     },
