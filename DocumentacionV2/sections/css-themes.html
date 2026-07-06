@@ -124,6 +124,26 @@ search.renderer.setTheme('forest-green');</code></pre>
     --border-radius-lg: 12px;
 }</code></pre>
 
+<h3>Resaltado</h3>
+
+<pre data-lang="css"><code>.app-search {
+    /* Color de fondo del texto resaltado */
+    --search-highlight-bg-color: #ffeb3b;
+
+    /* Color del texto resaltado */
+    --search-highlight-text-color: #000;
+}</code></pre>
+
+<p>El resaltado se aplica usando la clase <code>.search-highlight</code> en los elementos <code>&lt;span&gt;</code> generados por el componente. Puedes personalizar estos estilos o agregar una clase adicional con el parámetro <code>highlightClass</code>:</p>
+
+<pre data-lang="css"><code>/* Tema personalizado con resaltado naranja */
+.app-search.theme-custom .search-highlight {
+    background-color: #ff9800;
+    color: #fff;
+    border-radius: 3px;
+    padding: 0 3px;
+}</code></pre>
+
 <h2>Crear un tema personalizado</h2>
 
 <pre data-lang="css"><code>/* Mi tema personalizado */

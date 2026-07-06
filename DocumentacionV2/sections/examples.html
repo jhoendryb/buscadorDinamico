@@ -101,6 +101,31 @@ const searchUsuarios = new Search({
     itemsPerPage: 5
 }).init();</code></pre>
 
+<h2>Con resaltado de texto</h2>
+
+<pre data-lang="javascript"><code>new Search({
+    element: '#buscador',
+    data: productos,
+    highlightEnabled: true,
+    highlightClass: 'my-highlight',
+    template: (item, highlightText) => `
+        &lt;div class="product-card"&gt;
+            &lt;h3&gt;${highlightText(item.nombre)}&lt;/h3&gt;
+            &lt;p&gt;Precio: $${item.precio}&lt;/p&gt;
+            &lt;span class="badge"&gt;${item.categoria}&lt;/span&gt;
+        &lt;/div&gt;
+    `
+}).init();
+
+/* CSS personalizado */
+.my-highlight {
+    background-color: #ffeb3b;
+    color: #000;
+    font-weight: bold;
+    padding: 0 2px;
+    border-radius: 2px;
+}</code></pre>
+
 <h2>Con eventos</h2>
 
 <pre data-lang="javascript"><code>const search = new Search({

@@ -315,7 +315,8 @@ class Search {
                 next,
                 this.template,
                 this.t.noResults,
-                this.events
+                this.events,
+                this.#highlightText.bind(this)
             );
 
             // Reconfigurar detector de scroll para el nuevo contenido

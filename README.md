@@ -18,6 +18,7 @@ Una clase TypeScript flexible y moderna para crear buscadores dinámicos con sop
 - **TypeScript** con type safety completo
 - **Múltiples instancias** en la misma página sin conflictos
 - **Accesibilidad** con ARIA attributes
+- **Resaltado de texto** opcional para términos de búsqueda
 - **Build moderno** con Vite (ES Module + UMD)
 
 ## Tabla de Contenidos
@@ -335,7 +336,9 @@ const search = new Search({
 | `dom` | String | `'scip'` | Orden de renderizado (s=search, c=content, i=items, p=pagination) |
 | `template` | String/Function | `null` | Template personalizado para items |
 | `translation` | Object | `{}` | Traducciones personalizadas |
-| `developmentMode` | Boolean | `true` | Modo desarrollo con logs detallados |
+| `developmentMode` | Boolean | `false` | Modo desarrollo con logs detallados |
+| `highlightEnabled` | Boolean | `false` | Habilita resaltado del término de búsqueda en resultados |
+| `highlightClass` | String | `""` | Clase CSS adicional para el resaltado |
 | `fetch` | Object | `{}` | Configuración de Fetch API (solo si `procesServer: true`) |
 
 ### Configuración del Objeto `fetch`
@@ -1103,6 +1106,7 @@ search.pagination.goToPage(3);
 ```
 
 **Parámetros:**
+
 - `page` (number): Número de página
 
 **Retorna:** number (página actual)
@@ -1146,6 +1150,7 @@ const pageItems = search.pagination.getPageItems(search._data);
 ```
 
 **Parámetros:**
+
 - `data` (Array, opcional): Array de datos a filtrar
 
 **Retorna:** Array de items de la página actual
@@ -1159,6 +1164,7 @@ search.pagination.setItemsPerPage(20);
 ```
 
 **Parámetros:**
+
 - `itemsPerPage` (number): Nueva cantidad de items por página
 
 ## Scroll Infinito
@@ -1309,6 +1315,80 @@ template: (item) => {
         <p>${item.descripcion}</p>
     </div>`;
 }
+```
+
+## Resaltado de Texto
+
+El componente puede resaltar automáticamente el término de búsqueda en los resultados para mejorar la experiencia del usuario.
+
+### Configuración
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    highlightEnabled: true,
+    highlightClass: 'custom-highlight',
+    data: [/* datos */]
+});
+```
+
+### Parámetros
+
+- `highlightEnabled` (boolean): Habilita el resaltado de texto (default: `false`)
+- `highlightClass` (string): Clase CSS adicional para personalizar el estilo del resaltado (default: `""`)
+
+### Personalización CSS
+
+El resaltado usa la clase `.search-highlight` por defecto. Puedes personalizarla con variables CSS:
+
+```css
+:root {
+    --search-highlight-bg-color: #ffeb3b;
+    --search-highlight-text-color: #000;
+}
+
+.search-highlight {
+    background-color: var(--search-highlight-bg-color);
+    color: var(--search-highlight-text-color);
+    font-weight: bold;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+```
+
+### Ejemplo con Template
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    highlightEnabled: true,
+    template: '<div>{{name}} - {{descripcion}}</div>',
+    data: [
+        { name: 'Venezuela', descripcion: 'País rico en petróleo' }
+    ]
+});
+```
+
+Si buscas "vene", el resultado mostrará:
+
+```html
+<div><span class="search-highlight">Vene</span>zuela - País rico en petróleo</div>
+```
+
+### Ejemplo con Template de Función
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    highlightEnabled: true,
+    template: (item, highlightText) => {
+        return `<div class="item">
+            <h3>${highlightText(item.name)}</h3>
+            <p>${highlightText(item.descripcion)}</p>
+        </div>`;
+    },
+    data: [/* datos */]
+});
 ```
 
 ## Internacionalización (i18n)
@@ -2404,7 +2484,7 @@ search.ajax({ url: '/api', method: 'POST', body: data });
 // El componente usa fetch internamente
 ```
 
-2. **Actualizar configuración de fetch:**
+1. **Actualizar configuración de fetch:**
 
 ```javascript
 fetch: {
@@ -2417,7 +2497,7 @@ fetch: {
 }
 ```
 
-3. **Manejar errores con callbacks:**
+1. **Manejar errores con callbacks:**
 
 ```javascript
 fetch: {
@@ -2445,7 +2525,32 @@ Para navegadores antiguos, usa un polyfill:
 
 ## Changelog
 
-### Versión 2.1.0 (Actual)
+### Versión 2.2.0 (Actual)
+
+**Añadido:**
+
+- Resaltado de texto opcional para términos de búsqueda
+- Parámetro `highlightEnabled` para habilitar resaltado
+- Parámetro `highlightClass` para personalización CSS
+- Variables CSS `--search-highlight-bg-color` y `--search-highlight-text-color`
+- Enum `DomComponent` para mejor legibilidad en renderByDom
+
+**Mejorado:**
+
+- Refactorización del método `fetch` en searchingServer.ts (extraído a métodos privados)
+- Lógica mejorada en `setTheme` para cambio dinámico de temas
+- Constructor de EventEmitter ahora acepta parámetro opcional
+- Validación de parámetros extraída a método privado `#validateParameters`
+
+**Corregido:**
+
+- Removido código comentado en `setupKeyboardNavigation`
+- `DEFAULT_DEVELOPMENT_MODE` cambiado a `false` por defecto
+- Valor hardcodeado `max-height` reemplazado por variable CSS
+- Padding movido de colors.css a dimensions.css para mejor separación de responsabilidades
+- Inconsistencia en `selectedIndex` corregida usando constante `NO_SELECTION`
+
+### Versión 2.1.0
 
 **Nuevas características:**
 

@@ -2,7 +2,40 @@
 
 <p>Historial de versiones y cambios del componente.</p>
 
-<h2>v1.0.0 <span class="doc-badge doc-badge--success">Latest</span></h2>
+<h2>v2.2.0 <span class="doc-badge doc-badge--success">Latest</span></h2>
+
+<p><em>Fecha: 2026</em></p>
+
+<h3>Añadido</h3>
+
+<ul>
+    <li>Resaltado de texto opcional para términos de búsqueda</li>
+    <li>Parámetro <code>highlightEnabled</code> para habilitar resaltado</li>
+    <li>Parámetro <code>highlightClass</code> para personalización CSS</li>
+    <li>Variables CSS <code>--search-highlight-bg-color</code> y <code>--search-highlight-text-color</code></li>
+    <li>Enum <code>DomComponent</code> para mejor legibilidad en <code>renderByDom</code></li>
+</ul>
+
+<h3>Mejorado</h3>
+
+<ul>
+    <li>Refactorización del método <code>fetch</code> en <code>searchingServer.ts</code></li>
+    <li>Lógica mejorada en <code>setTheme</code> para cambio dinámico de temas</li>
+    <li>Constructor de <code>EventEmitter</code> ahora acepta parámetro opcional</li>
+    <li>Validación de parámetros extraída a método privado <code>#validateParameters</code></li>
+</ul>
+
+<h3>Corregido</h3>
+
+<ul>
+    <li>Removido código comentado en <code>setupKeyboardNavigation</code></li>
+    <li><code>DEFAULT_DEVELOPMENT_MODE</code> cambiado a <code>false</code> por defecto</li>
+    <li>Valor hardcodeado <code>max-height</code> reemplazado por variable CSS</li>
+    <li>Padding movido de <code>colors.css</code> a <code>dimensions.css</code> para mejor separación de responsabilidades</li>
+    <li>Inconsistencia en <code>selectedIndex</code> corregida usando constante <code>NO_SELECTION</code></li>
+</ul>
+
+<h2>v1.0.0</h2>
 
 <p><em>Fecha: 2026</em></p>
 
@@ -57,7 +90,7 @@
     <li><code>SEARCH_003</code> — elemento no encontrado</li>
     <li><code>SEARCH_004</code> — fetch.url requerido</li>
     <li><code>SEARCH_005</code> — itemsPerPage debe ser número</li>
-    <li><code>SEARCH_006</code> — itemsPerPage debe ser mayor a 0</li>
+    <li><code>SEARCH_006</code> — tipo de parámetro inválido</li>
     <li><code>SEARCH_007</code> — fetch.body debe ser objeto</li>
     <li><code>SEARCH_008</code> — timeout inválido</li>
     <li><code>SEARCH_009</code> — method HTTP inválido</li>

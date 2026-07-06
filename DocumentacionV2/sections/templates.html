@@ -22,33 +22,41 @@
 
 <h2>Plantilla con función</h2>
 
-<p>Para mayor control, usa una función que reciba el item y retorne HTML:</p>
+<p>Para mayor control, usa una función que reciba el item y un callback de resaltado, y retorne HTML:</p>
 
 <pre data-lang="javascript"><code>const search = new BuscadorDinamico.Search({
     element: '#app',
     data: productos,
-    template: (item) => `
+    template: (item, highlightText) => `
         &lt;div class="card"&gt;
             &lt;img src="${item.imagen}" alt="${item.nombre}"&gt;
-            &lt;h3&gt;${item.nombre}&lt;/h3&gt;
+            &lt;h3&gt;${highlightText(item.nombre)}&lt;/h3&gt;
             &lt;p class="price"&gt;$${item.precio.toFixed(2)}&lt;/p&gt;
             &lt;span class="category"&gt;${item.categoria}&lt;/span&gt;
         &lt;/div&gt;
     `
 }).init();</code></pre>
 
+<div class="doc-callout doc-callout--info">
+    <span class="doc-callout__icon">💡</span>
+    <div class="doc-callout__content">
+        <strong>Callback highlightText</strong>
+        <p>Cuando <code>highlightEnabled</code> está activo, el segundo parámetro <code>highlightText</code> es una función que envuelve el texto con un <code>&lt;span&gt;</code> resaltado. Puedes usarla en cualquier campo del item. Si <code>highlightEnabled</code> es <code>false</code>, el callback retorna el texto sin modificar.</p>
+    </div>
+</div>
+
 <h2>Ejemplo práctico</h2>
 
-<p>Creando una tarjeta de producto completa:</p>
+<p>Creando una tarjeta de producto completa con resaltado:</p>
 
-<pre data-lang="javascript"><code>const template = (item) => `
+<pre data-lang="javascript"><code>const template = (item, highlightText) => `
     &lt;div class="product-card" data-id="${item.id}"&gt;
         &lt;div class="product-card__image"&gt;
             &lt;img src="${item.image}" alt="${item.name}" loading="lazy"&gt;
         &lt;/div&gt;
         &lt;div class="product-card__body"&gt;
-            &lt;h3 class="product-card__title"&gt;${item.name}&lt;/h3&gt;
-            &lt;p class="product-card__desc"&gt;${item.description}&lt;/p&gt;
+            &lt;h3 class="product-card__title"&gt;${highlightText(item.name)}&lt;/h3&gt;
+            &lt;p class="product-card__desc"&gt;${highlightText(item.description)}&lt;/p&gt;
             &lt;div class="product-card__footer"&gt;
                 &lt;span class="product-card__price"&gt;$${item.price}&lt;/span&gt;
                 &lt;span class="product-card__badge"&gt;${item.category}&lt;/span&gt;
