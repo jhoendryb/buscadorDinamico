@@ -4,7 +4,7 @@
 
 .content-pagination-items {
     will-change: opacity, transform;
-    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, border-color 0.2s ease-in-out, border-bottom 0.2s ease-in-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
