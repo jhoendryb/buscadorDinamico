@@ -84,7 +84,7 @@
 .app-search:has(.content-pagination-items:last-child.content-pagination-visible),
 .app-search:has(.content-pagination-items:last-child.content-pagination-visible) .input-search {
     border-radius: var(--search-border-radius-open);
-    border-bottom: none;
+    /* border-bottom: none; */
 }
 
 .app-search:has(.content-pagination-items:first-child.content-pagination-visible),
