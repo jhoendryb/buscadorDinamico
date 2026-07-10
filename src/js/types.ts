@@ -20,6 +20,8 @@ export interface SearchParams {
     developmentMode?: boolean;
     highlightEnabled?: boolean;
     highlightClass?: string;
+    historyEnabled?: boolean;
+    historyMaxItems?: number;
 }
 
 export interface FetchConfig {

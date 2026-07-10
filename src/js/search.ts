@@ -83,6 +83,8 @@ const search4 = new Search({
     element: '.app-search4',
     dom: 'pics',
     keyboardEnabled: true,
+    historyEnabled: true,
+    historyMaxItems: 5,
     theme: 'clean-white',
     data: [
         {

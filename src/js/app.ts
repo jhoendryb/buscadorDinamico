@@ -9,12 +9,12 @@ import {
     SearchError,
     ErrorCode,
     ErrorHandler,
+    SearchHistory,
     Constants,
     Types
 } from './index';
 
 class Search {
-    // Declaraciones de propiedades
     element: string;
     theme: string;
     searchTerm: string;
@@ -46,9 +46,13 @@ class Search {
     searching: (searchTerm: string, isEvent: boolean) => Promise<void> = async () => { };
     highlightEnabled: boolean;
     highlightClass: string;
+    historyEnabled: boolean;
+    historyMaxItems: number;
     private errorHandler: ErrorHandler;
     private searchingLocal: SearchingLocal;
     private searchingServer: SearchingServer;
+    private history: SearchHistory;
+    private historyMode: boolean = false;
     /**
      * Instancia que almacena las traducciones predeterminadas.
      * @type {Types.TranslationCache}
@@ -80,6 +84,8 @@ class Search {
         this.selectedIndex = Constants.NO_SELECTION;
         this.developmentMode = Constants.DEFAULT_DEVELOPMENT_MODE;
         this.highlightEnabled = Constants.DEFAULT_HIGHLIGHT_ENABLED;
+        this.historyEnabled = Constants.DEFAULT_HISTORY_ENABLED;
+        this.historyMaxItems = Constants.DEFAULT_HISTORY_MAX_ITEMS;
         this.highlightClass = "";
 
         Object.assign(this, newParams);
@@ -114,6 +120,7 @@ class Search {
             this.pagination.setDataItemsFunction((): Record<string, any>[] => {
                 return this._data || [];
             });
+            this.history = new SearchHistory(this.historyMaxItems);
 
             this.t = { ...Search.#defaultTranslations, ...translation };
 
@@ -205,6 +212,25 @@ class Search {
             this.pagination.goToPage(1);
             this.selectedIndex = -1;
         }
+
+        if (searchTerm === '' && this.historyEnabled) {
+            const historyItems = this.history.get();
+            if (historyItems.length > 0) {
+                this.historyMode = true;
+                this.renderer.showHistory(historyItems, this);
+                if (!this.keyboardEnabled) {
+                    this.setupKeyboardNavigation();
+                }
+                return this;
+            }
+        }
+
+        this.historyMode = false;
+
+        if (this.historyEnabled && searchTerm) {
+            this.history.add(searchTerm);
+        }
+
         await this.searching(searchTerm, isEvent);
         this.processInfiniteScroll();
         return this;
@@ -454,7 +480,7 @@ class Search {
      * @return {Search} - The current instance of {@link Search} for chaining methods.
      */
     setupKeyboardNavigation(): Search {
-        if (!this.keyboardEnabled) return this;
+        if (!this.keyboardEnabled && !this.historyMode) return this;
 
         const content = this.renderer.body.content;
         const renderItems = this.renderer.body.renderItems;

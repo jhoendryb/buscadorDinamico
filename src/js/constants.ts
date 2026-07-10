@@ -12,6 +12,9 @@ export const DEFAULT_DEVELOPMENT_MODE = false;
 export const DEFAULT_THEME = "adaptative";
 export const DEFAULT_TIME_HIDDEN_RESULTS = 200;
 export const DEFAULT_HIGHLIGHT_ENABLED = false;
+export const DEFAULT_HISTORY_ENABLED = false;
+export const DEFAULT_HISTORY_MAX_ITEMS = 10;
+
 
 // Valores especiales
 export const NO_SELECTION = -1;

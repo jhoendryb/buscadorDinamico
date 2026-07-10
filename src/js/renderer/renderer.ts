@@ -1,5 +1,6 @@
 import { createElement } from '../renderElement';
 import { EventEmitter } from '../events/eventEmitter';
+import { Search } from '../app';
 import * as Types from '../types';
 
 /**
@@ -444,5 +445,31 @@ export class SearchRenderer {
         return newContentPagItems;
     }
 
+    showHistory(history: string[], searchInstance: Search): void {
+        const container = this.body.renderItems;
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (history.length === 0) {
+            return;
+        }
+
+        history.forEach(term => {
+            const item = createElement({
+                element: 'li',
+                className: 'items history-item',
+                textContent: term,
+                event: {
+                    click: (e: Event) => {
+                        const text = (e.target as HTMLElement).innerText;
+                        (this.body.inputSearch as HTMLInputElement).value = text;
+                        searchInstance.draw(text, true);
+                    }
+                }
+            });
+            container.appendChild(item);
+        });
+    }
 
 }

@@ -47,6 +47,25 @@
     border-top-color: var(--search-border-color);
 }
 
+.history-item {
+    color: #666;
+    font-style: italic;
+    opacity: 0.8;
+    transition: all 0.2s ease;
+}
+
+.history-item:hover {
+    color: #000;
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.history-item[aria-selected="true"] {
+    background-color: var(--search-highlight-bg-color, #ffeb3b);
+    color: var(--search-highlight-text-color, #000);
+    opacity: 1;
+}
+
 .spinner {
     border-color: var(--spinner-border-color);
     border-top-color: var(--spinner-top-color);
