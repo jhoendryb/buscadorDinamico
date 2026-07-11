@@ -19,6 +19,10 @@ Una clase TypeScript flexible y moderna para crear buscadores dinámicos con sop
 - **Múltiples instancias** en la misma página sin conflictos
 - **Accesibilidad** con ARIA attributes
 - **Resaltado de texto** opcional para términos de búsqueda
+- **Búsqueda en objetos anidados** — Busca recursivamente dentro de objetos nested
+- **Normalización Unicode** — Ignora tildes y diacriticos al buscar (café = cafe)
+- **Adapter de respuesta** — Transforma respuestas del servidor con `responseAdapter`
+- **Método `clear()`** — Resetea estado sin destruir la instancia
 - **Build moderno** con Vite (ES Module + UMD)
 
 ## Tabla de Contenidos
@@ -36,6 +40,9 @@ Una clase TypeScript flexible y moderna para crear buscadores dinámicos con sop
 - [Scroll Infinito](#scroll-infinito)
 - [Navegación por Teclado](#navegación-por-teclado)
 - [Templates Personalizados](#templates-personalizados)
+- [Resaltado de Texto](#resaltado-de-texto)
+- [Adapter de Respuesta](#adapter-de-respuesta)
+- [Búsqueda en Objetos Anidados](#búsqueda-en-objetos-anidados)
 - [Internacionalización](#internacionalización-i18n)
 - [Sistema de Caché](#sistema-de-caché)
 - [Gestión de Errores](#gestión-de-errores)
@@ -340,6 +347,7 @@ const search = new Search({
 | `developmentMode` | Boolean | `false` | Modo desarrollo con logs detallados |
 | `highlightEnabled` | Boolean | `false` | Habilita resaltado del término de búsqueda en resultados |
 | `highlightClass` | String | `""` | Clase CSS adicional para el resaltado |
+| `responseAdapter` | Function | `null` | Función para transformar la respuesta del servidor: `(response) => { data, countPage }` |
 | `fetch` | Object | `{}` | Configuración de Fetch API (solo si `procesServer: true`) |
 
 ### Configuración del Objeto `fetch`
@@ -824,6 +832,8 @@ fetch: {
 |--------|----------------|----------------|
 | `init` | Al inicializar el componente | `{ searchTerm, itemsPerPage, procesServer }` |
 | `search` | Al realizar una búsqueda | `{ searchTerm, results, totalResults, timestamp }` |
+| `resultsCleared` | Al cambiar término y limpiar resultados | `{ previousSearchTerm }` |
+| `searchComplete` | Al completar búsqueda y renderizado | `{ searchTerm, results, totalResults }` |
 | `pageChange` | Al cambiar de página | `{ page, totalPages, itemsOnPage, totalLoaded }` |
 | `sortChange` | Al cambiar el ordenamiento | `{ field, order }` |
 | `itemSelected` | Al seleccionar un item | `{ item, index }` |
@@ -894,6 +904,24 @@ search.events.removeAllListeners('search');
 search.events.removeAllListeners();
 ```
 
+### Eventos Adicionales
+
+El componente emite dos eventos adicionales durante el ciclo de vida de la búsqueda:
+
+```javascript
+// Se emite cuando cambia el término de búsqueda y se limpian los resultados
+search.on('resultsCleared', (data) => {
+    console.log('Término anterior:', data.previousSearchTerm);
+});
+
+// Se emite cuando la búsqueda completa renderiza sus resultados
+search.on('searchComplete', (data) => {
+    console.log('Búsqueda:', data.searchTerm);
+    console.log('Resultados:', data.results);
+    console.log('Total:', data.totalResults);
+});
+```
+
 ### Listener de Una Sola Vez
 
 ```javascript
@@ -936,7 +964,7 @@ search.init();
 
 ### draw(searchTerm, isEvent)
 
-Ejecuta una búsqueda y renderiza los resultados.
+Ejecuta una búsqueda y renderiza los resultados. Incluye protección contra condiciones de carrera: si se ejecuta una nueva búsqueda antes de que termine la anterior, la anterior se descarta automáticamente.
 
 ```javascript
 await search.draw('venezuela', true);
@@ -952,9 +980,11 @@ await search.draw('venezuela', true);
 **Funcionamiento:**
 
 - Resetea el scroll si cambia el término de búsqueda
+- Emite evento `resultsCleared` cuando se limpian resultados anteriores
 - Ejecuta la búsqueda (local o servidor)
 - Procesa scroll infinito
-- Emite eventos correspondientes
+- Emite evento `searchComplete` al finalizar
+- Descarta resultados obsoletos si se inició una nueva búsqueda (race condition guard)
 
 ### sort(field, order)
 
@@ -993,6 +1023,25 @@ search.clearSort();
 - Reinicia `sortOrder` a 'asc'
 - Limpia el caché
 - En modo servidor: envía parámetros de reinicio al servidor
+
+### clear()
+
+Resetea el estado del componente sin destruirlo. Limpia el término de búsqueda, el input, los resultados, la paginación, el caché y la selección actual.
+
+```javascript
+search.clear(); // Resetea todo el estado
+```
+
+**Retorna:** Instancia de Search para encadenamiento
+
+**Funcionamiento:**
+
+- Reinicia `searchTerm` a `""`
+- Limpia el valor del input
+- Vacía el contenedor de resultados
+- Reinicia la paginación a página 1
+- Limpia el caché
+- Reinicia `selectedIndex` a `NO_SELECTION`
 
 ### on(eventName, callback)
 
@@ -1069,7 +1118,7 @@ search.setupKeyboardNavigation();
 
 ### destroy()
 
-Destruye la instancia de Search, limpiando recursos y event listeners.
+Destruye la instancia de Search, limpiando recursos y event listeners. Las propiedades internas se re-inicializan en lugar de nullificarse para evitar errores de referencia nula.
 
 ```javascript
 search.destroy();
@@ -1080,10 +1129,10 @@ search.destroy();
 **Funcionamiento:**
 
 - Emite evento `destroy`
+- Remueve event listeners por referencia (no por recreación)
 - Limpia IntersectionObserver
 - Limpia timeouts de animación
-- Remueve event listeners del input
-- Limpia todas las referencias internas
+- Re-inicializa `cache`, `pagination`, `events` y `renderer` (no los pone a null)
 - No elimina el HTML del DOM
 
 ## Métodos de Paginación
@@ -1320,7 +1369,7 @@ template: (item) => {
 
 ## Resaltado de Texto
 
-El componente puede resaltar automáticamente el término de búsqueda en los resultados para mejorar la experiencia del usuario.
+El componente puede resaltar automáticamente el término de búsqueda en los resultados para mejorar la experiencia del usuario. El motor de resaltado escapa caracteres especiales de regex para evitar errores con términos como `(`, `+`, `[`, etc.
 
 ### Configuración
 
@@ -1391,6 +1440,82 @@ const search = new Search({
     data: [/* datos */]
 });
 ```
+
+## Adapter de Respuesta
+
+El parámetro `responseAdapter` permite transformar la respuesta del servidor al formato esperado por el componente `{ data: [], countPage: number }`.
+
+### Cuándo usarlo
+
+Úsalo cuando tu API retorna los datos en un formato diferente al esperado.
+
+### Ejemplo
+
+```javascript
+const search = new Search({
+    element: '.app-search',
+    procesServer: true,
+    responseAdapter: (response) => {
+        // Tu API retorna: { results: [...], total: 100, page: 1 }
+        return {
+            data: response.results,
+            countPage: response.total
+        };
+    },
+    fetch: {
+        url: 'https://api.ejemplo.com/buscar',
+        method: 'POST',
+        body: { page: 1, searchTerm: "" }
+    }
+});
+```
+
+### Formato de retorno
+
+```typescript
+(response: any) => { data: any[]; countPage: number }
+```
+
+Si no se proporciona un `responseAdapter`, el componente espera que el servidor retorne directamente `{ data: [], countPage: number }`.
+
+## Búsqueda en Objetos Anidados
+
+El componente busca recursivamente dentro de objetos anidados. No necesitas aplanar los datos manualmente.
+
+### Ejemplo
+
+```javascript
+const data = [
+    {
+        id: 1,
+        name: 'Venezuela',
+        capital: { name: 'Caracas', population: 2900000 }
+    },
+    {
+        id: 2,
+        name: 'Colombia',
+        capital: { name: 'Bogotá', population: 7400000 }
+    }
+];
+
+const search = new Search({
+    element: '.app-search',
+    data: data
+});
+
+search.init();
+
+// Buscar por "caracas" encuentra el item con capital.name = "Caracas"
+// Buscar por "7400000" encuentra el item con capital.population = 7400000
+```
+
+### Normalización Unicode
+
+La búsqueda ignora tildes y diacriticos automáticamente:
+
+- "café" coincide con "cafe"
+- "Venezolá" coincide con "Venezola"
+- "über" coincide con "uber"
 
 ## Internacionalización (i18n)
 
@@ -2101,7 +2226,7 @@ interface SearchParams {
     procesServer?: boolean;
     keyboardEnabled?: boolean;
     cacheEnabled?: boolean;
-    template?: string | ((item: any) => string);
+    template?: string | ((item: any, highlightText?: (text: string) => string) => string);
     sortBy?: string;
     zIndex?: number;
     sortOrder?: 'asc' | 'desc';
@@ -2113,6 +2238,9 @@ interface SearchParams {
     fetch?: FetchConfig;
     translation?: TranslationCache;
     developmentMode?: boolean;
+    highlightEnabled?: boolean;
+    highlightClass?: string;
+    responseAdapter?: (response: any) => { data: any[]; countPage: number };
 }
 
 interface FetchConfig {
@@ -2527,7 +2655,43 @@ Para navegadores antiguos, usa un polyfill:
 
 ## Changelog
 
-### Versión 2.2.0 (Actual)
+### Versión 2.3.0 (Actual)
+
+**Añadido:**
+
+- Parámetro `responseAdapter` para transformar respuestas del servidor personalizadas
+- Método `clear()` para resetear estado sin destruir la instancia
+- Evento `resultsCleared` emitido al cambiar término de búsqueda
+- Evento `searchComplete` emitido al completar búsqueda y renderizado
+- Búsqueda recursiva en objetos anidados (`flattenValues`)
+- Normalización Unicode para búsqueda con tildes/diacriticos
+- Protección contra condiciones de carrera en `draw()` (race condition guard)
+- Protección contra re-entrancy en `#loadMore()` (`isLoadingMore` guard)
+- Estilos de scrollbar cross-browser para Firefox (`scrollbar-width`, `scrollbar-color`)
+- `prefers-reduced-motion` ahora desactiva TODAS las transiciones/animaciones globalmente
+
+**Mejorado:**
+
+- `draw()` ahora retorna `Promise<Search>` (antes `Promise<void>`) para encadenamiento
+- `cache.has()` ahora refresca TTL al acceder (true LRU behavior)
+- `setItemsPerPage()` valida que el valor sea >= 1
+- `hideResults()` usa `timeHiddenResults` configurable (antes hardcodeado 200ms)
+- `destroy()` re-inicializa objetos en lugar de nullificarlos (previene null reference errors)
+- `destroy()` remueve event listeners por referencia (cleanup correcto)
+- Typo corregido: `firtsLoad` -> `firstLoad` en `renderer.appendItems()`
+- `#highlightText()` escapa caracteres especiales de regex para evitar errores
+- `setupKeyboardNavigation()` almacena handlers en referencias bound para cleanup
+- ScrollObserver se reutiliza en lugar de recrearse en cada página
+- Sentinel de scroll se limpia individualmente antes de reconfigurar
+
+**Corregido:**
+
+- `highlightText()` ahora escapa caracteres regex especiales (`(`, `+`, `[`, etc.)
+- Cache almacena `_data` completa en lugar de solo `data` (server mode)
+- `clearCacheByPrefix()` valida searchTerm vacío antes de iterar
+- `processInfiniteScroll()` ya no se llama desde `searchingServer` (manejado por `draw()`)
+
+### Versión 2.2.0
 
 **Añadido:**
 

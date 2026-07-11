@@ -354,7 +354,6 @@ class Search {
      * Genera un nombre de clase CSS único basado en el selector del elemento.
      * @param {string} baseClass - Clase base (ej: "input-search")
      * @returns {string} Nombre de clase único (ej: "input-search-mi-buscador")
-     * @private
      */
     #getUniqueClassName(baseClass: string): string {
         const parentSelector = this.element.replace(/^[.#]/, '');
@@ -511,7 +510,6 @@ class Search {
      * Destaca el item seleccionado agregando la clase 'selected'.
      * Remueve la clase de todos los demás items.
      * 
-     * @private
      * @param {NodeList} items - Lista de items del DOM
      * @returns {void}
      * @fires Search#itemHighlighted - Se emite cuando se destaca un item
@@ -537,7 +535,6 @@ class Search {
     /**
      * Selecciona un item y emite el evento 'itemSelected'.
      * 
-     * @private
      * @param {HTMLElement} item - Elemento DOM del item a seleccionar
      * @returns {void}
      * @fires Search#itemSelected - Se emite cuando se selecciona un item

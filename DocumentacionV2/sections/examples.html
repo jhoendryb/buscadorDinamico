@@ -168,7 +168,45 @@ document.getElementById('btn-ordenar').addEventListener('click', () => {
 document.getElementById('btn-reset').addEventListener('click', () => {
     search.clearSort();
     search.draw('');
+});
+
+// Reseteear estado completo
+document.getElementById('btn-clear').addEventListener('click', () => {
+    search.clear();
 });</code></pre>
+
+<h2>Con adapter de respuesta</h2>
+
+<pre data-lang="javascript"><code>new Search({
+    element: '#app',
+    procesServer: true,
+    responseAdapter: (response) => {
+        // Tu API retorna: { results: [...], total: 100 }
+        return {
+            data: response.results,
+            countPage: response.total
+        };
+    },
+    fetch: {
+        url: 'https://api.miapp.com/buscar',
+        method: 'POST',
+        body: { page: 1, searchTerm: "" }
+    }
+}).init();</code></pre>
+
+<h2>Con búsqueda en objetos anidados</h2>
+
+<pre data-lang="javascript"><code>const data = [
+    { id: 1, name: 'Venezuela', capital: { name: 'Caracas' } },
+    { id: 2, name: 'Colombia', capital: { name: 'Bogotá' } }
+];
+
+new Search({
+    element: '#app',
+    data: data
+}).init();
+
+// Buscar por "caracas" encuentra el item con capital.name = "Caracas"</code></pre>
 
 <h2>Integración con frameworks</h2>
 

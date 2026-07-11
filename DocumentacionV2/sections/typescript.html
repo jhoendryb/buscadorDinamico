@@ -42,6 +42,7 @@
     developmentMode?: boolean;
     highlightEnabled?: boolean;
     highlightClass?: string;
+    responseAdapter?: (response: any) => { data: any[]; countPage: number };
 }</code></pre>
 
 <h2>Interfaz FetchConfig</h2>
@@ -97,6 +98,16 @@ interface ItemHighlightedEventData {
 
 interface DestroyEventData {
     timestamp: string;
+}
+
+interface ResultsClearedEventData {
+    previousSearchTerm: string;
+}
+
+interface SearchCompleteEventData {
+    searchTerm: string;
+    results: Record&lt;string, any&gt;[];
+    totalResults: number;
 }</code></pre>
 
 <h2>Uso con tipos</h2>

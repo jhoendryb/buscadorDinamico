@@ -22,7 +22,7 @@
 
 <pre data-lang="typescript"><code>draw(searchTerm?: string, isEvent?: boolean): Promise&lt;Search&gt;</code></pre>
 
-<p>Ejecuta una búsqueda y renderiza los resultados. Se llama automáticamente al escribir en el input.</p>
+<p>Ejecuta una búsqueda y renderiza los resultados. Se llama automáticamente al escribir en el input. Incluye protección contra condiciones de carrera: si se ejecuta una nueva búsqueda antes de que termine la anterior, la anterior se descarta automáticamente.</p>
 
 <table>
     <thead>
@@ -64,6 +64,14 @@ search.sort('precio', 'desc');</code></pre>
 
 <p>Elimina el orden actual y reinicia al orden natural de los datos.</p>
 
+<h3>clear()</h3>
+
+<pre data-lang="typescript"><code>clear(): Search</code></pre>
+
+<p>Resetea el estado del componente sin destruirlo. Limpia el término de búsqueda, el input, los resultados, la paginación, el caché y la selección actual.</p>
+
+<pre data-lang="javascript"><code>search.clear(); // Resetea todo el estado</code></pre>
+
 <h3>showLoading()</h3>
 
 <pre data-lang="typescript"><code>showLoading(): Search</code></pre>
@@ -97,7 +105,7 @@ search.sort('precio', 'desc');</code></pre>
 
 <pre data-lang="typescript"><code>destroy(): void</code></pre>
 
-<p>Destruye la instancia, limpiando todos los event listeners, observer de scroll y referencias internas.</p>
+<p>Destruye la instancia, limpiando todos los event listeners, observer de scroll y referencias internas. Las propiedades se re-inicializan en lugar de nullificarse para evitar errores de referencia nula.</p>
 
 <pre data-lang="javascript"><code>search.destroy(); // Limpia todo</code></pre>
 

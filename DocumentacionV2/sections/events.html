@@ -57,6 +57,33 @@ interface SearchEventInit {
     console.log(`Items cargados: ${data.totalLoaded}`);
 });</code></pre>
 
+<h3>resultsCleared</h3>
+
+<p>Se emite cuando cambia el término de búsqueda y se limpian los resultados anteriores.</p>
+
+<pre data-lang="typescript"><code>interface ResultsClearedEventData {
+    previousSearchTerm: string;
+}</code></pre>
+
+<pre data-lang="javascript"><code>search.on('resultsCleared', (data) => {
+    console.log('Término anterior:', data.previousSearchTerm);
+});</code></pre>
+
+<h3>searchComplete</h3>
+
+<p>Se emite cuando la búsqueda completa renderiza sus resultados.</p>
+
+<pre data-lang="typescript"><code>interface SearchCompleteEventData {
+    searchTerm: string;
+    results: Record&lt;string, any&gt;[];
+    totalResults: number;
+}</code></pre>
+
+<pre data-lang="javascript"><code>search.on('searchComplete', (data) => {
+    console.log('Búsqueda:', data.searchTerm);
+    console.log('Total:', data.totalResults);
+});</code></pre>
+
 <h3>sortChange</h3>
 
 <p>Se emite cuando cambia el ordenamiento de los datos.</p>

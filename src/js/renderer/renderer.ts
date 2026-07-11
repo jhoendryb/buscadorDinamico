@@ -410,7 +410,7 @@ export class SearchRenderer {
                 if (contentPagination.classList.contains('content-pagination-hidden')) {
                     contentPagination.setAttribute('hidden', 'true');
                 }
-            }, 200);
+            }, this.timeHiddenResults);
             this.animationTimeouts.push(timeout);
         }
     }
