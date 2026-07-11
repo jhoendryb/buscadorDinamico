@@ -315,6 +315,7 @@ class Search {
                 this.template,
                 this.t.noResults,
                 this.events,
+                (this.pagination.getCurrentPage() === 1),
                 this.#highlightText.bind(this)
             );
 
@@ -326,14 +327,6 @@ class Search {
         const loaded = this.pagination.getTotalLoaded();
         const total = this.pagination.getTotalItems();
         this.renderer.updateCounter(loaded, total, this.t.pagination);
-
-        // Si no hay más páginas, ocultar botón de cargar más
-        if (!this.pagination.hasMorePages()) {
-            const loadMoreButton = this.renderer.body.paginationItems?.querySelector('.load-more-button') as HTMLButtonElement;
-            if (loadMoreButton) {
-                loadMoreButton.style.display = 'none';
-            }
-        }
 
         return this;
     }
@@ -457,6 +450,7 @@ class Search {
 
         const content = this.renderer.body.content;
         const renderItems = this.renderer.body.renderItems;
+        const input = this.renderer.body.inputSearch;
 
         renderItems?.addEventListener('click', (e: Event) => {
             e.preventDefault();
@@ -468,6 +462,9 @@ class Search {
                 this.selectedIndex = Array.from(items).indexOf(item);
                 this.#highlightItem(items);
                 this.#selectItem(item);
+                input.value = '';
+                input.dispatchEvent(new Event('input'));
+                input.blur();
             }
         });
 
@@ -483,9 +480,12 @@ class Search {
                 e.preventDefault();
                 this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
                 this.#highlightItem(items);
-            } else if (['enter', 'click'].includes(e.key.toLowerCase()) && this.selectedIndex >= 0) {
+            } else if (['enter'].includes(e.key.toLowerCase()) && this.selectedIndex >= 0) {
                 e.preventDefault();
                 this.#selectItem(items[this.selectedIndex]);
+                input.value = '';
+                input.dispatchEvent(new Event('input'));
+                input.blur();
             }
         });
 

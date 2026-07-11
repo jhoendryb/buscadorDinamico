@@ -58,10 +58,10 @@ search1.on('itemSelected', (data: any) => {
 
     data.close();
 
-    const input = document.querySelector(".filter-search-app-search1");
-    if (input) {
-        (input as HTMLInputElement).blur();
-    }
+    // const input = document.querySelector(".filter-search-app-search1");
+    // if (input) {
+    //     (input as HTMLInputElement).blur();
+    // }
 });
 
 // const search2 = new Search({
@@ -91,6 +91,7 @@ const search4 = new Search({
     element: '.app-search4',
     dom: 'pics',
     keyboardEnabled: true,
+    cacheEnabled: true,
     theme: 'clean-white',
     data: arrayData
 });

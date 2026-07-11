@@ -12,7 +12,7 @@ Una clase TypeScript flexible y moderna para crear buscadores dinámicos con sop
 - **Caché LRU** con TTL para optimizar rendimiento
 - **Templates personalizados** para renderizado de items
 - **Internacionalización** (i18n) con traducciones configurables
-- **Temas CSS predefinidos** (clean-white, blue-black, onyx-black, forest-green)
+- **Temas CSS predefinidos** (adaptative, clean-white, blue-black, onyx-black, forest-green)
 - **30+ variables CSS** personalizables
 - **Gestión de errores centralizada** con mensajes claros
 - **TypeScript** con type safety completo
@@ -170,6 +170,7 @@ buscadorDinamico/
 │   │   │   └── typography.css      # Tipografía
 │   │   └── themes/                 # Temas predefinidos
 │   │       ├── index.css
+│   │       ├── adaptative.css      # Tema adaptativo (light/dark)
 │   │       ├── clean-white.css     # Tema blanco limpio
 │   │       ├── blue-black.css      # Tema azul oscuro
 │   │       ├── onyx-black.css      # Tema negro onyx
@@ -542,11 +543,11 @@ CSS de estilización personalizable:
 
 ### Temas Predefinidos
 
-El componente incluye 4 temas predefinidos que puedes usar directamente:
+El componente incluye 5 temas predefinidos que puedes usar directamente:
 
 | Tema | Descripción |
 |------|-------------|
-| `default` | Tema por defecto con colores neutros |
+| `adaptative` | **Tema por defecto**. Se adapta automáticamente al modo light/dark del sistema via atributo `data-theme` |
 | `clean-white` | Blanco limpio, bordes sutiles, azul para selección |
 | `blue-black` | Azul oscuro (#21213e), hover azul intenso |
 | `onyx-black` | Negro puro (#121212), azul brillante para selección |
