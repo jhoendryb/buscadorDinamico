@@ -6,7 +6,7 @@ import { Search } from './app';
 
 const search1 = new Search({
     element: '.app-search1',
-    theme: 'forest-green',
+    theme: 'onyx-black',
     procesServer: true,
     cacheEnabled: true,
     keyboardEnabled: true,
