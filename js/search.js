@@ -38,6 +38,7 @@ const SEARCH_DATA = [
     { title: 'Vía CDN', route: '#/installation', segment: 'via-cdn-umd', category: 'Inicio', badge: 'info', description: 'Uso directo sin bundler via unpkg', keywords: 'cdn unpkg script tag umd' },
     { title: 'Vía script tag ES Module', route: '#/installation', segment: 'via-script-tag-es-module', category: 'Inicio', badge: 'info', description: 'Módulo ES con import en navegador', keywords: 'script module es import' },
     { title: 'Descarga manual', route: '#/installation', segment: 'descarga-manual', category: 'Inicio', badge: 'info', description: 'Descargar archivos directamente desde GitHub', keywords: 'descarga manual github release' },
+    { title: 'Estructura de archivos', route: '#/installation', segment: 'estructura-de-archivos', category: 'Inicio', badge: 'info', description: 'Estructura de directorios tras instalar', keywords: 'estructura archivos carpetas directorio install' },
     { title: 'Verificación', route: '#/installation', segment: 'verificacion', category: 'Inicio', badge: 'info', description: 'Confirmar que la instalación fue exitosa', keywords: 'verificar comprobar test instalar' },
 
     // ── Configuración ──────────────────────────────────────────────
@@ -78,16 +79,22 @@ const SEARCH_DATA = [
     { title: 'Aplicar un tema', route: '#/css-themes', segment: 'aplicar-un-tema', category: 'Guías', badge: 'success', description: 'Configurar tema en el constructor con theme', keywords: 'aplicar tema configurar theme' },
     { title: 'Cambiar tema dinámicamente', route: '#/css-themes', segment: 'cambiar-tema-dinamicamente', category: 'Guías', badge: 'success', description: 'Usar renderer.setTheme() después de inicializar', keywords: 'cambiar tema dinamico setTheme' },
     { title: 'Variables CSS personalizables', route: '#/css-themes', segment: 'variables-css-personalizables', category: 'Guías', badge: 'success', description: 'Dimensiones, colores y bordes editables vía CSS', keywords: 'variables css custom properties dimensiones colores' },
+    { title: 'Dimensiones', route: '#/css-themes', segment: 'dimensiones', category: 'Guías', badge: 'success', description: 'Variables CSS de dimensiones del componente', keywords: 'dimensiones width height border-radius padding' },
+    { title: 'Colores', route: '#/css-themes', segment: 'colores', category: 'Guías', badge: 'success', description: 'Variables CSS de colores del tema', keywords: 'colores colors background text shadow input hover' },
+    { title: 'Bordes', route: '#/css-themes', segment: 'bordes', category: 'Guías', badge: 'success', description: 'Variables CSS de bordes', keywords: 'bordes borders width style radius' },
+    { title: 'Resaltado', route: '#/css-themes', segment: 'resaltado', category: 'Guías', badge: 'success', description: 'Variables CSS para el resaltado de texto', keywords: 'resaltado highlight color background search' },
     { title: 'Crear un tema personalizado', route: '#/css-themes', segment: 'crear-un-tema-personalizado', category: 'Guías', badge: 'success', description: 'Definir .app-search.theme-mi-tema con variables', keywords: 'crear tema personalizado custom theme' },
     { title: 'Soporte dark/light mode', route: '#/css-themes', segment: 'soporte-dark-light-mode', category: 'Guías', badge: 'success', description: 'Tema adaptative con prefers-color-scheme', keywords: 'dark light mode prefer system' },
 
     // ── API ────────────────────────────────────────────────────────
     { title: 'API', route: '#/api', segment: '', category: 'Referencia', badge: 'warning', description: 'Referencia completa de la interfaz pública', keywords: 'api referencia publica interfaz' },
     { title: 'Constructor', route: '#/api', segment: 'constructor', category: 'Referencia', badge: 'warning', description: 'new Search(params: SearchParams): Search', keywords: 'constructor new crear instancia' },
+    { title: 'Métodos públicos', route: '#/api', segment: 'metodos-publicos', category: 'Referencia', badge: 'warning', description: 'Todos los métodos disponibles en la API', keywords: 'metodos methods publicos api init draw sort clear destroy' },
     { title: 'init()', route: '#/api', segment: 'init', category: 'Referencia', badge: 'warning', description: 'Inicializa el componente y renderiza la estructura DOM', keywords: 'init inicializar render setup' },
     { title: 'draw()', route: '#/api', segment: 'draw-searchterm-isevent', category: 'Referencia', badge: 'warning', description: 'Ejecuta búsqueda y renderiza resultados', keywords: 'draw buscar search render resultados' },
     { title: 'sort()', route: '#/api', segment: 'sort-field-order', category: 'Referencia', badge: 'warning', description: 'Ordena datos por campo específico', keywords: 'sort ordenar ascending descending' },
     { title: 'clearSort()', route: '#/api', segment: 'clearsort', category: 'Referencia', badge: 'warning', description: 'Elimina ordenamiento y reinicia a orden natural', keywords: 'clearsort limpiar orden reset' },
+    { title: 'clear()', route: '#/api', segment: 'clear', category: 'Referencia', badge: 'warning', description: 'Resetea el estado del componente sin destruirlo', keywords: 'clear resetear estado limpiar input busqueda' },
     { title: 'showLoading()', route: '#/api', segment: 'showloading', category: 'Referencia', badge: 'warning', description: 'Muestra indicador de carga en resultados', keywords: 'showloading carga spinner indicator' },
     { title: 'on()', route: '#/api', segment: 'oneventname-callback', category: 'Referencia', badge: 'warning', description: 'Registra listener para eventos del componente', keywords: 'on event listener registrar callback' },
     { title: 'getCacheKey()', route: '#/api', segment: 'getcachekey-searchterm-page', category: 'Referencia', badge: 'warning', description: 'Genera clave de caché para búsqueda y página', keywords: 'getcachekey cache key clave' },
@@ -99,9 +106,12 @@ const SEARCH_DATA = [
     // ── Eventos ────────────────────────────────────────────────────
     { title: 'Eventos', route: '#/events', segment: '', category: 'Referencia', badge: 'warning', description: 'Sistema de eventos personalizado con EventEmitter', keywords: 'events emit on event emitter callback' },
     { title: 'Uso básico de eventos', route: '#/events', segment: 'uso-basico', category: 'Referencia', badge: 'warning', description: 'Cómo registrar y escuchar eventos', keywords: 'uso basico como registrar escuchar' },
+    { title: 'Lista de eventos', route: '#/events', segment: 'lista-de-eventos', category: 'Referencia', badge: 'warning', description: 'Todos los eventos disponibles del componente', keywords: 'lista eventos disponibles all events list' },
     { title: 'Evento init', route: '#/events', segment: 'init', category: 'Referencia', badge: 'warning', description: 'Emite al inicializar el componente', keywords: 'init evento initialize setup' },
     { title: 'Evento search', route: '#/events', segment: 'search', category: 'Referencia', badge: 'warning', description: 'Emite después de cada búsqueda ejecutada', keywords: 'search evento buscar ejecutado' },
     { title: 'Evento pageChange', route: '#/events', segment: 'pagechange', category: 'Referencia', badge: 'warning', description: 'Emite al cambiar de página (scroll infinito)', keywords: 'pageChange pagina scroll infinito' },
+    { title: 'Evento resultsCleared', route: '#/events', segment: 'resultscleared', category: 'Referencia', badge: 'warning', description: 'Emite al limpiar resultados por cambio de término', keywords: 'resultsCleared limpiar resultados cambio termino' },
+    { title: 'Evento searchComplete', route: '#/events', segment: 'searchcomplete', category: 'Referencia', badge: 'warning', description: 'Emite al completar búsqueda y renderizado', keywords: 'searchComplete buscar completo render resultados' },
     { title: 'Evento sortChange', route: '#/events', segment: 'sortchange', category: 'Referencia', badge: 'warning', description: 'Emite al cambiar el ordenamiento', keywords: 'sortChange orden sort' },
     { title: 'Evento itemSelected', route: '#/events', segment: 'itemselected', category: 'Referencia', badge: 'warning', description: 'Emite al seleccionar un item (clic o Enter)', keywords: 'itemSelected seleccionar click enter' },
     { title: 'Evento itemHighlighted', route: '#/events', segment: 'itemhighlighted', category: 'Referencia', badge: 'warning', description: 'Emite al destacar un item visualmente', keywords: 'itemHighlighted destacar hover focus' },
@@ -119,7 +129,7 @@ const SEARCH_DATA = [
     { title: 'Try/Catch', route: '#/errors', segment: 'try-catch', category: 'Referencia', badge: 'warning', description: 'Capturar errores del constructor e init()', keywords: 'try catch capturar exception' },
     { title: 'Evento de error', route: '#/errors', segment: 'evento-de-error', category: 'Referencia', badge: 'warning', description: 'Escuchar errores vía events.on("error", ...)', keywords: 'evento error on emit' },
     { title: 'Modo desarrollo', route: '#/errors', segment: 'modo-desarrollo', category: 'Referencia', badge: 'warning', description: 'Logs detallados con developmentMode: true', keywords: 'desarrollo development mode logs debug' },
-    { title: 'Errores de red', route: '#/errors', segment: 'errores-de-red', category: 'Referencia', badge: 'warning', description: 'Timeouts, HTTP errors, AbortController', keywords: 'red network timeout http error' },
+    { title: 'Errores de red', route: '#/errors', segment: 'errores-de-red-modo-servidor', category: 'Referencia', badge: 'warning', description: 'Timeouts, HTTP errors, AbortController', keywords: 'red network timeout http error servidor' },
 
     // ── TypeScript ─────────────────────────────────────────────────
     { title: 'TypeScript', route: '#/typescript', segment: '', category: 'Referencia', badge: 'warning', description: 'Tipados e interfaces completas de TypeScript', keywords: 'typescript types interfaces typings ts' },
@@ -137,16 +147,28 @@ const SEARCH_DATA = [
     { title: 'Búsqueda básica local', route: '#/examples', segment: 'busqueda-basica-local', category: 'Recursos', badge: 'info', description: 'Ejemplo mínimo con array de objetos', keywords: 'basica local simple array objetos' },
     { title: 'Con plantilla personalizada', route: '#/examples', segment: 'con-plantilla-personalizada', category: 'Recursos', badge: 'info', description: 'Renderizado custom con función template', keywords: 'plantilla personalizada template custom' },
     { title: 'Búsqueda desde DOM', route: '#/examples', segment: 'busqueda-desde-dom', category: 'Recursos', badge: 'info', description: 'Extraer datos de elementos HTML data-*', keywords: 'dom data attributes extraer html' },
-    { title: 'Búsqueda remota', route: '#/examples', segment: 'busqueda-remota', category: 'Recursos', badge: 'info', description: 'Peticiones HTTP con Fetch API', keywords: 'remota server fetch api http ajax' },
-    { title: 'Múltiples instancias', route: '#/examples', segment: 'multiples-instancias-ejemplo', category: 'Recursos', badge: 'info', description: 'Varios buscadores en la misma página', keywords: 'multiples instancias varios search' },
+    { title: 'Búsqueda remota', route: '#/examples', segment: 'busqueda-remota-servidor', category: 'Recursos', badge: 'info', description: 'Peticiones HTTP con Fetch API', keywords: 'remota server fetch api http ajax' },
+    { title: 'Múltiples instancias', route: '#/examples', segment: 'multiples-instancias', category: 'Recursos', badge: 'info', description: 'Varios buscadores en la misma página', keywords: 'multiples instancias varios search' },
+    { title: 'Con resaltado de texto', route: '#/examples', segment: 'con-resaltado-de-texto', category: 'Recursos', badge: 'info', description: 'Habilitar y personalizar el resaltado de búsquedas', keywords: 'resaltado highlight texto buscar custom class' },
     { title: 'Con eventos', route: '#/examples', segment: 'con-eventos', category: 'Recursos', badge: 'info', description: 'Escuchar init, search, itemSelected, pageChange', keywords: 'eventos on escuchar init search' },
     { title: 'Con caché y sort', route: '#/examples', segment: 'con-cache-y-sort', category: 'Recursos', badge: 'info', description: 'Ordenamiento y caché LRU para performance', keywords: 'cache sort ordenamiento performance' },
+    { title: 'Con adapter de respuesta', route: '#/examples', segment: 'con-adapter-de-respuesta', category: 'Recursos', badge: 'info', description: 'Transformar respuestas del servidor con responseAdapter', keywords: 'adapter respuesta transformar response server' },
+    { title: 'Con búsqueda en objetos anidados', route: '#/examples', segment: 'con-busqueda-en-objetos-anidados', category: 'Recursos', badge: 'info', description: 'Buscar recursivamente en objetos anidados', keywords: 'busqueda anidados nested objects recursive flatten' },
+    { title: 'Integración con frameworks', route: '#/examples', segment: 'integracion-con-frameworks', category: 'Recursos', badge: 'info', description: 'Uso con React, Vue y otros frameworks', keywords: 'integracion frameworks react vue angular' },
     { title: 'React', route: '#/examples', segment: 'react', category: 'Recursos', badge: 'info', description: 'Integración con useRef y useEffect', keywords: 'react hook useRef useEffect jsx' },
     { title: 'Vue', route: '#/examples', segment: 'vue', category: 'Recursos', badge: 'info', description: 'Integración con onMounted y onUnmounted', keywords: 'vue composition api setup onMounted' },
 
     // ── Changelog ──────────────────────────────────────────────────
     { title: 'Changelog', route: '#/changelog', segment: '', category: 'Recursos', badge: 'info', description: 'Historial de versiones y cambios', keywords: 'changelog versiones releases history cambios' },
-    { title: 'v1.0.0', route: '#/changelog', segment: 'v100', category: 'Recursos', badge: 'info', description: 'Versión inicial con todas las funcionalidades', keywords: 'v1 version inicial release first' }
+    { title: 'v2.3.0', route: '#/changelog', segment: 'v2-3-0-latest', category: 'Recursos', badge: 'info', description: 'Última versión: responseAdapter, clear(), eventos nuevos', keywords: 'v2.3.0 latest version release' },
+    { title: 'Añadido', route: '#/changelog', segment: 'anadido', category: 'Recursos', badge: 'info', description: 'Nuevas funcionalidades en v2.3.0', keywords: 'anadido nuevo features added' },
+    { title: 'Mejorado', route: '#/changelog', segment: 'mejorado', category: 'Recursos', badge: 'info', description: 'Mejoras en v2.3.0', keywords: 'mejorado improved mejoras' },
+    { title: 'Corregido', route: '#/changelog', segment: 'corregido', category: 'Recursos', badge: 'info', description: 'Correcciones de bugs en v2.3.0', keywords: 'corregido fix bug fixes' },
+    { title: 'v2.2.0', route: '#/changelog', segment: 'v2-2-0', category: 'Recursos', badge: 'info', description: 'Resaltado de texto, refactorizaciones', keywords: 'v2.2.0 version release highlight' },
+    { title: 'Características iniciales', route: '#/changelog', segment: 'caracteristicas-iniciales', category: 'Recursos', badge: 'info', description: 'Funcionalidades principales del componente', keywords: 'caracteristicas iniciales features' },
+    { title: 'Temas CSS (Changelog)', route: '#/changelog', segment: 'temas-css', category: 'Recursos', badge: 'info', description: 'Historial de temas CSS', keywords: 'temas css themes changelog' },
+    { title: 'Eventos (Changelog)', route: '#/changelog', segment: 'eventos', category: 'Recursos', badge: 'info', description: 'Historial de eventos', keywords: 'eventos events changelog' },
+    { title: 'Códigos de error (Changelog)', route: '#/changelog', segment: 'codigos-de-error', category: 'Recursos', badge: 'info', description: 'Historial de códigos de error', keywords: 'codigos error changelog search' }
 ];
 
 /**
