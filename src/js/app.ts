@@ -43,13 +43,13 @@ class Search {
     fetch?: Types.FetchConfig;
     highlightEnabled: boolean;
     highlightClass: string;
-    isExtractData?: () => void | undefined;
     searching: (searchTerm: string, isEvent: boolean) => Promise<void> = async () => { };
     private errorHandler: ErrorHandler;
     private searchingLocal: SearchingLocal;
     private searchingServer: SearchingServer;
     private boundKeydownHandler: (e: KeyboardEvent) => void;
     private boundClickHandler: (e: Event) => void;
+    private currentDrawId: number = 0;
     /**
      * Instancia que almacena las traducciones predeterminadas.
      * @type {Types.TranslationCache}
@@ -200,8 +200,9 @@ class Search {
      * @returns {Promise<Search>} Instancia actual para encadenamiento
      */
     async draw(searchTerm: string = this.searchTerm, isEvent: boolean = false): Promise<Search> {
-        // Resetear scroll si cambia el término de búsqueda
+        const drawId = ++this.currentDrawId;
         if (searchTerm !== this.searchTerm && this.renderer.body.renderItems) {
+            // Resetear scroll si cambia el término de búsqueda
             this.renderer.body.renderItems.scrollTop = 0;
             this.renderer.body.renderItems.innerHTML = '';
             this.renderer.body.renderItems.removeAttribute('aria-activedescendant');
@@ -209,6 +210,10 @@ class Search {
             this.selectedIndex = -1;
         }
         await this.searching(searchTerm, isEvent);
+        if (drawId !== this.currentDrawId) {
+            console.log("Abortada", searchTerm, drawId, this.currentDrawId);
+            return this;
+        }
         this.processInfiniteScroll();
         return this;
     }
@@ -299,23 +304,23 @@ class Search {
         if (!this.pagination.hasMorePages()) return this;
 
         const nextPage = this.pagination.loadNextPage();
+        const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
 
         if (this.procesServer) {
             if (this.fetch?.body) {
                 this.fetch.body.page = nextPage;
             }
             await this.searching(this.searchTerm, false);
-        } else {
-            const next = this.pagination.getPageItems(this._data);
-            this.renderer.appendItems(
-                next,
-                this.template,
-                this.t.noResults,
-                this.events,
-                (this.pagination.getCurrentPage() === 1),
-                this.#highlightText.bind(this)
-            );
         }
+
+        this.renderer.appendItems(
+            next,
+            this.template,
+            this.t.noResults,
+            this.events,
+            (this.pagination.getCurrentPage() === 1),
+            this.#highlightText.bind(this)
+        );
 
         // Reconfigurar detector de scroll para el nuevo contenido
         this.#setupScrollDetection();

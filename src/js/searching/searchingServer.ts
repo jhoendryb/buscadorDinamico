@@ -58,7 +58,7 @@ export class SearchingServer {
 
             if (this.searchInstance.cacheEnabled && cachedData && !isEvent) {
                 this.searchInstance._data = cachedData;
-                this.searchInstance.processInfiniteScroll();
+                console.log('Usando caché para búsqueda:', cacheKey);
                 return this.searchInstance;
             }
 
@@ -85,7 +85,6 @@ export class SearchingServer {
                 } as Types.SearchEventData);
             }
 
-            this.searchInstance.processInfiniteScroll();
             return this.searchInstance;
         } catch (error) {
             if (error instanceof SearchError) {
