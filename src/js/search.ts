@@ -11,6 +11,10 @@ const search1 = new Search({
     cacheEnabled: true,
     keyboardEnabled: true,
     highlightEnabled: true,
+    // responseAdapter: (response) => ({
+    //     data: response.items,
+    //     countPage: response.count
+    // }),
     template: `<div>{{name}} - {{id_ciudad}}</div>`,
     translation: {
         searchPlaceholder: 'Escribe la busqueda aqui.',

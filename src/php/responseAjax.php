@@ -25,7 +25,9 @@ while ($filas = mysqli_fetch_assoc($consulta)) {
 $response = [
     // "test" => "SELECT id_ciudad, ciudad AS name FROM ciudades {$busqueda} ORDER BY {$sortBy} {$sortOrder} LIMIT $start, {$_POST['itemsPerPage']}",
     "data" => $newDatos,
-    "page" => (int) $page,
+    // "items" => $newDatos,
+    // "page" => (int) $page,
+    // "count" => (int) $consultaRow['totalCount']
     "countPage" => (int) $consultaRow['totalCount']
 ];
 

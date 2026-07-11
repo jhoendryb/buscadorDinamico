@@ -1,4 +1,5 @@
 import * as Types from '../types';
+import { Search } from '../app';
 import { ErrorHandler, ErrorCode, SearchError } from '../error-handler';
 
 /**
@@ -12,10 +13,10 @@ export class SearchingServer {
 
     /**
      * Crea una instancia de SearchingServer.
-     * @param {any} searchInstance - Instancia principal de Search
+     * @param {Search} searchInstance - Instancia principal de Search
      * @param {ErrorHandler} errorHandler - Instancia de ErrorHandler para gestión de errores
      */
-    constructor(searchInstance: any, errorHandler: ErrorHandler) {
+    constructor(searchInstance: Search, errorHandler: ErrorHandler) {
         this.searchInstance = searchInstance;
         this.errorHandler = errorHandler;
     }
