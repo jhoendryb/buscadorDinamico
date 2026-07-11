@@ -8,11 +8,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .content-pagination-items {
-        transition: none;
-    }
 
-    .spinner {
-        animation: none;
+    *,
+    *::before,
+    *::after {
+        transition: none !important;
+        animation: none !important;
     }
 }

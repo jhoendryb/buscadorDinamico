@@ -251,7 +251,7 @@ export class SearchRenderer {
      * @param {Function} [highlightText] - Función para resaltar texto de búsqueda
      * @returns {boolean} Indica si se pudo añadir los items exitosamente
      */
-    appendItems(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter, firstLoad: boolean = false, highlightText?: (text?: string) => string): boolean {
+    appendItems(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter, firstLoad: boolean = false, highlightText?: ((text: string) => string) | undefined): boolean {
         const container = this.body.renderItems;
         if (!container) return false;
 

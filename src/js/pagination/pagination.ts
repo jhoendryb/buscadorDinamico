@@ -147,6 +147,8 @@ export class Pagination {
      * @returns {void}
      */
     setItemsPerPage(itemsPerPage: number): void {
+        if (itemsPerPage < 1) itemsPerPage = 1;
+
         this.itemsPerPage = itemsPerPage;
         // Recalcular página actual si es necesario
         const totalPages = this.getTotalPages();

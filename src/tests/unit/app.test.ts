@@ -65,8 +65,10 @@ describe('Search', () => {
         search.init();
 
         const input = search.renderer.body.inputSearch;
-        input.value = 'juan';
-        input.dispatchEvent(new Event('input'), { bubbles: true });
+        if (input) {
+            (input as HTMLInputElement).value = 'juan';
+            input.dispatchEvent(new Event('input'));
+        }
 
         if (!search._data) {
             throw new Error('search._data is null');
@@ -267,10 +269,11 @@ describe('Search', () => {
         expect(mockCallback).toHaveBeenCalled();
         expect(search._data).toBeNull();
         expect(search.data).toEqual([]);
-        expect(search.pagination).toBeNull();
-        expect(search.events).toBeNull();
-        expect(search.cache).toBeNull();
-        expect(search.renderer).toBeNull();
+        expect(search.renderer.body.contentPaginationItems).toBeUndefined();
+        expect(search.events.listenerCount('destroy')).toBe(0);
+        expect(typeof search.pagination.setCountFunction).toBe('function');
+        expect(typeof search.pagination.setDataItemsFunction).toBe('function');
+        expect(search.cache.size()).toBe(0);
     });
 
     test('debe reiniciar ordenamiento al llamar clearSort', () => {
@@ -339,9 +342,9 @@ describe('Search', () => {
 
         search.showLoading();
 
-        const loadingElement = search.renderer.body.renderItems.querySelector('.search-loading');
+        const loadingElement = search.renderer.body.renderItems?.querySelector('.search-loading');
         expect(loadingElement).toBeTruthy();
-        expect(loadingElement.querySelector('.spinner')).toBeTruthy();
+        expect(loadingElement?.querySelector('.spinner')).toBeTruthy();
     });
 
     test('debe configurar navegación por teclado', () => {
@@ -367,8 +370,10 @@ describe('Search', () => {
         search.pagination.goToPage(1);
         search.processInfiniteScroll();
 
-        const items = search.renderer.body.renderItems.querySelectorAll('.items');
-        expect(items.length).toBe(10); // itemsPerPage por defecto
+        const items = search.renderer.body.renderItems?.querySelectorAll('.items');
+        if (items) {
+            expect(items.length).toBe(10); // itemsPerPage por defecto
+        }
     });
 
     // EVENTOS

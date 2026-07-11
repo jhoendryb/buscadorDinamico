@@ -2,6 +2,8 @@
 
 .scroll-personalize {
     position: relative;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb-color, #ccc) transparent;
 }
 
 .scroll-personalize::-webkit-scrollbar {

@@ -44,12 +44,9 @@ const search1 = new Search({
 });
 
 
-// const prueba = search1.on('renderItems', (data: any) => {
-//     const { content } = data;
-//     const item = content.children;
-//     console.log('Page change event:', item[0]);
-//     console.log('Item content:', item[0].innerHTML);
-// });
+search1.events.once('search', (data: any) => {
+    console.log("Que fue esto sera solo una vez", data);
+});
 
 // console.log("Esto es pruebas", prueba);
 

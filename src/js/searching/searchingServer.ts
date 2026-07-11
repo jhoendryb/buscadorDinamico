@@ -67,29 +67,22 @@ export class SearchingServer {
                 this.searchInstance.fetch.body.sortOrder = this.searchInstance.sortOrder;
             }
 
-            try {
-                const { data, ...rest } = await this.fetch(this.searchInstance.fetch);
-                this.searchInstance._data = data;
-                this.searchInstance._ajaxResponse.success = rest;
+            let { data, ...rest } = await this.fetch(this.searchInstance.fetch);
 
-                if (this.searchInstance.cacheEnabled) {
-                    this.searchInstance.cache.set(cacheKey, data);
-                }
+            this.searchInstance._data = data;
+            this.searchInstance._ajaxResponse.success = rest;
 
-                if (isEvent) {
-                    this.searchInstance.events.emit('search', {
-                        searchTerm,
-                        results: this.searchInstance._data,
-                        totalResults: this.searchInstance._data.length,
-                        timestamp: new Date().toISOString()
-                    } as Types.SearchEventData);
-                }
-            } catch (error) {
-                if (error instanceof SearchError) {
-                    this.errorHandler.logError(error, this.searchInstance.events);
-                }
-                this.searchInstance.events.emit('error', error);
-                throw error;
+            if (this.searchInstance.cacheEnabled) {
+                this.searchInstance.cache.set(cacheKey, data);
+            }
+
+            if (isEvent) {
+                this.searchInstance.events.emit('search', {
+                    searchTerm,
+                    results: this.searchInstance._data,
+                    totalResults: this.searchInstance._data.length,
+                    timestamp: new Date().toISOString()
+                } as Types.SearchEventData);
             }
 
             this.searchInstance.processInfiniteScroll();
@@ -98,6 +91,7 @@ export class SearchingServer {
             if (error instanceof SearchError) {
                 this.errorHandler.logError(error, this.searchInstance.events);
             }
+            this.searchInstance.events.emit('error', error);
             throw error;
         }
     }

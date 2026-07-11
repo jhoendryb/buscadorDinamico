@@ -34,20 +34,22 @@ class Search {
     selectedIndex: number;
     _ajaxResponse: Record<string, any>;
     developmentMode: boolean;
-    renderer: any;
-    cache: any;
-    events: any;
-    pagination: any;
+    renderer: SearchRenderer;
+    cache: LRUCache;
+    events: EventEmitter;
+    pagination: Pagination;
     scrollObserver: IntersectionObserver | null;
     t: Types.TranslationCache;
     fetch?: Types.FetchConfig;
-    isExtractData?: () => void | undefined;
-    searching: (searchTerm: string, isEvent: boolean) => Promise<void> = async () => { };
     highlightEnabled: boolean;
     highlightClass: string;
+    isExtractData?: () => void | undefined;
+    searching: (searchTerm: string, isEvent: boolean) => Promise<void> = async () => { };
     private errorHandler: ErrorHandler;
     private searchingLocal: SearchingLocal;
     private searchingServer: SearchingServer;
+    private boundKeydownHandler: (e: KeyboardEvent) => void;
+    private boundClickHandler: (e: Event) => void;
     /**
      * Instancia que almacena las traducciones predeterminadas.
      * @type {Types.TranslationCache}
@@ -83,7 +85,10 @@ class Search {
 
         Object.assign(this, newParams);
 
+        this.boundKeydownHandler = () => { };
+        this.boundClickHandler = () => { };
         this.errorHandler = ErrorHandler.getInstance(this.developmentMode);
+        this.events = new EventEmitter(this.errorHandler);
 
         try {
             this.#validateParameters()
@@ -105,7 +110,6 @@ class Search {
                 paginationItems: undefined // ".index-search" - elemento donde se muestra la paginación
             }, this.#getUniqueClassName.bind(this), Constants.DEFAULT_TIME_HIDDEN_RESULTS);
             this.cache = new LRUCache(this.cacheMaxSize, this.cacheTtlSeconds);
-            this.events = new EventEmitter(this.errorHandler);
             this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
             this.pagination.setCountFunction(() => {
                 return this.procesServer ? this._ajaxResponse.success?.countPage || 0 : this._data?.length || 0;
@@ -185,8 +189,8 @@ class Search {
     }
     #highlightText(text: string): string {
         if (!this.highlightEnabled || !this.searchTerm) return text;
-
-        const regex = new RegExp(`(${this.searchTerm})`, 'gi');
+        const escaped = this.searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escaped})`, 'gi');
         return text.replace(regex, `<span class="${['search-highlight', this.highlightClass].filter(cls => cls).join(' ')}">$1</span>`);
     }
     /**
@@ -444,24 +448,15 @@ class Search {
         const content = this.renderer.body.content;
         const renderItems = this.renderer.body.renderItems;
         const input = this.renderer.body.inputSearch;
-
-        renderItems?.addEventListener('click', (e: Event) => {
-            e.preventDefault();
-            if (!renderItems) return;
-
-            const item = (e.target as HTMLElement).closest('.items');
-            const items = renderItems.querySelectorAll('.items') as any;
-            if (item) {
-                this.selectedIndex = Array.from(items).indexOf(item);
-                this.#highlightItem(items);
-                this.#selectItem(item);
+        const eventPreviu = (input?: HTMLInputElement) => {
+            if (input) {
                 input.value = '';
                 input.dispatchEvent(new Event('input'));
                 input.blur();
             }
-        });
+        }
 
-        content.addEventListener('keydown', (e: KeyboardEvent) => {
+        this.boundKeydownHandler = (e: KeyboardEvent) => {
             if (!renderItems) return;
 
             const items = renderItems.querySelectorAll('.items') as any;
@@ -476,11 +471,26 @@ class Search {
             } else if (['enter'].includes(e.key.toLowerCase()) && this.selectedIndex >= 0) {
                 e.preventDefault();
                 this.#selectItem(items[this.selectedIndex]);
-                input.value = '';
-                input.dispatchEvent(new Event('input'));
-                input.blur();
+                eventPreviu(input as HTMLInputElement);
             }
-        });
+        };
+        this.boundClickHandler = (e: Event) => {
+            e.preventDefault();
+            if (!renderItems) return;
+
+            const item = (e.target as HTMLElement).closest('.items');
+            const items = renderItems.querySelectorAll('.items') as any;
+            if (item) {
+                this.selectedIndex = Array.from(items).indexOf(item);
+                this.#highlightItem(items);
+                this.#selectItem(item);
+                eventPreviu(input as HTMLInputElement);
+            }
+        };
+
+        renderItems?.addEventListener('click', this.boundClickHandler);
+
+        content.addEventListener('keydown', this.boundKeydownHandler);
 
         return this;
     }
@@ -540,6 +550,9 @@ class Search {
     destroy(): void {
         this.events.emit('destroy', { timestamp: new Date().toISOString() } as Types.DestroyEventData);
 
+        this.renderer.body.content.removeEventListener('keydown', this.boundKeydownHandler);
+        this.renderer.body.renderItems?.removeEventListener('click', this.boundClickHandler);
+
         if (this.scrollObserver) {
             this.#cleanupScrollDetection();
             this.scrollObserver = null;
@@ -566,10 +579,16 @@ class Search {
 
         this._data = null;
         this.data = [];
-        this.cache = null;
-        this.pagination = null;
-        this.events = null;
-        this.renderer = null;
+        this.cache = new LRUCache(this.cacheMaxSize, this.cacheTtlSeconds);
+        this.pagination = new Pagination();
+        this.events = new EventEmitter();
+        this.renderer = new SearchRenderer({
+            content: document.querySelector(this.element) as HTMLElement, // ".input-search" - contenedor que contiene la app Search
+            contentSearch: undefined, // ".app-search" - contenedor del Search
+            inputSearch: undefined, // "#filter-search" - input donde se escribe la búsqueda
+            renderItems: undefined, // ".items-search" - elemento donde se muestran los items
+            paginationItems: undefined // ".index-search" - elemento donde se muestra la paginación
+        }, this.#getUniqueClassName.bind(this), Constants.DEFAULT_TIME_HIDDEN_RESULTS);
     }
 }
 

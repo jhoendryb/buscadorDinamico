@@ -97,7 +97,7 @@ export class SearchingLocal {
             this.searchInstance._data = this.searchInstance.data.filter((item: Record<string, any>) => {
                 const values = Object.values(item);
                 return values.some((value: any) =>
-                    value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+                    String(value).toLowerCase().includes(searchTerm.toLowerCase())
                 );
             });
 

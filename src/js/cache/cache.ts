@@ -68,11 +68,12 @@ export class LRUCache {
     has(key: string): boolean {
         const entry = this.cache.get(key);
         if (!entry) return false;
-
-        if (Date.now() > entry.expiresAt) {
-            return false;
-        }
-
+        if (Date.now() > entry.expiresAt) return false;
+        this.delete(key);
+        this.cache.set(key, {
+            value: entry.value,
+            expiresAt: Date.now() + (this.ttlSeconds * 1000)
+        });
         return true;
     }
     /**
@@ -96,6 +97,7 @@ export class LRUCache {
      * @returns {LRUCache} Instancia actual para encadenamiento
      */
     clearCacheByPrefix(searchTerm: string): LRUCache {
+        if (!searchTerm) return this;
         for (const key of this.cache.keys()) {
             if (key.startsWith(searchTerm)) {
                 this.delete(key);
