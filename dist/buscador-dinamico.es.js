@@ -9,9 +9,9 @@ var e = Object.defineProperty, t = (t, n) => {
 }, n = class e {
 	static #e = v;
 	constructor(t) {
-		this.searching = async () => {};
+		this.searching = async () => {}, this.currentDrawId = 0, this.isLoadingMore = !1;
 		let { translation: n, ...r } = t;
-		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = _, this.zIndex = g, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = b.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.errorHandler = s.getInstance(this.developmentMode);
+		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = _, this.zIndex = g, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = b.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundKeydownHandler = () => {}, this.boundClickHandler = () => {}, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
 		try {
 			this.#t(), this.scrollObserver = null, this._ajaxResponse = {}, this.searchingLocal = new p(this, this.errorHandler), this.searchingServer = new m(this, this.errorHandler), this.searching = this.procesServer ? this.searchingServer.searching.bind(this.searchingServer) : this.searchingLocal.searching.bind(this.searchingLocal), this.renderer = new f({
 				content: document.querySelector(this.element),
@@ -19,7 +19,7 @@ var e = Object.defineProperty, t = (t, n) => {
 				inputSearch: void 0,
 				renderItems: void 0,
 				paginationItems: void 0
-			}, this.#o.bind(this), 200), this.cache = new i(this.cacheMaxSize, this.cacheTtlSeconds), this.events = new c(this.errorHandler), this.pagination = new l(this.itemsPerPage, 1), this.pagination.setCountFunction(() => this.procesServer ? this._ajaxResponse.success?.countPage || 0 : this._data?.length || 0), this.pagination.setDataItemsFunction(() => this._data || []), this.t = {
+			}, this.#o.bind(this), 200), this.cache = new i(this.cacheMaxSize, this.cacheTtlSeconds), this.pagination = new l(this.itemsPerPage, 1), this.pagination.setCountFunction(() => this.procesServer ? this._ajaxResponse.success?.countPage || 0 : this._data?.length || 0), this.pagination.setDataItemsFunction(() => this._data || []), this.t = {
 				...e.#e,
 				...n
 			}, this._data = this.data;
@@ -51,11 +51,16 @@ var e = Object.defineProperty, t = (t, n) => {
 	}
 	#n(e) {
 		if (!this.highlightEnabled || !this.searchTerm) return e;
-		let t = RegExp(`(${this.searchTerm})`, "gi");
-		return e.replace(t, `<span class="${["search-highlight", this.highlightClass].filter((e) => e).join(" ")}">$1</span>`);
+		let t = this.searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), n = RegExp(`(${t})`, "gi");
+		return e.replace(n, `<span class="${["search-highlight", this.highlightClass].filter((e) => e).join(" ")}">$1</span>`);
 	}
 	async draw(e = this.searchTerm, t = !1) {
-		return e !== this.searchTerm && this.renderer.body.renderItems && (this.renderer.body.renderItems.scrollTop = 0, this.renderer.body.renderItems.innerHTML = "", this.renderer.body.renderItems.removeAttribute("aria-activedescendant"), this.pagination.goToPage(1), this.selectedIndex = -1), await this.searching(e, t), this.processInfiniteScroll(), this;
+		let n = ++this.currentDrawId;
+		return e !== this.searchTerm && this.renderer.body.renderItems && (this.renderer.body.renderItems.scrollTop = 0, this.renderer.body.renderItems.innerHTML = "", this.events.emit("resultsCleared", { previousSearchTerm: this.searchTerm }), this.renderer.body.renderItems.removeAttribute("aria-activedescendant"), this.pagination.goToPage(1), this.selectedIndex = -1), await this.searching(e, t), n === this.currentDrawId ? (this.processInfiniteScroll(), this.events.emit("searchComplete", {
+			searchTerm: e,
+			results: this._data,
+			totalResults: this._data?.length
+		}), this) : (console.log("Abortada", e, n, this.currentDrawId), this);
 	}
 	processInfiniteScroll() {
 		if (!this.pagination) return;
@@ -91,16 +96,16 @@ var e = Object.defineProperty, t = (t, n) => {
 		return e.appendChild(n), this.scrollObserver.observe(n), this;
 	}
 	async #i() {
-		if (!this.pagination.hasMorePages()) return this;
-		let e = this.pagination.loadNextPage();
-		if (this.procesServer) this.fetch?.body && (this.fetch.body.page = e), await this.searching(this.searchTerm, !1);
-		else {
-			let e = this.pagination.getPageItems(this._data);
-			this.renderer.appendItems(e, this.template, this.t.noResults, this.events, this.pagination.getCurrentPage() === 1, this.#n.bind(this));
+		if (this.isLoadingMore || !this.pagination.hasMorePages()) return this;
+		this.isLoadingMore = !0;
+		try {
+			let e = this.pagination.loadNextPage(), t = this.pagination.getPageItems(this.procesServer ? null : this._data);
+			this.procesServer && (this.fetch?.body && (this.fetch.body.page = e), await this.searching(this.searchTerm, !1)), this.renderer.appendItems(t, this.template, this.t.noResults, this.events, this.pagination.getCurrentPage() === 1, this.#n.bind(this)), this.#r();
+			let n = this.pagination.getTotalLoaded(), r = this.pagination.getTotalItems();
+			return this.renderer.updateCounter(n, r, this.t.pagination), this;
+		} finally {
+			this.isLoadingMore = !1;
 		}
-		this.#r();
-		let t = this.pagination.getTotalLoaded(), n = this.pagination.getTotalItems();
-		return this.renderer.updateCounter(t, n, this.t.pagination), this;
 	}
 	#a() {
 		return this.scrollObserver && this.scrollObserver.disconnect(), this;
@@ -145,16 +150,18 @@ var e = Object.defineProperty, t = (t, n) => {
 	}
 	setupKeyboardNavigation() {
 		if (!this.keyboardEnabled) return this;
-		let e = this.renderer.body.content, t = this.renderer.body.renderItems, n = this.renderer.body.inputSearch;
-		return t?.addEventListener("click", (e) => {
-			if (e.preventDefault(), !t) return;
-			let r = e.target.closest(".items"), i = t.querySelectorAll(".items");
-			r && (this.selectedIndex = Array.from(i).indexOf(r), this.#s(i), this.#c(r), n.value = "", n.dispatchEvent(new Event("input")), n.blur());
-		}), e.addEventListener("keydown", (e) => {
+		let e = this.renderer.body.content, t = this.renderer.body.renderItems, n = this.renderer.body.inputSearch, r = (e) => {
+			e && (e.value = "", e.dispatchEvent(new Event("input")), e.blur());
+		};
+		return this.boundKeydownHandler = (e) => {
 			if (!t) return;
-			let r = t.querySelectorAll(".items");
-			e.key === "ArrowDown" ? (e.preventDefault(), this.selectedIndex = Math.min(this.selectedIndex + 1, r.length - 1), this.#s(r)) : e.key === "ArrowUp" ? (e.preventDefault(), this.selectedIndex = Math.max(this.selectedIndex - 1, 0), this.#s(r)) : ["enter"].includes(e.key.toLowerCase()) && this.selectedIndex >= 0 && (e.preventDefault(), this.#c(r[this.selectedIndex]), n.value = "", n.dispatchEvent(new Event("input")), n.blur());
-		}), this;
+			let i = t.querySelectorAll(".items");
+			e.key === "ArrowDown" ? (e.preventDefault(), this.selectedIndex = Math.min(this.selectedIndex + 1, i.length - 1), this.#s(i)) : e.key === "ArrowUp" ? (e.preventDefault(), this.selectedIndex = Math.max(this.selectedIndex - 1, 0), this.#s(i)) : ["enter"].includes(e.key.toLowerCase()) && this.selectedIndex >= 0 && (e.preventDefault(), this.#c(i[this.selectedIndex]), r(n));
+		}, this.boundClickHandler = (e) => {
+			if (e.preventDefault(), !t) return;
+			let i = e.target.closest(".items"), a = t.querySelectorAll(".items");
+			i && (this.selectedIndex = Array.from(a).indexOf(i), this.#s(a), this.#c(i), r(n));
+		}, t?.addEventListener("click", this.boundClickHandler), e.addEventListener("keydown", this.boundKeydownHandler), this;
 	}
 	#s(e) {
 		e.forEach((e, t) => {
@@ -174,12 +181,21 @@ var e = Object.defineProperty, t = (t, n) => {
 			close: () => this.renderer.hideResults()
 		});
 	}
+	clear() {
+		return this.searchTerm = "", this.renderer.body.inputSearch && (this.renderer.body.inputSearch.value = ""), this.renderer.body.renderItems && (this.renderer.body.renderItems.innerHTML = ""), this.pagination.goToPage(1), this.cache.clear(), this.selectedIndex = -1, this;
+	}
 	destroy() {
-		if (this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.scrollObserver &&= (this.#a(), null), this.renderer.animationTimeouts && (this.renderer.animationTimeouts.forEach((e) => clearTimeout(e)), this.renderer.animationTimeouts = []), this.renderer.hideTimeout && (clearTimeout(this.renderer.hideTimeout), this.renderer.hideTimeout = null), this.renderer.body.inputSearch) {
+		if (this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content.removeEventListener("keydown", this.boundKeydownHandler), this.renderer.body.renderItems?.removeEventListener("click", this.boundClickHandler), this.scrollObserver &&= (this.#a(), null), this.renderer.animationTimeouts && (this.renderer.animationTimeouts.forEach((e) => clearTimeout(e)), this.renderer.animationTimeouts = []), this.renderer.hideTimeout && (clearTimeout(this.renderer.hideTimeout), this.renderer.hideTimeout = null), this.renderer.body.inputSearch) {
 			let e = this.renderer.body.inputSearch.cloneNode(!0);
 			this.renderer.body.inputSearch.parentNode && this.renderer.body.inputSearch.parentNode.replaceChild(e, this.renderer.body.inputSearch);
 		}
-		this.events.removeAllListeners(), this._data = null, this.data = [], this.cache = null, this.pagination = null, this.events = null, this.renderer = null;
+		this.events.removeAllListeners(), this._data = null, this.data = [], this.cache = new i(this.cacheMaxSize, this.cacheTtlSeconds), this.pagination = new l(), this.events = new c(), this.renderer = new f({
+			content: document.querySelector(this.element),
+			contentSearch: void 0,
+			inputSearch: void 0,
+			renderItems: void 0,
+			paginationItems: void 0
+		}, this.#o.bind(this), 200);
 	}
 };
 //#endregion
@@ -236,7 +252,10 @@ var i = class {
 	}
 	has(e) {
 		let t = this.cache.get(e);
-		return !(!t || Date.now() > t.expiresAt);
+		return !t || Date.now() > t.expiresAt ? !1 : (this.delete(e), this.cache.set(e, {
+			value: t.value,
+			expiresAt: Date.now() + this.ttlSeconds * 1e3
+		}), !0);
 	}
 	size() {
 		return this.cleanup(), this.cache.size;
@@ -245,6 +264,7 @@ var i = class {
 		this.cache.clear();
 	}
 	clearCacheByPrefix(e) {
+		if (!e) return this;
 		for (let t of this.cache.keys()) t.startsWith(e) && this.delete(t);
 		return this;
 	}
@@ -464,7 +484,7 @@ var i = class {
 		return this.currentPage;
 	}
 	setItemsPerPage(e) {
-		this.itemsPerPage = e;
+		e < 1 && (e = 1), this.itemsPerPage = e;
 		let t = this.getTotalPages();
 		this.currentPage > t && (this.currentPage = t);
 	}
@@ -674,12 +694,14 @@ var i = class {
 				dataType: typeof this.searchInstance.data
 			}), this.searchInstance.cacheEnabled && this.searchInstance.cache.clearCacheByPrefix(this.searchInstance.searchTerm), this.searchInstance.pagination.goToPage(1);
 			let n = this.searchInstance.getCacheKey(e, this.searchInstance.pagination.getCurrentPage()), r = this.searchInstance.cache.get(n);
-			return this.searchInstance.cacheEnabled && r && !t ? (this.searchInstance._data = r, this.searchInstance.processInfiniteScroll(), this.searchInstance) : (this.searchInstance._data = this.searchInstance.data.filter((t) => Object.values(t).some((t) => t.toString().toLowerCase().includes(e.toLowerCase()))), this.searchInstance.sortBy && this.searchInstance.sort(this.searchInstance.sortBy, this.searchInstance.sortOrder), this.searchInstance.searchTerm = e, this.searchInstance.cacheEnabled && this.searchInstance.cache.set(n, this.searchInstance._data), t && this.searchInstance.events.emit("search", {
+			if (this.searchInstance.cacheEnabled && r && !t) return this.searchInstance._data = r, this.searchInstance.processInfiniteScroll(), this.searchInstance;
+			let i = (e) => typeof e != "object" || !e ? [String(e)] : Object.values(e).flatMap((e) => i(e)), o = (e) => e.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+			return this.searchInstance._data = this.searchInstance.data.filter((t) => i(t).some((t) => o(String(t)).toLowerCase().includes(o(String(e)).toLowerCase()))), this.searchInstance.sortBy && this.searchInstance.sort(this.searchInstance.sortBy, this.searchInstance.sortOrder), this.searchInstance.searchTerm = e, this.searchInstance.cacheEnabled && this.searchInstance.cache.set(n, this.searchInstance._data), t && this.searchInstance.events.emit("search", {
 				searchTerm: e,
 				results: this.searchInstance._data,
 				totalResults: this.searchInstance._data.length,
 				timestamp: (/* @__PURE__ */ new Date()).toISOString()
-			}), this.searchInstance);
+			}), this.searchInstance;
 		} catch (e) {
 			throw e instanceof o && this.errorHandler.logError(e), e;
 		}
@@ -692,22 +714,17 @@ var i = class {
 		try {
 			this.errorHandler.validateRequired(this.searchInstance.fetch?.url, "fetch.url", a.FETCH_URL_REQUIRED), e !== this.searchInstance.searchTerm && (this.searchInstance.pagination.goToPage(1), this.searchInstance.fetch.body.page = 1, this.searchInstance.fetch.body.searchTerm = e, this.searchInstance.cacheEnabled && this.searchInstance.cache.clearCacheByPrefix(this.searchInstance.searchTerm), this.searchInstance.showLoading()), this.searchInstance.pagination.getCurrentPage() !== this.searchInstance.fetch.body.page && this.searchInstance.pagination.goToPage(this.searchInstance.fetch.body.page), (this.searchInstance.itemsPerPage !== this.searchInstance.fetch.body.itemsPerPage || !this.searchInstance.fetch.body.itemsPerPage) && (this.searchInstance.fetch.body.itemsPerPage = this.searchInstance.itemsPerPage), this.searchInstance.searchTerm = e;
 			let n = this.searchInstance.getCacheKey(e, this.searchInstance.pagination.getCurrentPage()), r = this.searchInstance.cache.get(n);
-			if (this.searchInstance.cacheEnabled && r && !t) return this.searchInstance._data = r, this.searchInstance.processInfiniteScroll(), this.searchInstance;
+			if (this.searchInstance.cacheEnabled && r && !t) return this.searchInstance._data = r, console.log("Usando caché para búsqueda:", n), this.searchInstance;
 			this.searchInstance.sortBy && this.searchInstance.sortBy !== this.searchInstance.fetch.body.sortBy && (this.searchInstance.fetch.body.sortBy = this.searchInstance.sortBy, this.searchInstance.fetch.body.sortOrder = this.searchInstance.sortOrder);
-			try {
-				let { data: r, ...i } = await this.fetch(this.searchInstance.fetch);
-				this.searchInstance._data = r, this.searchInstance._ajaxResponse.success = i, this.searchInstance.cacheEnabled && this.searchInstance.cache.set(n, r), t && this.searchInstance.events.emit("search", {
-					searchTerm: e,
-					results: this.searchInstance._data,
-					totalResults: this.searchInstance._data.length,
-					timestamp: (/* @__PURE__ */ new Date()).toISOString()
-				});
-			} catch (e) {
-				throw e instanceof o && this.errorHandler.logError(e, this.searchInstance.events), this.searchInstance.events.emit("error", e), e;
-			}
-			return this.searchInstance.processInfiniteScroll(), this.searchInstance;
+			let i = await this.fetch(this.searchInstance.fetch), o = this.searchInstance.responseAdapter, s = o ? o(i) : i;
+			return this.searchInstance._data = s.data, this.searchInstance._ajaxResponse.success = { countPage: s.countPage }, this.searchInstance.cacheEnabled && this.searchInstance.cache.set(n, this.searchInstance._data), t && this.searchInstance.events.emit("search", {
+				searchTerm: e,
+				results: this.searchInstance._data,
+				totalResults: this.searchInstance._data.length,
+				timestamp: (/* @__PURE__ */ new Date()).toISOString()
+			}), this.searchInstance;
 		} catch (e) {
-			throw e instanceof o && this.errorHandler.logError(e, this.searchInstance.events), e;
+			throw e instanceof o && this.errorHandler.logError(e, this.searchInstance.events), this.searchInstance.events.emit("error", e), e;
 		}
 	}
 	#e(e) {
