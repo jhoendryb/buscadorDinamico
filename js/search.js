@@ -394,23 +394,23 @@ const DocSearch = {
     },
 
     /**
-     * Retorna el nombre del tema del componente según el atributo data-theme del HTML.
+     * Retorna el nombre del tema del componente.
+     * Usa el tema adaptative que se adapta automáticamente al data-theme del HTML.
      *
-     * @returns {string} Nombre del tema ('clean-white' o 'onyx-black')
+     * @returns {string} Nombre del tema ('adaptative')
      */
     getCurrentTheme() {
-        const theme = document.documentElement.getAttribute('data-theme');
-        return theme === 'dark' ? 'onyx-black' : 'clean-white';
+        return 'adaptative';
     },
 
     /**
      * Sincroniza el tema del buscador con el tema activo del sitio.
-     * Llamado desde App.setupThemeSync() al cambiar el tema.
+     * Con el tema adaptative, no es necesario llamar setTheme() ya que
+     * el CSS responde directamente al atributo data-theme del HTML.
      */
     updateTheme() {
-        if (this.instance?.renderer) {
-            this.instance.renderer.setTheme(this.getCurrentTheme());
-        }
+        // El tema adaptative se actualiza automáticamente via CSS
+        // No es necesario llamar setTheme()
     }
 };
 
