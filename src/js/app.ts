@@ -206,6 +206,7 @@ class Search {
             // Resetear scroll si cambia el término de búsqueda
             this.renderer.body.renderItems.scrollTop = 0;
             this.renderer.body.renderItems.innerHTML = '';
+            this.events.emit('resultsCleared', { previousSearchTerm: this.searchTerm });
             this.renderer.body.renderItems.removeAttribute('aria-activedescendant');
             this.pagination.goToPage(1);
             this.selectedIndex = -1;
@@ -216,6 +217,7 @@ class Search {
             return this;
         }
         this.processInfiniteScroll();
+        this.events.emit('searchComplete', { searchTerm, results: this._data, totalResults: this._data?.length });
         return this;
     }
     /**
@@ -545,6 +547,19 @@ class Search {
      */
     #selectItem(item: Record<string, any>): void {
         this.events.emit('itemSelected', { item, index: this.selectedIndex, close: () => this.renderer.hideResults() } as Types.ItemSelectedEventData);
+    }
+    clear(): Search {
+        this.searchTerm = "";
+        if (this.renderer.body.inputSearch) {
+            (this.renderer.body.inputSearch as HTMLInputElement).value = "";
+        }
+        if (this.renderer.body.renderItems) {
+            this.renderer.body.renderItems.innerHTML = "";
+        }
+        this.pagination.goToPage(1);
+        this.cache.clear();
+        this.selectedIndex = Constants.NO_SELECTION;
+        return this;
     }
     /**
      * Destruye la instancia de Search, limpiando recursos y event listeners.

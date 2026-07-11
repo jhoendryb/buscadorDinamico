@@ -67,13 +67,14 @@ export class SearchingServer {
                 this.searchInstance.fetch.body.sortOrder = this.searchInstance.sortOrder;
             }
 
-            let { data, ...rest } = await this.fetch(this.searchInstance.fetch);
-
-            this.searchInstance._data = data;
-            this.searchInstance._ajaxResponse.success = rest;
+            const response = await this.fetch(this.searchInstance.fetch);
+            const adapter = this.searchInstance.responseAdapter;
+            const result = adapter ? adapter(response) : response;
+            this.searchInstance._data = result.data;
+            this.searchInstance._ajaxResponse.success = { countPage: result.countPage };
 
             if (this.searchInstance.cacheEnabled) {
-                this.searchInstance.cache.set(cacheKey, data);
+                this.searchInstance.cache.set(cacheKey, this.searchInstance._data);
             }
 
             if (isEvent) {

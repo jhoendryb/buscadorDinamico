@@ -20,6 +20,7 @@ export interface SearchParams {
     developmentMode?: boolean;
     highlightEnabled?: boolean;
     highlightClass?: string;
+    responseAdapter?: (response: any) => { data: any[]; countPage: number };
 }
 
 export interface FetchConfig {
