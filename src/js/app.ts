@@ -254,29 +254,26 @@ class Search {
             return this;
         }
 
-        // Remover detector anterior si existe
-        if (this.scrollObserver) {
-            this.scrollObserver.disconnect();
-        }
-
-        // Remover sentinel anterior si existe
         const existingSentinel = container.querySelector('.scroll-sentinel');
         if (existingSentinel) {
+            this.scrollObserver?.unobserve(existingSentinel);
             existingSentinel.remove();
         }
 
         // Usar Intersection Observer para detectar scroll al final
-        this.scrollObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && this.pagination.hasMorePages()) {
-                    this.#loadMore();
-                }
+        if (!this.scrollObserver) {
+            this.scrollObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && this.pagination.hasMorePages()) {
+                        this.#loadMore();
+                    }
+                });
+            }, {
+                root: container,
+                rootMargin: '100px', // Cargar 100px antes del final
+                threshold: 0.1
             });
-        }, {
-            root: container,
-            rootMargin: '100px', // Cargar 100px antes del final
-            threshold: 0.1
-        });
+        }
 
         // Crear elemento sentinel al final
         const sentinel = createElement({
@@ -304,11 +301,7 @@ class Search {
                 this.fetch.body.page = nextPage;
             }
             await this.searching(this.searchTerm, false);
-
-            // Reconfigurar detector de scroll para el nuevo contenido
-            this.#setupScrollDetection();
         } else {
-            // En modo local, usar datos ya cargados
             const next = this.pagination.getPageItems(this._data);
             this.renderer.appendItems(
                 next,
@@ -318,10 +311,10 @@ class Search {
                 (this.pagination.getCurrentPage() === 1),
                 this.#highlightText.bind(this)
             );
-
-            // Reconfigurar detector de scroll para el nuevo contenido
-            this.#setupScrollDetection();
         }
+
+        // Reconfigurar detector de scroll para el nuevo contenido
+        this.#setupScrollDetection();
 
         // Actualizar contador
         const loaded = this.pagination.getTotalLoaded();

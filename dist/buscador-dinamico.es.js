@@ -73,9 +73,8 @@ var e = Object.defineProperty, t = (t, n) => {
 		let e = this.renderer.body.renderItems;
 		if (!e) return this;
 		if (typeof IntersectionObserver > "u") return console.warn("IntersectionObserver no está disponible. Scroll infinito no funcionará en este entorno."), this;
-		this.scrollObserver && this.scrollObserver.disconnect();
 		let t = e.querySelector(".scroll-sentinel");
-		t && t.remove(), this.scrollObserver = new IntersectionObserver((e) => {
+		t && (this.scrollObserver?.unobserve(t), t.remove()), this.scrollObserver ||= new IntersectionObserver((e) => {
 			e.forEach((e) => {
 				e.isIntersecting && this.pagination.hasMorePages() && this.#i();
 			});
@@ -94,11 +93,12 @@ var e = Object.defineProperty, t = (t, n) => {
 	async #i() {
 		if (!this.pagination.hasMorePages()) return this;
 		let e = this.pagination.loadNextPage();
-		if (this.procesServer) this.fetch?.body && (this.fetch.body.page = e), await this.searching(this.searchTerm, !1), this.#r();
+		if (this.procesServer) this.fetch?.body && (this.fetch.body.page = e), await this.searching(this.searchTerm, !1);
 		else {
 			let e = this.pagination.getPageItems(this._data);
-			this.renderer.appendItems(e, this.template, this.t.noResults, this.events, this.pagination.getCurrentPage() === 1, this.#n.bind(this)), this.#r();
+			this.renderer.appendItems(e, this.template, this.t.noResults, this.events, this.pagination.getCurrentPage() === 1, this.#n.bind(this));
 		}
+		this.#r();
 		let t = this.pagination.getTotalLoaded(), n = this.pagination.getTotalItems();
 		return this.renderer.updateCounter(t, n, this.t.pagination), this;
 	}
