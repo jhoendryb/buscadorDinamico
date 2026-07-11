@@ -1539,6 +1539,7 @@ El componente incluye un sistema robusto de gestión de errores que proporciona 
 | SEARCH_003 | El parámetro 'fetch.url' es requerido | Configura la URL del endpoint |
 | SEARCH_004 | itemsPerPage debe ser un número | Configura itemsPerPage con un número |
 | SEARCH_005 | itemsPerPage debe ser mayor a 0 | Configura itemsPerPage con un valor positivo |
+| SEARCH_006 | Formato de tipo inválido | Verifica que el parámetro tenga el formato correcto |
 | SEARCH_010 | No existe el contenedor especificado | Verifica el selector CSS |
 | SEARCH_011 | No existe el contenedor de resultados | Verifica la estructura DOM del componente |
 | SEARCH_020 | Error de conexión al servidor | Verifica tu conexión a internet |
