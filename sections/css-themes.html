@@ -169,21 +169,33 @@ const search = new BuscadorDinamico.Search({
 
 <h2>Soporte dark/light mode</h2>
 
-<p>El tema <code>adaptative</code> detecta automáticamente la preferencia del sistema:</p>
+<p>El tema <code>adaptative</code> (tema por defecto) detecta automáticamente el modo del sistema usando selectores CSS con el atributo <code>data-theme</code>:</p>
 
-<pre data-lang="css"><code>/* El tema adaptative usa */
-@media (prefers-color-scheme: dark) {
-    .app-search {
-        --bg-primary: #1a1b2e;
-        --text-primary: #e4e6ed;
-        /* ... */
-    }
+<pre data-lang="css"><code>/* El tema adaptative usa selectores de atributo */
+[data-theme="light"] .app-search.theme-adaptative {
+    --search-bg-color: #ffffff;
+    --search-text-color: #111827;
+    /* ... modo claro */
+}
+
+[data-theme="dark"] .app-search.theme-adaptative {
+    --search-bg-color: #161b22;
+    --search-text-color: #e6edf3;
+    /* ... modo oscuro */
 }</code></pre>
+
+<p>Para que funcione, establece el atributo <code>data-theme</code> en el elemento <code>&lt;html&gt;</code>:</p>
+
+<pre data-lang="html"><code>&lt;!-- Modo claro --&gt;
+&lt;html lang="es" data-theme="light"&gt;
+
+&lt;!-- Modo oscuro --&gt;
+&lt;html lang="es" data-theme="dark"&gt;</code></pre>
 
 <div class="doc-callout doc-callout--tip">
     <span class="doc-callout__icon">💡</span>
     <div class="doc-callout__content">
         <strong>Consejo</strong>
-        <p>Para un control total, crea tu tema personalizado copiando las variables de un tema existente y modificándolas. Esto garantiza compatibilidad con futuras actualizaciones.</p>
+        <p>El tema <code>adaptative</code> es el tema por defecto y está completamente funcional con soporte para light/dark mode. No requiere configuración adicional más allá de establecer el atributo <code>data-theme</code> en el HTML.</p>
     </div>
 </div>

@@ -97,14 +97,10 @@ var e = Object.defineProperty, t = (t, n) => {
 		if (this.procesServer) this.fetch?.body && (this.fetch.body.page = e), await this.searching(this.searchTerm, !1), this.#r();
 		else {
 			let e = this.pagination.getPageItems(this._data);
-			this.renderer.appendItems(e, this.template, this.t.noResults, this.events, this.#n.bind(this)), this.#r();
+			this.renderer.appendItems(e, this.template, this.t.noResults, this.events, this.pagination.getCurrentPage() === 1, this.#n.bind(this)), this.#r();
 		}
 		let t = this.pagination.getTotalLoaded(), n = this.pagination.getTotalItems();
-		if (this.renderer.updateCounter(t, n, this.t.pagination), !this.pagination.hasMorePages()) {
-			let e = this.renderer.body.paginationItems?.querySelector(".load-more-button");
-			e && (e.style.display = "none");
-		}
-		return this;
+		return this.renderer.updateCounter(t, n, this.t.pagination), this;
 	}
 	#a() {
 		return this.scrollObserver && this.scrollObserver.disconnect(), this;
@@ -149,15 +145,15 @@ var e = Object.defineProperty, t = (t, n) => {
 	}
 	setupKeyboardNavigation() {
 		if (!this.keyboardEnabled) return this;
-		let e = this.renderer.body.content, t = this.renderer.body.renderItems;
+		let e = this.renderer.body.content, t = this.renderer.body.renderItems, n = this.renderer.body.inputSearch;
 		return t?.addEventListener("click", (e) => {
 			if (e.preventDefault(), !t) return;
-			let n = e.target.closest(".items"), r = t.querySelectorAll(".items");
-			n && (this.selectedIndex = Array.from(r).indexOf(n), this.#s(r), this.#c(n));
+			let r = e.target.closest(".items"), i = t.querySelectorAll(".items");
+			r && (this.selectedIndex = Array.from(i).indexOf(r), this.#s(i), this.#c(r), n.value = "", n.dispatchEvent(new Event("input")), n.blur());
 		}), e.addEventListener("keydown", (e) => {
 			if (!t) return;
-			let n = t.querySelectorAll(".items");
-			e.key === "ArrowDown" ? (e.preventDefault(), this.selectedIndex = Math.min(this.selectedIndex + 1, n.length - 1), this.#s(n)) : e.key === "ArrowUp" ? (e.preventDefault(), this.selectedIndex = Math.max(this.selectedIndex - 1, 0), this.#s(n)) : ["enter", "click"].includes(e.key.toLowerCase()) && this.selectedIndex >= 0 && (e.preventDefault(), this.#c(n[this.selectedIndex]));
+			let r = t.querySelectorAll(".items");
+			e.key === "ArrowDown" ? (e.preventDefault(), this.selectedIndex = Math.min(this.selectedIndex + 1, r.length - 1), this.#s(r)) : e.key === "ArrowUp" ? (e.preventDefault(), this.selectedIndex = Math.max(this.selectedIndex - 1, 0), this.#s(r)) : ["enter"].includes(e.key.toLowerCase()) && this.selectedIndex >= 0 && (e.preventDefault(), this.#c(r[this.selectedIndex]), n.value = "", n.dispatchEvent(new Event("input")), n.blur());
 		}), this;
 	}
 	#s(e) {
