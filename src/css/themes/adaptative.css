@@ -3,6 +3,7 @@
     --search-text-color: #111827;
     --search-text-color-items: #4b5563;
     --search-placeholder-color: #9ca3af;
+    --search-light-text-color: #9ca3af;
     --search-icon-color: #9ca3af;
     --search-border-color: #e5e7eb;
     --search-input-bg-color: #f3f4f6;
@@ -13,6 +14,10 @@
     --search-selected-border-color: #3b82f6;
     --search-counter-color: #9ca3af;
     --search-counter-bg-color: #f3f4f6;
+    --scrollbar-thumb-color: #d1d5db;
+    --spinner-border-color: #e5e7eb;
+    --spinner-top-color: #3b82f6;
+    --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
 [data-theme="dark"] .app-search.theme-adaptative {
@@ -20,6 +25,7 @@
     --search-text-color: #e6edf3;
     --search-text-color-items: #b1bac4;
     --search-placeholder-color: #6e7681;
+    --search-light-text-color: #6e7681;
     --search-icon-color: #6e7681;
     --search-border-color: #30363d;
     --search-input-bg-color: #1c2128;
@@ -30,4 +36,43 @@
     --search-selected-border-color: #3b82f6;
     --search-counter-color: #6e7681;
     --search-counter-bg-color: #1c2128;
+    --scrollbar-thumb-color: #484f58;
+    --spinner-border-color: #30363d;
+    --spinner-top-color: #3b82f6;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+.theme-adaptative .input-search {
+    background-color: var(--search-input-bg-color);
+    border: 1px solid var(--search-input-border-color, transparent);
+    border-radius: var(--search-border-radius);
+}
+
+.theme-adaptative .items-search {
+    background-color: var(--search-bg-color);
+}
+
+.theme-adaptative .content-pagination-items {
+    border: 1px solid transparent;
+    border-top: none;
+}
+
+.theme-adaptative .content-pagination-items.content-pagination-visible {
+    border-color: var(--search-input-border-color, transparent);
+}
+
+.theme-adaptative .content-pagination-items:last-child.content-pagination-visible {
+    border-top: none;
+}
+
+.theme-adaptative .content-pagination-items:first-child.content-pagination-visible {
+    border-bottom: none;
+}
+
+.app-search.theme-adaptative:has(.content-pagination-items:last-child) .content-pagination-items {
+    border-radius: 0 0 var(--search-border-radius, 8px) var(--search-border-radius, 8px);
+}
+
+.app-search.theme-adaptative:has(.content-pagination-items:first-child) .content-pagination-items {
+    border-radius: var(--search-border-radius, 8px) var(--search-border-radius, 8px) 0 0;
 }

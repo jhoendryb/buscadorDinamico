@@ -100,7 +100,7 @@ var e = Object.defineProperty, t = (t, n) => {
 			this.renderer.appendItems(e, this.template, this.t.noResults, this.events, this.#n.bind(this)), this.#r();
 		}
 		let t = this.pagination.getTotalLoaded(), n = this.pagination.getTotalItems();
-		if (this.renderer.updateCounter(t, n), !this.pagination.hasMorePages()) {
+		if (this.renderer.updateCounter(t, n, this.t.pagination), !this.pagination.hasMorePages()) {
 			let e = this.renderer.body.paginationItems?.querySelector(".load-more-button");
 			e && (e.style.display = "none");
 		}

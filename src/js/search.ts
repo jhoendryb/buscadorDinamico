@@ -100,4 +100,6 @@ search1.init();
 // search3.init();
 search4.init();
 
+console.log(search4._data);
+
 // search2.sort('name', 'asc').draw();
