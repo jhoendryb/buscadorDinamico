@@ -94,10 +94,16 @@ export class SearchingLocal {
                 return this.searchInstance;
             }
 
+            const flattenValues = (obj: any): string[] => {
+                if (typeof obj !== 'object' || obj === null) return [String(obj)];
+                return Object.values(obj).flatMap(v => flattenValues(v));
+            };
+            
+            const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             this.searchInstance._data = this.searchInstance.data.filter((item: Record<string, any>) => {
-                const values = Object.values(item);
+                const values = flattenValues(item);
                 return values.some((value: any) =>
-                    String(value).toLowerCase().includes(searchTerm.toLowerCase())
+                    normalize(String(value)).toLowerCase().includes(normalize(String(searchTerm)).toLowerCase())
                 );
             });
 

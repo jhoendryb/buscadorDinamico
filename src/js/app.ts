@@ -50,6 +50,7 @@ class Search {
     private boundKeydownHandler: (e: KeyboardEvent) => void;
     private boundClickHandler: (e: Event) => void;
     private currentDrawId: number = 0;
+    private isLoadingMore: boolean = false;
     /**
      * Instancia que almacena las traducciones predeterminadas.
      * @type {Types.TranslationCache}
@@ -301,36 +302,41 @@ class Search {
      * @returns {Promise<Search>} Instancia actual para encadenamiento
      */
     async #loadMore(): Promise<Search> {
-        if (!this.pagination.hasMorePages()) return this;
+        if (this.isLoadingMore || !this.pagination.hasMorePages()) return this;
+        this.isLoadingMore = true;
 
-        const nextPage = this.pagination.loadNextPage();
-        const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
+        try {
+            const nextPage = this.pagination.loadNextPage();
+            const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
 
-        if (this.procesServer) {
-            if (this.fetch?.body) {
-                this.fetch.body.page = nextPage;
+            if (this.procesServer) {
+                if (this.fetch?.body) {
+                    this.fetch.body.page = nextPage;
+                }
+                await this.searching(this.searchTerm, false);
             }
-            await this.searching(this.searchTerm, false);
+
+            this.renderer.appendItems(
+                next,
+                this.template,
+                this.t.noResults,
+                this.events,
+                (this.pagination.getCurrentPage() === 1),
+                this.#highlightText.bind(this)
+            );
+
+            // Reconfigurar detector de scroll para el nuevo contenido
+            this.#setupScrollDetection();
+
+            // Actualizar contador
+            const loaded = this.pagination.getTotalLoaded();
+            const total = this.pagination.getTotalItems();
+            this.renderer.updateCounter(loaded, total, this.t.pagination);
+
+            return this;
+        } finally {
+            this.isLoadingMore = false;
         }
-
-        this.renderer.appendItems(
-            next,
-            this.template,
-            this.t.noResults,
-            this.events,
-            (this.pagination.getCurrentPage() === 1),
-            this.#highlightText.bind(this)
-        );
-
-        // Reconfigurar detector de scroll para el nuevo contenido
-        this.#setupScrollDetection();
-
-        // Actualizar contador
-        const loaded = this.pagination.getTotalLoaded();
-        const total = this.pagination.getTotalItems();
-        this.renderer.updateCounter(loaded, total, this.t.pagination);
-
-        return this;
     }
     /**
      * Limpia el detector de scroll.

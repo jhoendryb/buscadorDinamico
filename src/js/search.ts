@@ -81,7 +81,8 @@ search1.on('itemSelected', (data: any) => {
 const arrayData = Array.from({ length: 100 }, (_, i) => ({
     id: i,
     name: `Item ${i}`,
-    description: `Description item ${i}`
+    description: `Description item ${i}`,
+    child: { name: "son" }
 }));
 
 const search4 = new Search({
@@ -90,6 +91,16 @@ const search4 = new Search({
     keyboardEnabled: true,
     cacheEnabled: true,
     theme: 'clean-white',
+    template: (item) => {
+        let templete = "";
+        if (item) {
+            templete = `${item.child.name} - ${item.id}`;
+            if (item.description) {
+                templete += ` - ${item.description}`;
+            }
+        }
+        return templete;
+    },
     data: arrayData
 });
 
