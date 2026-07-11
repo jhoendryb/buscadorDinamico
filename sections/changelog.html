@@ -2,40 +2,48 @@
 
 <p>Historial de versiones y cambios del componente.</p>
 
-<h2>v2.2.0 <span class="doc-badge doc-badge--success">Latest</span></h2>
+<h2>v2.3.0 <span class="doc-badge doc-badge--success">Latest</span></h2>
 
 <p><em>Fecha: 2026</em></p>
 
 <h3>Añadido</h3>
 
 <ul>
-    <li>Resaltado de texto opcional para términos de búsqueda</li>
-    <li>Parámetro <code>highlightEnabled</code> para habilitar resaltado</li>
-    <li>Parámetro <code>highlightClass</code> para personalización CSS</li>
-    <li>Variables CSS <code>--search-highlight-bg-color</code> y <code>--search-highlight-text-color</code></li>
-    <li>Enum <code>DomComponent</code> para mejor legibilidad en <code>renderByDom</code></li>
+    <li>Parámetro <code>responseAdapter</code> para transformar respuestas del servidor personalizadas</li>
+    <li>Método <code>clear()</code> para resetear estado sin destruir la instancia</li>
+    <li>Evento <code>resultsCleared</code> emitido al cambiar término de búsqueda</li>
+    <li>Evento <code>searchComplete</code> emitido al completar búsqueda y renderizado</li>
+    <li>Búsqueda recursiva en objetos anidados (<code>flattenValues</code>)</li>
+    <li>Normalización Unicode para búsqueda con tildes/diacriticos</li>
+    <li>Protección contra condiciones de carrera en <code>draw()</code></li>
+    <li>Protección contra re-entrancy en <code>#loadMore()</code></li>
+    <li>Estilos de scrollbar cross-browser para Firefox</li>
+    <li><code>prefers-reduced-motion</code> ahora desactiva TODAS las transiciones globalmente</li>
 </ul>
 
 <h3>Mejorado</h3>
 
 <ul>
-    <li>Refactorización del método <code>fetch</code> en <code>searchingServer.ts</code></li>
-    <li>Lógica mejorada en <code>setTheme</code> para cambio dinámico de temas</li>
-    <li>Constructor de <code>EventEmitter</code> ahora acepta parámetro opcional</li>
-    <li>Validación de parámetros extraída a método privado <code>#validateParameters</code></li>
+    <li><code>draw()</code> ahora retorna <code>Promise&lt;Search&gt;</code></li>
+    <li><code>cache.has()</code> refresca TTL al acceder (true LRU)</li>
+    <li><code>setItemsPerPage()</code> valida que el valor sea &gt;= 1</li>
+    <li><code>hideResults()</code> usa <code>timeHiddenResults</code> configurable</li>
+    <li><code>destroy()</code> re-inicializa objetos en lugar de nullificarlos</li>
+    <li><code>destroy()</code> remueve event listeners por referencia</li>
+    <li><code>#highlightText()</code> escapa caracteres especiales de regex</li>
+    <li>Typo corregido: <code>firtsLoad</code> &gt; <code>firstLoad</code></li>
 </ul>
 
 <h3>Corregido</h3>
 
 <ul>
-    <li>Removido código comentado en <code>setupKeyboardNavigation</code></li>
-    <li><code>DEFAULT_DEVELOPMENT_MODE</code> cambiado a <code>false</code> por defecto</li>
-    <li>Valor hardcodeado <code>max-height</code> reemplazado por variable CSS</li>
-    <li>Padding movido de <code>colors.css</code> a <code>dimensions.css</code> para mejor separación de responsabilidades</li>
-    <li>Inconsistencia en <code>selectedIndex</code> corregida usando constante <code>NO_SELECTION</code></li>
+    <li><code>highlightText()</code> escapa caracteres regex especiales</li>
+    <li>Cache almacena <code>_data</code> completa en server mode</li>
+    <li><code>clearCacheByPrefix()</code> valida searchTerm vacío</li>
+    <li><code>processInfiniteScroll()</code> ya no se llama desde searchingServer</li>
 </ul>
 
-<h2>v1.0.0</h2>
+<h2>v2.2.0</h2>
 
 <p><em>Fecha: 2026</em></p>
 

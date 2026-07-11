@@ -653,7 +653,7 @@ var i = class {
 		let e = this.body.contentPaginationItems, t;
 		e && (e.classList.remove("content-pagination-visible"), e.classList.add("content-pagination-hidden"), t = setTimeout(() => {
 			e.classList.contains("content-pagination-hidden") && e.setAttribute("hidden", "true");
-		}, 200), this.animationTimeouts.push(t));
+		}, this.timeHiddenResults), this.animationTimeouts.push(t));
 	}
 	toggleResults() {
 		this.isVisible ? this.hideResults() : this.showResults();
