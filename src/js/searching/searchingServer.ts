@@ -1,11 +1,20 @@
 import * as Types from '../types';
 import { ErrorHandler, ErrorCode, SearchError } from '../error-handler';
 
+/**
+ * Clase que maneja la búsqueda de datos en servidor vía Fetch API.
+ * Realiza peticiones HTTP con soporte para caché, timeout y manejo de errores.
+ */
 export class SearchingServer {
     private searchInstance: any;
     private errorHandler: ErrorHandler;
     private defaultTimeout: number = 30000; // 30 segundos
 
+    /**
+     * Crea una instancia de SearchingServer.
+     * @param {any} searchInstance - Instancia principal de Search
+     * @param {ErrorHandler} errorHandler - Instancia de ErrorHandler para gestión de errores
+     */
     constructor(searchInstance: any, errorHandler: ErrorHandler) {
         this.searchInstance = searchInstance;
         this.errorHandler = errorHandler;
@@ -13,6 +22,10 @@ export class SearchingServer {
 
     /**
      * Realiza búsqueda en servidor vía Fetch API.
+     * Gestiona caché, paginación y emisión de eventos.
+     * @param {string} searchTerm - Término de búsqueda a enviar al servidor
+     * @param {boolean} [isEvent=false] - Si fue iniciado por evento del usuario (emite evento 'search')
+     * @returns {Promise<any>} Instancia de Search para encadenamiento
      */
     async searching(searchTerm: string, isEvent: boolean = false): Promise<any> {
         try {
@@ -160,6 +173,10 @@ export class SearchingServer {
 
     /**
      * Realiza petición HTTP con Fetch API.
+     * Soporta timeout con AbortController, múltiples Content-Type y manejo de errores.
+     * @param {Types.FetchConfig} config - Configuración de la petición (url, method, headers, body, timeout)
+     * @returns {Promise<any>} Datos JSON recibidos del servidor
+     * @throws {SearchError} Si hay errores de red, timeout o formato de datos inválido
      */
     async fetch(config: Types.FetchConfig): Promise<any> {
         try {

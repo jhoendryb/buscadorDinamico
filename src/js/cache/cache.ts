@@ -104,6 +104,11 @@ export class LRUCache {
         return this;
     }
 
+    /**
+     * Elimina un elemento del caché por su clave.
+     * @param {string} key - Clave del elemento a eliminar
+     * @returns {boolean} true si el elemento fue eliminado, false si no existía
+     */
     delete(key: string): boolean {
         return this.cache.delete(key);
     }

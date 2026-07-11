@@ -2,12 +2,18 @@ import { SearchError, ErrorCode, ErrorHandler } from '../error-handler/index';
 
 /**
  * Implementación de EventEmitter para manejo de eventos personalizados.
+ * Permite registrar, remover y emitir eventos con múltiples listeners.
  * @class
  */
 export class EventEmitter {
     private events: { [key: string]: Function[] } = {};
     private errorHandler: ErrorHandler;
 
+    /**
+     * Crea una instancia de EventEmitter.
+     * @param {ErrorHandler} [errorHandler] - Instancia de ErrorHandler para logging de errores.
+     *   Si no se proporciona, usa ErrorHandler.getInstance(true).
+     */
     constructor(errorHandler?: ErrorHandler) {
         this.errorHandler = errorHandler || ErrorHandler.getInstance(true);
     }

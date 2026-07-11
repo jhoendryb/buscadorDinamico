@@ -1,17 +1,28 @@
 import * as Types from '../types';
 import { ErrorHandler, ErrorCode, SearchError } from '../error-handler';
 
+/**
+ * Clase que maneja la búsqueda local de datos en memoria.
+ * Filtra los datos proporcionados o extraídos del DOM según el término de búsqueda.
+ */
 export class SearchingLocal {
     private searchInstance: any;
     private errorHandler: ErrorHandler;
 
+    /**
+     * Crea una instancia de SearchingLocal.
+     * @param {any} searchInstance - Instancia principal de Search
+     * @param {ErrorHandler} errorHandler - Instancia de ErrorHandler para gestión de errores
+     */
     constructor(searchInstance: any, errorHandler: ErrorHandler) {
         this.searchInstance = searchInstance;
         this.errorHandler = errorHandler;
     }
 
     /**
-     * Extrae datos del DOM si no hay datos proporcionados.
+     * Extrae datos del DOM si no hay datos proporcionados en el constructor.
+     * Busca elementos con clase '.items' y extrae sus atributos data-*.
+     * @returns {boolean} true si se extrajeron datos del DOM, false si ya existían datos o no hay elementos
      */
     isExtractData(): boolean {
         try {
@@ -50,6 +61,10 @@ export class SearchingLocal {
 
     /**
      * Realiza búsqueda local filtrando los datos en memoria.
+     * Filtra el array de datos buscando coincidencias en cualquier campo.
+     * @param {string} searchTerm - Término de búsqueda a filtrar
+     * @param {boolean} [isEvent=false] - Si fue iniciado por evento del usuario (emite evento 'search')
+     * @returns {any} Instancia de Search para encadenamiento
      */
     searching(searchTerm: string, isEvent: boolean = false): any {
         try {

@@ -193,7 +193,7 @@ class Search {
      * Ejecuta una búsqueda y renderiza los resultados.
      * @param {string} [searchTerm] - Término de búsqueda (usa this.searchTerm si no se proporciona)
      * @param {boolean} [isEvent=false] - Si fue iniciado por evento del usuario
-     * @returns {Promise<void>} Promesa que se resuelve cuando termina el renderizado
+     * @returns {Promise<Search>} Instancia actual para encadenamiento
      */
     async draw(searchTerm: string = this.searchTerm, isEvent: boolean = false): Promise<Search> {
         // Resetear scroll si cambia el término de búsqueda

@@ -151,6 +151,7 @@ export class SearchRenderer {
     }
     /**
      * Renderiza el contenedor donde se mostrarán los resultados de búsqueda.
+     * @param {number} [zIndex=999] - z-index del contenedor de items
      * @returns {HTMLElement} Contenedor de items
      */
     renderItems(zIndex: number = 999): HTMLElement {
@@ -246,14 +247,15 @@ export class SearchRenderer {
      * @param {string|Function|null} template - Template personalizado (opcional)
      * @param {string} [noResults="No hay resultados."] - Mensaje sin resultados
      * @param {EventEmitter} events - Instancia de EventEmitter
-     * @param {boolean} [firtsLoad=false] - Si es la primera carga
+     * @param {boolean} [firstLoad=false] - Si es la primera carga
+     * @param {Function} [highlightText] - Función para resaltar texto de búsqueda
      * @returns {boolean} Indica si se pudo añadir los items exitosamente
      */
-    appendItems(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter, firtsLoad: boolean = false, highlightText?: (text?: string) => string): boolean {
+    appendItems(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter, firstLoad: boolean = false, highlightText?: (text?: string) => string): boolean {
         const container = this.body.renderItems;
         if (!container) return false;
 
-        if (firtsLoad) container.innerHTML = '';
+        if (firstLoad) container.innerHTML = '';
 
         const jsonItem: Types.CreateElementConfig = {
             element: "li",
@@ -314,6 +316,7 @@ export class SearchRenderer {
      * Actualiza el contador de registros.
      * @param {number} loaded - Cantidad de items cargados
      * @param {number} total - Total de items
+     * @param {string} [textPagination] - Texto personalizado para paginación (ej: "{{count}} de {{total}}")
      * @returns {void}
      */
     updateCounter(loaded: number, total: number, textPagination?: string): void {
