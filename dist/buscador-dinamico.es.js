@@ -62,7 +62,7 @@ var e = Object.defineProperty, t = (t, n) => {
 		let e = this.pagination.getPageItems(this.procesServer ? null : this._data);
 		this.renderer.appendItems(e, this.template, this.t.noResults, this.events, this.pagination.getCurrentPage() === 1, this.#n.bind(this));
 		let t = this.pagination.getTotalLoaded(), n = this.pagination.getTotalItems();
-		this.renderer.updateCounter(t, n), this.#r(), this.events.emit("pageChange", {
+		this.renderer.updateCounter(t, n, this.t.pagination), this.#r(), this.events.emit("pageChange", {
 			page: this.pagination.getCurrentPage(),
 			totalPages: this.pagination.getTotalPages(),
 			itemsOnPage: e.length,
@@ -569,7 +569,6 @@ var i = class {
 		return r({
 			element: e,
 			className: this.#e("items-counter", e?.className),
-			textContent: "0 de 0",
 			...e ? {} : { element: "div" }
 		});
 	}
@@ -610,9 +609,9 @@ var i = class {
 			content: s
 		}), !0;
 	}
-	updateCounter(e, t) {
-		let n = this.body.paginationItems?.querySelector(".items-counter");
-		n && (n.textContent = `${e} de ${t}`);
+	updateCounter(e, t, n) {
+		let r = this.body.paginationItems?.querySelector(".items-counter");
+		n ||= "{{count}} de {{total}}", r && n && (r.textContent = n.replace("{{count}}", e.toString()).replace("{{total}}", t.toString()));
 	}
 	renderByDom(e, t) {
 		let n = {
@@ -808,7 +807,8 @@ var i = class {
 	searchLabel: "Filtrar por Búsqueda",
 	searchPlaceholder: "Ingrese palabra clave...",
 	noResults: "No se encontraron resultados",
-	loading: "Buscando..."
+	loading: "Buscando...",
+	pagination: "{{count}} de {{total}}"
 }, y = {
 	searchContainer: "input-search",
 	itemsContainer: "items-search",

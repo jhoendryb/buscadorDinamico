@@ -232,7 +232,7 @@ export class SearchRenderer {
         let jsonCountItems: Types.CreateElementConfig = {
             element: countItems,
             className: this.#classDefault(`items-counter`, countItems?.className),
-            textContent: "0 de 0",
+            // textContent: "0 de 0",
             ...(!countItems ? {
                 element: "div",
             } : {})
@@ -316,10 +316,17 @@ export class SearchRenderer {
      * @param {number} total - Total de items
      * @returns {void}
      */
-    updateCounter(loaded: number, total: number): void {
+    updateCounter(loaded: number, total: number, textPagination?: string): void {
         const counter = this.body.paginationItems?.querySelector('.items-counter');
-        if (counter) {
-            counter.textContent = `${loaded} de ${total}`;
+
+        if (!textPagination) {
+            textPagination = '{{count}} de {{total}}';
+        }
+
+        if (counter && textPagination) {
+            counter.textContent = textPagination
+                .replace('{{count}}', loaded.toString())
+                .replace('{{total}}', total.toString());
         }
     }
     /**
@@ -443,6 +450,4 @@ export class SearchRenderer {
         this.body.contentPaginationItems = newContentPagItems;
         return newContentPagItems;
     }
-
-
 }

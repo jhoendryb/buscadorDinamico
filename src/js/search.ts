@@ -13,7 +13,8 @@ const search1 = new Search({
     highlightEnabled: true,
     template: `<div>{{name}} - {{id_ciudad}}</div>`,
     translation: {
-        searchPlaceholder: 'Escribe la busqueda aqui.'
+        searchPlaceholder: 'Escribe la busqueda aqui.',
+        pagination: '{{total}} resultados, paginados {{count}}'
     },
     dom: 'scip',
     developmentMode: true,
@@ -79,88 +80,19 @@ search1.on('itemSelected', (data: any) => {
 //     element: '.app-search3',
 // });
 
+
+const arrayData = Array.from({ length: 100 }, (_, i) => ({
+    id: i,
+    name: `Item ${i}`,
+    description: `Description item ${i}`
+}));
+
 const search4 = new Search({
     element: '.app-search4',
     dom: 'pics',
     keyboardEnabled: true,
     theme: 'clean-white',
-    data: [
-        {
-            country: 'VE',
-            name: 'Venezuela',
-            descripcion: 'El pais mas rico en petroleo.'
-        },
-        {
-            country: 'CO',
-            name: 'Colombia',
-            descripcion: 'El pais mas rico en cafe.'
-        },
-        {
-            country: 'MX',
-            name: 'Mexico',
-            descripcion: 'El pais mas rico en tacos.'
-        },
-        {
-            country: 'AR',
-            name: 'Argentina',
-            descripcion: 'El pais mas rico en empanadas.'
-        },
-        {
-            country: 'CL',
-            name: 'Chile',
-            descripcion: 'El pais mas rico en vino.'
-        },
-        {
-            country: 'PE',
-            name: 'Peru',
-            descripcion: 'El pais mas rico en machi.'
-        },
-        {
-            country: 'EC',
-            name: 'Ecuador',
-            descripcion: 'El pais mas rico en cacao.'
-        },
-        {
-            country: 'BO',
-            name: 'Bolivia',
-            descripcion: 'El pais mas rico en plata.'
-        },
-        {
-            country: 'CO',
-            name: 'Colombia',
-            descripcion: 'El pais mas rico en cafe.'
-        },
-        {
-            country: 'MX',
-            name: 'Mexico',
-            descripcion: 'El pais mas rico en tacos.'
-        },
-        {
-            country: 'AR',
-            name: 'Argentina',
-            descripcion: 'El pais mas rico en empanadas.'
-        },
-        {
-            country: 'CL',
-            name: 'Chile',
-            descripcion: 'El pais mas rico en vino.'
-        },
-        {
-            country: 'PE',
-            name: 'Peru',
-            descripcion: 'El pais mas rico en machi.'
-        },
-        {
-            country: 'EC',
-            name: 'Ecuador',
-            descripcion: 'El pais mas rico en cacao.'
-        },
-        {
-            country: 'BO',
-            name: 'Bolivia',
-            descripcion: 'El pais mas rico en plata.'
-        },
-    ]
+    data: arrayData
 });
 
 search1.init();

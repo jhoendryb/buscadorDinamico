@@ -36,6 +36,7 @@ export interface TranslationCache {
     searchPlaceholder?: string;
     loading?: string;
     noResults?: string;
+    pagination?: string;
     [key: string]: string | undefined;
 }
 

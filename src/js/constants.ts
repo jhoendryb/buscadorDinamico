@@ -25,7 +25,8 @@ export const DEFAULT_TRANSLATIONS = {
     searchLabel: 'Filtrar por Búsqueda',
     searchPlaceholder: 'Ingrese palabra clave...',
     noResults: 'No se encontraron resultados',
-    loading: 'Buscando...'
+    loading: 'Buscando...',
+    pagination: '{{count}} de {{total}}'
 };
 
 // Clases CSS por defecto

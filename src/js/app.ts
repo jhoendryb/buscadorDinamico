@@ -14,7 +14,6 @@ import {
 } from './index';
 
 class Search {
-    // Declaraciones de propiedades
     element: string;
     theme: string;
     searchTerm: string;
@@ -230,7 +229,7 @@ class Search {
         // Actualizar contador
         const loaded = this.pagination.getTotalLoaded();
         const total = this.pagination.getTotalItems();
-        this.renderer.updateCounter(loaded, total);
+        this.renderer.updateCounter(loaded, total, this.t.pagination);
 
         // Configurar detector de scroll
         this.#setupScrollDetection();
@@ -326,7 +325,7 @@ class Search {
         // Actualizar contador
         const loaded = this.pagination.getTotalLoaded();
         const total = this.pagination.getTotalItems();
-        this.renderer.updateCounter(loaded, total);
+        this.renderer.updateCounter(loaded, total, this.t.pagination);
 
         // Si no hay más páginas, ocultar botón de cargar más
         if (!this.pagination.hasMorePages()) {

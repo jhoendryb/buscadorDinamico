@@ -208,7 +208,7 @@ const DocSearch = {
             cacheEnabled: true,
             cacheMaxSize: 30,
             cacheTtlSeconds: 300,
-            dom: 'search-content-items-pagination',
+            dom: 'scip',
             zIndex: 200,
             template: (item) => this.renderResult(item),
             translation: {
