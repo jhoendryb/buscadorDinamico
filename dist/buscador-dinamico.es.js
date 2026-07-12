@@ -99,8 +99,10 @@ var e = Object.defineProperty, t = (t, n) => {
 		if (this.isLoadingMore || !this.pagination.hasMorePages()) return this;
 		this.isLoadingMore = !0;
 		try {
-			let e = this.pagination.loadNextPage(), t = this.pagination.getPageItems(this.procesServer ? null : this._data);
-			this.procesServer && (this.fetch?.body && (this.fetch.body.page = e), await this.searching(this.searchTerm, !1)), this.renderer.appendItems(t, this.template, this.t.noResults, this.events, this.pagination.getCurrentPage() === 1, this.#n.bind(this)), this.#r();
+			let e = this.pagination.loadNextPage();
+			this.procesServer && (this.fetch?.body && (this.fetch.body.page = e), await this.searching(this.searchTerm, !1));
+			let t = this.pagination.getPageItems(this.procesServer ? null : this._data);
+			this.renderer.appendItems(t, this.template, this.t.noResults, this.events, this.pagination.getCurrentPage() === 1, this.#n.bind(this)), this.#r();
 			let n = this.pagination.getTotalLoaded(), r = this.pagination.getTotalItems();
 			return this.renderer.updateCounter(n, r, this.t.pagination), this;
 		} finally {
@@ -692,9 +694,14 @@ var i = class {
 			Array.isArray(this.searchInstance.data) || this.errorHandler.throwCustomError(a.INVALID_DATA_FORMAT, {
 				context: "searchingLocal",
 				dataType: typeof this.searchInstance.data
-			}), this.searchInstance.cacheEnabled && this.searchInstance.cache.clearCacheByPrefix(this.searchInstance.searchTerm), this.searchInstance.pagination.goToPage(1);
+			}), this.searchInstance.pagination.goToPage(1);
 			let n = this.searchInstance.getCacheKey(e, this.searchInstance.pagination.getCurrentPage()), r = this.searchInstance.cache.get(n);
-			if (this.searchInstance.cacheEnabled && r && !t) return this.searchInstance._data = r, this.searchInstance.processInfiniteScroll(), this.searchInstance;
+			if (this.searchInstance.cacheEnabled && r) return this.searchInstance._data = r, console.log("Usando caché para búsqueda local:", n), t && this.searchInstance.events.emit("search", {
+				searchTerm: e,
+				results: this.searchInstance._data,
+				totalResults: this.searchInstance._data.length,
+				timestamp: (/* @__PURE__ */ new Date()).toISOString()
+			}), this.searchInstance;
 			let i = (e) => typeof e != "object" || !e ? [String(e)] : Object.values(e).flatMap((e) => i(e)), o = (e) => e.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 			return this.searchInstance._data = this.searchInstance.data.filter((t) => i(t).some((t) => o(String(t)).toLowerCase().includes(o(String(e)).toLowerCase()))), this.searchInstance.sortBy && this.searchInstance.sort(this.searchInstance.sortBy, this.searchInstance.sortOrder), this.searchInstance.searchTerm = e, this.searchInstance.cacheEnabled && this.searchInstance.cache.set(n, this.searchInstance._data), t && this.searchInstance.events.emit("search", {
 				searchTerm: e,
@@ -712,9 +719,14 @@ var i = class {
 	}
 	async searching(e, t = !1) {
 		try {
-			this.errorHandler.validateRequired(this.searchInstance.fetch?.url, "fetch.url", a.FETCH_URL_REQUIRED), e !== this.searchInstance.searchTerm && (this.searchInstance.pagination.goToPage(1), this.searchInstance.fetch.body.page = 1, this.searchInstance.fetch.body.searchTerm = e, this.searchInstance.cacheEnabled && this.searchInstance.cache.clearCacheByPrefix(this.searchInstance.searchTerm), this.searchInstance.showLoading()), this.searchInstance.pagination.getCurrentPage() !== this.searchInstance.fetch.body.page && this.searchInstance.pagination.goToPage(this.searchInstance.fetch.body.page), (this.searchInstance.itemsPerPage !== this.searchInstance.fetch.body.itemsPerPage || !this.searchInstance.fetch.body.itemsPerPage) && (this.searchInstance.fetch.body.itemsPerPage = this.searchInstance.itemsPerPage), this.searchInstance.searchTerm = e;
+			this.errorHandler.validateRequired(this.searchInstance.fetch?.url, "fetch.url", a.FETCH_URL_REQUIRED), e !== this.searchInstance.searchTerm && (this.searchInstance.pagination.goToPage(1), this.searchInstance.fetch.body.page = 1, this.searchInstance.fetch.body.searchTerm = e, this.searchInstance.showLoading()), this.searchInstance.pagination.getCurrentPage() !== this.searchInstance.fetch.body.page && this.searchInstance.pagination.goToPage(this.searchInstance.fetch.body.page), (this.searchInstance.itemsPerPage !== this.searchInstance.fetch.body.itemsPerPage || !this.searchInstance.fetch.body.itemsPerPage) && (this.searchInstance.fetch.body.itemsPerPage = this.searchInstance.itemsPerPage), this.searchInstance.searchTerm = e;
 			let n = this.searchInstance.getCacheKey(e, this.searchInstance.pagination.getCurrentPage()), r = this.searchInstance.cache.get(n);
-			if (this.searchInstance.cacheEnabled && r && !t) return this.searchInstance._data = r, console.log("Usando caché para búsqueda:", n), this.searchInstance;
+			if (this.searchInstance.cacheEnabled && r) return this.searchInstance._data = r, console.log("Usando caché para búsqueda:", n), t && this.searchInstance.events.emit("search", {
+				searchTerm: e,
+				results: this.searchInstance._data,
+				totalResults: this.searchInstance._data.length,
+				timestamp: (/* @__PURE__ */ new Date()).toISOString()
+			}), this.searchInstance;
 			this.searchInstance.sortBy && this.searchInstance.sortBy !== this.searchInstance.fetch.body.sortBy && (this.searchInstance.fetch.body.sortBy = this.searchInstance.sortBy, this.searchInstance.fetch.body.sortOrder = this.searchInstance.sortOrder);
 			let i = await this.fetch(this.searchInstance.fetch), o = this.searchInstance.responseAdapter, s = o ? o(i) : i;
 			return this.searchInstance._data = s.data, this.searchInstance._ajaxResponse.success = { countPage: s.countPage }, this.searchInstance.cacheEnabled && this.searchInstance.cache.set(n, this.searchInstance._data), t && this.searchInstance.events.emit("search", {
