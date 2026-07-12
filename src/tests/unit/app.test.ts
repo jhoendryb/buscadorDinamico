@@ -340,7 +340,7 @@ describe('Search', () => {
         });
         search.init();
 
-        search.showLoading();
+        search.renderer.showLoading("Cargando...");
 
         const loadingElement = search.renderer.body.renderItems?.querySelector('.search-loading');
         expect(loadingElement).toBeTruthy();
@@ -489,18 +489,6 @@ describe('Search', () => {
         const result = search.on('test', jest.fn());
 
         expect(result).toBe(search.events);
-    });
-
-    test('debe permitir encadenamiento en showLoading', () => {
-        const search = new Search({
-            element: '.test',
-            data: [{ name: 'Juan' }]
-        });
-        search.init();
-
-        const result = search.showLoading();
-
-        expect(result).toBe(search);
     });
 
     test('debe configurar zIndex correctamente', () => {

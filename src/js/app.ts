@@ -97,6 +97,8 @@ class Search {
             this.scrollObserver = null;
             this._ajaxResponse = {};
 
+            this.t = { ...Search.#defaultTranslations, ...translation };
+
             this.searchingLocal = new SearchingLocal(this, this.errorHandler);
             this.searchingServer = new SearchingServer(this, this.errorHandler);
             this.searching = this.procesServer
@@ -118,8 +120,6 @@ class Search {
             this.pagination.setDataItemsFunction((): Record<string, any>[] => {
                 return this._data || [];
             });
-
-            this.t = { ...Search.#defaultTranslations, ...translation };
 
             this._data = this.data;
         } catch (error) {
@@ -369,31 +369,6 @@ class Search {
         return this.events.on(eventName, callback);
     }
     /**
-     * Muestra el indicador de carga.
-     * @returns {Search} - La instancia actual de {@link Search} para encadenar métodos.
-     */
-    showLoading(): Search {
-        if (this.renderer.body.renderItems) {
-            const loading = createElement({
-                element: "div",
-                className: `search-loading`,
-                children: [
-                    {
-                        element: "div",
-                        className: `spinner`
-                    },
-                    {
-                        element: "p",
-                        textContent: this.t.loading
-                    }
-                ]
-            });
-            this.renderer.body.renderItems.innerHTML = loading.outerHTML;
-        }
-
-        return this;
-    }
-    /**
      * Genera la clave de caché para una búsqueda en particular y una página determinada.
      * @param {string} searchTerm - Término de búsqueda
      * @param {number} page - Número de página
@@ -581,16 +556,6 @@ class Search {
             this.scrollObserver = null;
         }
 
-        if (this.renderer.animationTimeouts) {
-            this.renderer.animationTimeouts.forEach((timeout: any) => clearTimeout(timeout));
-            this.renderer.animationTimeouts = [];
-        }
-
-        if (this.renderer.hideTimeout) {
-            clearTimeout(this.renderer.hideTimeout);
-            this.renderer.hideTimeout = null;
-        }
-
         if (this.renderer.body.inputSearch) {
             const newInput = this.renderer.body.inputSearch.cloneNode(true);
             if (this.renderer.body.inputSearch.parentNode) {
@@ -605,13 +570,7 @@ class Search {
         this.cache = new LRUCache(this.cacheMaxSize, this.cacheTtlSeconds);
         this.pagination = new Pagination();
         this.events = new EventEmitter();
-        this.renderer = new SearchRenderer({
-            content: document.querySelector(this.element) as HTMLElement, // ".input-search" - contenedor que contiene la app Search
-            contentSearch: undefined, // ".app-search" - contenedor del Search
-            inputSearch: undefined, // "#filter-search" - input donde se escribe la búsqueda
-            renderItems: undefined, // ".items-search" - elemento donde se muestran los items
-            paginationItems: undefined // ".index-search" - elemento donde se muestra la paginación
-        }, this.#getUniqueClassName.bind(this), Constants.DEFAULT_TIME_HIDDEN_RESULTS);
+        this.renderer.destroy();
     }
 }
 

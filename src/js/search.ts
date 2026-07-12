@@ -81,8 +81,6 @@ search1.on('itemSelected', (data: any) => {
 //     element: '.app-search3',
 // });
 
-console.log("Hola que hace")
-
 const arrayData = Array.from({ length: 100 }, (_, i) => ({
     id: i,
     name: `Item ${i}`,
@@ -95,16 +93,16 @@ const search4 = new Search({
     dom: 'pics',
     keyboardEnabled: true,
     theme: 'clean-white',
-    template: (item) => {
-        let templete = "";
-        if (item) {
-            templete = `${item.child.name} - ${item.id}`;
-            if (item.description) {
-                templete += ` - ${item.description}`;
-            }
-        }
-        return templete;
-    },
+    // template: (item) => {
+    //     let templete = "";
+    //     if (item) {
+    //         templete = `${item.child.name} - ${item.id}`;
+    //         if (item.description) {
+    //             templete += ` - ${item.description}`;
+    //         }
+    //     }
+    //     return templete;
+    // },
     data: arrayData
 });
 

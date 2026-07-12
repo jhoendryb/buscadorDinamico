@@ -37,7 +37,7 @@ export class SearchingServer {
                 this.searchInstance.fetch.body.page = 1;
                 this.searchInstance.fetch.body.searchTerm = searchTerm;
 
-                this.searchInstance.showLoading();
+                this.searchInstance.renderer.showLoading(this.searchInstance.t.loading);
             }
 
             if (this.searchInstance.pagination.getCurrentPage() !== this.searchInstance.fetch.body.page) {

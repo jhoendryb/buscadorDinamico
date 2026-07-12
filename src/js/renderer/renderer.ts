@@ -1,5 +1,6 @@
 import { createElement } from '../renderElement';
 import { EventEmitter } from '../events/eventEmitter';
+import { TemplateEngine } from './templateEngine';
 import * as Types from '../types';
 
 /**
@@ -252,6 +253,7 @@ export class SearchRenderer {
      * @returns {boolean} Indica si se pudo añadir los items exitosamente
      */
     appendItems(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter, firstLoad: boolean = false, highlightText?: ((text: string) => string) | undefined): boolean {
+
         const container = this.body.renderItems;
         if (!container) return false;
 
@@ -282,28 +284,16 @@ export class SearchRenderer {
         const length = this.body.renderItems?.children.length;
         let idNum: number = (length ? (length - 1) : 0);
 
-        // Añadir items al final
+        const fragment = document.createDocumentFragment();
         data.forEach(item => {
             jsonItem.id = this.getUniqueClassName(`items-${idNum++}`);
             const itemElement = createElement(jsonItem);
-            if (template) {
-                if (typeof template === 'function') {
-                    itemElement.innerHTML = template(item, highlightText);
-                } else if (typeof template === 'string') {
-                    let templateStr = template;
-                    Object.keys(item).forEach(key => {
-                        const value = highlightText ? highlightText(item[key]) : item[key];
-                        templateStr = templateStr.replace(`{{${key}}}`, value);
-                    });
-                    itemElement.innerHTML = templateStr;
-                }
-            } else {
-                const value = Object.values(item).join(' ');
-                itemElement.textContent = highlightText ? highlightText(value) : value;
-            }
-
-            container.appendChild(itemElement);
+            const engine = new TemplateEngine();
+            const rendered = engine.render(item, template, highlightText);
+            itemElement.innerHTML = rendered;
+            fragment.appendChild(itemElement);
         });
+        container.appendChild(fragment);
 
         events.emit('appendItems', {
             items: data,
@@ -425,7 +415,22 @@ export class SearchRenderer {
             this.showResults();
         }
     }
-
+    /**
+         * Muestra el indicador de carga.
+         * @returns {Search} - La instancia actual de {@link Search} para encadenar métodos.
+         */
+    showLoading(loadingText: string): void {
+        if (!this.body.renderItems) return;
+        const loading = createElement({
+            element: "div",
+            className: `search-loading`,
+            children: [
+                { element: "div", className: `spinner` },
+                { element: "p", textContent: loadingText }
+            ]
+        });
+        this.body.renderItems.innerHTML = loading.outerHTML;
+    }
     /**
      * Renderiza el contenedor padre que envuelve items-search y pagination-items.
      * @returns {HTMLElement} Contenedor padre content-pagination-items
@@ -452,5 +457,23 @@ export class SearchRenderer {
 
         this.body.contentPaginationItems = newContentPagItems;
         return newContentPagItems;
+    }
+    destroy(): void {
+        // Limpiar timeouts de animación
+        this.animationTimeouts.forEach(t => clearTimeout(t));
+        this.animationTimeouts = [];
+
+        // Limpiar hideTimeout
+        if (this.hideTimeout) {
+            clearTimeout(this.hideTimeout);
+            this.hideTimeout = null;
+        }
+
+        // Resetear referencias
+        this.body.contentSearch = undefined;
+        this.body.inputSearch = undefined;
+        this.body.renderItems = undefined;
+        this.body.paginationItems = undefined;
+        this.body.contentPaginationItems = undefined;
     }
 }
