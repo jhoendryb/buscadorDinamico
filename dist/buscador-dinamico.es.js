@@ -7,22 +7,22 @@ var e = Object.defineProperty, t = (t, n) => {
 	});
 	return n || e(r, Symbol.toStringTag, { value: "Module" }), r;
 }, n = class e {
-	static #e = v;
+	static #e = y;
 	constructor(t) {
 		this.searching = async () => {}, this.currentDrawId = 0, this.isLoadingMore = !1;
 		let { translation: n, ...r } = t;
-		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = _, this.zIndex = g, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = b.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundKeydownHandler = () => {}, this.boundClickHandler = () => {}, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
+		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = v, this.zIndex = _, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = x.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundKeydownHandler = () => {}, this.boundClickHandler = () => {}, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
 		try {
-			this.#t(), this.scrollObserver = null, this._ajaxResponse = {}, this.searchingLocal = new p(this, this.errorHandler), this.searchingServer = new m(this, this.errorHandler), this.searching = this.procesServer ? this.searchingServer.searching.bind(this.searchingServer) : this.searchingLocal.searching.bind(this.searchingLocal), this.renderer = new f({
+			this.#t(), this.scrollObserver = null, this._ajaxResponse = {}, this.t = {
+				...e.#e,
+				...n
+			}, this.searchingLocal = new m(this, this.errorHandler), this.searchingServer = new h(this, this.errorHandler), this.searching = this.procesServer ? this.searchingServer.searching.bind(this.searchingServer) : this.searchingLocal.searching.bind(this.searchingLocal), this.renderer = new p({
 				content: document.querySelector(this.element),
 				contentSearch: void 0,
 				inputSearch: void 0,
 				renderItems: void 0,
 				paginationItems: void 0
-			}, this.#o.bind(this), 200), this.cache = new i(this.cacheMaxSize, this.cacheTtlSeconds), this.pagination = new l(this.itemsPerPage, 1), this.pagination.setCountFunction(() => this.procesServer ? this._ajaxResponse.success?.countPage || 0 : this._data?.length || 0), this.pagination.setDataItemsFunction(() => this._data || []), this.t = {
-				...e.#e,
-				...n
-			}, this._data = this.data;
+			}, this.#o.bind(this), 200), this.cache = new i(this.cacheMaxSize, this.cacheTtlSeconds), this.pagination = new l(this.itemsPerPage, 1), this.pagination.setCountFunction(() => this.procesServer ? this._ajaxResponse.success?.countPage || 0 : this._data?.length || 0), this.pagination.setDataItemsFunction(() => this._data || []), this._data = this.data;
 		} catch (e) {
 			throw e instanceof o && this.errorHandler.logError(e, this.events), e;
 		}
@@ -118,23 +118,6 @@ var e = Object.defineProperty, t = (t, n) => {
 	on(e, t) {
 		return this.events.on(e, t);
 	}
-	showLoading() {
-		if (this.renderer.body.renderItems) {
-			let e = r({
-				element: "div",
-				className: "search-loading",
-				children: [{
-					element: "div",
-					className: "spinner"
-				}, {
-					element: "p",
-					textContent: this.t.loading
-				}]
-			});
-			this.renderer.body.renderItems.innerHTML = e.outerHTML;
-		}
-		return this;
-	}
 	getCacheKey(e, t) {
 		return `${e}_${t}`;
 	}
@@ -187,17 +170,11 @@ var e = Object.defineProperty, t = (t, n) => {
 		return this.searchTerm = "", this.renderer.body.inputSearch && (this.renderer.body.inputSearch.value = ""), this.renderer.body.renderItems && (this.renderer.body.renderItems.innerHTML = ""), this.pagination.goToPage(1), this.cache.clear(), this.selectedIndex = -1, this;
 	}
 	destroy() {
-		if (this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content.removeEventListener("keydown", this.boundKeydownHandler), this.renderer.body.renderItems?.removeEventListener("click", this.boundClickHandler), this.scrollObserver &&= (this.#a(), null), this.renderer.animationTimeouts && (this.renderer.animationTimeouts.forEach((e) => clearTimeout(e)), this.renderer.animationTimeouts = []), this.renderer.hideTimeout && (clearTimeout(this.renderer.hideTimeout), this.renderer.hideTimeout = null), this.renderer.body.inputSearch) {
+		if (this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content.removeEventListener("keydown", this.boundKeydownHandler), this.renderer.body.renderItems?.removeEventListener("click", this.boundClickHandler), this.scrollObserver &&= (this.#a(), null), this.renderer.body.inputSearch) {
 			let e = this.renderer.body.inputSearch.cloneNode(!0);
 			this.renderer.body.inputSearch.parentNode && this.renderer.body.inputSearch.parentNode.replaceChild(e, this.renderer.body.inputSearch);
 		}
-		this.events.removeAllListeners(), this._data = null, this.data = [], this.cache = new i(this.cacheMaxSize, this.cacheTtlSeconds), this.pagination = new l(), this.events = new c(), this.renderer = new f({
-			content: document.querySelector(this.element),
-			contentSearch: void 0,
-			inputSearch: void 0,
-			renderItems: void 0,
-			paginationItems: void 0
-		}, this.#o.bind(this), 200);
+		this.events.removeAllListeners(), this._data = null, this.data = [], this.cache = new i(this.cacheMaxSize, this.cacheTtlSeconds), this.pagination = new l(), this.events = new c(), this.renderer.destroy();
 	}
 };
 //#endregion
@@ -490,9 +467,19 @@ var i = class {
 		let t = this.getTotalPages();
 		this.currentPage > t && (this.currentPage = t);
 	}
-}, u = /* @__PURE__ */ t({ DomComponent: () => d }), d = /* @__PURE__ */ function(e) {
+}, u = class {
+	render(e, t, n) {
+		if (typeof t == "function") return t(e, n);
+		if (typeof t == "string") return t.replace(/{{(\w+)}}/g, (t, r) => {
+			let i = e[r];
+			return n ? n(String(i)) : String(i);
+		});
+		let r = Object.values(e).join(" ");
+		return n ? n(r) : r;
+	}
+}, d = /* @__PURE__ */ t({ DomComponent: () => f }), f = /* @__PURE__ */ function(e) {
 	return e.SEARCH = "s", e.CONTENT = "c", e.ITEMS = "i", e.PAGINATION = "p", e;
-}({}), f = class {
+}({}), p = class {
 	constructor(e, t, n) {
 		this.body = e, this.uniqueClassNameFn = t, this.isVisible = !1, this.hideTimeout = null, this.animationTimeouts = [], this.timeHiddenResults = n;
 	}
@@ -604,25 +591,12 @@ var i = class {
 			} }
 		};
 		if (s.children.length === 0 && (!e || e.length === 0)) return c.textContent = n, s.appendChild(r(c)), !1;
-		let l = this.body.renderItems?.children.length, u = l ? l - 1 : 0;
+		let l = this.body.renderItems?.children.length, d = l ? l - 1 : 0, f = document.createDocumentFragment();
 		return e.forEach((e) => {
-			c.id = this.getUniqueClassName(`items-${u++}`);
+			c.id = this.getUniqueClassName(`items-${d++}`);
 			let n = r(c);
-			if (t) {
-				if (typeof t == "function") n.innerHTML = t(e, o);
-				else if (typeof t == "string") {
-					let r = t;
-					Object.keys(e).forEach((t) => {
-						let n = o ? o(e[t]) : e[t];
-						r = r.replace(`{{${t}}}`, n);
-					}), n.innerHTML = r;
-				}
-			} else {
-				let t = Object.values(e).join(" ");
-				n.textContent = o ? o(t) : t;
-			}
-			s.appendChild(n);
-		}), i.emit("appendItems", {
+			n.innerHTML = new u().render(e, t, o), f.appendChild(n);
+		}), s.appendChild(f), i.emit("appendItems", {
 			items: e,
 			content: s
 		}), !0;
@@ -633,12 +607,12 @@ var i = class {
 	}
 	renderByDom(e, t) {
 		let n = {
-			[d.SEARCH]: () => {
+			[f.SEARCH]: () => {
 				this.contentSearch(), this.renderSearch({ ...t.search });
 			},
-			[d.CONTENT]: () => this.renderContentPaginationItems(),
-			[d.ITEMS]: () => this.renderItems(),
-			[d.PAGINATION]: () => this.renderPagination()
+			[f.CONTENT]: () => this.renderContentPaginationItems(),
+			[f.ITEMS]: () => this.renderItems(),
+			[f.PAGINATION]: () => this.renderPagination()
 		}, r = e.split(""), i = r.filter((e) => "sc".includes(e)).join(""), a = r.filter((e) => "ip".includes(e)).join("");
 		for (let e of `${i}${a}`) n[e] && n[e]();
 	}
@@ -660,6 +634,21 @@ var i = class {
 	toggleResults() {
 		this.isVisible ? this.hideResults() : this.showResults();
 	}
+	showLoading(e) {
+		if (!this.body.renderItems) return;
+		let t = r({
+			element: "div",
+			className: "search-loading",
+			children: [{
+				element: "div",
+				className: "spinner"
+			}, {
+				element: "p",
+				textContent: e
+			}]
+		});
+		this.body.renderItems.innerHTML = t.outerHTML;
+	}
 	renderContentPaginationItems() {
 		if (this.body.contentPaginationItems) return this.body.contentPaginationItems;
 		let e = this.body.content, t = e.querySelector(".content-pagination-items"), n = r({
@@ -669,7 +658,10 @@ var i = class {
 		});
 		return t || e.appendChild(n), this.body.contentPaginationItems = n, n;
 	}
-}, p = class {
+	destroy() {
+		this.animationTimeouts.forEach((e) => clearTimeout(e)), this.animationTimeouts = [], this.hideTimeout &&= (clearTimeout(this.hideTimeout), null), this.body.contentSearch = void 0, this.body.inputSearch = void 0, this.body.renderItems = void 0, this.body.paginationItems = void 0, this.body.contentPaginationItems = void 0;
+	}
+}, m = class {
 	constructor(e, t) {
 		this.searchInstance = e, this.errorHandler = t;
 	}
@@ -713,13 +705,13 @@ var i = class {
 			throw e instanceof o && this.errorHandler.logError(e), e;
 		}
 	}
-}, m = class {
+}, h = class {
 	constructor(e, t) {
 		this.defaultTimeout = 3e4, this.searchInstance = e, this.errorHandler = t;
 	}
 	async searching(e, t = !1) {
 		try {
-			this.errorHandler.validateRequired(this.searchInstance.fetch?.url, "fetch.url", a.FETCH_URL_REQUIRED), e !== this.searchInstance.searchTerm && (this.searchInstance.pagination.goToPage(1), this.searchInstance.fetch.body.page = 1, this.searchInstance.fetch.body.searchTerm = e, this.searchInstance.showLoading()), this.searchInstance.pagination.getCurrentPage() !== this.searchInstance.fetch.body.page && this.searchInstance.pagination.goToPage(this.searchInstance.fetch.body.page), (this.searchInstance.itemsPerPage !== this.searchInstance.fetch.body.itemsPerPage || !this.searchInstance.fetch.body.itemsPerPage) && (this.searchInstance.fetch.body.itemsPerPage = this.searchInstance.itemsPerPage), this.searchInstance.searchTerm = e;
+			this.errorHandler.validateRequired(this.searchInstance.fetch?.url, "fetch.url", a.FETCH_URL_REQUIRED), e !== this.searchInstance.searchTerm && (this.searchInstance.pagination.goToPage(1), this.searchInstance.fetch.body.page = 1, this.searchInstance.fetch.body.searchTerm = e, this.searchInstance.renderer.showLoading(this.searchInstance.t.loading)), this.searchInstance.pagination.getCurrentPage() !== this.searchInstance.fetch.body.page && this.searchInstance.pagination.goToPage(this.searchInstance.fetch.body.page), (this.searchInstance.itemsPerPage !== this.searchInstance.fetch.body.itemsPerPage || !this.searchInstance.fetch.body.itemsPerPage) && (this.searchInstance.fetch.body.itemsPerPage = this.searchInstance.itemsPerPage), this.searchInstance.searchTerm = e;
 			let n = this.searchInstance.getCacheKey(e, this.searchInstance.pagination.getCurrentPage()), r = this.searchInstance.cache.get(n);
 			if (this.searchInstance.cacheEnabled && r) return this.searchInstance._data = r, console.log("Usando caché para búsqueda:", n), t && this.searchInstance.events.emit("search", {
 				searchTerm: e,
@@ -810,39 +802,39 @@ var i = class {
 			this.#r(t, e.url, e.timeout || this.defaultTimeout);
 		}
 	}
-}, h = /* @__PURE__ */ t({
+}, g = /* @__PURE__ */ t({
 	DEFAULT_CACHE_MAX_SIZE: () => 50,
 	DEFAULT_CACHE_TTL: () => 300,
-	DEFAULT_CSS_CLASSES: () => y,
+	DEFAULT_CSS_CLASSES: () => b,
 	DEFAULT_DEBOUNCE_TIME: () => 500,
 	DEFAULT_DEVELOPMENT_MODE: () => !1,
 	DEFAULT_HIGHLIGHT_ENABLED: () => !1,
 	DEFAULT_ITEMS_PER_PAGE: () => 10,
-	DEFAULT_THEME: () => _,
+	DEFAULT_THEME: () => v,
 	DEFAULT_TIME_HIDDEN_RESULTS: () => 200,
-	DEFAULT_TRANSLATIONS: () => v,
-	DEFAULT_Z_INDEX: () => g,
-	DOM_ORDERS: () => b,
+	DEFAULT_TRANSLATIONS: () => y,
+	DEFAULT_Z_INDEX: () => _,
+	DOM_ORDERS: () => x,
 	FIRST_PAGE: () => 1,
 	NO_SELECTION: () => -1,
 	SORT_ASC: () => -1,
 	SORT_DESC: () => 1,
 	SORT_ORDER: () => "asc"
-}), g = 1e3, _ = "adaptative", v = {
+}), _ = 1e3, v = "adaptative", y = {
 	searchLabel: "Filtrar por Búsqueda",
 	searchPlaceholder: "Ingrese palabra clave...",
 	noResults: "No se encontraron resultados",
 	loading: "Buscando...",
 	pagination: "{{count}} de {{total}}"
-}, y = {
+}, b = {
 	searchContainer: "input-search",
 	itemsContainer: "items-search",
 	paginationContainer: "index-search",
 	paginationList: "pagination",
 	item: "items"
-}, b = {
+}, x = {
 	SEARCH_ITEMS_PAGINATION: "sip",
 	SEARCH_CONTENT_ITEMS_PAGINATION: "scip"
 };
 //#endregion
-export { h as Constants, a as ErrorCode, s as ErrorHandler, c as EventEmitter, i as LRUCache, l as Pagination, n as Search, o as SearchError, f as SearchRenderer, p as SearchingLocal, m as SearchingServer, u as Types, r as createElement };
+export { g as Constants, a as ErrorCode, s as ErrorHandler, c as EventEmitter, i as LRUCache, l as Pagination, n as Search, o as SearchError, p as SearchRenderer, m as SearchingLocal, h as SearchingServer, d as Types, r as createElement };
