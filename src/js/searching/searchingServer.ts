@@ -37,10 +37,6 @@ export class SearchingServer {
                 this.searchInstance.fetch.body.page = 1;
                 this.searchInstance.fetch.body.searchTerm = searchTerm;
 
-                if (this.searchInstance.cacheEnabled) {
-                    this.searchInstance.cache.clearCacheByPrefix(this.searchInstance.searchTerm);
-                }
-
                 this.searchInstance.showLoading();
             }
 
@@ -57,9 +53,17 @@ export class SearchingServer {
             const cacheKey = this.searchInstance.getCacheKey(searchTerm, this.searchInstance.pagination.getCurrentPage());
             const cachedData = this.searchInstance.cache.get(cacheKey);
 
-            if (this.searchInstance.cacheEnabled && cachedData && !isEvent) {
+            if (this.searchInstance.cacheEnabled && cachedData) {
                 this.searchInstance._data = cachedData;
                 console.log('Usando caché para búsqueda:', cacheKey);
+                if (isEvent) {
+                    this.searchInstance.events.emit('search', {
+                        searchTerm,
+                        results: this.searchInstance._data,
+                        totalResults: this.searchInstance._data.length,
+                        timestamp: new Date().toISOString()
+                    } as Types.SearchEventData);
+                }
                 return this.searchInstance;
             }
 

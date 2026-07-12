@@ -79,18 +79,22 @@ export class SearchingLocal {
                 });
             }
 
-            if (this.searchInstance.cacheEnabled) {
-                this.searchInstance.cache.clearCacheByPrefix(this.searchInstance.searchTerm);
-            }
-
             this.searchInstance.pagination.goToPage(1);
 
             const cacheKey = this.searchInstance.getCacheKey(searchTerm, this.searchInstance.pagination.getCurrentPage());
             const cachedData = this.searchInstance.cache.get(cacheKey);
 
-            if (this.searchInstance.cacheEnabled && cachedData && !isEvent) {
+            if (this.searchInstance.cacheEnabled && cachedData) {
                 this.searchInstance._data = cachedData;
-                this.searchInstance.processInfiniteScroll();
+                console.log('Usando caché para búsqueda local:', cacheKey);
+                if (isEvent) {
+                    this.searchInstance.events.emit('search', {
+                        searchTerm,
+                        results: this.searchInstance._data,
+                        totalResults: this.searchInstance._data.length,
+                        timestamp: new Date().toISOString()
+                    } as Types.SearchEventData);
+                }
                 return this.searchInstance;
             }
 
@@ -98,7 +102,7 @@ export class SearchingLocal {
                 if (typeof obj !== 'object' || obj === null) return [String(obj)];
                 return Object.values(obj).flatMap(v => flattenValues(v));
             };
-            
+
             const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             this.searchInstance._data = this.searchInstance.data.filter((item: Record<string, any>) => {
                 const values = flattenValues(item);

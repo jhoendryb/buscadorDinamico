@@ -309,7 +309,6 @@ class Search {
 
         try {
             const nextPage = this.pagination.loadNextPage();
-            const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
 
             if (this.procesServer) {
                 if (this.fetch?.body) {
@@ -317,7 +316,8 @@ class Search {
                 }
                 await this.searching(this.searchTerm, false);
             }
-
+            
+            const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
             this.renderer.appendItems(
                 next,
                 this.template,

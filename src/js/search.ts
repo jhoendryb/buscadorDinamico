@@ -93,7 +93,6 @@ const search4 = new Search({
     element: '.app-search4',
     dom: 'pics',
     keyboardEnabled: true,
-    cacheEnabled: true,
     theme: 'clean-white',
     template: (item) => {
         let templete = "";
