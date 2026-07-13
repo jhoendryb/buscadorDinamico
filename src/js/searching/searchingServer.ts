@@ -1,5 +1,4 @@
 import * as Types from '../types';
-import { Search } from '../app';
 import { ErrorHandler, ErrorCode, SearchError } from '../error-handler';
 
 /**
@@ -7,18 +6,13 @@ import { ErrorHandler, ErrorCode, SearchError } from '../error-handler';
  * Realiza peticiones HTTP con soporte para caché, timeout y manejo de errores.
  */
 export class SearchingServer {
-    private searchInstance: any;
     private errorHandler: ErrorHandler;
-    private defaultTimeout: number = 30000; // 30 segundos
+    private responseAdapter?: Types.SearchParams['responseAdapter'];
+    private defaultTimeout: number = 30000;
 
-    /**
-     * Crea una instancia de SearchingServer.
-     * @param {Search} searchInstance - Instancia principal de Search
-     * @param {ErrorHandler} errorHandler - Instancia de ErrorHandler para gestión de errores
-     */
-    constructor(searchInstance: Search, errorHandler: ErrorHandler) {
-        this.searchInstance = searchInstance;
+    constructor(errorHandler: ErrorHandler, responseAdapter?: Types.SearchParams['responseAdapter']) {
         this.errorHandler = errorHandler;
+        this.responseAdapter = responseAdapter;
     }
 
     /**
@@ -28,77 +22,25 @@ export class SearchingServer {
      * @param {boolean} [isEvent=false] - Si fue iniciado por evento del usuario (emite evento 'search')
      * @returns {Promise<any>} Instancia de Search para encadenamiento
      */
-    async searching(searchTerm: string, isEvent: boolean = false): Promise<any> {
-        try {
-            this.errorHandler.validateRequired(this.searchInstance.fetch?.url, 'fetch.url', ErrorCode.FETCH_URL_REQUIRED);
-
-            if (searchTerm !== this.searchInstance.searchTerm) {
-                this.searchInstance.pagination.goToPage(1);
-                this.searchInstance.fetch.body.page = 1;
-                this.searchInstance.fetch.body.searchTerm = searchTerm;
-
-                this.searchInstance.renderer.showLoading(this.searchInstance.t.loading);
-            }
-
-            if (this.searchInstance.pagination.getCurrentPage() !== this.searchInstance.fetch.body.page) {
-                this.searchInstance.pagination.goToPage(this.searchInstance.fetch.body.page);
-            }
-
-            if (this.searchInstance.itemsPerPage !== this.searchInstance.fetch.body.itemsPerPage || !this.searchInstance.fetch.body.itemsPerPage) {
-                this.searchInstance.fetch.body.itemsPerPage = this.searchInstance.itemsPerPage;
-            }
-
-            this.searchInstance.searchTerm = searchTerm;
-
-            const cacheKey = this.searchInstance.getCacheKey(searchTerm, this.searchInstance.pagination.getCurrentPage());
-            const cachedData = this.searchInstance.cache.get(cacheKey);
-
-            if (this.searchInstance.cacheEnabled && cachedData) {
-                this.searchInstance._data = cachedData;
-                console.log('Usando caché para búsqueda:', cacheKey);
-                if (isEvent) {
-                    this.searchInstance.events.emit('search', {
-                        searchTerm,
-                        results: this.searchInstance._data,
-                        totalResults: this.searchInstance._data.length,
-                        timestamp: new Date().toISOString()
-                    } as Types.SearchEventData);
-                }
-                return this.searchInstance;
-            }
-
-            if (this.searchInstance.sortBy && (this.searchInstance.sortBy !== this.searchInstance.fetch.body.sortBy)) {
-                this.searchInstance.fetch.body.sortBy = this.searchInstance.sortBy;
-                this.searchInstance.fetch.body.sortOrder = this.searchInstance.sortOrder;
-            }
-
-            const response = await this.fetch(this.searchInstance.fetch);
-            const adapter = this.searchInstance.responseAdapter;
-            const result = adapter ? adapter(response) : response;
-            this.searchInstance._data = result.data;
-            this.searchInstance._ajaxResponse.success = { countPage: result.countPage };
-
-            if (this.searchInstance.cacheEnabled) {
-                this.searchInstance.cache.set(cacheKey, this.searchInstance._data);
-            }
-
-            if (isEvent) {
-                this.searchInstance.events.emit('search', {
-                    searchTerm,
-                    results: this.searchInstance._data,
-                    totalResults: this.searchInstance._data.length,
-                    timestamp: new Date().toISOString()
-                } as Types.SearchEventData);
-            }
-
-            return this.searchInstance;
-        } catch (error) {
-            if (error instanceof SearchError) {
-                this.errorHandler.logError(error, this.searchInstance.events);
-            }
-            this.searchInstance.events.emit('error', error);
-            throw error;
-        }
+    async search(
+        searchTerm: string,
+        fetchConfig: Types.FetchConfig,
+        page: number,
+        itemsPerPage: number
+    ): Promise<Types.SearchResult> {
+        fetchConfig.body = {
+            itemsPerPage,
+            ...fetchConfig.body,
+            page,
+            searchTerm
+        };
+        const response = await this.executeFetch(fetchConfig);
+        const adapter = this.responseAdapter;
+        const result = adapter ? adapter(response) : response;
+        return {
+            data: result.data,
+            countPage: result.countPage
+        };
     }
     #validateFetchConfig(config: Types.FetchConfig): void {
         this.errorHandler.validateRequired(config.url, 'url', ErrorCode.FETCH_URL_REQUIRED);
@@ -169,15 +111,14 @@ export class SearchingServer {
         });
     }
 
-
     /**
      * Realiza petición HTTP con Fetch API.
-     * Soporta timeout con AbortController, múltiples Content-Type y manejo de errores.
+     * Admite la configuración de timeouts, múltiples Content-Type y manejo de errores.
      * @param {Types.FetchConfig} config - Configuración de la petición (url, method, headers, body, timeout)
-     * @returns {Promise<any>} Datos JSON recibidos del servidor
-     * @throws {SearchError} Si hay errores de red, timeout o formato de datos inválido
+     * @returns {Promise<any>} - Datos JSON recibidos del servidor
+     * @throws {SearchError} - Si se produce un error de red, timeout o si el formato de datos recibido es inválido
      */
-    async fetch(config: Types.FetchConfig): Promise<any> {
+    async executeFetch(config: Types.FetchConfig): Promise<any> {
         try {
             this.#validateFetchConfig(config);
 
@@ -224,7 +165,7 @@ export class SearchingServer {
             }
 
             if (config.success) {
-                config.success(data, this.searchInstance);
+                config.success(data, null);
             }
 
             return data;

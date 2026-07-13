@@ -129,3 +129,8 @@ export enum DomComponent {
     ITEMS = 'i',
     PAGINATION = 'p'
 }
+
+export interface SearchResult {
+    data: Record<string, any>[];
+    countPage?: number;
+}

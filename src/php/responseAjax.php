@@ -5,8 +5,8 @@ require __DIR__ . "/modelo.php";
 
 $busqueda = $_POST['searchTerm'];
 $page = $_POST['page'];
-$sortBy = $_POST['sortBy'] ?? "id_ciudad";
-$sortOrder = $_POST['sortOrder'] ?? "asc";
+$sortBy = $_POST['sortBy'] ?: "id_ciudad";
+$sortOrder = $_POST['sortOrder'] ?: "asc";
 
 $start = ($page - 1) * 10;
 
