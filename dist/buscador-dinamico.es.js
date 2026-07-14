@@ -9,14 +9,14 @@ var e = Object.defineProperty, t = (t, n) => {
 }, n = class e {
 	static #e = y;
 	constructor(t) {
-		this.searching = async () => {}, this.currentDrawId = 0, this.isLoadingMore = !1;
+		this.currentDrawId = 0, this.isLoadingMore = !1;
 		let { translation: n, ...r } = t;
 		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = v, this.zIndex = _, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = x.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundKeydownHandler = () => {}, this.boundClickHandler = () => {}, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
 		try {
 			this.#t(), this.scrollObserver = null, this._ajaxResponse = {}, this.t = {
 				...e.#e,
 				...n
-			}, this.searchingLocal = new m(this, this.errorHandler), this.searchingServer = new h(this, this.errorHandler), this.searching = this.procesServer ? this.searchingServer.searching.bind(this.searchingServer) : this.searchingLocal.searching.bind(this.searchingLocal), this.renderer = new p({
+			}, this.searchingLocal = new m(), this.searchingServer = new h(this.errorHandler, this.responseAdapter), this.renderer = new p({
 				content: document.querySelector(this.element),
 				contentSearch: void 0,
 				inputSearch: void 0,
@@ -29,7 +29,11 @@ var e = Object.defineProperty, t = (t, n) => {
 	}
 	init() {
 		try {
-			return this.errorHandler.validateElementExists(this.element, a.ELEMENT_NOT_FOUND), this.renderer.setTheme(this.theme), !this.procesServer && typeof this.searchingLocal.isExtractData == "function" && this.searchingLocal.isExtractData(), this.renderer.renderByDom(this.dom, {
+			if (this.errorHandler.validateElementExists(this.element, a.ELEMENT_NOT_FOUND), this.renderer.setTheme(this.theme), !this.procesServer) {
+				let e = this.searchingLocal.isExtractData(this.renderer.body.content);
+				e && (this.data = e, this._data = this.data);
+			}
+			return this.renderer.renderByDom(this.dom, {
 				zIndex: this.zIndex,
 				search: {
 					onInput: (e, t) => this.draw(e, t),
@@ -56,11 +60,26 @@ var e = Object.defineProperty, t = (t, n) => {
 	}
 	async draw(e = this.searchTerm, t = !1) {
 		let n = ++this.currentDrawId;
-		return e !== this.searchTerm && this.renderer.body.renderItems && (this.renderer.body.renderItems.scrollTop = 0, this.renderer.body.renderItems.innerHTML = "", this.events.emit("resultsCleared", { previousSearchTerm: this.searchTerm }), this.renderer.body.renderItems.removeAttribute("aria-activedescendant"), this.pagination.goToPage(1), this.selectedIndex = -1), await this.searching(e, t), n === this.currentDrawId ? (this.processInfiniteScroll(), this.events.emit("searchComplete", {
+		e !== this.searchTerm && this.renderer.body.renderItems && (this.renderer.body.renderItems.scrollTop = 0, this.renderer.body.renderItems.innerHTML = "", this.events.emit("resultsCleared", { previousSearchTerm: this.searchTerm }), this.renderer.body.renderItems.removeAttribute("aria-activedescendant"), this.pagination.goToPage(1), this.selectedIndex = -1);
+		let r = null;
+		if (this.procesServer) {
+			let t = this.getCacheKey(e, this.pagination.getCurrentPage());
+			if (this.cacheEnabled) {
+				let e = this.cache.get(t);
+				e && (r = e);
+			}
+			r || (this.renderer.showLoading(this.t.loading || ""), r = await this.searchingServer.search(e, this.fetch, this.pagination.getCurrentPage(), this.itemsPerPage), this.cacheEnabled && this.cache.set(t, r)), this._ajaxResponse.success = { countPage: r.countPage };
+		} else r = { data: this.searchingLocal.search(e, this.data, this.sortBy, this.sortOrder) };
+		return n === this.currentDrawId ? (this._data = r.data, this.searchTerm = e, t && this.events.emit("search", {
+			searchTerm: e,
+			results: this._data,
+			totalResults: this._data.length,
+			timestamp: (/* @__PURE__ */ new Date()).toISOString()
+		}), this.processInfiniteScroll(), this.events.emit("searchComplete", {
 			searchTerm: e,
 			results: this._data,
 			totalResults: this._data?.length
-		}), this) : (console.log("Abortada", e, n, this.currentDrawId), this);
+		}), this) : this;
 	}
 	processInfiniteScroll() {
 		if (!this.pagination) return;
@@ -100,7 +119,14 @@ var e = Object.defineProperty, t = (t, n) => {
 		this.isLoadingMore = !0;
 		try {
 			let e = this.pagination.loadNextPage();
-			this.procesServer && (this.fetch?.body && (this.fetch.body.page = e), await this.searching(this.searchTerm, !1));
+			if (this.procesServer) {
+				let t = this.getCacheKey(this.searchTerm, e), n = null;
+				if (this.cacheEnabled) {
+					let e = this.cache.get(t);
+					e && (n = e);
+				}
+				n || (n = await this.searchingServer.search(this.searchTerm, this.fetch, e, this.itemsPerPage), this.cacheEnabled && this.cache.set(t, n)), this._data = n.data, this._ajaxResponse.success = { countPage: n.countPage };
+			}
 			let t = this.pagination.getPageItems(this.procesServer ? null : this._data);
 			this.renderer.appendItems(t, this.template, this.t.noResults, this.events, this.pagination.getCurrentPage() === 1, this.#n.bind(this)), this.#r();
 			let n = this.pagination.getTotalLoaded(), r = this.pagination.getTotalItems();
@@ -662,74 +688,45 @@ var i = class {
 		this.animationTimeouts.forEach((e) => clearTimeout(e)), this.animationTimeouts = [], this.hideTimeout &&= (clearTimeout(this.hideTimeout), null), this.body.contentSearch = void 0, this.body.inputSearch = void 0, this.body.renderItems = void 0, this.body.paginationItems = void 0, this.body.contentPaginationItems = void 0;
 	}
 }, m = class {
-	constructor(e, t) {
-		this.searchInstance = e, this.errorHandler = t;
+	isExtractData(e) {
+		let t = e.querySelectorAll(".items");
+		return t.length === 0 ? null : Array.from(t).map((e) => {
+			let t = {};
+			return Array.from(e.attributes).forEach((e) => {
+				e.name.startsWith("data-") && (t[e.name.replace("data-", "")] = e.value.trim());
+			}), t.children = e.innerHTML.trim(), t;
+		});
 	}
-	isExtractData() {
-		try {
-			let e = this.searchInstance.data;
-			if (Array.isArray(e) || this.errorHandler.validateType(e, "array", "data", a.INVALID_DATA_FORMAT), e.length > 0) return !1;
-			let t = this.searchInstance.renderer.body.content.querySelectorAll(".items");
-			return t.length === 0 ? !1 : (this.searchInstance.data = Array.from(t).map((e) => {
-				let t = {};
-				return Array.from(e.attributes).forEach((e) => {
-					e.name.startsWith("data-") && (t[e.name.replace("data-", "")] = e.value.trim());
-				}), t.children = e.innerHTML.trim(), t;
-			}), this.searchInstance._data = this.searchInstance.data, !0);
-		} catch (e) {
-			throw e instanceof o && this.errorHandler.logError(e), e;
-		}
+	search(e, t, n, r) {
+		if (e === "" || !e) return t;
+		let i = t.filter((t) => this.#e(t).some((t) => this.#t(String(t)).includes(this.#t(e))));
+		return n && i.sort((e, t) => {
+			let i = e[n], a = t[n];
+			return i < a ? r === "asc" ? -1 : 1 : i > a ? r === "asc" ? 1 : -1 : 0;
+		}), i;
 	}
-	searching(e, t = !1) {
-		try {
-			if (this.searchInstance.searchTerm === e && e !== "") return this.searchInstance;
-			Array.isArray(this.searchInstance.data) || this.errorHandler.throwCustomError(a.INVALID_DATA_FORMAT, {
-				context: "searchingLocal",
-				dataType: typeof this.searchInstance.data
-			}), this.searchInstance.pagination.goToPage(1);
-			let n = this.searchInstance.getCacheKey(e, this.searchInstance.pagination.getCurrentPage()), r = this.searchInstance.cache.get(n);
-			if (this.searchInstance.cacheEnabled && r) return this.searchInstance._data = r, console.log("Usando caché para búsqueda local:", n), t && this.searchInstance.events.emit("search", {
-				searchTerm: e,
-				results: this.searchInstance._data,
-				totalResults: this.searchInstance._data.length,
-				timestamp: (/* @__PURE__ */ new Date()).toISOString()
-			}), this.searchInstance;
-			let i = (e) => typeof e != "object" || !e ? [String(e)] : Object.values(e).flatMap((e) => i(e)), o = (e) => e.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-			return this.searchInstance._data = this.searchInstance.data.filter((t) => i(t).some((t) => o(String(t)).toLowerCase().includes(o(String(e)).toLowerCase()))), this.searchInstance.sortBy && this.searchInstance.sort(this.searchInstance.sortBy, this.searchInstance.sortOrder), this.searchInstance.searchTerm = e, this.searchInstance.cacheEnabled && this.searchInstance.cache.set(n, this.searchInstance._data), t && this.searchInstance.events.emit("search", {
-				searchTerm: e,
-				results: this.searchInstance._data,
-				totalResults: this.searchInstance._data.length,
-				timestamp: (/* @__PURE__ */ new Date()).toISOString()
-			}), this.searchInstance;
-		} catch (e) {
-			throw e instanceof o && this.errorHandler.logError(e), e;
-		}
+	#e(e) {
+		return typeof e != "object" || !e ? [String(e)] : Object.values(e).flatMap((e) => this.#e(e));
+	}
+	#t(e) {
+		return e.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 	}
 }, h = class {
 	constructor(e, t) {
-		this.defaultTimeout = 3e4, this.searchInstance = e, this.errorHandler = t;
+		this.defaultTimeout = 3e4, this.errorHandler = e, this.responseAdapter = t;
 	}
-	async searching(e, t = !1) {
-		try {
-			this.errorHandler.validateRequired(this.searchInstance.fetch?.url, "fetch.url", a.FETCH_URL_REQUIRED), e !== this.searchInstance.searchTerm && (this.searchInstance.pagination.goToPage(1), this.searchInstance.fetch.body.page = 1, this.searchInstance.fetch.body.searchTerm = e, this.searchInstance.renderer.showLoading(this.searchInstance.t.loading)), this.searchInstance.pagination.getCurrentPage() !== this.searchInstance.fetch.body.page && this.searchInstance.pagination.goToPage(this.searchInstance.fetch.body.page), (this.searchInstance.itemsPerPage !== this.searchInstance.fetch.body.itemsPerPage || !this.searchInstance.fetch.body.itemsPerPage) && (this.searchInstance.fetch.body.itemsPerPage = this.searchInstance.itemsPerPage), this.searchInstance.searchTerm = e;
-			let n = this.searchInstance.getCacheKey(e, this.searchInstance.pagination.getCurrentPage()), r = this.searchInstance.cache.get(n);
-			if (this.searchInstance.cacheEnabled && r) return this.searchInstance._data = r, console.log("Usando caché para búsqueda:", n), t && this.searchInstance.events.emit("search", {
-				searchTerm: e,
-				results: this.searchInstance._data,
-				totalResults: this.searchInstance._data.length,
-				timestamp: (/* @__PURE__ */ new Date()).toISOString()
-			}), this.searchInstance;
-			this.searchInstance.sortBy && this.searchInstance.sortBy !== this.searchInstance.fetch.body.sortBy && (this.searchInstance.fetch.body.sortBy = this.searchInstance.sortBy, this.searchInstance.fetch.body.sortOrder = this.searchInstance.sortOrder);
-			let i = await this.fetch(this.searchInstance.fetch), o = this.searchInstance.responseAdapter, s = o ? o(i) : i;
-			return this.searchInstance._data = s.data, this.searchInstance._ajaxResponse.success = { countPage: s.countPage }, this.searchInstance.cacheEnabled && this.searchInstance.cache.set(n, this.searchInstance._data), t && this.searchInstance.events.emit("search", {
-				searchTerm: e,
-				results: this.searchInstance._data,
-				totalResults: this.searchInstance._data.length,
-				timestamp: (/* @__PURE__ */ new Date()).toISOString()
-			}), this.searchInstance;
-		} catch (e) {
-			throw e instanceof o && this.errorHandler.logError(e, this.searchInstance.events), this.searchInstance.events.emit("error", e), e;
-		}
+	async search(e, t, n, r) {
+		t.body = {
+			itemsPerPage: r,
+			...t.body,
+			page: n,
+			searchTerm: e
+		};
+		let i = await this.executeFetch(t), a = this.responseAdapter, o = a ? a(i) : i;
+		return {
+			data: o.data,
+			countPage: o.countPage
+		};
 	}
 	#e(e) {
 		this.errorHandler.validateRequired(e.url, "url", a.FETCH_URL_REQUIRED), this.errorHandler.validateRequired(e.method, "method", a.FETCH_URL_REQUIRED), this.errorHandler.validateType(e.method, "string", "method", a.FETCH_URL_REQUIRED);
@@ -769,7 +766,7 @@ var i = class {
 			originalError: e
 		});
 	}
-	async fetch(e) {
+	async executeFetch(e) {
 		try {
 			this.#e(e);
 			let t = new AbortController(), n = setTimeout(() => t.abort(), e.timeout || this.defaultTimeout), r = this.#t(e), i = this.#n(e, r), o = await fetch(e.url, {
@@ -797,7 +794,7 @@ var i = class {
 			return (!s || Array.isArray(s) && s.length === 0) && this.errorHandler.throwCustomError(a.EMPTY_RESPONSE, {
 				context: "empty_response",
 				url: e.url
-			}), e.success && e.success(s, this.searchInstance), s;
+			}), e.success && e.success(s, null), s;
 		} catch (t) {
 			this.#r(t, e.url, e.timeout || this.defaultTimeout);
 		}
