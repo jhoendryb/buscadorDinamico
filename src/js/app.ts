@@ -43,7 +43,7 @@ class Search {
     fetch?: Types.FetchConfig;
     highlightEnabled: boolean;
     highlightClass: string;
-    searching: (searchTerm: string, isEvent: boolean) => Promise<void> = async () => { };
+    responseAdapter?: Types.SearchParams['responseAdapter'];
     private errorHandler: ErrorHandler;
     private searchingLocal: SearchingLocal;
     private searchingServer: SearchingServer;
@@ -99,11 +99,8 @@ class Search {
 
             this.t = { ...Search.#defaultTranslations, ...translation };
 
-            this.searchingLocal = new SearchingLocal(this, this.errorHandler);
-            this.searchingServer = new SearchingServer(this, this.errorHandler);
-            this.searching = this.procesServer
-                ? this.searchingServer.searching.bind(this.searchingServer)
-                : this.searchingLocal.searching.bind(this.searchingLocal);
+            this.searchingLocal = new SearchingLocal();
+            this.searchingServer = new SearchingServer(this.errorHandler, this.responseAdapter);
 
             this.renderer = new SearchRenderer({
                 content: document.querySelector(this.element) as HTMLElement, // ".input-search" - contenedor que contiene la app Search
@@ -139,8 +136,12 @@ class Search {
 
             this.renderer.setTheme(this.theme);
 
-            if (!this.procesServer && typeof this.searchingLocal.isExtractData === 'function') {
-                this.searchingLocal.isExtractData();
+            if (!this.procesServer) {
+                const extracted = this.searchingLocal.isExtractData(this.renderer.body.content);
+                if (extracted) {
+                    this.data = extracted;
+                    this._data = this.data;
+                }
             }
 
             this.renderer.renderByDom(this.dom, {
@@ -203,7 +204,6 @@ class Search {
     async draw(searchTerm: string = this.searchTerm, isEvent: boolean = false): Promise<Search> {
         const drawId = ++this.currentDrawId;
         if (searchTerm !== this.searchTerm && this.renderer.body.renderItems) {
-            // Resetear scroll si cambia el término de búsqueda
             this.renderer.body.renderItems.scrollTop = 0;
             this.renderer.body.renderItems.innerHTML = '';
             this.events.emit('resultsCleared', { previousSearchTerm: this.searchTerm });
@@ -211,13 +211,60 @@ class Search {
             this.pagination.goToPage(1);
             this.selectedIndex = -1;
         }
-        await this.searching(searchTerm, isEvent);
-        if (drawId !== this.currentDrawId) {
-            console.log("Abortada", searchTerm, drawId, this.currentDrawId);
-            return this;
+
+        let searchResult: Types.SearchResult | null = null;
+
+        if (this.procesServer) {
+            const cacheKey = this.getCacheKey(searchTerm, this.pagination.getCurrentPage());
+            if (this.cacheEnabled) {
+                const cached = this.cache.get(cacheKey);
+                if (cached) {
+                    searchResult = cached;
+                }
+            }
+            if (!searchResult) {
+                this.renderer.showLoading(this.t.loading || '');
+                searchResult = await this.searchingServer.search(
+                    searchTerm,
+                    this.fetch as Types.FetchConfig,
+                    this.pagination.getCurrentPage(),
+                    this.itemsPerPage
+                );
+                if (this.cacheEnabled) {
+                    this.cache.set(cacheKey, searchResult);
+                }
+            }
+            this._ajaxResponse.success = { countPage: searchResult.countPage };
+        } else {
+            const filtered = this.searchingLocal.search(
+                searchTerm,
+                this.data,
+                this.sortBy,
+                this.sortOrder
+            );
+            searchResult = { data: filtered };
         }
+
+        if (drawId !== this.currentDrawId) return this;
+
+        this._data = searchResult.data;
+        this.searchTerm = searchTerm;
+
+        if (isEvent) {
+            this.events.emit('search', {
+                searchTerm,
+                results: this._data,
+                totalResults: this._data.length,
+                timestamp: new Date().toISOString()
+            } as Types.SearchEventData);
+        }
+
         this.processInfiniteScroll();
-        this.events.emit('searchComplete', { searchTerm, results: this._data, totalResults: this._data?.length });
+        this.events.emit('searchComplete', {
+            searchTerm,
+            results: this._data,
+            totalResults: this._data?.length
+        });
         return this;
     }
     /**
@@ -311,12 +358,30 @@ class Search {
             const nextPage = this.pagination.loadNextPage();
 
             if (this.procesServer) {
-                if (this.fetch?.body) {
-                    this.fetch.body.page = nextPage;
+                const cacheKey = this.getCacheKey(this.searchTerm, nextPage);
+                let searchResult: Types.SearchResult | null = null;
+                if (this.cacheEnabled) {
+                    const cached = this.cache.get(cacheKey);
+                    if (cached) {
+                        searchResult = cached;
+                    }
                 }
-                await this.searching(this.searchTerm, false);
+                if (!searchResult) {
+                    searchResult = await this.searchingServer.search(
+                        this.searchTerm,
+                        this.fetch as Types.FetchConfig,
+                        nextPage,
+                        this.itemsPerPage
+                    );
+                    if (this.cacheEnabled) {
+                        this.cache.set(cacheKey, searchResult);
+                    }
+                }
+
+                this._data = searchResult.data;
+                this._ajaxResponse.success = { countPage: searchResult.countPage };
             }
-            
+
             const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
             this.renderer.appendItems(
                 next,
@@ -327,10 +392,8 @@ class Search {
                 this.#highlightText.bind(this)
             );
 
-            // Reconfigurar detector de scroll para el nuevo contenido
             this.#setupScrollDetection();
 
-            // Actualizar contador
             const loaded = this.pagination.getTotalLoaded();
             const total = this.pagination.getTotalItems();
             this.renderer.updateCounter(loaded, total, this.t.pagination);
