@@ -11,9 +11,9 @@ import * as Types from '../types';
 export class SearchRenderer {
     public body: Types.BodyConfig;
     private uniqueClassNameFn: (baseClass: string) => string;
-    public isVisible: boolean;
-    public hideTimeout: ReturnType<typeof setTimeout> | null;
-    public animationTimeouts: ReturnType<typeof setTimeout>[];
+    private _isVisible: boolean;
+    private _hideTimeout: ReturnType<typeof setTimeout> | null;
+    private _animationTimeouts: ReturnType<typeof setTimeout>[];
     private timeHiddenResults: number;
     /**
      * Crea una instancia de SearchRenderer.
@@ -24,9 +24,9 @@ export class SearchRenderer {
     constructor(body: Types.BodyConfig, uniqueClassNameFn: (baseClass: string) => string, timeHiddenResults: number) {
         this.body = body;
         this.uniqueClassNameFn = uniqueClassNameFn;
-        this.isVisible = false; // Nuevo: estado de visibilidad
-        this.hideTimeout = null; // Nuevo: timeout para delay al ocultar
-        this.animationTimeouts = [];
+        this._isVisible = false; // Nuevo: estado de visibilidad
+        this._hideTimeout = null; // Nuevo: timeout para delay al ocultar
+        this._animationTimeouts = [];
         this.timeHiddenResults = timeHiddenResults;
     }
     /**
@@ -62,9 +62,10 @@ export class SearchRenderer {
      * @returns {string} Clases unidas y sin duplicados (ej: "input-search red")
      */
     #classDefault(baseClass: string, classImport: string = ''): string {
-        return `${baseClass} ${classImport}`.trim().split(' ')
-            .filter((cls, index, array) => !classImport.includes(cls) || array.indexOf(cls) === index)
-            .join(' ');
+        const base = baseClass.trim().split(/\s+/);
+        const extras = classImport.trim().split(/\s+/);
+        const classNames = new Set([...base, ...extras]);
+        return Array.from(classNames).join(' ');
     }
     /**
      * Renderiza el contenedor del input de búsqueda (label + contenedor).
@@ -207,7 +208,7 @@ export class SearchRenderer {
             element: paginationItems,
             className: this.#classDefault(`pagination-items`, paginationItems?.className),
             attributes: { 'role': 'status', 'aria-live': 'polite' },
-            innerHTML: this.renderCounter().outerHTML as string,
+            child: this.renderCounter(),
             ...(!paginationItems ? {
                 element: "div",
             } : {})
@@ -228,19 +229,22 @@ export class SearchRenderer {
      * @returns {HTMLElement} Contador de registros
      */
     renderCounter(): HTMLElement {
+        if (this.body.counterItems) return this.body.counterItems;
+
         const element = this.body.contentPaginationItems;
         const countItems = element?.querySelector('.items-counter') as HTMLElement;
 
         let jsonCountItems: Types.CreateElementConfig = {
             element: countItems,
             className: this.#classDefault(`items-counter`, countItems?.className),
-            // textContent: "0 de 0",
             ...(!countItems ? {
                 element: "div",
             } : {})
         }
 
-        return createElement(jsonCountItems);
+        const counterItems = createElement(jsonCountItems);
+        this.body.counterItems = counterItems;
+        return counterItems;
     }
     /**
      * Añade items al contenedor sin reemplazar el contenido existente.
@@ -267,7 +271,7 @@ export class SearchRenderer {
             event: {
                 pointerdown: (e: PointerEvent) => {
                     e.preventDefault();
-                    this.isVisible = true;
+                    this._isVisible = true;
                 }
             }
         };
@@ -285,10 +289,10 @@ export class SearchRenderer {
         let idNum: number = (length ? (length - 1) : 0);
 
         const fragment = document.createDocumentFragment();
+        const engine = new TemplateEngine();
         data.forEach(item => {
             jsonItem.id = this.getUniqueClassName(`items-${idNum++}`);
             const itemElement = createElement(jsonItem);
-            const engine = new TemplateEngine();
             const rendered = engine.render(item, template, highlightText);
             itemElement.innerHTML = rendered;
             fragment.appendChild(itemElement);
@@ -312,14 +316,19 @@ export class SearchRenderer {
      * @returns {void}
      */
     updateCounter(pagination: { from: number; to: number; total: number, textPagination?: string }): void {
-        const counter = this.body.paginationItems?.querySelector('.items-counter');
+        if (!this.body.counterItems) return;
+
+        const counter = this.body.counterItems;
+
+        console.log('pagination.textPagination', pagination.textPagination);
+        console.log('pagination', pagination);
 
         if (!pagination.textPagination) {
             pagination.textPagination = '{{to}} de {{total}}';
         }
 
         if (counter && pagination.textPagination) {
-            counter.textContent = pagination.textPagination
+            counter.innerHTML = pagination.textPagination
                 .replace('{{from}}', pagination.from.toString())
                 .replace('{{to}}', pagination.to.toString())
                 .replace('{{total}}', pagination.total.toString());
@@ -368,11 +377,11 @@ export class SearchRenderer {
         contentPagination.classList.add('content-pagination-visible');
         contentPagination.removeAttribute('hidden');
 
-        this.isVisible = true;
+        this._isVisible = true;
 
-        if (this.hideTimeout) {
-            clearTimeout(this.hideTimeout);
-            this.hideTimeout = null;
+        if (this._hideTimeout) {
+            clearTimeout(this._hideTimeout);
+            this._hideTimeout = null;
         }
     }
 
@@ -381,7 +390,7 @@ export class SearchRenderer {
      * Permite que el usuario haga clic en un resultado antes de ocultar.
      */
     hideResultsWithDelay(delay: number = this.timeHiddenResults): void {
-        this.hideTimeout = setTimeout(() => {
+        this._hideTimeout = setTimeout(() => {
             this.hideResults();
         }, delay);
     }
@@ -404,7 +413,7 @@ export class SearchRenderer {
                     contentPagination.setAttribute('hidden', 'true');
                 }
             }, this.timeHiddenResults);
-            this.animationTimeouts.push(timeout);
+            this._animationTimeouts.push(timeout);
         }
     }
 
@@ -412,7 +421,7 @@ export class SearchRenderer {
      * Toggle de visibilidad de resultados.
      */
     toggleResults(): void {
-        if (this.isVisible) {
+        if (this._isVisible) {
             this.hideResults();
         } else {
             this.showResults();
@@ -463,13 +472,13 @@ export class SearchRenderer {
     }
     destroy(): void {
         // Limpiar timeouts de animación
-        this.animationTimeouts.forEach(t => clearTimeout(t));
-        this.animationTimeouts = [];
+        this._animationTimeouts.forEach(t => clearTimeout(t));
+        this._animationTimeouts = [];
 
         // Limpiar hideTimeout
-        if (this.hideTimeout) {
-            clearTimeout(this.hideTimeout);
-            this.hideTimeout = null;
+        if (this._hideTimeout) {
+            clearTimeout(this._hideTimeout);
+            this._hideTimeout = null;
         }
 
         // Resetear referencias

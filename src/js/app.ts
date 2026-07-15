@@ -107,7 +107,8 @@ class Search {
                 contentSearch: undefined, // ".app-search" - contenedor del Search
                 inputSearch: undefined, // "#filter-search" - input donde se escribe la búsqueda
                 renderItems: undefined, // ".items-search" - elemento donde se muestran los items
-                paginationItems: undefined // ".index-search" - elemento donde se muestra la paginación
+                paginationItems: undefined, // ".index-search" - elemento donde se muestra la paginación
+                counterItems: undefined // ".items-counter" - elemento donde se muestra el contador de registros
             }, this.#getUniqueClassName.bind(this), Constants.DEFAULT_TIME_HIDDEN_RESULTS);
             this.cache = new LRUCache<Types.SearchResult>(this.cacheMaxSize, this.cacheTtlSeconds);
             this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
