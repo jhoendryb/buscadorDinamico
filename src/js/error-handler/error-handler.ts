@@ -1,5 +1,6 @@
 import { ErrorCode, ErrorDetails } from './error-codes';
 import { EventEmitter } from '../events/eventEmitter';
+import * as Types from '../types';
 
 /**
  * Clase de error personalizada para errores del componente Search.
@@ -260,7 +261,7 @@ export class ErrorHandler {
             message: error.message,
             solution: error.solution,
             context: error.context
-        });
+        } as Types.ErrorData);
     }
 
     /**
