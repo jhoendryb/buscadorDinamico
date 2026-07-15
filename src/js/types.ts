@@ -48,6 +48,7 @@ export interface BodyConfig {
     renderItems?: HTMLElement;
     paginationItems?: HTMLElement;
     contentPaginationItems?: HTMLElement;
+    counterItems?: HTMLElement;
 }
 
 export interface RenderSearchOptions {
