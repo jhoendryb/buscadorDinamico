@@ -141,7 +141,7 @@ export class ErrorHandler {
         this.developmentMode = developmentMode;
         this.errorMessages = new Map();
         this.initializeErrorMessages();
-        this.documentationUrl = 'https://jhoendryb.github.io/buscadorDinamico/#/introduction';
+        this.documentationUrl = 'https://www.xample.com';
     }
 
     /**
