@@ -36,6 +36,102 @@ export class ErrorHandler {
     private static instance: ErrorHandler;
     private errorMessages: Map<ErrorCode, ErrorDetails>;
     private developmentMode: boolean;
+    private documentationUrl: string;
+    private static readonly DEFAULT_ERROR_MESSAGES: Record<string, ErrorDetails> = {
+        // Errores de validación
+        [ErrorCode.ELEMENT_REQUIRED]: {
+            code: ErrorCode.ELEMENT_REQUIRED,
+            message: "El parámetro 'element' es requerido",
+            solution: "Proporciona el selector CSS del contenedor donde se renderizará el buscador.\nEjemplo: { element: '.mi-buscador' }",
+            documentation: "#configuration-element"
+        },
+        [ErrorCode.ELEMENT_TYPE_INVALID]: {
+            code: ErrorCode.ELEMENT_TYPE_INVALID,
+            message: "El parámetro 'element' debe ser un string con el selector CSS",
+            solution: "El parámetro element debe ser un string válido de selector CSS.\nEjemplo: '.mi-buscador', '#buscador-id', '[data-search]'",
+            documentation: "#configuration-element"
+        },
+        [ErrorCode.FETCH_URL_REQUIRED]: {
+            code: ErrorCode.FETCH_URL_REQUIRED,
+            message: "El parámetro 'fetch.url' es requerido cuando procesServer es true",
+            solution: "Configura la URL del endpoint de búsqueda.\nEjemplo: { fetch: { url: '/api/search' } }",
+            documentation: "#configuration-fetch"
+        },
+        [ErrorCode.ITEMSPERPAGE_TYPE_INVALID]: {
+            code: ErrorCode.ITEMSPERPAGE_TYPE_INVALID,
+            message: "El parámetro 'itemsPerPage' debe ser un número",
+            solution: "El parámetro itemsPerPage debe ser de tipo number.\nEjemplo: { itemsPerPage: 10 }",
+            documentation: "#configuration-pagination"
+        },
+        [ErrorCode.ITEMSPERPAGE_VALUE_INVALID]: {
+            code: ErrorCode.ITEMSPERPAGE_VALUE_INVALID,
+            message: "El parámetro 'itemsPerPage' debe ser mayor a 0",
+            solution: "El parámetro itemsPerPage debe ser un número positivo mayor a 0.\nEjemplo: { itemsPerPage: 10 }",
+            documentation: "#configuration-pagination"
+        },
+        [ErrorCode.INVALID_TYPE_FORMAT]: {
+            code: ErrorCode.INVALID_TYPE_FORMAT,
+            message: "El parámetro tiene un formato de tipo inválido",
+            solution: "Verifica que el parámetro tenga el formato correcto.",
+            documentation: "#configuration-invalid-type"
+        },
+
+        // Errores de DOM
+        [ErrorCode.ELEMENT_NOT_FOUND]: {
+            code: ErrorCode.ELEMENT_NOT_FOUND,
+            message: "No existe el contenedor especificado",
+            solution: "Verifica que el selector CSS sea correcto y que el elemento exista en el DOM antes de inicializar el componente.",
+            documentation: "#troubleshooting-dom"
+        },
+        [ErrorCode.CONTAINER_NOT_FOUND]: {
+            code: ErrorCode.CONTAINER_NOT_FOUND,
+            message: "No existe el contenedor principal",
+            solution: "Asegúrate de que el elemento especificado exista en el DOM antes de inicializar el componente.",
+            documentation: "#troubleshooting-dom"
+        },
+
+        // Errores de red
+        [ErrorCode.NETWORK_ERROR]: {
+            code: ErrorCode.NETWORK_ERROR,
+            message: "Error de conexión al servidor",
+            solution: "Verifica tu conexión a internet y que el servidor esté disponible.",
+            documentation: "#troubleshooting-network"
+        },
+        [ErrorCode.FETCH_FAILED]: {
+            code: ErrorCode.FETCH_FAILED,
+            message: "Error al obtener datos del servidor",
+            solution: "Verifica que la URL del endpoint sea correcta y que el servidor responda con el formato esperado.",
+            documentation: "#troubleshooting-fetch"
+        },
+
+        // Errores de datos
+        [ErrorCode.INVALID_DATA_FORMAT]: {
+            code: ErrorCode.INVALID_DATA_FORMAT,
+            message: "Formato de datos inválido",
+            solution: "Verifica que los datos tengan el formato esperado por el componente.",
+            documentation: "#data-format"
+        },
+        [ErrorCode.EMPTY_RESPONSE]: {
+            code: ErrorCode.EMPTY_RESPONSE,
+            message: "La respuesta del servidor está vacía",
+            solution: "Verifica que el endpoint devuelva datos en el formato esperado.",
+            documentation: "#data-format"
+        },
+
+        // Errores internos
+        [ErrorCode.INITIALIZATION_FAILED]: {
+            code: ErrorCode.INITIALIZATION_FAILED,
+            message: "Error al inicializar el componente",
+            solution: "Verifica la configuración y los parámetros proporcionados.",
+            documentation: "#troubleshooting-initialization"
+        },
+        [ErrorCode.RENDER_ERROR]: {
+            code: ErrorCode.RENDER_ERROR,
+            message: "Error al renderizar el componente",
+            solution: "Verifica que el DOM esté disponible y que no haya conflictos con otros componentes.",
+            documentation: "#troubleshooting-render"
+        },
+    };
 
     /**
      * Crea una instancia privada de ErrorHandler (singleton).
@@ -45,6 +141,7 @@ export class ErrorHandler {
         this.developmentMode = developmentMode;
         this.errorMessages = new Map();
         this.initializeErrorMessages();
+        this.documentationUrl = 'https://jhoendryb.github.io/buscadorDinamico/#/introduction';
     }
 
     /**
@@ -55,8 +152,18 @@ export class ErrorHandler {
     static getInstance(developmentMode?: boolean): ErrorHandler {
         if (!ErrorHandler.instance) {
             ErrorHandler.instance = new ErrorHandler(developmentMode ?? true);
+        } else if (developmentMode !== undefined) {
+            ErrorHandler.instance.developmentMode = developmentMode;
         }
         return ErrorHandler.instance;
+    }
+
+    isDevelopmentMode(): boolean {
+        return this.developmentMode;
+    }
+
+    setDocumentationUrl(url: string): void {
+        this.documentationUrl = url;
     }
 
     /**
@@ -64,107 +171,8 @@ export class ErrorHandler {
      * @private
      */
     private initializeErrorMessages(): void {
-        // Errores de validación
-        this.errorMessages.set(ErrorCode.ELEMENT_REQUIRED, {
-            code: ErrorCode.ELEMENT_REQUIRED,
-            message: "El parámetro 'element' es requerido",
-            solution: "Proporciona el selector CSS del contenedor donde se renderizará el buscador.\nEjemplo: { element: '.mi-buscador' }",
-            documentation: "#configuration-element"
-        });
-
-        this.errorMessages.set(ErrorCode.ELEMENT_TYPE_INVALID, {
-            code: ErrorCode.ELEMENT_TYPE_INVALID,
-            message: "El parámetro 'element' debe ser un string con el selector CSS",
-            solution: "El parámetro element debe ser un string válido de selector CSS.\nEjemplo: '.mi-buscador', '#buscador-id', '[data-search]'",
-            documentation: "#configuration-element"
-        });
-
-        this.errorMessages.set(ErrorCode.FETCH_URL_REQUIRED, {
-            code: ErrorCode.FETCH_URL_REQUIRED,
-            message: "El parámetro 'fetch.url' es requerido cuando procesServer es true",
-            solution: "Configura la URL del endpoint de búsqueda.\nEjemplo: { fetch: { url: '/api/search' } }",
-            documentation: "#configuration-fetch"
-        });
-
-        this.errorMessages.set(ErrorCode.ITEMSPERPAGE_TYPE_INVALID, {
-            code: ErrorCode.ITEMSPERPAGE_TYPE_INVALID,
-            message: "El parámetro 'itemsPerPage' debe ser un número",
-            solution: "El parámetro itemsPerPage debe ser de tipo number.\nEjemplo: { itemsPerPage: 10 }",
-            documentation: "#configuration-pagination"
-        });
-
-        this.errorMessages.set(ErrorCode.ITEMSPERPAGE_VALUE_INVALID, {
-            code: ErrorCode.ITEMSPERPAGE_VALUE_INVALID,
-            message: "El parámetro 'itemsPerPage' debe ser mayor a 0",
-            solution: "El parámetro itemsPerPage debe ser un número positivo mayor a 0.\nEjemplo: { itemsPerPage: 10 }",
-            documentation: "#configuration-pagination"
-        });
-
-        this.errorMessages.set(ErrorCode.INVALID_TYPE_FORMAT, {
-            code: ErrorCode.INVALID_TYPE_FORMAT,
-            message: "El parámetro tiene un formato de tipo inválido",
-            solution: "Verifica que el parámetro tenga el formato correcto.",
-            documentation: "#configuration-invalid-type"
-        });
-
-        // Errores de DOM
-        this.errorMessages.set(ErrorCode.ELEMENT_NOT_FOUND, {
-            code: ErrorCode.ELEMENT_NOT_FOUND,
-            message: "No existe el contenedor especificado",
-            solution: "Verifica que el selector CSS sea correcto y que el elemento exista en el DOM antes de inicializar el componente.",
-            documentation: "#troubleshooting-dom"
-        });
-
-        this.errorMessages.set(ErrorCode.CONTAINER_NOT_FOUND, {
-            code: ErrorCode.CONTAINER_NOT_FOUND,
-            message: "No existe el contenedor principal",
-            solution: "Asegúrate de que el elemento especificado exista en el DOM antes de inicializar el componente.",
-            documentation: "#troubleshooting-dom"
-        });
-
-        // Errores de red
-        this.errorMessages.set(ErrorCode.NETWORK_ERROR, {
-            code: ErrorCode.NETWORK_ERROR,
-            message: "Error de conexión al servidor",
-            solution: "Verifica tu conexión a internet y que el servidor esté disponible.",
-            documentation: "#troubleshooting-network"
-        });
-
-        this.errorMessages.set(ErrorCode.FETCH_FAILED, {
-            code: ErrorCode.FETCH_FAILED,
-            message: "Error al obtener datos del servidor",
-            solution: "Verifica que la URL del endpoint sea correcta y que el servidor responda con el formato esperado.",
-            documentation: "#troubleshooting-fetch"
-        });
-
-        // Errores de datos
-        this.errorMessages.set(ErrorCode.INVALID_DATA_FORMAT, {
-            code: ErrorCode.INVALID_DATA_FORMAT,
-            message: "Formato de datos inválido",
-            solution: "Verifica que los datos tengan el formato esperado por el componente.",
-            documentation: "#data-format"
-        });
-
-        this.errorMessages.set(ErrorCode.EMPTY_RESPONSE, {
-            code: ErrorCode.EMPTY_RESPONSE,
-            message: "La respuesta del servidor está vacía",
-            solution: "Verifica que el endpoint devuelva datos en el formato esperado.",
-            documentation: "#data-format"
-        });
-
-        // Errores internos
-        this.errorMessages.set(ErrorCode.INITIALIZATION_FAILED, {
-            code: ErrorCode.INITIALIZATION_FAILED,
-            message: "Error al inicializar el componente",
-            solution: "Verifica la configuración y los parámetros proporcionados.",
-            documentation: "#troubleshooting-initialization"
-        });
-
-        this.errorMessages.set(ErrorCode.RENDER_ERROR, {
-            code: ErrorCode.RENDER_ERROR,
-            message: "Error al renderizar el componente",
-            solution: "Verifica que el DOM esté disponible y que no haya conflictos con otros componentes.",
-            documentation: "#troubleshooting-render"
+        Object.values(ErrorHandler.DEFAULT_ERROR_MESSAGES).forEach(details => {
+            this.errorMessages.set(details.code, details);
         });
     }
 
@@ -278,7 +286,7 @@ export class ErrorHandler {
         }
 
         if (error.documentation) {
-            message += `\nDocumentación: https://tu-documentacion.com${error.documentation}`;
+            message += `\nDocumentación: ${this.documentationUrl}${error.documentation}`;
         }
 
         return message;
