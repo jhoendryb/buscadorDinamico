@@ -416,9 +416,9 @@ export class SearchRenderer {
         }
     }
     /**
-         * Muestra el indicador de carga.
-         * @returns {Search} - La instancia actual de {@link Search} para encadenar métodos.
-         */
+     * Muestra el indicador de carga.
+     * @param {string} loadingText - Texto a mostrar mientras se carga
+     */
     showLoading(loadingText: string): void {
         if (!this.body.renderItems) return;
         const loading = createElement({

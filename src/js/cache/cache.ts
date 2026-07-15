@@ -2,19 +2,33 @@
  * Implementación de caché LRU (Least Recently Used o Menos Recientemente Utilizado).
  * @class LRUCache
  */
-export class LRUCache {
-    private cache: Map<string, { value: any; expiresAt: number }>;
-    public maxSize: number;
-    public ttlSeconds: number;
+export class LRUCache<T = any> {
+    private cache: Map<string, { value: T; expiresAt: number }>;
+    readonly maxSize: number;
+    readonly ttlSeconds: number;
+    public stats: {
+        hits: number;
+        misses: number;
+        evictions: number;
+    };
     /**
      * Crea una instancia de LRUCache.
      * @param {number} maxSize - Tamaño máximo del caché (cantidad de items)
      * @param {number} ttlSeconds - Tiempo de vida en segundos
+     * @property {Object} stats - Estatísticas de uso de la caché
+     * @property {number} stats.hits - Cantidad de consultas que encontraron un valor válido
+     * @property {number} stats.misses - Cantidad de consultas que no encontraron un valor válido
+     * @property {number} stats.evictions - Cantidad de inserciones que requirieron eliminar un valor por LRU
      */
     constructor(maxSize: number = 50, ttlSeconds: number = 300) {
         this.cache = new Map();
         this.maxSize = maxSize;
         this.ttlSeconds = ttlSeconds;
+        this.stats = {
+            hits: 0,
+            misses: 0,
+            evictions: 0
+        };
     }
     /**
      * Almacena un valor en el caché.
@@ -22,37 +36,74 @@ export class LRUCache {
      * @param {*} value - Valor a almacenar (puede ser cualquier tipo)
      * @returns {void}
      */
-    set(key: string, value: any): void {
-        this.cleanup();
+    set(key: string, value: T): void {
+        if (this.cache.has(key)) {
+            this.cache.set(key, {
+                value,
+                expiresAt: Date.now() + (this.ttlSeconds * 1000)
+            });
+            return;
+        }
+
+        if (this.cache.size >= this.maxSize) {
+            this.cleanup();
+        }
 
         if (this.cache.size >= this.maxSize) {
             const firstKey = this.cache.keys().next().value;
             if (firstKey) {
                 this.delete(firstKey);
+                this.stats.evictions++;
             }
         }
-        // Guardar con timestamp de expiración
+
         this.cache.set(key, {
-            value: value,
+            value,
             expiresAt: Date.now() + (this.ttlSeconds * 1000)
         });
+    }
+
+    /**
+     * Obtiene un valor del caché o lo carga si no existe.
+     * @param {string} key - Clave del valor a obtener
+     * @param {() => Promise<T>} fetch - Función para cargar el valor si no existe en el caché
+     * @param {() => void} onMiss - Función para ejecutar cuando el valor no existe en el caché
+     * @returns {Promise<T>} Valor almacenado o cargado
+     */
+    async getOrFetch(
+        key: string,
+        fetch: () => Promise<T>,
+        onMiss?: () => void
+    ): Promise<T> {
+        const cached = this.get(key);
+        if (cached !== undefined) return cached;
+
+        if (onMiss) onMiss();
+
+        const value = await fetch();
+        this.set(key, value);
+        return value;
     }
     /**
      * Obtiene un valor del caché.
      * @param {string} key - Clave del valor a obtener
      * @returns {*|undefined} Valor almacenado o undefined si no existe
      */
-    get(key: string): any | undefined {
+    get(key: string): T | undefined {
         const entry = this.cache.get(key);
-        if (!entry) return undefined;
+        if (!entry) {
+            this.stats.misses++;
+            return undefined
+        };
 
         // Verificar expiración
         if (Date.now() > entry.expiresAt) {
             this.delete(key);
+            this.stats.misses++;
             return undefined;
         }
 
-        // Actualizar como recientemente usado
+        this.stats.hits++;
         this.delete(key);
         this.cache.set(key, {
             value: entry.value,
@@ -69,11 +120,6 @@ export class LRUCache {
         const entry = this.cache.get(key);
         if (!entry) return false;
         if (Date.now() > entry.expiresAt) return false;
-        this.delete(key);
-        this.cache.set(key, {
-            value: entry.value,
-            expiresAt: Date.now() + (this.ttlSeconds * 1000)
-        });
         return true;
     }
     /**
@@ -81,7 +127,6 @@ export class LRUCache {
      * @returns {number} Cantidad de elementos en el caché
      */
     size(): number {
-        this.cleanup();
         return this.cache.size;
     }
     /**
@@ -96,7 +141,7 @@ export class LRUCache {
      * @param {string} searchTerm - Término de búsqueda a limpiar
      * @returns {LRUCache} Instancia actual para encadenamiento
      */
-    clearCacheByPrefix(searchTerm: string): LRUCache {
+    clearCacheByPrefix(searchTerm: string): LRUCache<T> {
         if (!searchTerm) return this;
         for (const key of this.cache.keys()) {
             if (key.startsWith(searchTerm)) {

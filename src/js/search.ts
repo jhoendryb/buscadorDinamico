@@ -65,6 +65,8 @@ search1.on('itemSelected', (data: any) => {
     // }
 });
 
+search1.on('search', () => console.table(search1.cache.stats));
+
 // const search2 = new Search({
 //     element: '.app-search2',
 // });
