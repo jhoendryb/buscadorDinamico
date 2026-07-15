@@ -18,7 +18,7 @@ const search1 = new Search({
     template: `<div>{{name}} - {{id_ciudad}}</div>`,
     translation: {
         searchPlaceholder: 'Escribe la busqueda aqui.',
-        pagination: '{{total}} resultados, paginados {{count}}'
+        pagination: '{{total}} resultados, paginados {{from}}-{{to}}'
     },
     dom: 'scip',
     developmentMode: true,
@@ -66,6 +66,7 @@ search1.on('itemSelected', (data: any) => {
 });
 
 search1.on('search', () => console.table(search1.cache.stats));
+search1.on('pageChange', (data: any) => console.log('Page change:', data));
 
 // const search2 = new Search({
 //     element: '.app-search2',
