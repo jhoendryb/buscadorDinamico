@@ -54,7 +54,7 @@ search1.events.once('search', (data: any) => {
 
 // console.log("Esto es pruebas", prueba);
 
-search1.on('itemSelected', (data: any) => {
+search1.on('itemSelected', (data) => {
     if (!data.item) return;
 
     data.close();
@@ -66,7 +66,7 @@ search1.on('itemSelected', (data: any) => {
 });
 
 search1.on('search', () => console.table(search1.cache.stats));
-search1.on('pageChange', (data: any) => console.log('Page change:', data));
+search1.on('pageChange', (data) => console.log('Page change:', data));
 
 // const search2 = new Search({
 //     element: '.app-search2',
