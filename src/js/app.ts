@@ -36,7 +36,7 @@ class Search {
     developmentMode: boolean;
     renderer: SearchRenderer;
     cache: LRUCache;
-    events: EventEmitter;
+    events: EventEmitter<Types.SearchEventMap>;
     pagination: Pagination;
     scrollObserver: IntersectionObserver | null;
     t: Types.TranslationCache;
@@ -89,7 +89,7 @@ class Search {
         this.boundKeydownHandler = () => { };
         this.boundClickHandler = () => { };
         this.errorHandler = ErrorHandler.getInstance(this.developmentMode);
-        this.events = new EventEmitter(this.errorHandler);
+        this.events = new EventEmitter<Types.SearchEventMap>(this.errorHandler);
 
         try {
             this.#validateParameters()
@@ -214,7 +214,7 @@ class Search {
         if (searchTerm !== this.searchTerm && this.renderer.body.renderItems) {
             this.renderer.body.renderItems.scrollTop = 0;
             this.renderer.body.renderItems.innerHTML = '';
-            this.events.emit('resultsCleared', { previousSearchTerm: this.searchTerm });
+            this.events.emit('resultsCleared', { previousSearchTerm: this.searchTerm } as Types.ResultsClearedEventData);
             this.renderer.body.renderItems.removeAttribute('aria-activedescendant');
             this.pagination.goToPage(1);
             this.selectedIndex = -1;
@@ -410,7 +410,7 @@ class Search {
      * @param {Function} callback - Función a ejecutar cuando se emite el evento
      * @returns {EventEmitter} - {@link EventEmitter} para poder concatenar métodos
      */
-    on(eventName: string, callback: Function): EventEmitter {
+    on<K extends keyof Types.SearchEventMap>(eventName: K, callback: (data: Types.SearchEventMap[K]) => void): EventEmitter<Types.SearchEventMap> {
         return this.events.on(eventName, callback);
     }
     /**

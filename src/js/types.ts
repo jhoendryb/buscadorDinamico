@@ -112,6 +112,19 @@ export interface SearchEventData {
     timestamp: string;
 }
 
+
+export interface ResultsClearedEventData {
+    previousSearchTerm: string;
+}
+
+
+export interface ErrorData {
+    code: string;
+    message: string;
+    solution: string;
+    context: any;
+}
+
 export interface CreateElementConfig {
     element: string | HTMLElement;
     dataset?: Record<string, string>;
@@ -133,4 +146,18 @@ export enum DomComponent {
 export interface SearchResult {
     data: Record<string, any>[];
     countPage?: number;
+}
+
+export interface SearchEventMap {
+    init: SearchEventInit;
+    search: SearchEventData;
+    searchComplete: Omit<SearchEventData, 'timestamp'>;
+    resultsCleared: ResultsClearedEventData;
+    pageChange: PageChangeEventData;
+    sortChange: SortChangeEventData;
+    itemHighlighted: ItemHighlightedEventData;
+    itemSelected: ItemSelectedEventData;
+    appendItems: AppendItemsEventData;
+    destroy: DestroyEventData;
+    error: ErrorData;
 }
