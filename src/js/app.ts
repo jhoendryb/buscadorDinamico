@@ -109,7 +109,7 @@ class Search {
                 renderItems: undefined, // ".items-search" - elemento donde se muestran los items
                 paginationItems: undefined // ".index-search" - elemento donde se muestra la paginación
             }, this.#getUniqueClassName.bind(this), Constants.DEFAULT_TIME_HIDDEN_RESULTS);
-            this.cache = new LRUCache(this.cacheMaxSize, this.cacheTtlSeconds);
+            this.cache = new LRUCache<Types.SearchResult>(this.cacheMaxSize, this.cacheTtlSeconds);
             this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
             this.pagination.setCountFunction(() => {
                 return this.procesServer ? this._ajaxResponse.success?.countPage || 0 : this._data?.length || 0;
@@ -216,25 +216,18 @@ class Search {
 
         if (this.procesServer) {
             const cacheKey = this.getCacheKey(searchTerm, this.pagination.getCurrentPage());
-            if (this.cacheEnabled) {
-                const cached = this.cache.get(cacheKey);
-                if (cached) {
-                    searchResult = cached;
-                }
-            }
-            if (!searchResult) {
-                this.renderer.showLoading(this.t.loading || '');
-                searchResult = await this.searchingServer.search(
+            const loadFetch = async () => {
+                return await this.searchingServer.search(
                     searchTerm,
                     this.fetch as Types.FetchConfig,
                     this.pagination.getCurrentPage(),
                     this.itemsPerPage
                 );
-                if (this.cacheEnabled) {
-                    this.cache.set(cacheKey, searchResult);
-                }
-            }
-            this._ajaxResponse.success = { countPage: searchResult.countPage };
+            };
+            searchResult = this.cacheEnabled
+                ? await this.cache.getOrFetch(cacheKey, loadFetch, () => this.renderer.showLoading(this.t.loading || ''))
+                : await loadFetch();
+            this._ajaxResponse.success = { countPage: searchResult?.countPage };
         } else {
             const filtered = this.searchingLocal.search(
                 searchTerm,
@@ -247,7 +240,7 @@ class Search {
 
         if (drawId !== this.currentDrawId) return this;
 
-        this._data = searchResult.data;
+        this._data = searchResult?.data || [];
         this.searchTerm = searchTerm;
 
         if (isEvent) {
@@ -358,28 +351,19 @@ class Search {
             const nextPage = this.pagination.loadNextPage();
 
             if (this.procesServer) {
-                const cacheKey = this.getCacheKey(this.searchTerm, nextPage);
                 let searchResult: Types.SearchResult | null = null;
-                if (this.cacheEnabled) {
-                    const cached = this.cache.get(cacheKey);
-                    if (cached) {
-                        searchResult = cached;
-                    }
-                }
-                if (!searchResult) {
-                    searchResult = await this.searchingServer.search(
-                        this.searchTerm,
-                        this.fetch as Types.FetchConfig,
-                        nextPage,
-                        this.itemsPerPage
-                    );
-                    if (this.cacheEnabled) {
-                        this.cache.set(cacheKey, searchResult);
-                    }
-                }
-
-                this._data = searchResult.data;
-                this._ajaxResponse.success = { countPage: searchResult.countPage };
+                const cacheKey = this.getCacheKey(this.searchTerm, nextPage);
+                const loadFetch = async () => await this.searchingServer.search(
+                    this.searchTerm,
+                    this.fetch as Types.FetchConfig,
+                    this.pagination.getCurrentPage(),
+                    this.itemsPerPage
+                );
+                searchResult = this.cacheEnabled
+                    ? await this.cache.getOrFetch(cacheKey, loadFetch)
+                    : await loadFetch();
+                this._data = searchResult?.data || [];
+                this._ajaxResponse.success = { countPage: searchResult?.countPage };
             }
 
             const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
