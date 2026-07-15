@@ -4,9 +4,13 @@
  */
 export class Pagination {
     private currentPage: number;
-    public itemsPerPage: number;
+    private _itemsPerPage: number;
+    get itemsPerPage(): number {
+        return this._itemsPerPage;
+    }
     private countFn?: () => number;
-    private dataItemsFn?: () => Object[];
+    private dataItemsFn?: () => Record<string, any>[];
+    private onPageChange?: (page: number, totalPages: number) => void;
     /**
      * Crea una instancia de Pagination.
      * @param {number} [itemsPerPage=10] - Items por página
@@ -14,7 +18,7 @@ export class Pagination {
      */
     constructor(itemsPerPage: number = 10, firstPage: number = 1) {
         this.currentPage = firstPage;
-        this.itemsPerPage = itemsPerPage;
+        this._itemsPerPage = itemsPerPage < 1 ? 1 : itemsPerPage;
     }
     /**
      * Carga la siguiente página en modo scroll infinito.
@@ -24,6 +28,7 @@ export class Pagination {
         const totalPages = this.getTotalPages();
         if (this.currentPage < totalPages) {
             this.currentPage++;
+            this.onPageChange?.(this.currentPage, totalPages);
         }
         return this.currentPage; // No hay más páginas
     }
@@ -43,7 +48,7 @@ export class Pagination {
     getTotalLoaded(): number {
         // En modo scroll infinito, calcular items de todas las páginas cargadas
         const totalItems = this.getTotalItems();
-        const loadedItems = Math.min(totalItems, this.currentPage * this.itemsPerPage);
+        const loadedItems = Math.min(totalItems, this.currentPage * this._itemsPerPage);
         return loadedItems;
     }
     /**
@@ -61,6 +66,9 @@ export class Pagination {
      */
     setDataItemsFunction(dataItemsFn: () => Record<string, any>[]): void {
         this.dataItemsFn = dataItemsFn;
+    }
+    onPageChangeCallback(callback: (page: number, totalPages: number) => void): void {
+        this.onPageChange = callback;
     }
     /**
      * Obtiene el total de items usando la función de conteo configurada.
@@ -83,7 +91,7 @@ export class Pagination {
      */
     getTotalPages(): number {
         const totalItems = this.getTotalItems();
-        return Math.ceil(totalItems / this.itemsPerPage) || 1;
+        return Math.ceil(totalItems / this._itemsPerPage) || 1;
     }
     /**
      * Retrocede a la página anterior si existe.
@@ -92,6 +100,7 @@ export class Pagination {
     prevPage(): number {
         if (this.currentPage > 1) {
             this.currentPage--;
+            this.onPageChange?.(this.currentPage, this.getTotalPages());
         }
         return this.currentPage;
     }
@@ -104,6 +113,7 @@ export class Pagination {
         const totalPages = this.getTotalPages();
         if (page >= 1 && page <= totalPages) {
             this.currentPage = page;
+            this.onPageChange?.(this.currentPage, totalPages);
         }
         return this.currentPage;
     }
@@ -113,6 +123,7 @@ export class Pagination {
      */
     firstPage(): number {
         this.currentPage = 1;
+        this.onPageChange?.(this.currentPage, this.getTotalPages());
         return this.currentPage;
     }
     /**
@@ -121,6 +132,7 @@ export class Pagination {
      */
     lastPage(): number {
         this.currentPage = this.getTotalPages();
+        this.onPageChange?.(this.currentPage, this.getTotalPages());
         return this.currentPage;
     }
     /**
@@ -130,9 +142,17 @@ export class Pagination {
      */
     getPageItems(data?: Record<string, any>[] | null): Record<string, any>[] {
         if (!data) return this.dataItemsFn ? this.dataItemsFn() : [];
-        const start = (this.currentPage - 1) * this.itemsPerPage;
-        const end = this.currentPage * this.itemsPerPage;
+        const start = (this.currentPage - 1) * this._itemsPerPage;
+        const end = this.currentPage * this._itemsPerPage;
         return data.slice(start, end);
+    }
+    getRange(): { from: number; to: number; total: number } {
+        const totalItems = this.getTotalItems();
+        if (totalItems === 0) return { from: 0, to: 0, total: 0 };
+
+        const from = (this.currentPage - 1) * this._itemsPerPage + 1;
+        const to = Math.min(this.currentPage * this._itemsPerPage, totalItems);
+        return { from, to, total: totalItems };
     }
     /**
      * Obtiene la página actual.
@@ -149,11 +169,21 @@ export class Pagination {
     setItemsPerPage(itemsPerPage: number): void {
         if (itemsPerPage < 1) itemsPerPage = 1;
 
-        this.itemsPerPage = itemsPerPage;
+        this._itemsPerPage = itemsPerPage;
         // Recalcular página actual si es necesario
         const totalPages = this.getTotalPages();
         if (this.currentPage > totalPages) {
             this.currentPage = totalPages;
         }
+    }
+    /**
+     * Reinicia la paginación a la primera página.
+     * @param {number} [firstPage=1] - Página inicial
+     * @returns {void}
+     */
+    reset(firstPage: number = 1): void {
+        this.currentPage = firstPage;
+        this.countFn = undefined;
+        this.dataItemsFn = undefined;
     }
 }

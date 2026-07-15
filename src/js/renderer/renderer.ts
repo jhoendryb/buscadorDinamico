@@ -304,22 +304,25 @@ export class SearchRenderer {
     }
     /**
      * Actualiza el contador de registros.
-     * @param {number} loaded - Cantidad de items cargados
-     * @param {number} total - Total de items
-     * @param {string} [textPagination] - Texto personalizado para paginación (ej: "{{count}} de {{total}}")
+     * @param {object} pagination - Objeto con la información de paginación
+     * @param {number} pagination.from - Desde qué item se está mostrando
+     * @param {number} pagination.to - Hasta qué item se está mostrando
+     * @param {number} pagination.total - Total de items
+     * @param {string} [pagination.textPagination] - Texto personalizado para paginación (ej: "{{to}} de {{total}}")
      * @returns {void}
      */
-    updateCounter(loaded: number, total: number, textPagination?: string): void {
+    updateCounter(pagination: { from: number; to: number; total: number, textPagination?: string }): void {
         const counter = this.body.paginationItems?.querySelector('.items-counter');
 
-        if (!textPagination) {
-            textPagination = '{{count}} de {{total}}';
+        if (!pagination.textPagination) {
+            pagination.textPagination = '{{to}} de {{total}}';
         }
 
-        if (counter && textPagination) {
-            counter.textContent = textPagination
-                .replace('{{count}}', loaded.toString())
-                .replace('{{total}}', total.toString());
+        if (counter && pagination.textPagination) {
+            counter.textContent = pagination.textPagination
+                .replace('{{from}}', pagination.from.toString())
+                .replace('{{to}}', pagination.to.toString())
+                .replace('{{total}}', pagination.total.toString());
         }
     }
     /**

@@ -117,6 +117,14 @@ class Search {
             this.pagination.setDataItemsFunction((): Record<string, any>[] => {
                 return this._data || [];
             });
+            this.pagination.onPageChangeCallback((page, totalPages) => {
+                this.events.emit('pageChange', {
+                    page,
+                    totalPages,
+                    itemsOnPage: this.pagination.getPageItems(this.procesServer ? null : this._data).length,
+                    totalLoaded: this.pagination.getTotalLoaded()
+                } as Types.PageChangeEventData);
+            });
 
             this._data = this.data;
         } catch (error) {
@@ -278,20 +286,10 @@ class Search {
             this.#highlightText.bind(this)
         );
 
-        // Actualizar contador
-        const loaded = this.pagination.getTotalLoaded();
-        const total = this.pagination.getTotalItems();
-        this.renderer.updateCounter(loaded, total, this.t.pagination);
+        const range = this.pagination.getRange();
+        this.renderer.updateCounter({ ...range, textPagination: this.t.pagination });
 
-        // Configurar detector de scroll
         this.#setupScrollDetection();
-
-        this.events.emit('pageChange', {
-            page: this.pagination.getCurrentPage(),
-            totalPages: this.pagination.getTotalPages(),
-            itemsOnPage: next.length,
-            totalLoaded: loaded
-        } as Types.PageChangeEventData);
     }
     /**
      * Configura el detector de scroll al final del contenedor.
@@ -378,9 +376,9 @@ class Search {
 
             this.#setupScrollDetection();
 
-            const loaded = this.pagination.getTotalLoaded();
-            const total = this.pagination.getTotalItems();
-            this.renderer.updateCounter(loaded, total, this.t.pagination);
+            // Actualizar contador
+            const range = this.pagination.getRange();
+            this.renderer.updateCounter({ ...range, textPagination: this.t.pagination });
 
             return this;
         } finally {
@@ -615,7 +613,7 @@ class Search {
         this._data = null;
         this.data = [];
         this.cache = new LRUCache(this.cacheMaxSize, this.cacheTtlSeconds);
-        this.pagination = new Pagination();
+        this.pagination.reset();
         this.events = new EventEmitter();
         this.renderer.destroy();
     }

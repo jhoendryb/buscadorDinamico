@@ -26,7 +26,7 @@ export const DEFAULT_TRANSLATIONS = {
     searchPlaceholder: 'Ingrese palabra clave...',
     noResults: 'No se encontraron resultados',
     loading: 'Buscando...',
-    pagination: '{{count}} de {{total}}'
+    pagination: '{{to}} de {{total}}'
 };
 
 // Clases CSS por defecto
