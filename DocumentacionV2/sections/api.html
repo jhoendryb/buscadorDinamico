@@ -72,22 +72,28 @@ search.sort('precio', 'desc');</code></pre>
 
 <pre data-lang="javascript"><code>search.clear(); // Resetea todo el estado</code></pre>
 
-<h3>showLoading()</h3>
+<h3>showLoading(loadingText?)</h3>
 
-<pre data-lang="typescript"><code>showLoading(): Search</code></pre>
+<pre data-lang="typescript"><code>showLoading(loadingText?: string): Search</code></pre>
 
-<p>Muestra un indicador de carga en el contenedor de resultados.</p>
+<p>Muestra un indicador de carga en el contenedor de resultados. Opcionalmente muestra un texto personalizado.</p>
+
+<pre data-lang="javascript"><code>search.showLoading();                    // "Buscando..."
+search.showLoading('Cargando datos...'); // Texto personalizado</code></pre>
 
 <h3>on(eventName, callback)</h3>
 
-<pre data-lang="typescript"><code>on(eventName: string, callback: Function): EventEmitter</code></pre>
+<pre data-lang="typescript"><code>on&lt;K extends keyof SearchEventMap&gt;(event: K, callback: (data: SearchEventMap[K]) => void): EventEmitter&lt;SearchEventMap&gt;</code></pre>
 
-<p>Registra un listener para un evento. Retorna el <code>EventEmitter</code> para encadenamiento.</p>
+<p>Registra un listener para un evento. El tipo del dato en el callback se infiere automáticamente desde <code>SearchEventMap</code>. Retorna el <code>EventEmitter</code> para encadenamiento.</p>
 
 <pre data-lang="javascript"><code>search
     .on('search', (data) => console.log('Búsqueda:', data))
     .on('pageChange', (data) => console.log('Página:', data.page))
-    .on('itemSelected', (data) => console.log('Seleccionado:', data.item));</code></pre>
+    .on('itemSelected', (data) => {
+        console.log('Seleccionado:', data.item);
+        data.close(); // Cierra resultados
+    });</code></pre>
 
 <h3>getCacheKey(searchTerm, page)</h3>
 
@@ -105,9 +111,78 @@ search.sort('precio', 'desc');</code></pre>
 
 <pre data-lang="typescript"><code>destroy(): void</code></pre>
 
-<p>Destruye la instancia, limpiando todos los event listeners, observer de scroll y referencias internas. Las propiedades se re-inicializan en lugar de nullificarse para evitar errores de referencia nula.</p>
+<p>Destruye la instancia, limpiando todos los event listeners, observer de scroll y referencias internas. Las propiedades se re-inicializan en lugar de nullificarse para evitar errores de referencia nula. También llama a <code>renderer.destroy()</code> para limpiar timeouts y referencias del DOM.</p>
 
 <pre data-lang="javascript"><code>search.destroy(); // Limpia todo</code></pre>
+
+<h2>Métodos del Renderer</h2>
+
+<h3>renderer.updateCounter()</h3>
+
+<pre data-lang="typescript"><code>renderer.updateCounter(data: { from: number; to: number; total: number; textPagination?: string }): void</code></pre>
+
+<p>Actualiza el contador de registros con formato personalizado.</p>
+
+<pre data-lang="javascript"><code>search.renderer.updateCounter({
+    from: 1,
+    to: 10,
+    total: 100,
+    textPagination: '{{from}} - {{to}} de {{total}}'
+});</code></pre>
+
+<h3>renderer.showResults() / hideResults() / toggleResults()</h3>
+
+<pre data-lang="typescript"><code>renderer.showResults(): void
+renderer.hideResults(): void
+renderer.toggleResults(): void
+renderer.hideResultsWithDelay(delay?: number): void</code></pre>
+
+<p>Controla la visibilidad del panel de resultados.</p>
+
+<pre data-lang="javascript"><code>search.renderer.showResults();
+search.renderer.hideResults();
+search.renderer.toggleResults();
+search.renderer.hideResultsWithDelay(300); // Con delay personalizado</code></pre>
+
+<h3>renderer.destroy()</h3>
+
+<pre data-lang="typescript"><code>renderer.destroy(): void</code></pre>
+
+<p>Limpia timeouts de animación, hideTimeout y reinicia las referencias del DOM. Se llama automáticamente desde <code>search.destroy()</code>.</p>
+
+<h2>Métodos de Paginación</h2>
+
+<h3>pagination.getRange()</h3>
+
+<pre data-lang="typescript"><code>pagination.getRange(): { from: number; to: number; total: number }</code></pre>
+
+<p>Retorna el rango actual de items visibles para el contador.</p>
+
+<pre data-lang="javascript"><code>const range = search.pagination.getRange(); // { from: 1, to: 10, total: 100 }</code></pre>
+
+<h3>pagination.getTotalPages()</h3>
+
+<pre data-lang="typescript"><code>pagination.getTotalPages(): number</code></pre>
+
+<p>Retorna el total de páginas disponibles.</p>
+
+<h3>pagination.getTotalLoaded()</h3>
+
+<pre data-lang="typescript"><code>pagination.getTotalLoaded(): number</code></pre>
+
+<p>Retorna el total de items cargados (considerando scroll infinito).</p>
+
+<h3>pagination.loadNextPage()</h3>
+
+<pre data-lang="typescript"><code>pagination.loadNextPage(): number</code></pre>
+
+<p>Avanza a la siguiente página en modo scroll infinito.</p>
+
+<h3>pagination.hasMorePages()</h3>
+
+<pre data-lang="typescript"><code>pagination.hasMorePages(): boolean</code></pre>
+
+<p>Verifica si hay más páginas disponibles.</p>
 
 <h2>Propiedades públicas</h2>
 

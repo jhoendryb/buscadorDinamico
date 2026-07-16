@@ -15,7 +15,7 @@ Una clase TypeScript flexible y moderna para crear buscadores dinámicos con sop
 - **Temas CSS predefinidos** (adaptative, clean-white, blue-black, onyx-black, forest-green)
 - **30+ variables CSS** personalizables
 - **Gestión de errores centralizada** con mensajes claros
-- **TypeScript** con type safety completo
+- **TypeScript** con type safety completo, `SearchEventMap` y `EventEmitter<T>` genérico
 - **Múltiples instancias** en la misma página sin conflictos
 - **Accesibilidad** con ARIA attributes
 - **Resaltado de texto** opcional para términos de búsqueda
@@ -328,7 +328,7 @@ const search = new Search({
 | Parámetro | Tipo | Default | Descripción |
 |-----------|------|---------|-------------|
 | `element` | String | - | Selector CSS del contenedor (requerido) |
-| `theme` | String | `"default"` | Nombre del tema CSS (`default`, `clean-white`, `blue-black`, `onyx-black`, `forest-green`) |
+| `theme` | String | `"adaptative"` | Nombre del tema CSS (`adaptative`, `clean-white`, `blue-black`, `onyx-black`, `forest-green`) |
 | `data` | Array | `[]` | Array de objetos para búsqueda local |
 | `procesServer` | Boolean | `false` | Habilita búsqueda por servidor (AJAX) |
 | `searchTerm` | String | `""` | Término de búsqueda inicial |
@@ -830,17 +830,19 @@ fetch: {
 
 | Evento | Cuándo se emite | Datos emitidos |
 |--------|----------------|----------------|
-| `init` | Al inicializar el componente | `{ searchTerm, itemsPerPage, procesServer }` |
-| `search` | Al realizar una búsqueda | `{ searchTerm, results, totalResults, timestamp }` |
-| `resultsCleared` | Al cambiar término y limpiar resultados | `{ previousSearchTerm }` |
-| `searchComplete` | Al completar búsqueda y renderizado | `{ searchTerm, results, totalResults }` |
-| `pageChange` | Al cambiar de página | `{ page, totalPages, itemsOnPage, totalLoaded }` |
-| `sortChange` | Al cambiar el ordenamiento | `{ field, order }` |
-| `itemSelected` | Al seleccionar un item | `{ item, index }` |
-| `itemHighlighted` | Al destacar un item con teclado | `{ item, index }` |
-| `appendItems` | Al añadir items al DOM | `{ items, content }` |
-| `destroy` | Al destruir la instancia | `{ timestamp }` |
-| `error` | Al ocurrir un error | `{ code, message, solution }` |
+| `init` | Al inicializar el componente | `SearchEventInit` |
+| `search` | Al realizar una búsqueda | `SearchEventData` |
+| `resultsCleared` | Al cambiar término y limpiar resultados | `ResultsClearedEventData` |
+| `searchComplete` | Al completar búsqueda y renderizado | `Omit<SearchEventData, 'timestamp'>` |
+| `pageChange` | Al cambiar de página | `PageChangeEventData` |
+| `sortChange` | Al cambiar el ordenamiento | `SortChangeEventData` |
+| `itemSelected` | Al seleccionar un item | `ItemSelectedEventData` (incluye `close()`) |
+| `itemHighlighted` | Al destacar un item con teclado | `ItemHighlightedEventData` |
+| `appendItems` | Al añadir items al DOM | `AppendItemsEventData` |
+| `destroy` | Al destruir la instancia | `DestroyEventData` |
+| `error` | Al ocurrir un error | `ErrorData` |
+
+Con TypeScript, los datos emitidos se infieren automáticamente gracias a `SearchEventMap`.
 
 ### Ejemplos de Uso de Eventos
 
@@ -867,10 +869,11 @@ search.on('pageChange', (data) => {
     console.log('Total páginas:', data.totalPages);
 });
 
-// Evento itemSelected
+// Evento itemSelected — incluye método close()
 search.on('itemSelected', (data) => {
     console.log('Item seleccionado:', data.item);
     console.log('Índice:', data.index);
+    data.close(); // Cierra los resultados
 });
 
 // Evento sortChange
@@ -890,12 +893,14 @@ search.init();
 ### Remover Listeners
 
 ```javascript
-const listener = search.on('search', (data) => {
+const callback = (data) => {
     console.log('Búsqueda:', data);
-});
+};
 
-// Remover el listener específico
-listener.off();
+search.on('search', callback);
+
+// Remover el listener específico por referencia
+search.events.off('search', callback);
 
 // Remover todos los listeners de un evento
 search.events.removeAllListeners('search');
@@ -931,6 +936,19 @@ search.events.once('init', (data) => {
 });
 ```
 
+### Eventos Asíncronos
+
+```javascript
+// Emitir evento de forma asíncrona (espera a todos los callbacks)
+await search.events.emitAsync('search', {
+    searchTerm: 'venezuela',
+    results: data,
+    totalResults: 10,
+    timestamp: new Date().toISOString()
+});
+// Promise.allSettled internamente — no se bloquea por errores individuales
+```
+
 ### Información de Listeners
 
 ```javascript
@@ -939,6 +957,10 @@ const count = search.events.listenerCount('search');
 
 // Obtener nombres de todos los eventos registrados
 const eventNames = search.events.eventNames();
+
+// Obtener lista detallada de eventos y su cantidad de listeners
+const list = search.events.getEventList();
+// [{ event: 'search', listeners: 2 }, { event: 'init', listeners: 1 }]
 ```
 
 ## Métodos Públicos
@@ -1045,7 +1067,7 @@ search.clear(); // Resetea todo el estado
 
 ### on(eventName, callback)
 
-Registra un listener para un evento.
+Registra un listener para un evento. En TypeScript, el tipo del dato recibido en el callback se infiere automáticamente desde `SearchEventMap`.
 
 ```javascript
 search.on('search', (data) => {
@@ -1058,15 +1080,20 @@ search.on('search', (data) => {
 - `eventName` (string): Nombre del evento
 - `callback` (function): Función a ejecutar
 
-**Retorna:** Objeto con método `off()` para remover el listener
+**Retorna:** `EventEmitter<SearchEventMap>` para encadenamiento. Usa `search.events.off(eventName, callback)` para remover.
 
-### showLoading()
+### showLoading(loadingText?)
 
-Muestra el indicador de carga.
+Muestra el indicador de carga con un texto opcional.
 
 ```javascript
-search.showLoading();
+search.showLoading();                    // Muestra "Buscando..."
+search.showLoading('Cargando datos...'); // Texto personalizado
 ```
+
+**Parámetros:**
+
+- `loadingText` (string, opcional): Texto a mostrar durante la carga
 
 **Retorna:** Instancia de Search para encadenamiento
 
@@ -1133,6 +1160,7 @@ search.destroy();
 - Limpia IntersectionObserver
 - Limpia timeouts de animación
 - Re-inicializa `cache`, `pagination`, `events` y `renderer` (no los pone a null)
+- Llama a `renderer.destroy()` para limpiar timeouts y referencias del DOM
 - No elimina el HTML del DOM
 
 ## Métodos de Paginación
@@ -1216,6 +1244,59 @@ search.pagination.setItemsPerPage(20);
 **Parámetros:**
 
 - `itemsPerPage` (number): Nueva cantidad de items por página
+
+### getRange()
+
+Retorna el rango actual de items visibles para el contador.
+
+```javascript
+const range = search.pagination.getRange();
+// { from: 1, to: 10, total: 100 }
+```
+
+**Retorna:** `PaginationRange` — `{ from: number; to: number; total: number }`
+
+### getTotalPages()
+
+Retorna el total de páginas.
+
+```javascript
+const totalPages = search.pagination.getTotalPages();
+```
+
+**Retorna:** number
+
+### getTotalLoaded()
+
+Retorna el total de items cargados (considerando scroll infinito).
+
+```javascript
+const loaded = search.pagination.getTotalLoaded();
+```
+
+**Retorna:** number
+
+### loadNextPage()
+
+Avanza a la siguiente página en modo scroll infinito.
+
+```javascript
+const nextPage = search.pagination.loadNextPage();
+```
+
+**Retorna:** number (nueva página actual)
+
+### hasMorePages()
+
+Verifica si hay más páginas disponibles.
+
+```javascript
+if (search.pagination.hasMorePages()) {
+    // Cargar más datos
+}
+```
+
+**Retorna:** boolean
 
 ## Scroll Infinito
 
@@ -1527,6 +1608,7 @@ La búsqueda ignora tildes y diacriticos automáticamente:
 | `searchLabel` | "Filtrar por Búsqueda" | Label del input (aria-label) |
 | `noResults` | "No se encontraron resultados" | Mensaje sin resultados |
 | `loading` | "Buscando..." | Mensaje de carga |
+| `pagination` | `"{{to}} de {{total}}"` | Template del contador. Variables: `{{from}}`, `{{to}}`, `{{total}}` |
 
 ### Configuración de Traducciones Personalizadas
 
@@ -1552,7 +1634,8 @@ static #defaultTranslations = {
     searchLabel: "Filtrar por Búsqueda",
     searchPlaceholder: "Ingrese palabra clave...",
     noResults: "No se encontraron resultados",
-    loading: "Buscando..."
+    loading: "Buscando...",
+    pagination: "{{to}} de {{total}}"
 };
 ```
 
@@ -1562,7 +1645,8 @@ static #defaultTranslations = {
 const search = new Search({
     element: '.app-search',
     translation: {
-        searchPlaceholder: 'Escribe la busqueda aqui.'
+        searchPlaceholder: 'Escribe la busqueda aqui.',
+        pagination: '{{from}} - {{to}} de {{total}}' // Formato personalizado
     },
     procesServer: true,
     fetch: {
@@ -1612,6 +1696,35 @@ const key = search.getCacheKey('venezuela', 1);
 
 // Limpiar caché por prefijo
 search.cache.clearCacheByPrefix('venezuela');
+```
+
+### Estadísticas de Caché
+
+El caché expone estadísticas de uso:
+
+```javascript
+console.log(search.cache.stats);
+// { hits: 5, misses: 3, evictions: 1 }
+```
+
+- `hits`: Consultas que encontraron un valor válido
+- `misses`: Consultas que no encontraron un valor válido
+- `evictions`: Inserciones que requirieron eliminar un valor por LRU
+
+### Otros Métodos de Caché
+
+```javascript
+// Obtener o cargar un valor (patrón getOrFetch)
+const result = await search.cache.getOrFetch(key, fetchFn, onMissFn);
+
+// Eliminar un elemento por clave
+search.cache.delete(key);
+
+// Obtener cantidad de elementos en caché
+const size = search.cache.size();
+
+// Limpiar todo el caché
+search.cache.clear();
 ```
 
 ### Invalidación de Caché
@@ -2004,15 +2117,16 @@ search.on('init', (data) => {
 });
 
 search.on('search', (data) => {
-    console.log('Búsqueda:', data.searchTerm);
+    console.log('Búsqueda:', data.searchTerm, 'Resultados:', data.totalResults);
 });
 
 search.on('pageChange', (data) => {
-    console.log('Página:', data.page);
+    console.log('Página:', data.page, '/', data.totalPages);
 });
 
 search.on('itemSelected', (data) => {
     console.log('Seleccionado:', data.item);
+    data.close(); // Cerrar resultados al seleccionar
 });
 
 search.init();
@@ -2170,6 +2284,27 @@ search.searching = async function(searchTerm, isEvent) {
 search.init();
 ```
 
+### Renderer APIs Públicas
+
+```javascript
+// Actualizar el contador con formato personalizado
+search.renderer.updateCounter({
+    from: 1,
+    to: 10,
+    total: 100,
+    textPagination: '{{from}} - {{to}} de {{total}}'
+});
+
+// Mostrar/ocultar resultados manualmente
+search.renderer.showResults();
+search.renderer.hideResults();
+search.renderer.toggleResults();
+search.renderer.hideResultsWithDelay(300); // Con delay
+
+// Destruir el renderizador (libera referencias del DOM)
+search.renderer.destroy();
+```
+
 ### Clases CSS Únicas
 
 ```javascript
@@ -2215,7 +2350,7 @@ Consulta la sección [Variables CSS Personalizables](#variables-css-personalizab
 
 ### Tipos Disponibles
 
-El componente incluye interfaces TypeScript completas:
+El componente incluye interfaces TypeScript completas con tipado genérico para eventos:
 
 ```typescript
 interface SearchParams {
@@ -2252,6 +2387,11 @@ interface FetchConfig {
     success?: (resp: any, instance: any) => void;
     error?: (err: any) => void;
 }
+
+interface SearchResult {
+    data: Record<string, any>[];
+    countPage?: number;
+}
 ```
 
 ### Interfaces TypeScript
@@ -2262,6 +2402,7 @@ interface TranslationCache {
     searchPlaceholder?: string;
     loading?: string;
     noResults?: string;
+    pagination?: string;
     [key: string]: string | undefined;
 }
 
@@ -2277,14 +2418,119 @@ interface PageChangeEventData {
     itemsOnPage: number;
     totalLoaded: number;
 }
+
+interface SortChangeEventData {
+    field: string;
+    order: 'asc' | 'desc';
+}
+
+interface ItemSelectedEventData {
+    item: HTMLElement;
+    index: number;
+    close: () => void;
+}
+
+interface ItemHighlightedEventData {
+    item: HTMLElement;
+    index: number;
+}
+
+interface DestroyEventData {
+    timestamp: string;
+}
+
+interface AppendItemsEventData {
+    items: any[];
+    content: HTMLElement;
+}
+
+interface SearchEventData {
+    searchTerm: string;
+    results: Record<string, any>;
+    totalResults: number;
+    timestamp: string;
+}
+
+interface ResultsClearedEventData {
+    previousSearchTerm: string;
+}
+
+interface ErrorData {
+    code: string;
+    message: string;
+    solution: string;
+    context: any;
+}
+
+interface PaginationRange {
+    from: number;
+    to: number;
+    total: number;
+}
 ```
+
+### SearchEventMap — Mapa Tipado de Eventos
+
+El componente usa un mapa centralizado que asocia cada nombre de evento con su tipo de datos:
+
+```typescript
+interface SearchEventMap {
+    init: SearchEventInit;
+    search: SearchEventData;
+    searchComplete: Omit<SearchEventData, 'timestamp'>;
+    resultsCleared: ResultsClearedEventData;
+    pageChange: PageChangeEventData;
+    sortChange: SortChangeEventData;
+    itemHighlighted: ItemHighlightedEventData;
+    itemSelected: ItemSelectedEventData;
+    appendItems: AppendItemsEventData;
+    destroy: DestroyEventData;
+    error: ErrorData;
+}
+```
+
+Este mapa se usa con el `EventEmitter<T>` genérico y el método `on()` de Search para obtener type-safety completo.
+
+### DomComponent — Enum de Orden de Renderizado
+
+```typescript
+enum DomComponent {
+    SEARCH = 's',      // Input de búsqueda
+    CONTENT = 'c',     // Contenedor content-pagination-items
+    ITEMS = 'i',       // Lista de resultados
+    PAGINATION = 'p'   // Contador/paginación
+}
+```
+
+Usado en el parámetro `dom` del constructor para controlar el orden de renderizado. Por defecto: `'scip'`.
+
+### EventEmitter Genérico
+
+El `EventEmitter` es genérico y acepta un mapa de eventos para type-safety:
+
+```typescript
+class EventEmitter<T extends Record<string, any>> {
+    on<K extends keyof T>(event: K, callback: (data: T[K]) => void): this;
+    off<K extends keyof T>(event: K, callback: Function): this;
+    emit<K extends keyof T>(event: K, data: T[K]): void;
+    emitAsync<K extends keyof T>(event: K, data: T[K]): Promise<void>;
+    once<K extends keyof T>(event: K, callback: (data: T[K]) => void): this;
+    removeAllListeners(eventName?: string): void;
+    listenerCount(eventName: string): number;
+    eventNames(): string[];
+    getEventList(): { event: string; listeners: number }[];
+}
+```
+
+La instancia de Search expone `events: EventEmitter<SearchEventMap>`, por lo que todos los eventos tienen type-checking automático.
 
 ### Autocompletado en IDEs
 
 Al usar TypeScript, obtienes:
 
-- Autocompletado de métodos y propiedades
+- Autocompletado de métodos y propiedades con tipos exactos
 - Type checking en tiempo de compilación
+- Inferencia automática del tipo de datos en callbacks de eventos
 - Documentación inline en el IDE
 - Refactorización segura
 - Detección de errores antes de ejecutar
@@ -2292,7 +2538,7 @@ Al usar TypeScript, obtienes:
 ### Ejemplos con TypeScript
 
 ```typescript
-import { Search, SearchParams, FetchConfig } from './src/js/app';
+import { Search, SearchParams, FetchConfig, SearchEventMap } from './src/js/app';
 
 const config: SearchParams = {
     element: '.app-search',
@@ -2319,14 +2565,18 @@ const config: SearchParams = {
 
 const search = new Search(config);
 
-search.on('appendItems', (data: any) => {
+// Los callbacks tienen tipo inferido automáticamente gracias a SearchEventMap
+search.on('appendItems', (data) => {
+    // data: AppendItemsEventData — inferido automáticamente
     const { content } = data;
     const item = content.children;
     console.log('Item content:', item[0].innerHTML);
 });
 
-search.on('itemSelected', (data: any) => {
+search.on('itemSelected', (data) => {
+    // data: ItemSelectedEventData — inferido automáticamente
     console.log('Item seleccionado:', data.item);
+    data.close(); // Cerrar resultados
 });
 
 search.init();
@@ -2655,7 +2905,60 @@ Para navegadores antiguos, usa un polyfill:
 
 ## Changelog
 
-### Versión 2.3.0 (Actual)
+### Versión 2.4.0 (Actual)
+
+**Añadido:**
+
+- `SearchEventMap` — Mapa tipado de eventos que asocia cada nombre de evento con su tipo de datos
+- `EventEmitter<T>` genérico con type-safety completo (`EventEmitter<SearchEventMap>`)
+- `DomComponent` enum para controlar el orden de renderizado (`SEARCH`, `CONTENT`, `ITEMS`, `PAGINATION`)
+- `SearchResult` interface `{ data: Record<string, any>[]; countPage?: number }`
+- `PaginationRange` interface `{ from: number; to: number; total: number }`
+- Método `Pagination.getRange()` para obtener el rango actual de items visibles
+- Método `Pagination.getTotalPages()` para obtener el total de páginas
+- Método `Pagination.getTotalLoaded()` para obtener items cargados (scroll infinito)
+- Método `Pagination.loadNextPage()` para avanzar a la siguiente página
+- Método `Pagination.hasMorePages()` para verificar si hay más páginas
+- Método `EventEmitter.emitAsync()` para emitir eventos de forma asíncrona
+- Método `EventEmitter.getEventList()` para obtener lista detallada de eventos y listeners
+- Método `SearchRenderer.destroy()` para limpiar timeouts y referencias del DOM
+- Método `SearchRenderer.toggleResults()` para toggle de visibilidad de resultados
+- Método `SearchRenderer.hideResultsWithDelay(delay?)` para ocultar con delay configurable
+- Parámetro `loadingText` en `showLoading(text)` para texto personalizado de carga
+- Propiedad `LRUCache.stats` — estadísticas de caché (`hits`, `misses`, `evictions`)
+- Método `LRUCache.getOrFetch(key, fetch, onMiss?)` para obtener o cargar valores
+- Método `LRUCache.delete(key)` para eliminar un elemento específico
+- Método `LRUCache.size()` para obtener la cantidad de elementos en caché
+- Clave `pagination` en traducciones para personalizar el formato del contador
+- `ItemSelectedEventData.close` — método para cerrar resultados desde el evento
+- `SortChangeEventData` interface para evento de ordenamiento
+- `ItemHighlightedEventData` interface para evento de navegación por teclado
+- `AppendItemsEventData` interface para evento de adición de items
+- `ResultsClearedEventData` interface para evento de limpieza de resultados
+- `ErrorData` interface completa con `code`, `message`, `solution`, `context`
+
+**Mejorado:**
+
+- `Search.on()` ahora tipado con genéricos: `on<K extends keyof SearchEventMap>(...)` — el tipo de datos del callback se infiere automáticamente
+- `SearchRenderer.updateCounter()` acepta objeto `{ from, to, total, textPagination? }` (antes parámetros separados)
+- `EventEmitter` constructor acepta `ErrorHandler` opcional para logging de errores en callbacks
+- Manejo de errores en callbacks de eventos: errores individuales no afectan a otros listeners
+- Tema por defecto cambiado a `"adaptative"` (antes `"default"`)
+- Traducción por defecto `pagination: "{{to}} de {{total}}"` para el contador
+
+**Documentación:**
+
+- Documentación completa de `SearchEventMap` en sección TypeScript
+- Documentación de `DomComponent` enum y su uso en el parámetro `dom`
+- Documentación del `EventEmitter<T>` genérico con todos sus métodos
+- Documentación de `LRUCache.stats`, `getOrFetch()`, `delete()`, `size()`
+- Documentación de nuevos métodos de paginación: `getRange()`, `getTotalPages()`, `loadNextPage()`, `hasMorePages()`
+- Documentación de renderer APIs: `destroy()`, `toggleResults()`, `hideResultsWithDelay()`, `updateCounter()`
+- Documentación de `emitAsync()` y `getEventList()` en EventEmitter
+- Documentación de la clave `pagination` en internacionalización
+- Todos los tipos de datos de eventos ahora referencian sus interfaces TypeScript
+
+### Versión 2.3.0
 
 **Añadido:**
 

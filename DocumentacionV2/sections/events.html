@@ -1,6 +1,6 @@
 <h1>Eventos</h1>
 
-<p>El componente emite eventos personalizados que permiten reaccionar a diferentes acciones del usuario y del sistema.</p>
+<p>El componente emite eventos personalizados que permiten reaccionar a diferentes acciones del usuario y del sistema. Todos los eventos están tipados mediante <code>SearchEventMap</code> para TypeScript.</p>
 
 <h2>Uso básico</h2>
 
@@ -11,7 +11,12 @@
 
 search.on('search', (data) => {
     console.log('Término de búsqueda:', data.searchTerm);
-    console.log('Resultados encontrados:', data.results.length);
+    console.log('Resultados encontrados:', data.totalResults);
+});
+
+search.on('itemSelected', (data) => {
+    console.log('Item:', data.item);
+    data.close(); // Cierra el panel de resultados
 });</code></pre>
 
 <h2>Lista de eventos</h2>
@@ -33,12 +38,13 @@ interface SearchEventInit {
 
 <h3>search</h3>
 
-<p>Se emite después de cada búsqueda ejecutada.</p>
+<p>Se emite después de cada búsqueda ejecutada (solo si fue iniciada por evento del usuario).</p>
 
 <pre data-lang="typescript"><code>interface SearchEventData {
     searchTerm: string;
-    results: Record&lt;string, any&gt;[];
-    count: number;
+    results: Record&lt;string, any&gt;;
+    totalResults: number;
+    timestamp: string; // ISO date
 }</code></pre>
 
 <h3>pageChange</h3>
@@ -120,11 +126,11 @@ interface SearchEventInit {
 
 <h3>appendItems</h3>
 
-<p>Se emite cuando se añaden nuevos items al DOM (scroll infinito).</p>
+<p>Se emite cuando se añaden nuevos items al DOM.</p>
 
 <pre data-lang="typescript"><code>interface AppendItemsEventData {
-    items: Record&lt;string, any&gt;[];
-    isFirstPage: boolean;
+    items: any[];
+    content: HTMLElement; // Contenedor de items
 }</code></pre>
 
 <h3>destroy</h3>
@@ -139,13 +145,22 @@ interface SearchEventInit {
 
 <p>Se emite cuando ocurre un error durante la búsqueda o inicialización.</p>
 
-<pre data-lang="javascript"><code>search.on('error', (error) => {
-    console.error('Error en el componente:', error);
+<pre data-lang="typescript"><code>interface ErrorData {
+    code: string;      // Código de error (ej: "SEARCH_020")
+    message: string;   // Mensaje descriptivo
+    solution: string;  // Guía para resolver el error
+    context: any;      // Contexto adicional del error
+}</code></pre>
+
+<pre data-lang="javascript"><code>search.on('error', (data) => {
+    console.error('Código:', data.code);
+    console.error('Mensaje:', data.message);
+    console.error('Solución:', data.solution);
 });</code></pre>
 
 <h2>Remover listeners</h2>
 
-<pre data-lang="javascript"><code>// Remover un listener específico
+<pre data-lang="javascript"><code>// Remover un listener específico por referencia
 const callback = (data) => console.log(data);
 search.on('search', callback);
 search.events.off('search', callback);
@@ -153,7 +168,7 @@ search.events.off('search', callback);
 // Remover todos los listeners de un evento
 search.events.removeAllListeners('search');
 
-// Remover todos los listeners
+// Remover todos los listeners de todos los eventos
 search.events.removeAllListeners();</code></pre>
 
 <h2>Una sola vez</h2>
@@ -161,4 +176,52 @@ search.events.removeAllListeners();</code></pre>
 <pre data-lang="javascript"><code>// Se ejecuta solo la primera vez que se emite
 search.events.once('init', (data) => {
     console.log('Inicialización (solo una vez):', data);
+});</code></pre>
+
+<h2>Eventos asíncronos</h2>
+
+<pre data-lang="javascript"><code>// Emitir evento de forma asíncrona
+await search.events.emitAsync('search', {
+    searchTerm: 'laptop',
+    results: data,
+    totalResults: 10,
+    timestamp: new Date().toISOString()
+});
+// Promise.allSettled internamente — errores individuales no bloquean</code></pre>
+
+<h2>Información de listeners</h2>
+
+<pre data-lang="javascript"><code>// Cantidad de listeners de un evento
+const count = search.events.listenerCount('search');
+
+// Nombres de todos los eventos registrados
+const names = search.events.eventNames();
+
+// Lista detallada de eventos con cantidad de listeners
+const list = search.events.getEventList();
+// [{ event: 'search', listeners: 2 }, { event: 'init', listeners: 1 }]</code></pre>
+
+<h2>SearchEventMap (TypeScript)</h2>
+
+<p>Todos los eventos están tipados mediante la interfaz <code>SearchEventMap</code>, que asocia cada nombre de evento con su tipo de datos:</p>
+
+<pre data-lang="typescript"><code>interface SearchEventMap {
+    init: SearchEventInit;
+    search: SearchEventData;
+    searchComplete: Omit&lt;SearchEventData, 'timestamp'&gt;;
+    resultsCleared: ResultsClearedEventData;
+    pageChange: PageChangeEventData;
+    sortChange: SortChangeEventData;
+    itemHighlighted: ItemHighlightedEventData;
+    itemSelected: ItemSelectedEventData;
+    appendItems: AppendItemsEventData;
+    destroy: DestroyEventData;
+    error: ErrorData;
+}
+
+// El tipo del callback se infiere automáticamente:
+search.on('itemSelected', (data) => {
+    // data: ItemSelectedEventData (inferido)
+    console.log(data.item, data.index);
+    data.close();
 });</code></pre>

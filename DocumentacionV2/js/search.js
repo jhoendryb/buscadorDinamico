@@ -61,7 +61,7 @@ const SEARCH_DATA = [
     { title: 'Idioma por defecto', route: '#/i18n', segment: 'idioma-por-defecto', category: 'Guías', badge: 'success', description: 'Traducciones predeterminadas en español', keywords: 'idioma defecto español spanish default' },
     { title: 'Personalizar traducciones', route: '#/i18n', segment: 'personalizar-traducciones', category: 'Guías', badge: 'success', description: 'Sobrescribir cadenas con el parámetro translation', keywords: 'personalizar traducciones custom translation' },
     { title: 'Soporte multiidioma completo', route: '#/i18n', segment: 'soporte-multiidioma-completo', category: 'Guías', badge: 'success', description: 'Ejemplo con múltiples idiomas y selección dinámica', keywords: 'multiidioma multiple languages soporte' },
-    { title: 'Referencia de claves', route: '#/i18n', segment: 'referencia-de-claves', category: 'Guías', badge: 'success', description: 'Tabla con las 4 claves de traducción disponibles', keywords: 'claves keys referencia searchPlaceholder noResults' },
+    { title: 'Referencia de claves', route: '#/i18n', segment: 'referencia-de-claves', category: 'Guías', badge: 'success', description: '5 claves: searchPlaceholder, searchLabel, noResults, loading, pagination', keywords: 'claves keys referencia searchPlaceholder noResults pagination' },
     { title: 'Cambiar idioma dinámicamente', route: '#/i18n', segment: 'cambiar-idioma-dinamicamente', category: 'Guías', badge: 'success', description: 'Recrear instancia para cambiar idioma en runtime', keywords: 'cambiar idioma dinamico runtime ejecucion' },
 
     // ── Caché ──────────────────────────────────────────────────────
@@ -71,6 +71,8 @@ const SEARCH_DATA = [
     { title: 'Cómo funciona', route: '#/cache', segment: 'como-funciona', category: 'Guías', badge: 'success', description: 'Algoritmo LRU y flujo de datos en caché', keywords: 'como funciona algoritmo lru flujo' },
     { title: 'Generación de claves', route: '#/cache', segment: 'generacion-de-claves', category: 'Guías', badge: 'success', description: 'Claves generadas automáticamente por término y página', keywords: 'claves key generate cacheKey' },
     { title: 'Limpiar caché', route: '#/cache', segment: 'limpiar-cache', category: 'Guías', badge: 'success', description: 'Métodos clear, delete y clearCacheByPrefix', keywords: 'limpiar borrar clear delete reset' },
+    { title: 'Estadísticas de caché', route: '#/cache', segment: 'estadisticas-de-cache', category: 'Guías', badge: 'success', description: 'stats.hits, stats.misses, stats.evictions', keywords: 'estadisticas stats hits misses evictions' },
+    { title: 'Patrón getOrFetch', route: '#/cache', segment: 'patron-getorfetch', category: 'Guías', badge: 'success', description: 'Obtener o cargar valores con cache.getOrFetch()', keywords: 'getOrFetch cache load fetch pattern' },
     { title: 'Uso con datos del servidor', route: '#/cache', segment: 'uso-con-datos-del-servidor', category: 'Guías', badge: 'success', description: 'Caché con búsquedas remotas para reducir peticiones HTTP', keywords: 'servidor http peticiones remote fetch' },
 
     // ── Temas CSS ──────────────────────────────────────────────────
@@ -100,6 +102,16 @@ const SEARCH_DATA = [
     { title: 'getCacheKey()', route: '#/api', segment: 'getcachekey-searchterm-page', category: 'Referencia', badge: 'warning', description: 'Genera clave de caché para búsqueda y página', keywords: 'getcachekey cache key clave' },
     { title: 'setupKeyboardNavigation()', route: '#/api', segment: 'setupkeyboardnavigation', category: 'Referencia', badge: 'warning', description: 'Habilita navegación con flechas y Enter', keywords: 'keyboard teclado flechas navigation' },
     { title: 'destroy()', route: '#/api', segment: 'destroy', category: 'Referencia', badge: 'warning', description: 'Destruye instancia y limpia todos los recursos', keywords: 'destroy destruir limpiar cleanup dispose' },
+    { title: 'Métodos del Renderer', route: '#/api', segment: 'metodos-del-renderer', category: 'Referencia', badge: 'warning', description: 'updateCounter, showResults, hideResults, toggleResults, destroy', keywords: 'renderer updateCounter showResults hideResults toggle' },
+    { title: 'renderer.updateCounter()', route: '#/api', segment: 'renderer-updatecounter', category: 'Referencia', badge: 'warning', description: 'Actualiza contador con { from, to, total, textPagination? }', keywords: 'updateCounter contador from to total textPagination' },
+    { title: 'renderer.showResults/hideResults/toggleResults', route: '#/api', segment: 'renderer-showresults-hideresults-toggleresults', category: 'Referencia', badge: 'warning', description: 'Control de visibilidad del panel de resultados', keywords: 'showResults hideResults toggleResults visibilidad' },
+    { title: 'renderer.destroy()', route: '#/api', segment: 'renderer-destroy', category: 'Referencia', badge: 'warning', description: 'Limpia timeouts y referencias del DOM', keywords: 'renderer destroy cleanup timeouts DOM' },
+    { title: 'Métodos de Paginación', route: '#/api', segment: 'metodos-de-paginacion', category: 'Referencia', badge: 'warning', description: 'getRange, getTotalPages, getTotalLoaded, loadNextPage, hasMorePages', keywords: 'paginacion getRange getTotalPages loadNextPage hasMorePages' },
+    { title: 'pagination.getRange()', route: '#/api', segment: 'pagination-getrange', category: 'Referencia', badge: 'warning', description: 'Rango actual: { from, to, total }', keywords: 'getRange from to total rango' },
+    { title: 'pagination.getTotalPages()', route: '#/api', segment: 'pagination-gettotalpages', category: 'Referencia', badge: 'warning', description: 'Total de páginas disponibles', keywords: 'getTotalPages total paginas count' },
+    { title: 'pagination.getTotalLoaded()', route: '#/api', segment: 'pagination-gettotalloaded', category: 'Referencia', badge: 'warning', description: 'Items cargados con scroll infinito', keywords: 'getTotalLoaded items cargados loaded' },
+    { title: 'pagination.loadNextPage()', route: '#/api', segment: 'pagination-loadnextpage', category: 'Referencia', badge: 'warning', description: 'Avanza a la siguiente página', keywords: 'loadNextPage next page avanzar siguiente' },
+    { title: 'pagination.hasMorePages()', route: '#/api', segment: 'pagination-hasmorepages', category: 'Referencia', badge: 'warning', description: 'Verifica si hay más páginas', keywords: 'hasMorePages has more pages verificar' },
     { title: 'Propiedades públicas', route: '#/api', segment: 'propiedades-publicas', category: 'Referencia', badge: 'warning', description: 'element, searchTerm, data, theme, pagination, events, cache, renderer', keywords: 'propiedades publicas properties attributes' },
     { title: 'Encadenamiento', route: '#/api', segment: 'encadenamiento', category: 'Referencia', badge: 'warning', description: 'Métodos que retornan this para chaining', keywords: 'encadenamiento chaining methods fluent' },
 
@@ -120,6 +132,9 @@ const SEARCH_DATA = [
     { title: 'Evento error', route: '#/events', segment: 'error', category: 'Referencia', badge: 'warning', description: 'Emite cuando ocurre un error', keywords: 'error evento excepcion fallo' },
     { title: 'Remover listeners', route: '#/events', segment: 'remover-listeners', category: 'Referencia', badge: 'warning', description: 'Métodos off() y removeAllListeners()', keywords: 'remover off remove listener unsubscribe' },
     { title: 'Una sola vez', route: '#/events', segment: 'una-sola-vez', category: 'Referencia', badge: 'warning', description: 'Registrarse una sola vez con events.once()', keywords: 'once una sola vez primer vez' },
+    { title: 'Eventos asíncronos', route: '#/events', segment: 'eventos-asincronos', category: 'Referencia', badge: 'warning', description: 'Emitir eventos con emitAsync() y Promise.allSettled', keywords: 'eventos asincronos async emitAsync' },
+    { title: 'Información de listeners', route: '#/events', segment: 'informacion-de-listeners', category: 'Referencia', badge: 'warning', description: 'listenerCount, eventNames, getEventList', keywords: 'listenerCount eventNames getEventList info listeners' },
+    { title: 'SearchEventMap (TypeScript)', route: '#/events', segment: 'searcheventmap-typescript', category: 'Referencia', badge: 'warning', description: 'Mapa tipado de eventos para type-safety', keywords: 'SearchEventMap typed events type safety' },
 
     // ── Errores ────────────────────────────────────────────────────
     { title: 'Errores', route: '#/errors', segment: '', category: 'Referencia', badge: 'warning', description: 'Sistema centralizado de gestión de errores', keywords: 'errors error handling gestion excepciones' },
@@ -138,9 +153,14 @@ const SEARCH_DATA = [
     { title: 'FetchConfig', route: '#/typescript', segment: 'interfaz-fetchconfig', category: 'Referencia', badge: 'warning', description: 'Configuración de peticiones HTTP', keywords: 'FetchConfig interfaz fetch http' },
     { title: 'TranslationCache', route: '#/typescript', segment: 'interfaz-translationcache', category: 'Referencia', badge: 'warning', description: 'Estructura de traducciones', keywords: 'TranslationCache traducciones idiomas' },
     { title: 'Eventos tipados', route: '#/typescript', segment: 'eventos-tipados', category: 'Referencia', badge: 'warning', description: 'SearchEventInit, PageChangeEventData, etc.', keywords: 'eventos tipados typed events data' },
-    { title: 'Uso con tipos', route: '#/typescript', segment: 'uso-con-tipos', category: 'Referencia', badge: 'warning', description: 'Ejemplo completo con interfaces y type assertions', keywords: 'uso tipos example tipos interfaces' },
+    { title: 'SearchEventMap', route: '#/typescript', segment: 'searcheventmap-mapa-tipado-de-eventos', category: 'Referencia', badge: 'warning', description: 'Mapa tipado que asocia cada evento con su tipo de datos', keywords: 'SearchEventMap typed event map types' },
+    { title: 'Tipos de datos de eventos', route: '#/typescript', segment: 'tipos-de-datos-de-eventos', category: 'Referencia', badge: 'warning', description: 'SearchEventData, ErrorData, AppendItemsEventData y más', keywords: 'tipos datos eventos interfaces ErrorData SearchEventData' },
+    { title: 'DomComponent enum', route: '#/typescript', segment: 'domcomponent-enum-de-orden-de-renderizado', category: 'Referencia', badge: 'warning', description: 'Enum para orden de renderizado: SEARCH, CONTENT, ITEMS, PAGINATION', keywords: 'DomComponent enum renderizado orden dom' },
+    { title: 'EventEmitter Genérico', route: '#/typescript', segment: 'eventemitter-generico', category: 'Referencia', badge: 'warning', description: 'EventEmitter<T> con emitAsync, getEventList y type-safety', keywords: 'EventEmitter generic emitAsync getEventList' },
+    { title: 'PaginationRange', route: '#/typescript', segment: 'paginationrange', category: 'Referencia', badge: 'warning', description: 'Interface { from, to, total } para el rango de paginación', keywords: 'PaginationRange rango paginacion from to total' },
+    { title: 'Uso con tipos', route: '#/typescript', segment: 'uso-con-tipos', category: 'Referencia', badge: 'warning', description: 'Ejemplo completo con SearchEventMap y type inference', keywords: 'uso tipos example tipo interfaces type inference' },
     { title: 'Generación de tipos', route: '#/typescript', segment: 'generacion-de-tipos', category: 'Referencia', badge: 'warning', description: 'Archivos .d.ts generados por el build', keywords: 'generacion tipos declarations d.ts build' },
-    { title: 'Type narrowing', route: '#/typescript', segment: 'type-narrowing', category: 'Referencia', badge: 'warning', description: 'Type assertion en eventos y callbacks', keywords: 'type narrowing assertion cast' },
+    { title: 'Type narrowing', route: '#/typescript', segment: 'type-narrowing', category: 'Referencia', badge: 'warning', description: 'Type inference automática desde SearchEventMap', keywords: 'type narrowing inference auto' },
 
     // ── Ejemplos ───────────────────────────────────────────────────
     { title: 'Ejemplos', route: '#/examples', segment: '', category: 'Recursos', badge: 'info', description: 'Ejemplos prácticos de uso en diferentes escenarios', keywords: 'examples ejemplos demo usage casos uso' },
@@ -160,10 +180,8 @@ const SEARCH_DATA = [
 
     // ── Changelog ──────────────────────────────────────────────────
     { title: 'Changelog', route: '#/changelog', segment: '', category: 'Recursos', badge: 'info', description: 'Historial de versiones y cambios', keywords: 'changelog versiones releases history cambios' },
-    { title: 'v2.3.0', route: '#/changelog', segment: 'v2-3-0-latest', category: 'Recursos', badge: 'info', description: 'Última versión: responseAdapter, clear(), eventos nuevos', keywords: 'v2.3.0 latest version release' },
-    { title: 'Añadido', route: '#/changelog', segment: 'anadido', category: 'Recursos', badge: 'info', description: 'Nuevas funcionalidades en v2.3.0', keywords: 'anadido nuevo features added' },
-    { title: 'Mejorado', route: '#/changelog', segment: 'mejorado', category: 'Recursos', badge: 'info', description: 'Mejoras en v2.3.0', keywords: 'mejorado improved mejoras' },
-    { title: 'Corregido', route: '#/changelog', segment: 'corregido', category: 'Recursos', badge: 'info', description: 'Correcciones de bugs en v2.3.0', keywords: 'corregido fix bug fixes' },
+    { title: 'v2.4.0', route: '#/changelog', segment: 'v2-4-0-latest', category: 'Recursos', badge: 'info', description: 'SearchEventMap, DomComponent, EventEmitter genérico, nuevas APIs', keywords: 'v2.4.0 latest version release SearchEventMap DomComponent' },
+    { title: 'v2.3.0', route: '#/changelog', segment: 'v2-3-0', category: 'Recursos', badge: 'info', description: 'responseAdapter, clear(), resultados anidados, Unicode', keywords: 'v2.3.0 version release responseAdapter clear nested' },
     { title: 'v2.2.0', route: '#/changelog', segment: 'v2-2-0', category: 'Recursos', badge: 'info', description: 'Resaltado de texto, refactorizaciones', keywords: 'v2.2.0 version release highlight' },
     { title: 'Características iniciales', route: '#/changelog', segment: 'caracteristicas-iniciales', category: 'Recursos', badge: 'info', description: 'Funcionalidades principales del componente', keywords: 'caracteristicas iniciales features' },
     { title: 'Temas CSS (Changelog)', route: '#/changelog', segment: 'temas-css', category: 'Recursos', badge: 'info', description: 'Historial de temas CSS', keywords: 'temas css themes changelog' },

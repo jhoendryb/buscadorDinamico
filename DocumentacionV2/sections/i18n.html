@@ -7,10 +7,11 @@
 <p>Por defecto, el componente usa español. Las traducciones predeterminadas son:</p>
 
 <pre data-lang="typescript"><code>const DEFAULT_TRANSLATIONS = {
-    searchPlaceholder: 'Escriba para buscar...',
-    searchLabel: 'Campo de búsqueda',
+    searchPlaceholder: 'Ingrese palabra clave...',
+    searchLabel: 'Filtrar por Búsqueda',
     noResults: 'No se encontraron resultados',
-    loading: 'Cargando...'
+    loading: 'Buscando...',
+    pagination: '{{to}} de {{total}}'
 };</code></pre>
 
 <h2>Personalizar traducciones</h2>
@@ -92,8 +93,19 @@ const search = new BuscadorDinamico.Search({
             <td>Mensaje de carga</td>
             <td>Indicador de carga</td>
         </tr>
+        <tr>
+            <td><code>pagination</code></td>
+            <td>Template del contador: <code>{{from}}</code>, <code>{{to}}</code>, <code>{{total}}</code></td>
+            <td>Contador de registros</td>
+        </tr>
     </tbody>
 </table>
+
+<p>La clave <code>pagination</code> acepta un template con las variables <code>{{from}}</code>, <code>{{to}}</code> y <code>{{total}}</code>:</p>
+
+<pre data-lang="javascript"><code>translation: {
+    pagination: '{{from}} - {{to}} de {{total}}'  // "1 - 10 de 100"
+}</code></pre>
 
 <h2>Cambiar idioma dinámicamente</h2>
 
