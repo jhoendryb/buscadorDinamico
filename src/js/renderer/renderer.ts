@@ -320,18 +320,18 @@ export class SearchRenderer {
 
         const counter = this.body.counterItems;
 
-        console.log('pagination.textPagination', pagination.textPagination);
-        console.log('pagination', pagination);
-
         if (!pagination.textPagination) {
             pagination.textPagination = '{{to}} de {{total}}';
         }
 
-        if (counter && pagination.textPagination) {
-            counter.innerHTML = pagination.textPagination
-                .replace('{{from}}', pagination.from.toString())
-                .replace('{{to}}', pagination.to.toString())
-                .replace('{{total}}', pagination.total.toString());
+        const { textPagination, ...propertyCounter } = pagination;
+
+        if (counter && textPagination) {
+            let finalText = textPagination;
+            Object.entries(propertyCounter).forEach(([key, value]) => {
+                finalText = finalText.replace(`{{${key}}}`, String(value));
+            });
+            counter.textContent = finalText;
         }
     }
     /**
