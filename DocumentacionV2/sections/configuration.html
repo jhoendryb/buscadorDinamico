@@ -11,7 +11,7 @@
     itemsPerPage: 10,             // Items por página
     debounceTime: 500,            // Delay de búsqueda en ms
     keyboardEnabled: false,       // Navegación por teclado
-    cacheEnabled: false,          // Habilitar caché LRU
+    cacheEnabled: false,          // Habilitar caché LRU (Least Recently Used)
     zIndex: 1000,                 // Z-index del componente
     dom: 'scip', // Orden: s=search, c=content, i=items, p=pagination
     developmentMode: false,       // Modo desarrollo (logs detallados)
@@ -71,7 +71,7 @@
             <td><code>cacheEnabled</code></td>
             <td><code>boolean</code></td>
             <td><code>false</code></td>
-            <td>Habilitar caché LRU de resultados</td>
+            <td>Habilitar caché LRU (Least Recently Used) de resultados</td>
         </tr>
         <tr>
             <td><code>cacheMaxSize</code></td>

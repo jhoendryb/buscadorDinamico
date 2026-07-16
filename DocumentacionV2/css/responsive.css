@@ -1,6 +1,6 @@
 @media (max-width: 1024px) {
     .doc-content {
-        padding: var(--doc-spacing-2xl) var(--doc-spacing-xl);
+        padding: var(--doc-spacing-2xl) var(--doc-spacing-xl) var(--doc-spacing-lg) var(--doc-spacing-xl);
     }
 }
 
@@ -47,7 +47,7 @@
     }
 
     .doc-content {
-        padding: var(--doc-spacing-xl) var(--doc-spacing-md);
+        padding: var(--doc-spacing-xl) var(--doc-spacing-md) var(--doc-spacing-md) var(--doc-spacing-md);
         grid-area: content;
     }
 
@@ -90,7 +90,7 @@
 
 @media (max-width: 480px) {
     .doc-content {
-        padding: var(--doc-spacing-lg) var(--doc-spacing-md);
+        padding: var(--doc-spacing-lg) var(--doc-spacing-md) var(--doc-spacing-sm) var(--doc-spacing-md);
     }
 
     .doc-content h1 {
