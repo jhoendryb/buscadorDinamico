@@ -51,6 +51,8 @@ class Search {
     private boundClickHandler: (e: Event) => void;
     private currentDrawId: number = 0;
     private isLoadingMore: boolean = false;
+    private _destroyed: boolean = false;
+    private abortController: AbortController | null = null;
     /**
      * Instancia que almacena las traducciones predeterminadas.
      * @type {Types.TranslationCache}
@@ -113,7 +115,7 @@ class Search {
             this.cache = new LRUCache<Types.SearchResult>(this.cacheMaxSize, this.cacheTtlSeconds);
             this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
             this.pagination.setCountFunction(() => {
-                return this.procesServer ? this._ajaxResponse.success?.countPage || 0 : this._data?.length || 0;
+                return (this.procesServer ? this._ajaxResponse.success?.countPage : this._data?.length) || 0;
             });
             this.pagination.setDataItemsFunction((): Record<string, any>[] => {
                 return this._data || [];
@@ -204,6 +206,16 @@ class Search {
         const regex = new RegExp(`(${escaped})`, 'gi');
         return text.replace(regex, `<span class="${['search-highlight', this.highlightClass].filter(cls => cls).join(' ')}">$1</span>`);
     }
+    async #executeSearch(searchTerm: string, showLoading: boolean = false): Promise<Types.SearchResult | null> {
+        this.abortController?.abort();
+        this.abortController = new AbortController();
+
+        if (this.procesServer) {
+            return await this.#fetchFromServer(searchTerm, this.pagination.getCurrentPage(), showLoading);
+        }
+        const filtered = this.searchingLocal.search(searchTerm, this.data, this.sortBy, this.sortOrder);
+        return { data: filtered };
+    }
     /**
      * Ejecuta una búsqueda y renderiza los resultados.
      * @param {string} [searchTerm] - Término de búsqueda (usa this.searchTerm si no se proporciona)
@@ -211,6 +223,7 @@ class Search {
      * @returns {Promise<Search>} Instancia actual para encadenamiento
      */
     async draw(searchTerm: string = this.searchTerm, isEvent: boolean = false): Promise<Search> {
+        if (this._destroyed) return this;
         const drawId = ++this.currentDrawId;
         if (searchTerm !== this.searchTerm && this.renderer.body.renderItems) {
             this.renderer.body.renderItems.scrollTop = 0;
@@ -221,31 +234,18 @@ class Search {
             this.selectedIndex = -1;
         }
 
-        let searchResult: Types.SearchResult | null = null;
-
-        if (this.procesServer) {
-            const cacheKey = this.getCacheKey(searchTerm, this.pagination.getCurrentPage());
-            const loadFetch = async () => {
-                return await this.searchingServer.search(
-                    searchTerm,
-                    this.fetch as Types.FetchConfig,
-                    this.pagination.getCurrentPage(),
-                    this.itemsPerPage
-                );
-            };
-            searchResult = this.cacheEnabled
-                ? await this.cache.getOrFetch(cacheKey, loadFetch, () => this.renderer.showLoading(this.t.loading || ''))
-                : await loadFetch();
-            this._ajaxResponse.success = { countPage: searchResult?.countPage };
-        } else {
-            const filtered = this.searchingLocal.search(
-                searchTerm,
-                this.data,
-                this.sortBy,
-                this.sortOrder
-            );
-            searchResult = { data: filtered };
-        }
+        const searchResult = await this.#executeSearch(searchTerm, true);
+        // if (this.procesServer) {
+        //     searchResult = await this.#fetchFromServer(searchTerm, this.pagination.getCurrentPage(), true);
+        // } else {
+        //     const filtered = this.searchingLocal.search(
+        //         searchTerm,
+        //         this.data,
+        //         this.sortBy,
+        //         this.sortOrder
+        //     );
+        //     searchResult = { data: filtered };
+        // }
 
         if (drawId !== this.currentDrawId) return this;
 
@@ -276,21 +276,7 @@ class Search {
     processInfiniteScroll(): void {
         if (!this.pagination) return;
 
-        const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
-
-        this.renderer.appendItems(
-            next,
-            this.template,
-            this.t.noResults,
-            this.events,
-            (this.pagination.getCurrentPage() === 1),
-            this.#highlightText.bind(this)
-        );
-
-        const range = this.pagination.getRange();
-        this.renderer.updateCounter({ ...range, textPagination: this.t.pagination });
-
-        this.#setupScrollDetection();
+        this.#renderCurrentPage(this.pagination.getCurrentPage() === 1);
     }
     /**
      * Configura el detector de scroll al final del contenedor.
@@ -348,39 +334,12 @@ class Search {
 
         try {
             const nextPage = this.pagination.loadNextPage();
-
             if (this.procesServer) {
                 let searchResult: Types.SearchResult | null = null;
-                const cacheKey = this.getCacheKey(this.searchTerm, nextPage);
-                const loadFetch = async () => await this.searchingServer.search(
-                    this.searchTerm,
-                    this.fetch as Types.FetchConfig,
-                    this.pagination.getCurrentPage(),
-                    this.itemsPerPage
-                );
-                searchResult = this.cacheEnabled
-                    ? await this.cache.getOrFetch(cacheKey, loadFetch)
-                    : await loadFetch();
+                searchResult = await this.#fetchFromServer(this.searchTerm, nextPage);
                 this._data = searchResult?.data || [];
-                this._ajaxResponse.success = { countPage: searchResult?.countPage };
             }
-
-            const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
-            this.renderer.appendItems(
-                next,
-                this.template,
-                this.t.noResults,
-                this.events,
-                (this.pagination.getCurrentPage() === 1),
-                this.#highlightText.bind(this)
-            );
-
-            this.#setupScrollDetection();
-
-            // Actualizar contador
-            const range = this.pagination.getRange();
-            this.renderer.updateCounter({ ...range, textPagination: this.t.pagination });
-
+            this.#renderCurrentPage(this.pagination.getCurrentPage() === 1);
             return this;
         } finally {
             this.isLoadingMore = false;
@@ -404,6 +363,37 @@ class Search {
     #getUniqueClassName(baseClass: string): string {
         const parentSelector = this.element.replace(/^[.#]/, '');
         return `${baseClass}-${parentSelector}`;
+    }
+    async #fetchFromServer(searchTerm: string, page: number, showLoading: boolean = false): Promise<Types.SearchResult | null> {
+        const cacheKey = this.getCacheKey(searchTerm, page);
+        const loadFetch = async () => await this.searchingServer.search(
+            searchTerm,
+            this.fetch as Types.FetchConfig,
+            page,
+            this.itemsPerPage,
+            this.abortController?.signal
+        );
+        const result = this.cacheEnabled
+            ? await this.cache.getOrFetch(cacheKey, loadFetch, (() => showLoading ? this.renderer.showLoading(this.t.loading || '') : undefined))
+            : await loadFetch();
+        if (result) {
+            this._ajaxResponse.success = { countPage: result.countPage };
+        }
+        return result;
+    }
+    #renderCurrentPage(firstLoad: boolean = false): void {
+        const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
+        this.renderer.appendItems(
+            next,
+            this.template,
+            this.t.noResults,
+            this.events,
+            firstLoad,
+            this.#highlightText.bind(this)
+        );
+        const range = this.pagination.getRange();
+        this.renderer.updateCounter({ ...range, textPagination: this.t.pagination });
+        this.#setupScrollDetection();
     }
     /**
      * Registra un listener para un evento.
@@ -430,6 +420,7 @@ class Search {
      * @returns {Search} - La instancia actual de {@link Search} para encadenar métodos.
      */
     sort(field: string, order: 'asc' | 'desc' = 'asc'): Search {
+        if (this._destroyed) return this;
         this.sortBy = field;
         this.sortOrder = order;
         if (this.procesServer) {
@@ -451,6 +442,7 @@ class Search {
      * @returns {Search} - La instancia actual de {@link Search} para encadenar métodos.
      */
     clearSort(): Search {
+        if (this._destroyed) return this;
         this.sortBy = null;
         this.sortOrder = 'asc';
 
@@ -476,6 +468,8 @@ class Search {
      * @return {Search} - The current instance of {@link Search} for chaining methods.
      */
     setupKeyboardNavigation(): Search {
+        if (this._destroyed) return this;
+
         if (!this.keyboardEnabled) return this;
 
         const content = this.renderer.body.content;
@@ -567,6 +561,7 @@ class Search {
         this.events.emit('itemSelected', { item, index: this.selectedIndex, close: () => this.renderer.hideResults() } as Types.ItemSelectedEventData);
     }
     clear(): Search {
+        if (this._destroyed) return this;
         this.searchTerm = "";
         if (this.renderer.body.inputSearch) {
             (this.renderer.body.inputSearch as HTMLInputElement).value = "";
@@ -575,6 +570,8 @@ class Search {
             this.renderer.body.renderItems.innerHTML = "";
         }
         this.pagination.goToPage(1);
+        this.sortBy = null;
+        this.sortOrder = Constants.SORT_ORDER;
         this.cache.clear();
         this.selectedIndex = Constants.NO_SELECTION;
         return this;
@@ -592,6 +589,7 @@ class Search {
      * search.destroy();
      */
     destroy(): void {
+        this._destroyed = true;
         this.events.emit('destroy', { timestamp: new Date().toISOString() } as Types.DestroyEventData);
 
         this.renderer.body.content.removeEventListener('keydown', this.boundKeydownHandler);

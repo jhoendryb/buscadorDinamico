@@ -26,7 +26,8 @@ export class SearchingServer {
         searchTerm: string,
         fetchConfig: Types.FetchConfig,
         page: number,
-        itemsPerPage: number
+        itemsPerPage: number,
+        userSignal?: AbortSignal
     ): Promise<Types.SearchResult> {
         fetchConfig.body = {
             itemsPerPage,
@@ -34,7 +35,7 @@ export class SearchingServer {
             page,
             searchTerm
         };
-        const response = await this.executeFetch(fetchConfig);
+        const response = await this.executeFetch(fetchConfig, userSignal);
         const adapter = this.responseAdapter;
         const result = adapter ? adapter(response) : response;
         return {
@@ -118,12 +119,16 @@ export class SearchingServer {
      * @returns {Promise<any>} - Datos JSON recibidos del servidor
      * @throws {SearchError} - Si se produce un error de red, timeout o si el formato de datos recibido es inválido
      */
-    async executeFetch(config: Types.FetchConfig): Promise<any> {
+    async executeFetch(config: Types.FetchConfig, userSignal?: AbortSignal): Promise<any> {
         try {
             this.#validateFetchConfig(config);
 
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), config.timeout || this.defaultTimeout);
+
+            const combinedSignal = userSignal
+                ? AbortSignal.any([userSignal, controller.signal])
+                : controller.signal;
 
             const headers = this.#configureHeaders(config);
             const body = this.#configureBody(config, headers);
@@ -132,7 +137,7 @@ export class SearchingServer {
                 method: config.method,
                 headers,
                 body,
-                signal: controller.signal
+                signal: combinedSignal
             });
 
             clearTimeout(timeoutId);
