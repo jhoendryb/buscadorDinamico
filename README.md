@@ -130,6 +130,49 @@ El build genera dos versiones en `dist/`:
 
 ```
 buscadorDinamico/
+├── .gitignore
+├── .vscode/
+│   └── settings.json
+├── DocumentacionV2/                 # Sitio de documentación
+│   ├── index.html
+│   ├── assets/
+│   ├── css/
+│   │   ├── code.css
+│   │   ├── components.css
+│   │   ├── layout.css
+│   │   ├── reset.css
+│   │   ├── responsive.css
+│   │   ├── themes.css
+│   │   └── variables.css
+│   ├── js/
+│   │   ├── app.js
+│   │   ├── navigation.js
+│   │   ├── router.js
+│   │   ├── search.js
+│   │   ├── theme.js
+│   │   └── utils.js
+│   ├── dist/
+│   │   ├── buscador-dinamico.es.js
+│   │   ├── buscador-dinamico.umd.js
+│   │   └── css/
+│   │       └── buscador-dinamico.css
+│   └── sections/
+│       ├── api.html
+│       ├── cache.html
+│       ├── changelog.html
+│       ├── configuration.html
+│       ├── css-themes.html
+│       ├── errors.html
+│       ├── events.html
+│       ├── examples.html
+│       ├── i18n.html
+│       ├── installation.html
+│       ├── introduction.html
+│       ├── templates.html
+│       └── typescript.html
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── skills-lock.json
 ├── src/
 │   ├── js/
 │   │   ├── main.ts                 # Entry point del build (importa CSS + re-exporta)
@@ -156,9 +199,14 @@ buscadorDinamico/
 │   │   ├── pagination/
 │   │   │   ├── index.ts            # Barrel export
 │   │   │   └── pagination.ts       # Lógica de paginación
-│   │   └── renderer/
-│   │       ├── index.ts            # Barrel export
-│   │       └── renderer.ts         # SearchRenderer
+│   │   ├── renderer/
+│   │   │   ├── index.ts            # Barrel export
+│   │   │   ├── renderer.ts         # SearchRenderer
+│   │   │   └── templateEngine.ts   # Motor de templates
+│   │   └── utils/                  # Utilidades (deprecadas)
+│   │       └── deprecated/
+│   │           ├── extraJson.js
+│   │           └── printJson.js
 │   ├── css/
 │   │   ├── index.css               # CSS entry point
 │   │   ├── core/                   # CSS obligatorio
@@ -182,13 +230,23 @@ buscadorDinamico/
 │   │       ├── blue-black.css      # Tema azul oscuro
 │   │       ├── onyx-black.css      # Tema negro onyx
 │   │       └── forest-green.css    # Tema verde bosque
+│   ├── img/
+│   │   └── image.png               # Imagen de ejemplo
 │   ├── php/
 │   │   ├── modelo.php              # Conexión BD (ejemplo)
 │   │   └── responseAjax.php        # Endpoint de ejemplo
-│   ├── json/
-│   │   └── search.json             # Estructura HTML de referencia
 │   └── tests/
-│       └── unit/                   # Tests unitarios
+│       ├── unit/
+│       │   ├── app.test.ts
+│       │   ├── cache.test.ts
+│       │   ├── error-handler.test.ts
+│       │   ├── eventEmitter.test.ts
+│       │   ├── pagination.test.ts
+│       │   ├── renderElement.test.ts
+│       │   ├── renderer.test.ts
+│       │   ├── searchingLocal.test.ts
+│       │   └── searchingServer.test.ts
+│       └── integration/            # Tests de integración
 ├── dist/                           # Build de producción
 │   ├── buscador-dinamico.es.js     # Módulo ES
 │   ├── buscador-dinamico.umd.js    # UMD (window.BuscadorDinamico)
