@@ -3,7 +3,7 @@
 <p>
     <strong>Buscador Dinámico</strong> es un componente de búsqueda modular, ligero y altamente personalizable
     escrito en TypeScript. Está diseñado para integrarse fácilmente en cualquier proyecto web, ofreciendo
-    búsqueda local o remota con soporte para scroll infinito, caché LRU y internacionalización.
+    búsqueda local o remota con soporte para scroll infinito, caché LRU (Least Recently Used) y internacionalización.
 </p>
 
 <div class="doc-callout doc-callout--info">
@@ -22,7 +22,7 @@
 <ul>
     <li><strong>Sin dependencias</strong> — Vanilla JavaScript/TypeScript, funciona con cualquier framework o sin ellos.</li>
     <li><strong>Modular</strong> — Arquitectura OOP con clases independientes que se pueden extender o reemplazar.</li>
-    <li><strong>Performante</strong> — Caché LRU, debounce configurable, scroll infinito con Intersection Observer.</li>
+    <li><strong>Performante</strong> — Caché LRU (Least Recently Used), debounce configurable, scroll infinito con Intersection Observer.</li>
     <li><strong>Accesible</strong> — Navegación por teclado, roles ARIA, soporte para lectores de pantalla.</li>
     <li><strong>Personalizable</strong> — Templates, temas CSS con variables, sistema i18n integrado.</li>
     <li><strong>Resaltado de texto</strong> — Opcional, resalta los términos de búsqueda en los resultados.</li>
@@ -64,7 +64,7 @@
         </tr>
         <tr>
             <td><code>LRUCache</code></td>
-            <td>Caché de resultados con TTL</td>
+            <td>Caché de resultados con TTL (Time To Live)</td>
         </tr>
         <tr>
             <td><code>EventEmitter</code></td>

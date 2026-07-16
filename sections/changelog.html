@@ -66,7 +66,7 @@
 
 <ul>
     <li><code>draw()</code> ahora retorna <code>Promise&lt;Search&gt;</code></li>
-    <li><code>cache.has()</code> refresca TTL al acceder (true LRU)</li>
+    <li><code>cache.has()</code> refresca TTL (Time To Live) al acceder (true LRU)</li>
     <li><code>setItemsPerPage()</code> valida que el valor sea &gt;= 1</li>
     <li><code>hideResults()</code> usa <code>timeHiddenResults</code> configurable</li>
     <li><code>destroy()</code> re-inicializa objetos en lugar de nullificarlos</li>
@@ -94,7 +94,7 @@
     <li>Búsqueda local en tiempo real con debounce configurable</li>
     <li>Búsqueda remota vía Fetch API con soporte para JSON, FormData y URL-encoded</li>
     <li>Paginación por scroll infinito con Intersection Observer</li>
-    <li>Sistema de caché LRU con TTL configurable</li>
+    <li>Sistema de caché LRU (Least Recently Used) con TTL (Time To Live) configurable</li>
     <li>5 temas CSS predefinidos (adaptative, clean-white, blue-black, onyx-black, forest-green)</li>
     <li>Sistema de eventos personalizado con 8 eventos</li>
     <li>Navegación por teclado (flechas arriba/abajo, Enter)</li>
