@@ -9,14 +9,23 @@
     SearchParams,
     FetchConfig,
     TranslationCache,
+    SearchEventMap,
+    SearchResult,
+    DomComponent,
     SearchEventInit,
     PageChangeEventData,
     SortChangeEventData,
     ItemSelectedEventData,
     ItemHighlightedEventData,
     DestroyEventData,
+    SearchEventData,
+    ResultsClearedEventData,
+    AppendItemsEventData,
+    ErrorData,
+    PaginationRange,
     ErrorCode,
-    SearchError
+    SearchError,
+    EventEmitter
 } from 'buscador-dinamico';</code></pre>
 
 <h2>Interfaz SearchParams</h2>
@@ -35,7 +44,7 @@
     dom?: string;
     sortBy?: string | null;
     sortOrder?: 'asc' | 'desc';
-    template?: string | Function | null;
+    template?: string | ((item: any, highlightText?: (text: string) => string) => string) | null;
     translation?: Partial&lt;TranslationCache&gt;
     procesServer?: boolean;
     fetch?: FetchConfig;
@@ -43,6 +52,11 @@
     highlightEnabled?: boolean;
     highlightClass?: string;
     responseAdapter?: (response: any) => { data: any[]; countPage: number };
+}
+
+interface SearchResult {
+    data: Record&lt;string, any&gt;[];
+    countPage?: number;
 }</code></pre>
 
 <h2>Interfaz FetchConfig</h2>
@@ -62,15 +76,40 @@
     searchLabel: string;
     noResults: string;
     loading: string;
+    pagination?: string; // Template: "{{to}} de {{total}}"
 }</code></pre>
 
-<h2>Eventos tipados</h2>
+<h2>SearchEventMap — Mapa tipado de eventos</h2>
 
-<pre data-lang="typescript"><code>// Cada evento tiene su propio tipo de dato
-interface SearchEventInit {
+<p>Todos los eventos se definen en <code>SearchEventMap</code>, usado por <code>EventEmitter&lt;T&gt;</code> para type-safety completo:</p>
+
+<pre data-lang="typescript"><code>interface SearchEventMap {
+    init: SearchEventInit;
+    search: SearchEventData;
+    searchComplete: Omit&lt;SearchEventData, 'timestamp'&gt;;
+    resultsCleared: ResultsClearedEventData;
+    pageChange: PageChangeEventData;
+    sortChange: SortChangeEventData;
+    itemHighlighted: ItemHighlightedEventData;
+    itemSelected: ItemSelectedEventData;
+    appendItems: AppendItemsEventData;
+    destroy: DestroyEventData;
+    error: ErrorData;
+}</code></pre>
+
+<h2>Tipos de datos de eventos</h2>
+
+<pre data-lang="typescript"><code>interface SearchEventInit {
     searchTerm: string;
     itemsPerPage: number;
     procesServer: boolean;
+}
+
+interface SearchEventData {
+    searchTerm: string;
+    results: Record&lt;string, any&gt;;
+    totalResults: number;
+    timestamp: string;
 }
 
 interface PageChangeEventData {
@@ -86,33 +125,84 @@ interface SortChangeEventData {
 }
 
 interface ItemSelectedEventData {
-    item: Record&lt;string, any&gt;;
+    item: HTMLElement;
     index: number;
     close: () =&gt; void;
 }
 
 interface ItemHighlightedEventData {
-    item: Record&lt;string, any&gt;;
+    item: HTMLElement;
     index: number;
 }
 
-interface DestroyEventData {
-    timestamp: string;
+interface AppendItemsEventData {
+    items: any[];
+    content: HTMLElement;
 }
 
 interface ResultsClearedEventData {
     previousSearchTerm: string;
 }
 
-interface SearchCompleteEventData {
-    searchTerm: string;
-    results: Record&lt;string, any&gt;[];
-    totalResults: number;
+interface DestroyEventData {
+    timestamp: string;
+}
+
+interface ErrorData {
+    code: string;
+    message: string;
+    solution: string;
+    context: any;
 }</code></pre>
+
+<h2>DomComponent — Enum de orden de renderizado</h2>
+
+<pre data-lang="typescript"><code>enum DomComponent {
+    SEARCH = 's',      // Input de búsqueda
+    CONTENT = 'c',     // Contenedor content-pagination-items
+    ITEMS = 'i',       // Lista de resultados
+    PAGINATION = 'p'   // Contador/paginación
+}
+
+// Uso en el parámetro 'dom': 'scip' (default)
+const search = new Search({
+    element: '#app',
+    dom: 'scip',  // search -> content -> items -> pagination
+    data: items
+});</code></pre>
+
+<h2>EventEmitter Genérico</h2>
+
+<pre data-lang="typescript"><code>class EventEmitter&lt;T extends Record&lt;string, any&gt;&gt; {
+    on&lt;K extends keyof T&gt;(event: K, callback: (data: T[K]) =&gt; void): this;
+    off&lt;K extends keyof T&gt;(event: K, callback: Function): this;
+    emit&lt;K extends keyof T&gt;(event: K, data: T[K]): void;
+    emitAsync&lt;K extends keyof T&gt;(event: K, data: T[K]): Promise&lt;void&gt;;
+    once&lt;K extends keyof T&gt;(event: K, callback: (data: T[K]) =&gt; void): this;
+    removeAllListeners(eventName?: string): void;
+    listenerCount(eventName: string): number;
+    eventNames(): string[];
+    getEventList(): { event: string; listeners: number }[];
+}
+
+// La instancia Search expone: events: EventEmitter&lt;SearchEventMap&gt;
+search.events.emitAsync('search', { ... }); // Eventos asíncronos</code></pre>
+
+<h2>PaginationRange</h2>
+
+<pre data-lang="typescript"><code>interface PaginationRange {
+    from: number;
+    to: number;
+    total: number;
+}
+
+// Uso:
+const range = search.pagination.getRange();
+// { from: 1, to: 10, total: 100 }</code></pre>
 
 <h2>Uso con tipos</h2>
 
-<pre data-lang="typescript"><code>import { Search, SearchParams } from 'buscador-dinamico';
+<pre data-lang="typescript"><code>import { Search, SearchParams, SearchEventMap } from 'buscador-dinamico';
 
 // Definir tipos para tus datos
 interface Producto {
@@ -143,10 +233,18 @@ const config: SearchParams = {
 
 const search = new Search(config).init();
 
-// Eventos tipados
-search.on('itemSelected', (data: ItemSelectedEventData) => {
-    const producto = data.item as Producto;
+// Eventos tipados — el tipo del callback se infiere automáticamente
+search.on('itemSelected', (data) => {
+    // data: ItemSelectedEventData (inferido desde SearchEventMap)
+    const producto = data.item as unknown as Producto;
     console.log(producto.nombre);
+    data.close(); // Cierra resultados
+});
+
+// Todos los eventos tienen type-check con SearchEventMap
+search.on('searchComplete', (data) => {
+    // data: Omit&lt;SearchEventData, 'timestamp'&gt;
+    console.log(data.searchTerm, data.totalResults);
 });</code></pre>
 
 <h2>Generación de tipos</h2>
@@ -164,10 +262,10 @@ search.on('itemSelected', (data: ItemSelectedEventData) => {
 <h2>Type narrowing</h2>
 
 <pre data-lang="typescript"><code>search.on('itemSelected', (data) => {
-    // TypeScript sabe que data.item es Record&lt;string, any&gt;
-    // Puedes hacer type assertion si conoces la estructura
-    const item = data.item as Producto;
-    console.log(item.nombre); // OK
+    // TypeScript sabe que data.item es HTMLElement y data.index es number
+    // El tipo se infiere automáticamente desde SearchEventMap
+    console.log('Índice:', data.index);
+    data.close(); // Cerrar resultados
 });</code></pre>
 
 <div class="doc-callout doc-callout--info">

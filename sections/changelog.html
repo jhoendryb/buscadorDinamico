@@ -2,11 +2,52 @@
 
 <p>Historial de versiones y cambios del componente.</p>
 
-<h2>v2.3.0 <span class="doc-badge doc-badge--success">Latest</span></h2>
+<h2>v2.4.0 <span class="doc-badge doc-badge--success">Latest</span></h2>
 
 <p><em>Fecha: 2026</em></p>
 
-<h3>Añadido</h3>
+<h3 id="anadido-v2-4-0">Añadido</h3>
+
+<ul>
+    <li><code>SearchEventMap</code> — Mapa tipado de eventos que asocia cada nombre con su tipo de datos</li>
+    <li><code>EventEmitter&lt;T&gt;</code> genérico con type-safety completo (<code>EventEmitter&lt;SearchEventMap&gt;</code>)</li>
+    <li><code>DomComponent</code> enum para controlar el orden de renderizado (<code>SEARCH</code>, <code>CONTENT</code>, <code>ITEMS</code>, <code>PAGINATION</code>)</li>
+    <li><code>SearchResult</code> interface <code>{ data: Record&lt;string, any&gt;[]; countPage?: number }</code></li>
+    <li><code>PaginationRange</code> interface <code>{ from: number; to: number; total: number }</code></li>
+    <li>Método <code>Pagination.getRange()</code> para el rango actual de items</li>
+    <li>Método <code>Pagination.getTotalPages()</code> para total de páginas</li>
+    <li>Método <code>Pagination.getTotalLoaded()</code> para items cargados</li>
+    <li>Método <code>Pagination.loadNextPage()</code> para avanzar página</li>
+    <li>Método <code>Pagination.hasMorePages()</code> para verificar páginas restantes</li>
+    <li>Método <code>EventEmitter.emitAsync()</code> para eventos asíncronos</li>
+    <li>Método <code>EventEmitter.getEventList()</code> para lista detallada de eventos</li>
+    <li>Método <code>SearchRenderer.destroy()</code> para limpiar timeouts y referencias DOM</li>
+    <li>Método <code>SearchRenderer.toggleResults()</code> para toggle de visibilidad</li>
+    <li>Método <code>SearchRenderer.hideResultsWithDelay(delay?)</code></li>
+    <li>Parámetro <code>loadingText</code> en <code>showLoading(text)</code> para texto de carga personalizado</li>
+    <li>Propiedad <code>LRUCache.stats</code> — estadísticas de caché (hits, misses, evictions)</li>
+    <li>Método <code>LRUCache.getOrFetch(key, fetch, onMiss?)</code></li>
+    <li>Método <code>LRUCache.delete(key)</code> y <code>LRUCache.size()</code></li>
+    <li>Clave <code>pagination</code> en traducciones para personalizar el contador</li>
+    <li><code>ItemSelectedEventData.close</code> — método para cerrar resultados</li>
+    <li>Interfaces completas: <code>SearchEventData</code>, <code>ErrorData</code>, <code>ResultsClearedEventData</code>, <code>AppendItemsEventData</code></li>
+</ul>
+
+<h3 id="mejorado-v2-4-0">Mejorado</h3>
+
+<ul>
+    <li><code>Search.on()</code> tipado con genéricos: <code>on&lt;K extends keyof SearchEventMap&gt;(...)</code></li>
+    <li><code>SearchRenderer.updateCounter()</code> acepta objeto <code>{ from, to, total, textPagination? }</code></li>
+    <li><code>EventEmitter</code> constructor acepta <code>ErrorHandler</code> opcional</li>
+    <li>Manejo de errores en callbacks: errores individuales no afectan a otros listeners</li>
+    <li>Traducción por defecto <code>pagination: "{{to}} de {{total}}"</code></li>
+</ul>
+
+<h2>v2.3.0</h2>
+
+<p><em>Fecha: 2026</em></p>
+
+<h3 id="anadido-v2-3-0">Añadido</h3>
 
 <ul>
     <li>Parámetro <code>responseAdapter</code> para transformar respuestas del servidor personalizadas</li>
@@ -21,7 +62,7 @@
     <li><code>prefers-reduced-motion</code> ahora desactiva TODAS las transiciones globalmente</li>
 </ul>
 
-<h3>Mejorado</h3>
+<h3 id="mejorado-v2-3-0">Mejorado</h3>
 
 <ul>
     <li><code>draw()</code> ahora retorna <code>Promise&lt;Search&gt;</code></li>
@@ -34,7 +75,7 @@
     <li>Typo corregido: <code>firtsLoad</code> &gt; <code>firstLoad</code></li>
 </ul>
 
-<h3>Corregido</h3>
+<h3 id="corregido-v2-3-0">Corregido</h3>
 
 <ul>
     <li><code>highlightText()</code> escapa caracteres regex especiales</li>

@@ -13,7 +13,7 @@
     keyboardEnabled: false,       // Navegación por teclado
     cacheEnabled: false,          // Habilitar caché LRU
     zIndex: 1000,                 // Z-index del componente
-    dom: 'search-content-items-pagination', // Orden de elementos DOM
+    dom: 'scip', // Orden: s=search, c=content, i=items, p=pagination
     developmentMode: false,       // Modo desarrollo (logs detallados)
     highlightEnabled: false,      // Resaltar términos de búsqueda
     highlightClass: ''            // Clase CSS adicional para resaltado
@@ -94,8 +94,8 @@
         <tr>
             <td><code>dom</code></td>
             <td><code>string</code></td>
-            <td><code>'search-content-items-pagination'</code></td>
-            <td>Orden de renderizado de elementos DOM</td>
+            <td><code>'scip'</code></td>
+            <td>Orden de renderizado: <code>s</code>=search, <code>c</code>=content, <code>i</code>=items, <code>p</code>=pagination. Usa <code>DomComponent</code> enum en TypeScript</td>
         </tr>
         <tr>
             <td><code>developmentMode</code></td>

@@ -62,6 +62,50 @@
 const key = search.getCacheKey('laptop', 1);
 console.log(key); // "laptop_1"</code></pre>
 
+<h2>Estadísticas de caché</h2>
+
+<p>El caché expone estadísticas de uso para monitorear su rendimiento:</p>
+
+<pre data-lang="javascript"><code>console.log(search.cache.stats);
+// { hits: 5, misses: 3, evictions: 1 }</code></pre>
+
+<table>
+    <thead>
+        <tr>
+            <th>Propiedad</th>
+            <th>Descripción</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>hits</code></td>
+            <td>Consultas que encontraron un valor válido</td>
+        </tr>
+        <tr>
+            <td><code>misses</code></td>
+            <td>Consultas que no encontraron un valor válido</td>
+        </tr>
+        <tr>
+            <td><code>evictions</code></td>
+            <td>Inserciones que requirieron eliminar un valor por LRU</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Patrón getOrFetch</h2>
+
+<pre data-lang="javascript"><code>const result = await search.cache.getOrFetch(
+    'mi_clave',
+    async () => {
+        // Esta función solo se ejecuta si no hay caché
+        return await fetchDataFromServer();
+    },
+    () => {
+        // Opcional: se ejecuta cuando hay cache miss
+        search.showLoading('Cargando...');
+    }
+);</code></pre>
+
 <h2>Limpiar caché</h2>
 
 <pre data-lang="javascript"><code>// Limpiar toda la caché
