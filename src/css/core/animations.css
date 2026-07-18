@@ -9,9 +9,10 @@
 
 @media (prefers-reduced-motion: reduce) {
 
-    *,
-    *::before,
-    *::after {
+    .app-search,
+    .app-search *,
+    .app-search *::before,
+    .app-search *::after {
         transition: none !important;
         animation: none !important;
     }

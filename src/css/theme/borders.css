@@ -6,21 +6,20 @@
     border-radius: var(--search-border-radius);
 }
 
+.app-search:has(.content-pagination-items:last-child.content-pagination-visible) .content-pagination-items {
+    border-radius: 0 0 var(--search-border-radius) var(--search-border-radius);
+    border-top: none;
+}
+
+.app-search:has(.content-pagination-items:first-child.content-pagination-visible) .content-pagination-items {
+    border-radius: var(--search-border-radius) var(--search-border-radius) 0 0;
+    border-bottom: none;
+}
+
 .app-search:has(.content-pagination-items:last-child.content-pagination-visible) .items-counter {
     border-top: 1px solid var(--search-border-color);
-    border-radius: 0 0 var(--search-border-radius) var(--search-border-radius);
 }
 
 .app-search:has(.content-pagination-items:first-child.content-pagination-visible) .items-counter {
     border-bottom: 1px solid var(--search-border-color);
-    border-radius: var(--search-border-radius) var(--search-border-radius) 0 0;
-}
-
-
-.content-pagination-items:not(:has(.pagination-items:last-child)) {
-    border-radius: 0 0 var(--search-border-radius) var(--search-border-radius);
-}
-
-.content-pagination-items:has(.pagination-items:first-child) .items-counter {
-    border-radius: 0;
 }
