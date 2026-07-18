@@ -72,15 +72,6 @@ search.sort('precio', 'desc');</code></pre>
 
 <pre data-lang="javascript"><code>search.clear(); // Resetea todo el estado</code></pre>
 
-<h3>showLoading(loadingText?)</h3>
-
-<pre data-lang="typescript"><code>showLoading(loadingText?: string): Search</code></pre>
-
-<p>Muestra un indicador de carga en el contenedor de resultados. Opcionalmente muestra un texto personalizado.</p>
-
-<pre data-lang="javascript"><code>search.showLoading();                    // "Buscando..."
-search.showLoading('Cargando datos...'); // Texto personalizado</code></pre>
-
 <h3>on(eventName, callback)</h3>
 
 <pre data-lang="typescript"><code>on&lt;K extends keyof SearchEventMap&gt;(event: K, callback: (data: SearchEventMap[K]) => void): EventEmitter&lt;SearchEventMap&gt;</code></pre>
@@ -244,6 +235,86 @@ search.renderer.hideResultsWithDelay(300); // Con delay personalizado</code></pr
             <td><code>renderer</code></td>
             <td><code>SearchRenderer</code></td>
             <td>Instancia del motor de renderizado</td>
+        </tr>
+        <tr>
+            <td><code>procesServer</code></td>
+            <td><code>boolean</code></td>
+            <td>Habilita búsqueda por servidor</td>
+        </tr>
+        <tr>
+            <td><code>keyboardEnabled</code></td>
+            <td><code>boolean</code></td>
+            <td>Navegación por teclado habilitada</td>
+        </tr>
+        <tr>
+            <td><code>cacheEnabled</code></td>
+            <td><code>boolean</code></td>
+            <td>Caché LRU habilitada</td>
+        </tr>
+        <tr>
+            <td><code>template</code></td>
+            <td><code>string | Function | null</code></td>
+            <td>Template personalizado para items</td>
+        </tr>
+        <tr>
+            <td><code>sortBy</code></td>
+            <td><code>string | null</code></td>
+            <td>Campo de ordenamiento activo</td>
+        </tr>
+        <tr>
+            <td><code>sortOrder</code></td>
+            <td><code>'asc' | 'desc'</code></td>
+            <td>Dirección del ordenamiento</td>
+        </tr>
+        <tr>
+            <td><code>zIndex</code></td>
+            <td><code>number</code></td>
+            <td>Z-index del componente</td>
+        </tr>
+        <tr>
+            <td><code>itemsPerPage</code></td>
+            <td><code>number</code></td>
+            <td>Items por página</td>
+        </tr>
+        <tr>
+            <td><code>debounceTime</code></td>
+            <td><code>number</code></td>
+            <td>Debounce en milisegundos</td>
+        </tr>
+        <tr>
+            <td><code>cacheMaxSize</code></td>
+            <td><code>number</code></td>
+            <td>Tamaño máximo del caché</td>
+        </tr>
+        <tr>
+            <td><code>cacheTtlSeconds</code></td>
+            <td><code>number</code></td>
+            <td>TTL del caché en segundos</td>
+        </tr>
+        <tr>
+            <td><code>dom</code></td>
+            <td><code>string</code></td>
+            <td>Orden de renderizado del DOM</td>
+        </tr>
+        <tr>
+            <td><code>selectedIndex</code></td>
+            <td><code>number</code></td>
+            <td>Índice del item seleccionado</td>
+        </tr>
+        <tr>
+            <td><code>developmentMode</code></td>
+            <td><code>boolean</code></td>
+            <td>Modo desarrollo con logs</td>
+        </tr>
+        <tr>
+            <td><code>fetch</code></td>
+            <td><code>FetchConfig | undefined</code></td>
+            <td>Configuración de petición al servidor</td>
+        </tr>
+        <tr>
+            <td><code>responseAdapter</code></td>
+            <td><code>Function | undefined</code></td>
+            <td>Transforma la respuesta del servidor</td>
         </tr>
     </tbody>
 </table>

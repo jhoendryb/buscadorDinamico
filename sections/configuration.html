@@ -14,6 +14,7 @@
     cacheEnabled: false,          // Habilitar caché LRU (Least Recently Used)
     zIndex: 1000,                 // Z-index del componente
     dom: 'scip', // Orden: s=search, c=content, i=items, p=pagination
+    searchTerm: '',               // Término de búsqueda inicial
     developmentMode: false,       // Modo desarrollo (logs detallados)
     highlightEnabled: false,      // Resaltar términos de búsqueda
     highlightClass: ''            // Clase CSS adicional para resaltado
@@ -96,6 +97,12 @@
             <td><code>string</code></td>
             <td><code>'scip'</code></td>
             <td>Orden de renderizado: <code>s</code>=search, <code>c</code>=content, <code>i</code>=items, <code>p</code>=pagination. Usa <code>DomComponent</code> enum en TypeScript</td>
+        </tr>
+        <tr>
+            <td><code>searchTerm</code></td>
+            <td><code>string</code></td>
+            <td><code>''</code></td>
+            <td>Término de búsqueda inicial</td>
         </tr>
         <tr>
             <td><code>developmentMode</code></td>

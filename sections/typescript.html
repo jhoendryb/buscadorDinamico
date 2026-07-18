@@ -22,7 +22,6 @@
     ResultsClearedEventData,
     AppendItemsEventData,
     ErrorData,
-    PaginationRange,
     ErrorCode,
     SearchError,
     EventEmitter
@@ -63,20 +62,22 @@ interface SearchResult {
 
 <pre data-lang="typescript"><code>interface FetchConfig {
     url: string;
-    method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+    method: string;
     headers?: Record&lt;string, string&gt;;
     body?: Record&lt;string, any&gt;;
     timeout?: number;
+    success?: (resp: any, instance: any) =&gt; void;
+    error?: (err: any) =&gt; void;
 }</code></pre>
 
 <h2>Interfaz TranslationCache</h2>
 
 <pre data-lang="typescript"><code>interface TranslationCache {
-    searchPlaceholder: string;
-    searchLabel: string;
-    noResults: string;
-    loading: string;
-    pagination?: string; // Template: "{{to}} de {{total}}"
+    searchPlaceholder?: string;
+    loading?: string;
+    noResults?: string;
+    pagination?: string;
+    [key: string]: string | undefined;
 }</code></pre>
 
 <h2>SearchEventMap — Mapa tipado de eventos</h2>
@@ -187,18 +188,6 @@ const search = new Search({
 
 // La instancia Search expone: events: EventEmitter&lt;SearchEventMap&gt;
 search.events.emitAsync('search', { ... }); // Eventos asíncronos</code></pre>
-
-<h2>PaginationRange</h2>
-
-<pre data-lang="typescript"><code>interface PaginationRange {
-    from: number;
-    to: number;
-    total: number;
-}
-
-// Uso:
-const range = search.pagination.getRange();
-// { from: 1, to: 10, total: 100 }</code></pre>
 
 <h2>Uso con tipos</h2>
 

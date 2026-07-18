@@ -26,32 +26,72 @@
         <tr>
             <td><code>SEARCH_001</code></td>
             <td>El parámetro <code>element</code> es requerido</td>
-            <td>Proporcione el selector CSS del contenedor</td>
+            <td>Proporciona el selector CSS del contenedor donde se renderizará el buscador. Ejemplo: <code>{ element: '.mi-buscador' }</code></td>
         </tr>
         <tr>
             <td><code>SEARCH_002</code></td>
-            <td>El parámetro <code>element</code> debe ser un string</td>
-            <td>Pase un selector como <code>'.mi-buscador'</code></td>
+            <td>El parámetro <code>element</code> debe ser un string con el selector CSS</td>
+            <td>El parámetro element debe ser un string válido de selector CSS. Ejemplo: <code>'.mi-buscador'</code>, <code>'#buscador-id'</code>, <code>'[data-search]'</code></td>
         </tr>
         <tr>
             <td><code>SEARCH_003</code></td>
-            <td><code>fetch.url</code> es requerido en modo servidor</td>
-            <td>Configure la URL del endpoint</td>
+            <td>El parámetro <code>fetch.url</code> es requerido cuando procesServer es true</td>
+            <td>Configura la URL del endpoint de búsqueda. Ejemplo: <code>{ fetch: { url: '/api/search' } }</code></td>
         </tr>
         <tr>
             <td><code>SEARCH_004</code></td>
-            <td><code>itemsPerPage</code> debe ser un número</td>
-            <td>Pase un valor numérico, ej: <code>itemsPerPage: 10</code></td>
+            <td>El parámetro <code>itemsPerPage</code> debe ser un número</td>
+            <td>El parámetro itemsPerPage debe ser de tipo number. Ejemplo: <code>{ itemsPerPage: 10 }</code></td>
         </tr>
         <tr>
             <td><code>SEARCH_005</code></td>
-            <td><code>itemsPerPage</code> debe ser mayor a 0</td>
-            <td>Use un valor de 1 o superior</td>
+            <td>El parámetro <code>itemsPerPage</code> debe ser mayor a 0</td>
+            <td>El parámetro itemsPerPage debe ser un número positivo mayor a 0. Ejemplo: <code>{ itemsPerPage: 10 }</code></td>
         </tr>
         <tr>
             <td><code>SEARCH_006</code></td>
             <td>El parámetro tiene un formato de tipo inválido</td>
-            <td>Verifique que el parámetro tenga el formato correcto</td>
+            <td>Verifica que el parámetro tenga el formato correcto.</td>
+        </tr>
+        <tr>
+            <td><code>SEARCH_010</code></td>
+            <td>No existe el contenedor especificado</td>
+            <td>Verifica que el selector CSS sea correcto y que el elemento exista en el DOM antes de inicializar el componente.</td>
+        </tr>
+        <tr>
+            <td><code>SEARCH_011</code></td>
+            <td>No existe el contenedor principal</td>
+            <td>Asegúrate de que el elemento especificado exista en el DOM antes de inicializar el componente.</td>
+        </tr>
+        <tr>
+            <td><code>SEARCH_020</code></td>
+            <td>Error de conexión al servidor</td>
+            <td>Verifica tu conexión a internet y que el servidor esté disponible.</td>
+        </tr>
+        <tr>
+            <td><code>SEARCH_021</code></td>
+            <td>Error al obtener datos del servidor</td>
+            <td>Verifica que la URL del endpoint sea correcta y que el servidor responda con el formato esperado.</td>
+        </tr>
+        <tr>
+            <td><code>SEARCH_030</code></td>
+            <td>Formato de datos inválido</td>
+            <td>Verifica que los datos tengan el formato esperado por el componente.</td>
+        </tr>
+        <tr>
+            <td><code>SEARCH_031</code></td>
+            <td>La respuesta del servidor está vacía</td>
+            <td>Verifica que el endpoint devuelva datos en el formato esperado.</td>
+        </tr>
+        <tr>
+            <td><code>SEARCH_040</code></td>
+            <td>Error al inicializar el componente</td>
+            <td>Verifica la configuración y los parámetros proporcionados.</td>
+        </tr>
+        <tr>
+            <td><code>SEARCH_041</code></td>
+            <td>Error al renderizar el componente</td>
+            <td>Verifica que el DOM esté disponible y que no haya conflictos con otros componentes.</td>
         </tr>
     </tbody>
 </table>
