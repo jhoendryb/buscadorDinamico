@@ -9,7 +9,7 @@
 <pre data-lang="javascript"><code>const search = new BuscadorDinamico.Search({
     element: '#app',
     data: productos,
-    template: '&lt;div class="producto"&gt;&lt;strong&gt;{nombre}&lt;/strong&gt; - ${precio}&lt;/div&gt;'
+    template: '&lt;div class="producto"&gt;&lt;strong&gt;{{nombre}}&lt;/strong&gt; - ${precio}&lt;/div&gt;'
 }).init();</code></pre>
 
 <div class="doc-callout doc-callout--info">
@@ -67,11 +67,9 @@
 
 <h2>Plantilla por defecto</h2>
 
-<p>Si no se proporciona una plantilla, el componente usa la siguiente estructura:</p>
+<p>Cuando no se proporciona un template, el componente concatena todos los valores del objeto separados por espacio.</p>
 
-<pre data-lang="html"><code>&lt;div class="items"&gt;
-    &lt;span class="item-name"&gt;{valor del campo}&lt;/span&gt;
-&lt;/div&gt;</code></pre>
+<pre data-lang="html"><code>&lt;div class="items"&gt;valor de todas las propiedades concatenadas&lt;/div&gt;</code></pre>
 
 <div class="doc-callout doc-callout--warning">
     <span class="doc-callout__icon">⚠️</span>

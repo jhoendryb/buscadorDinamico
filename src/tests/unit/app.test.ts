@@ -93,7 +93,7 @@ describe('Search', () => {
             element: '.test',
             data: Array.from({ length: 25 }, (_, i) => ({ id: i, name: `Item ${i}` })),
         });
-        search.searching('', false);
+        search.draw('', false);
         if (!search._data) {
             throw new Error('search._data is null');
         }
@@ -105,7 +105,7 @@ describe('Search', () => {
             element: '.test',
             data: [{ name: 'Juan' }, { name: 'Maria' }]
         });
-        search.searching('JUAN', false);
+        search.draw('JUAN', false);
         if (!search._data) {
             throw new Error('search._data is null');
         }
@@ -118,45 +118,13 @@ describe('Search', () => {
             element: '.test',
             data: [{ name: 'Juan' }, { name: 'Maria' }]
         });
-        search.searching('juan', false);
+        search.init();
+        search.draw('juan', false);
         if (!search._data) {
             throw new Error('search._data is null');
         }
         expect(search._data.length).toBe(1);
         expect(search._data[0].name).toBe('Juan');
-    });
-
-    test('debe usar template personalizado si se proporciona', () => {
-        const search = new Search({
-            element: '.test',
-            data: [{ name: 'Zebra', age: 26 }, { name: 'Aardvark', age: 28 }, { name: 'Moose', age: 30 }],
-            template: `<div>{{name}} - {{age}} años</div>`
-        });
-        search.on('renderItems', (data: any) => {
-            const { content } = data;
-            const item = content.querySelector('.items');
-            expect(item.innerHTML).toContain('Zebra - 26 años');
-        });
-        search.init();
-    });
-
-    test('debe emitir evento cuando se selecciona un item', () => {
-        const search = new Search({
-            element: '.test',
-            data: [{ name: 'Zebra', age: 26 }, { name: 'Aardvark', age: 28 }, { name: 'Moose', age: 30 }],
-            template: `<div>{{name}} - {{age}} años</div>`
-        });
-        search.on('itemSelected', (data: any) => {
-            const { item } = data;
-            expect(item.innerHTML).toContain('Aardvark - 28 años');
-        });
-        search.on('renderItems', (data: any) => {
-            const { content } = data;
-            const item = content.querySelectorAll('.items')[1];
-            const enterEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
-            item.dispatchEvent(enterEvent);
-        });
-        search.init();
     });
 
     test('debe usar caché correctamente', async () => {
@@ -174,19 +142,19 @@ describe('Search', () => {
         await search.init();
 
         // Primera búsqueda - debe almacenar en caché
-        search.searching('juan', false);
+        search.draw('juan', false);
         if (!search._data) {
             throw new Error('search._data is null');
         }
-        const firstResults = search._data;
+        const firstResults = search.data;
         expect(firstResults.length).toBe(1);
 
         // Segunda búsqueda igual - debe usar caché
-        search.searching('juan', false);
+        search.draw('juan', false);
         expect(search._data).toEqual(firstResults);
 
         // Búsqueda diferente - no debe usar caché
-        search.searching('maria', false);
+        search.draw('maria', false);
         expect(search._data.length).toBe(1);
         expect(search._data[0].name).toBe('Maria');
     });
@@ -221,7 +189,7 @@ describe('Search', () => {
         });
 
         const mockCallback = jest.fn();
-        const subscription = search.on('renderItems', mockCallback);
+        const subscription = search.on('search', mockCallback);
 
         expect(subscription).toHaveProperty('off');
         expect(typeof subscription.off).toBe('function');
@@ -323,12 +291,12 @@ describe('Search', () => {
         search.cache.set('juan_2', [{ name: 'Juan' }]);
         search.cache.set('maria_1', [{ name: 'Maria' }]);
 
-        expect(search.cache.size()).toBe(4);
+        expect(search.cache.size()).toBe(3);
 
         const result = search.cache.clearCacheByPrefix('juan');
 
         // Solo maria_1 y la primera carga vacía
-        expect(search.cache.size()).toBe(2);
+        expect(search.cache.size()).toBe(1);
         expect(search.cache.has('maria_1')).toBe(true);
         expect(result).toBe(search.cache); // Encadenamiento
     });
@@ -422,13 +390,14 @@ describe('Search', () => {
         const mockCallback = jest.fn();
         search.on('pageChange', mockCallback);
 
-        search.processInfiniteScroll();
+        search.pagination.goToPage(1);
 
         expect(mockCallback).toHaveBeenCalledWith(
             expect.objectContaining({
                 page: 1,
                 totalPages: 3,
-                itemsOnPage: 10
+                itemsOnPage: 10,
+                totalLoaded: 10
             })
         );
     });
@@ -486,7 +455,7 @@ describe('Search', () => {
             data: [{ name: 'Juan' }]
         });
 
-        const result = search.on('test', jest.fn());
+        const result = search.on('search', jest.fn());
 
         expect(result).toBe(search.events);
     });

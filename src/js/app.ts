@@ -235,17 +235,6 @@ class Search {
         }
 
         const searchResult = await this.#executeSearch(searchTerm, true);
-        // if (this.procesServer) {
-        //     searchResult = await this.#fetchFromServer(searchTerm, this.pagination.getCurrentPage(), true);
-        // } else {
-        //     const filtered = this.searchingLocal.search(
-        //         searchTerm,
-        //         this.data,
-        //         this.sortBy,
-        //         this.sortOrder
-        //     );
-        //     searchResult = { data: filtered };
-        // }
 
         if (drawId !== this.currentDrawId) return this;
 

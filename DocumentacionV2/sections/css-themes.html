@@ -62,66 +62,113 @@ search.renderer.setTheme('forest-green');</code></pre>
 
 <pre data-lang="css"><code>.app-search {
     /* Ancho del componente */
-    --app-width: 100%;
+    --search-width: 280px;
 
-    /* Altura del input */
-    --input-height: 40px;
+    /* Altura máxima del panel */
+    --search-max-height: 300px;
 
-    /* Ancho del input */
-    --input-width: 100%;
+    /* Padding interno */
+    --search-padding: 10px;
 
-    /* Radio de bordes */
-    --border-radius: 8px;
+    /* Espaciado entre elementos */
+    --search-gap: 10px;
 
-    /* Máxima altura del panel de resultados */
-    --max-height-results: 300px;
-
-    /* Ancho del scrollbar */
-    --scrollbar-width: 6px;
+    /* Padding de cada item */
+    --search-item-padding: 10px;
 }</code></pre>
 
 <h3>Colores</h3>
 
 <pre data-lang="css"><code>.app-search {
     /* Color de fondo principal */
-    --bg-primary: #ffffff;
+    --search-bg-color: #ffffff;
 
-    /* Color de fondo del input */
-    --bg-input: #ffffff;
-
-    /* Color de fondo de items */
-    --bg-items: #ffffff;
-
-    /* Color de fondo al pasar el mouse */
-    --bg-hover: #f3f4f6;
-
-    /* Color de fondo item seleccionado */
-    --bg-selected: #e5e7eb;
+    /* Color del borde principal */
+    --search-border-color: #d0d0d0;
 
     /* Color de texto principal */
-    --text-primary: #111827;
+    --search-text-color: #333333;
+
+    /* Color de texto de items */
+    --search-text-color-items: #444444;
 
     /* Color de texto secundario */
-    --text-secondary: #6b7280;
+    --search-light-text-color: #666666;
 
-    /* Color de bordes */
-    --border-color: #e5e7eb;
+    /* Color del placeholder */
+    --search-placeholder-color: #888888;
 
-    /* Color del input focus */
-    --border-focus: #6366f1;
+    /* Color de fondo del input */
+    --search-input-bg-color: #ffffff;
+
+    /* Color del borde del input */
+    --search-input-border-color: #cccccc;
+
+    /* Color de fondo de items */
+    --search-item-bg-color: #f5f5f5;
+
+    /* Color de fondo al pasar el mouse */
+    --search-item-hover-bg-color: #e8e8e8;
+
+    /* Color de fondo item seleccionado */
+    --search-selected-bg-color: #d4edff;
+
+    /* Color del borde del item seleccionado */
+    --search-selected-border-color: #0066cc;
+
+    /* Color del contador */
+    --search-counter-color: #666666;
+
+    /* Color de fondo del contador */
+    --search-counter-bg-color: #f8f8f8;
 
     /* Color de la sombra */
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-color: rgba(0, 0, 0, 0.1);
+
+    /* Color del icono */
+    --search-icon-color: #666666;
+
+    /* Color del thumb del scrollbar */
+    --scrollbar-thumb-color: #cccccc;
 }</code></pre>
 
-<h3>Bordes</h3>
+<h3>Tipografía</h3>
 
 <pre data-lang="css"><code>.app-search {
-    --border-width: 1px;
-    --border-style: solid;
-    --border-radius: 8px;
-    --border-radius-sm: 4px;
-    --border-radius-lg: 12px;
+    /* Tamaño de fuente principal */
+    --search-font-size: 15px;
+
+    /* Tamaño de fuente del contador */
+    --search-counter-font-size: 0.9em;
+
+    /* Alineación del texto del contador */
+    --search-counter-text-align: center;
+
+    /* Tamaño del icono */
+    --search-icon-size: 1.2em;
+}</code></pre>
+
+<h3>Bordes y esquinas</h3>
+
+<pre data-lang="css"><code>.app-search {
+    /* Radio de borde general */
+    --search-border-radius: 8px;
+
+    /* Radio de borde con panel abierto */
+    --search-border-radius-open: 8px 8px 0 0;
+
+    /* Radio de borde de items */
+    --items-search-border-radius: 8px 8px 0 0;
+}</code></pre>
+
+<h3>Spinner</h3>
+
+<pre data-lang="css"><code>.app-search {
+    /* Color del borde del spinner */
+    --spinner-border-color: #e0e0e0;
+
+    /* Color superior del spinner */
+    --spinner-top-color: #0066cc;
 }</code></pre>
 
 <h3>Resaltado</h3>

@@ -106,6 +106,31 @@ console.log(key); // "laptop_1"</code></pre>
     }
 );</code></pre>
 
+<h2>Métodos de LRUCache</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Método</th>
+            <th>Descripción</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>set(key, value)</code></td>
+            <td>Almacena un valor en caché con la clave especificada</td>
+        </tr>
+        <tr>
+            <td><code>get(key)</code></td>
+            <td>Obtiene un valor de caché por clave. Refresca el TTL al acceder</td>
+        </tr>
+        <tr>
+            <td><code>has(key)</code></td>
+            <td>Verifica si una clave existe en caché y no ha expirado</td>
+        </tr>
+    </tbody>
+</table>
+
 <h2>Limpiar caché</h2>
 
 <pre data-lang="javascript"><code>// Limpiar toda la caché
