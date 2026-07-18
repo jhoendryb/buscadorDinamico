@@ -1,21 +1,21 @@
 /* SCROLLBAR - OBLIGATORIO */
 
-.scroll-personalize {
+.app-search .scroll-personalize {
     position: relative;
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-thumb-color, #ccc) transparent;
 }
 
-.scroll-personalize::-webkit-scrollbar {
+.app-search .scroll-personalize::-webkit-scrollbar {
     width: 8px;
     background-color: transparent;
 }
 
-.scroll-personalize::-webkit-scrollbar-track {
+.app-search .scroll-personalize::-webkit-scrollbar-track {
     background-color: transparent;
 }
 
-.scroll-personalize::-webkit-scrollbar-thumb {
+.app-search .scroll-personalize::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: var(--scrollbar-thumb-color, #cccccc);
 }

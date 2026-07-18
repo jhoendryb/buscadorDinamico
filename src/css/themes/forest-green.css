@@ -1,4 +1,4 @@
-.theme-forest-green {
+.app-search.theme-forest-green {
     /* Colores principales - Forest Green */
     --search-bg-color: #2c3e2e;
     /* Verde bosque muy oscuro */
@@ -12,6 +12,11 @@
     /* Gris cálido para placeholders */
     --search-light-text-color: #a0a0a0;
     /* Gris cálido para texto secundario */
+
+    --search-input-bg-color: transparent;
+    /* Fondo del input ligeramente más claro que el fondo verde oscuro */
+    --search-icon-color: #8a9a8c;
+    /* Verde grisáceo claro para el icono */
 
     --search-item-bg-color: #3b503e;
     /* Fondo de cada elemento de la lista (un poco más claro) */
@@ -37,6 +42,11 @@
     /* Borde del spinner */
     --spinner-top-color: #6a9c7b;
     /* Verde para la parte superior del spinner */
+
+    --search-highlight-bg-color: #8bc34a;
+    /* Verde lima suave para resaltar texto, acorde a la paleta */
+    --search-highlight-text-color: #1b3a1e;
+    /* Verde oscuro para el texto resaltado */
 
     --search-input-border-color: #5a6b5c;
     --shadow-color: rgba(0, 0, 0, 0.3);

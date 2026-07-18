@@ -1,4 +1,4 @@
-.theme-onyx-black {
+.app-search.theme-onyx-black {
     /* Colores principales - Onyx Black */
     --search-bg-color: #121212;
     /* Un negro muy oscuro */
@@ -12,6 +12,11 @@
     /* Gris cálido para placeholders */
     --search-light-text-color: #a0a0a0;
     /* Gris cálido para texto secundario */
+
+    --search-input-bg-color: transparent;
+    /* Fondo del input, ligeramente más claro que el fondo principal para contraste */
+    --search-icon-color: #888888;
+    /* Gris medio para el icono de búsqueda, visible sobre fondo oscuro */
 
     --search-item-bg-color: #1e1e1e;
     /* Fondo de cada elemento de la lista (un poco más claro que el principal) */
@@ -31,6 +36,12 @@
     /* Scrollbar */
     --scrollbar-thumb-color: #555555;
     /* Gris oscuro para el pulgar del scrollbar */
+
+    /* Highlight de texto */
+    --search-highlight-bg-color: #ffeb3b;
+    /* Amarillo neón para destacar texto sobre fondo oscuro */
+    --search-highlight-text-color: #000000;
+    /* Texto negro sobre el highlight amarillo */
 
     /* Loading */
     --spinner-border-color: #333333;
