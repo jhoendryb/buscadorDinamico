@@ -416,8 +416,15 @@ class Search {
      */
     sort(field: string, order: 'asc' | 'desc' = 'asc'): Search {
         if (this._destroyed) return this;
+
         this.sortBy = field;
         this.sortOrder = order;
+
+        if (this.sortBy === null) {
+            this.clearSort();
+            return this;
+        }
+
         if (this.procesServer) {
             this.draw(this.searchTerm, true);
         } else {
@@ -439,17 +446,16 @@ class Search {
     clearSort(): Search {
         if (this._destroyed) return this;
         this.sortBy = null;
-        this.sortOrder = 'asc';
+        this.sortOrder = Constants.SORT_ORDER;
 
         if (this.procesServer) {
             if (this.fetch?.body) {
                 this.fetch.body.sortBy = null;
-                this.fetch.body.sortOrder = 'asc';
+                this.fetch.body.sortOrder = Constants.SORT_ORDER;
             }
         }
 
         this.cache.clear();
-        this.draw(this.searchTerm);
         return this;
     }
     /**
@@ -559,16 +565,18 @@ class Search {
     clear(): Search {
         if (this._destroyed) return this;
         this.searchTerm = "";
+
         if (this.renderer.body.inputSearch) {
-            (this.renderer.body.inputSearch as HTMLInputElement).value = "";
+            (this.renderer.body.inputSearch as HTMLInputElement).value = this.searchTerm;
         }
         if (this.renderer.body.renderItems) {
             this.renderer.body.renderItems.innerHTML = "";
         }
-        this.pagination.goToPage(1);
-        this.sortBy = null;
-        this.sortOrder = Constants.SORT_ORDER;
+        if (this.sortBy !== null) this.clearSort();
+
         this.cache.clear();
+        this.pagination.goToPage(1);
+        this.draw(this.searchTerm, true);
         this.selectedIndex = Constants.NO_SELECTION;
         return this;
     }

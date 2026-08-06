@@ -78,6 +78,20 @@ function reactionSearch({ form, search, emit = null }: Record<string, any>): Sea
         return search;
     }
 
+    if (emit && emit.name === "sortOrder") {
+        if (emit.value === "") {
+            search.clearSort();
+            search.draw("");
+            console.log("Hablame, reinicie el sort")
+            return search;
+        }
+        if (!values["sortBy"]) return search;
+        search.sort(values["sortBy"] as string, emit.value as string);
+        search.draw("");
+        console.log("hablame, estoy cuadrando el sort, sirve?", search._data);
+        return search;
+    }
+
     if (search) search.destroy();
 
     search = new Search(values as unknown as Types.SearchParams).init();
