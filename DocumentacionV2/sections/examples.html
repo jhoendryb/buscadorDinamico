@@ -28,7 +28,14 @@
 
 <h2>Con plantilla personalizada</h2>
 
-<pre data-lang="javascript"><code>new Search({
+<pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
+
+const productos = [
+    { id: 1, nombre: 'Laptop HP', precio: 999, categoria: 'Electrónica' },
+    { id: 2, nombre: 'Mouse Logitech', precio: 29, categoria: 'Accesorios' }
+];
+
+new Search({
     element: '#app',
     data: productos,
     template: (item) => `
@@ -45,8 +52,10 @@
 <p>Extrae datos automáticamente de elementos HTML existentes:</p>
 
 <pre data-lang="html"><code>&lt;div id="buscador"&gt;
-    &lt;div data-nombre="Laptop HP" data-precio="999"&gt;Laptop HP&lt;/div&gt;
-    &lt;div data-nombre="Mouse" data-precio="29"&gt;Mouse Logitech&lt;/div&gt;
+    &lt;ul class="items-search"&gt;
+        &lt;li class="items" data-nombre="Laptop HP" data-precio="999"&gt;Laptop HP&lt;/li&gt;
+        &lt;li class="items" data-nombre="Mouse" data-precio="29"&gt;Mouse Logitech&lt;/li&gt;
+    &lt;/ul&gt;
 &lt;/div&gt;
 
 &lt;script type="module"&gt;
@@ -59,7 +68,9 @@
 
 <h2>Búsqueda remota (servidor)</h2>
 
-<pre data-lang="javascript"><code>new Search({
+<pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
+
+new Search({
     element: '#app',
     procesServer: true,
     fetch: {
@@ -86,7 +97,16 @@
 
 <h2>Múltiples instancias</h2>
 
-<pre data-lang="javascript"><code>// Buscador de productos
+<pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
+
+const productos = [
+    { id: 1, nombre: 'Laptop HP', categoria: 'Electrónica' }
+];
+const usuarios = [
+    { id: 1, nombre: 'Ana García', rol: 'admin' }
+];
+
+// Buscador de productos
 const searchProductos = new Search({
     element: '#productos',
     data: productos,
@@ -103,7 +123,13 @@ const searchUsuarios = new Search({
 
 <h2>Con resaltado de texto</h2>
 
-<pre data-lang="javascript"><code>new Search({
+<pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
+
+const productos = [
+    { id: 1, nombre: 'Laptop HP', precio: 999, categoria: 'Electrónica' }
+];
+
+new Search({
     element: '#buscador',
     data: productos,
     highlightEnabled: true,
@@ -115,9 +141,9 @@ const searchUsuarios = new Search({
             &lt;span class="badge"&gt;${item.categoria}&lt;/span&gt;
         &lt;/div&gt;
     `
-}).init();
+}).init();</code></pre>
 
-/* CSS personalizado */
+<pre data-lang="css"><code>/* CSS personalizado */
 .my-highlight {
     background-color: #ffeb3b;
     color: #000;
@@ -128,7 +154,14 @@ const searchUsuarios = new Search({
 
 <h2>Con eventos</h2>
 
-<pre data-lang="javascript"><code>const search = new Search({
+<pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
+
+const items = [
+    { id: 1, nombre: 'Laptop HP' },
+    { id: 2, nombre: 'Mouse Logitech' }
+];
+
+const search = new Search({
     element: '#app',
     data: items
 }).init();
@@ -137,10 +170,12 @@ search
     .on('init', () => console.log('Componente listo'))
     .on('search', (data) => {
         console.log(`Buscando: ${data.searchTerm}`);
-        console.log(`Resultados: ${data.results.length}`);
+        console.log(`Resultados: ${data.totalResults}`);
     })
     .on('itemSelected', ({ item, close }) => {
-        alert(`Seleccionaste: ${item.nombre}`);
+        // 'item' es el elemento &lt;li&gt; del DOM, no el objeto de datos.
+        // Puedes leer el texto renderizado o consultar el DOM del item.
+        console.log('Item seleccionado:', item.textContent);
         close();
     })
     .on('pageChange', (data) => {
@@ -149,7 +184,14 @@ search
 
 <h2>Con caché y sort</h2>
 
-<pre data-lang="javascript"><code>const search = new Search({
+<pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
+
+const productos = [
+    { id: 1, nombre: 'Laptop HP', precio: 999 },
+    { id: 2, nombre: 'Mouse Logitech', precio: 29 }
+];
+
+const search = new Search({
     element: '#app',
     data: productos,
     cacheEnabled: true,
@@ -177,7 +219,9 @@ document.getElementById('btn-clear').addEventListener('click', () => {
 
 <h2>Con adapter de respuesta</h2>
 
-<pre data-lang="javascript"><code>new Search({
+<pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
+
+new Search({
     element: '#app',
     procesServer: true,
     responseAdapter: (response) => {
@@ -196,7 +240,9 @@ document.getElementById('btn-clear').addEventListener('click', () => {
 
 <h2>Con búsqueda en objetos anidados</h2>
 
-<pre data-lang="javascript"><code>const data = [
+<pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
+
+const data = [
     { id: 1, name: 'Venezuela', capital: { name: 'Caracas' } },
     { id: 2, name: 'Colombia', capital: { name: 'Bogotá' } }
 ];
@@ -212,7 +258,7 @@ new Search({
 
 <h3>React</h3>
 
-<pre data-lang="javascript"><code>import { useEffect, useRef } from 'react';
+<pre data-lang="jsx"><code>import { useEffect, useRef } from 'react';
 import { Search } from 'buscador-dinamico';
 import 'buscador-dinamico/css/buscador-dinamico.css';
 
@@ -237,7 +283,7 @@ function SearchComponent({ data }) {
 
 <h3>Vue</h3>
 
-<pre data-lang="javascript"><code>&lt;template&gt;
+<pre data-lang="vue"><code>&lt;template&gt;
     &lt;div id="vue-search"&gt;&lt;/div&gt;
 &lt;/template&gt;
 

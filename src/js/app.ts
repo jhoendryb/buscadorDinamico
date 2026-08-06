@@ -445,9 +445,12 @@ class Search {
      */
     clearSort(): Search {
         if (this._destroyed) return this;
-        this.sortBy = null;
         this.sortOrder = Constants.SORT_ORDER;
-
+        
+        this.sort(this.sortBy || "", this.sortOrder);
+        
+        this.sortBy = null;
+        
         if (this.procesServer) {
             if (this.fetch?.body) {
                 this.fetch.body.sortBy = null;
