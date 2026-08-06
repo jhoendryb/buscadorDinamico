@@ -11,12 +11,12 @@ var e = Object.defineProperty, t = (t, n) => {
 	constructor(t) {
 		this.currentDrawId = 0, this.isLoadingMore = !1, this._destroyed = !1, this.abortController = null;
 		let { translation: n, ...r } = t;
-		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = v, this.zIndex = _, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = x.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundKeydownHandler = () => {}, this.boundClickHandler = () => {}, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
+		console.log("que esta pasando", r), this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = v, this.zIndex = _, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = x.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), console.log("que esta pasando 2", this.data), this.boundKeydownHandler = () => {}, this.boundClickHandler = () => {}, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
 		try {
 			this.#t(), this.scrollObserver = null, this._ajaxResponse = {}, this.t = {
 				...e.#e,
 				...n
-			}, this.searchingLocal = new m(), this.searchingServer = new h(this.errorHandler, this.responseAdapter), this.renderer = new p({
+			}, this._data = this.data, console.log("que esta pasando 3", this._data), this.searchingLocal = new m(), this.searchingServer = new h(this.errorHandler, this.responseAdapter), this.renderer = new p({
 				content: document.querySelector(this.element),
 				contentSearch: void 0,
 				inputSearch: void 0,
@@ -30,14 +30,14 @@ var e = Object.defineProperty, t = (t, n) => {
 					itemsOnPage: this.pagination.getPageItems(this.procesServer ? null : this._data).length,
 					totalLoaded: this.pagination.getTotalLoaded()
 				});
-			}), this._data = this.data;
+			});
 		} catch (e) {
 			throw e instanceof o && this.errorHandler.logError(e, this.events), e;
 		}
 	}
 	init() {
 		try {
-			if (this.errorHandler.validateElementExists(this.element, a.ELEMENT_NOT_FOUND), this.renderer.setTheme(this.theme), !this.procesServer) {
+			if (this.errorHandler.validateElementExists(this.element, a.ELEMENT_NOT_FOUND), this.renderer.setTheme(this.theme), !this.procesServer && this.data.length == 0) {
 				let e = this.searchingLocal.isExtractData(this.renderer.body.content);
 				e && (this.data = e, this._data = this.data);
 			}
@@ -149,16 +149,16 @@ var e = Object.defineProperty, t = (t, n) => {
 		return `${e}_${t}`;
 	}
 	sort(e, t = "asc") {
-		return this._destroyed ? this : (this.sortBy = e, this.sortOrder = t, this.procesServer ? this.draw(this.searchTerm, !0) : this._data?.sort((n, r) => {
+		return this._destroyed ? this : (this.sortBy = e, this.sortOrder = t, this.sortBy === null ? (this.clearSort(), this) : (this.procesServer ? this.draw(this.searchTerm, !0) : this._data?.sort((n, r) => {
 			let i = n[e], a = r[e];
 			return i < a ? t === "asc" ? -1 : 1 : i > a ? t === "asc" ? 1 : -1 : 0;
 		}), this.events.emit("sortChange", {
 			field: e,
 			order: t
-		}), this);
+		}), this));
 	}
 	clearSort() {
-		return this._destroyed ? this : (this.sortBy = null, this.sortOrder = "asc", this.procesServer && this.fetch?.body && (this.fetch.body.sortBy = null, this.fetch.body.sortOrder = "asc"), this.cache.clear(), this);
+		return this._destroyed ? this : (this.sortOrder = "asc", this.sort(this.sortBy || "", this.sortOrder), this.sortBy = null, this.procesServer && this.fetch?.body && (this.fetch.body.sortBy = null, this.fetch.body.sortOrder = "asc"), this.cache.clear(), this);
 	}
 	setupKeyboardNavigation() {
 		if (this._destroyed || !this.keyboardEnabled) return this;
@@ -194,7 +194,7 @@ var e = Object.defineProperty, t = (t, n) => {
 		});
 	}
 	clear() {
-		return this._destroyed ? this : (this.searchTerm = "", this.renderer.body.inputSearch && (this.renderer.body.inputSearch.value = ""), this.renderer.body.renderItems && (this.renderer.body.renderItems.innerHTML = ""), this.pagination.goToPage(1), this.sortBy = null, this.sortOrder = "asc", this.cache.clear(), this.selectedIndex = -1, this);
+		return this._destroyed ? this : (this.searchTerm = "", this.renderer.body.inputSearch && (this.renderer.body.inputSearch.value = this.searchTerm), this.renderer.body.renderItems && (this.renderer.body.renderItems.innerHTML = ""), this.sortBy !== null && this.clearSort(), this.cache.clear(), this.pagination.goToPage(1), this.draw(this.searchTerm, !0), this.selectedIndex = -1, this);
 	}
 	destroy() {
 		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content.removeEventListener("keydown", this.boundKeydownHandler), this.renderer.body.renderItems?.removeEventListener("click", this.boundClickHandler), this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
