@@ -65,6 +65,8 @@ class Search {
     constructor(params: Types.SearchParams) {
         const { translation, ...newParams } = params;
 
+        console.log("que esta pasando", newParams);
+
         this.element = undefined as unknown as string;
         this.searchTerm = "";
         this.data = [];
@@ -88,6 +90,8 @@ class Search {
 
         Object.assign(this, newParams);
 
+        console.log("que esta pasando 2", this.data);
+
         this.boundKeydownHandler = () => { };
         this.boundClickHandler = () => { };
         this.errorHandler = ErrorHandler.getInstance(this.developmentMode);
@@ -100,6 +104,10 @@ class Search {
             this._ajaxResponse = {};
 
             this.t = { ...Search.#defaultTranslations, ...translation };
+
+            this._data = this.data;
+
+            console.log("que esta pasando 3", this._data);
 
             this.searchingLocal = new SearchingLocal();
             this.searchingServer = new SearchingServer(this.errorHandler, this.responseAdapter);
@@ -128,8 +136,6 @@ class Search {
                     totalLoaded: this.pagination.getTotalLoaded()
                 } as Types.PageChangeEventData);
             });
-
-            this._data = this.data;
         } catch (error) {
             if (error instanceof SearchError) {
                 this.errorHandler.logError(error, this.events);
@@ -147,9 +153,9 @@ class Search {
 
             this.renderer.setTheme(this.theme);
 
-            if (!this.procesServer) {
+            if (!this.procesServer && this.data.length == 0) {
                 const extracted = this.searchingLocal.isExtractData(this.renderer.body.content);
-                if (extracted) {
+                if (extracted) {    
                     this.data = extracted;
                     this._data = this.data;
                 }

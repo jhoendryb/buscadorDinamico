@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -13,37 +13,268 @@
             box-sizing: border-box;
         }
     </style>
-    <!-- <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css"> -->
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="./src/css/index.css">
     <!-- <link rel="stylesheet" href="./src/css/core/index.css">
     <link rel="stylesheet" href="./src/css/theme-BlueBlack/index.css"> -->
 
-    <!--
+
     <style type="text/css">
-        :root {
-            --search-width: 400px;
-            --search-bg-color: #f5f5f5;
-            --search-selected-bg-color: #ffeb3b;
-        }
-        .app-search {
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        .items-search .items {
-            transition: all 0.3s ease;
+        body,
+        html {
+            width: 100%;
+            height: 100%;
         }
 
-        .content-pagination-items {
-            background: #f5f5f5;
+        html[data-theme="light"] body {
+            color-scheme: light;
         }
-    </style> -->
+
+        html[data-theme="dark"] body {
+            color-scheme: dark;
+            background-color: black;
+            color: white;
+        }
+
+        .dynamic_search>div {
+            padding: 5px;
+            display: flex;
+            flex-direction: row;
+            border-radius: 10px;
+        }
+
+        .dynamic_search nav,
+        .dynamic_search article {
+            flex: 1;
+        }
+
+        .dynamic_search nav {
+            min-width: 30%;
+            max-width: 250px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .dynamic_search article {
+            display: flex;
+        }
+
+        .dynamic_search article .content-code pre {
+            height: 500px;
+            max-height: 500px;
+            overflow: auto;
+        }
+
+        /* .dynamic_search article .content-search {} */
+    </style>
 </head>
 
-<body
-    style="background: #ffffff; height: 100vh;
-background: linear-gradient(90deg,rgba(255, 255, 255, 1) 50%, rgba(0, 0, 0, 1) 50%); display:flex; flex-direction: row; justify-content: space-evenly; align-items: center;">
+<body>
 
-    <div class="app-search app-search1">
+    <section class="container-fluid h-100 dynamic_search">
+        <div class="row h-100">
+            <nav class="col-3 py-2">
+                <form class="form-dynamic_search">
+                    <h3 class="mb-4">Configuración del Buscador Dinámico</h3>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="input-element" class="form-label fw-semibold">element *</label>
+                            <input value=".app-search1" data-type="string" data-required="true" id="input-element"
+                                type="text" name="element" class="form-control" placeholder="#miBuscador">
+                            <div class="form-text text-white">Selector CSS del contenedor donde se montará el buscador
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="input-theme" class="form-label fw-semibold">theme</label>
+                            <select data-type="string" data-default="adaptative" id="input-theme" name="theme"
+                                class="form-select">
+                                <option selected="" value="adaptative">adaptative (default)</option>
+                                <option value="clean-white">clean-white</option>
+                                <option value="onyx-black">onyx-black</option>
+                                <option value="blue-black">blue-black</option>
+                                <option value="forest-green">forest-green</option>
+                                <option value="default">default (sin tema)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="input-sortOrder" class="form-label fw-semibold">sortOrder</label>
+                            <select data-type="string" data-default="asc" id="input-sortOrder" name="sortOrder"
+                                class="form-select">
+                                <option selected="" value="asc">asc</option>
+                                <option value="desc">desc</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="input-searchTerm" class="form-label fw-semibold">searchTerm</label>
+                            <input data-type="string" data-default="" id="input-searchTerm" type="text"
+                                name="searchTerm" class="form-control" placeholder="Término de búsqueda inicial">
+                        </div>
+                        <div class="col-12">
+                            <label for="input-data" class="form-label fw-semibold">data</label>
+                            <textarea data-type="array" data-default="[]" id="input-data" name="data"
+                                class="form-control font-monospace" rows="5"
+                                placeholder="[{ &quot;name&quot;: &quot;Ejemplo&quot; }]"></textarea>
+                            <div class="form-text text-white">Array JSON de objetos para búsqueda local. Se ignora si
+                                procesServer=true.</div>
+                        </div>
+                        <div class="col-12">
+                            <label for="input-template" class="form-label fw-semibold">template</label>
+                            <textarea data-type="string|function" data-default="null" id="input-template"
+                                name="template" class="form-control font-monospace" rows="3"
+                                placeholder="&lt;strong&gt;{{name}}&lt;/strong&gt; - &lt;small&gt;{{descripcion}}&lt;/small&gt;"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="input-sortBy" class="form-label fw-semibold">sortBy</label>
+                            <input data-type="string" data-default="null" id="input-sortBy" type="text" name="sortBy"
+                                class="form-control" placeholder="nombreCampo">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="input-highlightClass" class="form-label fw-semibold">highlightClass</label>
+                            <input data-type="string" data-default="&quot;&quot;" id="input-highlightClass" type="text"
+                                name="highlightClass" class="form-control" placeholder="mi-resaltado">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="input-zIndex" class="form-label fw-semibold">zIndex</label>
+                            <input value="1000" data-type="number" data-default="1000" id="input-zIndex" type="number"
+                                name="zIndex" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="input-itemsPerPage" class="form-label fw-semibold">itemsPerPage</label>
+                            <input value="10" data-type="number" data-default="10" min="1" id="input-itemsPerPage"
+                                type="number" name="itemsPerPage" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="input-debounceTime" class="form-label fw-semibold">debounceTime (ms)</label>
+                            <input value="500" data-type="number" data-default="500" id="input-debounceTime"
+                                type="number" name="debounceTime" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="input-cacheMaxSize" class="form-label fw-semibold">cacheMaxSize</label>
+                            <input value="50" data-type="number" data-default="50" id="input-cacheMaxSize" type="number"
+                                name="cacheMaxSize" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="input-cacheTtlSeconds" class="form-label fw-semibold">cacheTtlSeconds</label>
+                            <input value="300" data-type="number" data-default="300" id="input-cacheTtlSeconds"
+                                type="number" name="cacheTtlSeconds" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="input-dom" class="form-label fw-semibold">dom</label>
+                            <input value="scip" data-type="string" data-default="scip" pattern="^[scip]+$"
+                                id="input-dom" type="text" name="dom" class="form-control">
+                            <div class="form-text text-white">Orden: s=search, c=content, i=items, p=pagination</div>
+                        </div>
+                    </div>
+                    <hr class="my-4">
+                    <h5 class="mb-3">Banderas (booleans)</h5>
+                    <div class="row mb-4 d-flex flex-column">
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="form-check form-switch">
+                                <input data-type="boolean" data-default="false" id="input-procesServer" type="checkbox"
+                                    name="procesServer" class="form-check-input">
+                                <label for="input-procesServer" class="form-check-label">procesServer</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="form-check form-switch">
+                                <input data-type="boolean" data-default="false" id="input-keyboardEnabled"
+                                    type="checkbox" name="keyboardEnabled" class="form-check-input">
+                                <label for="input-keyboardEnabled" class="form-check-label">keyboardEnabled</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="form-check form-switch">
+                                <input data-type="boolean" data-default="false" id="input-cacheEnabled" type="checkbox"
+                                    name="cacheEnabled" class="form-check-input">
+                                <label for="input-cacheEnabled" class="form-check-label">cacheEnabled</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="form-check form-switch">
+                                <input data-type="boolean" data-default="false" id="input-highlightEnabled"
+                                    type="checkbox" name="highlightEnabled" class="form-check-input">
+                                <label for="input-highlightEnabled" class="form-check-label">highlightEnabled</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="form-check form-switch">
+                                <input data-type="boolean" data-default="false" id="input-developmentMode"
+                                    type="checkbox" name="developmentMode" class="form-check-input">
+                                <label for="input-developmentMode" class="form-check-label">developmentMode</label>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="my-4">
+                    <h5 class="mb-3">fetch (requerido si procesServer=true)</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <textarea data-type="object" data-default="{}" id="input-fetch" name="fetch"
+                                class="form-control font-monospace" rows="6"
+                                placeholder=""></textarea>
+                            <!-- <div class="form-text text-white">Usa en "pagination": {{from}}, {{to}} y {{total}} para
+                                mostrar datos.</div> -->
+                        </div>
+                    </div>
+                    <!-- <div class="row g-3 mb-4 d-flex flex-column">
+                        <div class="col-md-6">
+                            <label for="input-fetch-url" class="form-label fw-semibold">fetch.url *</label>
+                            <input id="input-fetch-url" type="url" name="fetch[url]" class="form-control"
+                                placeholder="/api/search.php">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="input-fetch-method" class="form-label fw-semibold">fetch.method</label>
+                            <select id="input-fetch-method" name="fetch[method]" class="form-select">
+                                <option selected="" value="POST">POST</option>
+                                <option value="GET">GET</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="input-fetch-timeout" class="form-label fw-semibold">fetch.timeout (ms)</label>
+                            <input value="5000" id="input-fetch-timeout" type="number" name="fetch[timeout]"
+                                class="form-control">
+                        </div>
+                    </div> -->
+                    <hr class="my-4">
+                    <h5 class="mb-3">Traducciones (translation)</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <textarea data-type="object" data-default="{}" id="input-translation" name="translation"
+                                class="form-control font-monospace" rows="6"
+                                placeholder=""></textarea>
+                            <div class="form-text text-white">Usa en "pagination": {{from}}, {{to}} y {{total}} para
+                                mostrar datos.</div>
+                        </div>
+                    </div>
+                </form>
+            </nav>
+            <article class="col-9">
+                <div class="col-6 content-code">
+                    <button class="copy-btn">Copiar</button>
+                    <pre><code contenteditable="true" class="code-prepareSearch"></code></pre>
+                </div>
+                <div class="col-6 content-search">
+                    <div class="app-search app-search1">
+                        <search class="input-search prueba">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" name="filterSearch" id="filter-search"
+                                class="filter-search form-control input-sm" placeholder="Ingrese palabra clave...">
+                        </search>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- style="background: #ffffff; height: 100vh;
+background: linear-gradient(90deg,rgba(255, 255, 255, 1) 50%, rgba(0, 0, 0, 1) 50%); display:flex; flex-direction: row; justify-content: space-evenly; align-items: center;" -->
+
+    <!-- <div class="app-search app-search1">
         <search class="input-search prueba">
             <span class="search-icon">🔍</span>
             <input type="text" name="filterSearch" id="filter-search" class="filter-search form-control input-sm"
@@ -59,7 +290,7 @@ background: linear-gradient(90deg,rgba(255, 255, 255, 1) 50%, rgba(0, 0, 0, 1) 5
                 <div class="items-counter">20 de 498</div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- <div class="app-search app-search2">
         <search class="input-search">
@@ -239,12 +470,12 @@ background: linear-gradient(90deg,rgba(255, 255, 255, 1) 50%, rgba(0, 0, 0, 1) 5
 
     -->
 
-    <div class="app-search app-search4">
-        <!-- <search class="input-search">
+    <!-- <div class="app-search app-search4">
+        <search class="input-search">
             <input type="text" name="filterSearch" class="filter-search form-control input-lg"
                 placeholder="Ingrese palabra clave...">
-        </search> -->
-    </div>
+        </search>
+    </div> -->
 
     <!-- <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js" type="module"></script> -->
     <script src="./src/js/search.ts" type="module"></script>
