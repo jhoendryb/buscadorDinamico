@@ -449,6 +449,7 @@ class Search {
         }
 
         this.cache.clear();
+        this.draw(this.searchTerm);
         return this;
     }
     /**
