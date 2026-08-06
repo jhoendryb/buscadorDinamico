@@ -134,7 +134,8 @@
                             <label for="input-sortBy" class="form-label fw-semibold">sortBy</label>
                             <input data-type="string" data-default="null" id="input-sortBy" type="text" name="sortBy"
                                 class="form-control" placeholder="nombreCampo">
-                            <div class="form-text text-white">Coloca el nombre de alguna de las claves de los objetos proporcionados.</div>
+                            <div class="form-text text-white">Coloca el nombre de alguna de las claves de los objetos
+                                proporcionados.</div>
                         </div>
                         <div class="col-md-6">
                             <label for="input-highlightClass" class="form-label fw-semibold">highlightClass</label>
@@ -217,8 +218,7 @@
                     <div class="row g-3 mb-4">
                         <div class="col-md-12">
                             <textarea data-type="object" data-default="{}" id="input-fetch" name="fetch"
-                                class="form-control font-monospace" rows="6"
-                                placeholder=""></textarea>
+                                class="form-control font-monospace" rows="6" placeholder=""></textarea>
                             <!-- <div class="form-text text-white">Usa en "pagination": {{from}}, {{to}} y {{total}} para
                                 mostrar datos.</div> -->
                         </div>
@@ -247,8 +247,7 @@
                     <div class="row g-3 mb-4">
                         <div class="col-md-12">
                             <textarea data-type="object" data-default="{}" id="input-translation" name="translation"
-                                class="form-control font-monospace" rows="6"
-                                placeholder=""></textarea>
+                                class="form-control font-monospace" rows="6" placeholder=""></textarea>
                             <div class="form-text text-white">Usa en "pagination": {{from}}, {{to}} y {{total}} para
                                 mostrar datos.</div>
                         </div>
@@ -271,7 +270,22 @@
                 </div>
             </article>
         </div>
+        <div id="buscador">
+            <ul class="items-search">
+                <li class="items" data-nombre="Laptop HP" data-precio="999">Laptop HP</li>
+                <li class="items" data-nombre="Mouse" data-precio="29">Mouse Logitech</li>
+            </ul>
+        </div>
     </section>
+
+
+    <script type="module">
+        import { Search } from './dist/buscador-dinamico.es.js';
+
+        new Search({
+            element: '#buscador'
+        }).init();
+    </script>
 
     <!-- style="background: #ffffff; height: 100vh;
 background: linear-gradient(90deg,rgba(255, 255, 255, 1) 50%, rgba(0, 0, 0, 1) 50%); display:flex; flex-direction: row; justify-content: space-evenly; align-items: center;" -->
