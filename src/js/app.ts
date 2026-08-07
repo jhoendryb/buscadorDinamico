@@ -189,6 +189,16 @@ class Search {
         this.errorHandler.validateRequired(this.element, 'element', ErrorCode.ELEMENT_REQUIRED);
         this.errorHandler.validateType(this.element, 'string', 'element', ErrorCode.ELEMENT_TYPE_INVALID);
 
+        const isBoolean = {
+            procesServer: this.procesServer, keyboardEnabled: this.keyboardEnabled, 
+            cacheEnabled: this.cacheEnabled, developmentMode: this.developmentMode, 
+            highlightEnabled: this.highlightEnabled
+        }
+
+        Object.keys(isBoolean).forEach(key => {
+            this.errorHandler.validateType(isBoolean[key as keyof typeof isBoolean], 'boolean', key, ErrorCode.INVALID_TYPE_FORMAT);
+        });
+
         if (this.procesServer) {
             this.errorHandler.validateRequired(this.fetch?.url, 'fetch.url', ErrorCode.FETCH_URL_REQUIRED);
         }

@@ -52,11 +52,18 @@ function copiarCodigo(boton: HTMLElement) {
 function reactionSearch({ form, search, emit = null }: Record<string, any>): Search {
 
     const formData = new FormData(form as HTMLFormElement);
-    let values: { [key: string]: string | number } = {};
+    let values: { [key: string]: string | number | boolean } = {};
     Array.from(formData.keys()).forEach((key) => {
         let value = formData.get(key);
         if (typeof value === 'string' && value.trim() !== "") {
-            if (key == "fetch") {
+            
+            if ([
+                "procesServer", "keyboardEnabled", 
+                "cacheEnabled", "developmentMode", 
+                "highlightEnabled"
+            ].includes(key) !== false) {
+                values[key] = true;
+            } else if (key == "fetch") {
                 values[key] = JSON.parse(value.trim());
             } else if (key == "translation") {
                 values[key] = JSON.parse(value.trim());
@@ -81,12 +88,12 @@ function reactionSearch({ form, search, emit = null }: Record<string, any>): Sea
     if (emit && emit.name === "sortOrder") {
         if (emit.value === "") {
             search.clearSort();
-            search.draw("");
+            search.draw("", true);
             return search;
         }
         if (!values["sortBy"]) return search;
         search.sort(values["sortBy"] as string, emit.value as string);
-        search.draw("");
+        search.draw("", true);
         return search;
     }
 
