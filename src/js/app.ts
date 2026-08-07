@@ -420,11 +420,6 @@ class Search {
         this.sortBy = field;
         this.sortOrder = order;
 
-        if (this.sortBy === null) {
-            this.clearSort();
-            return this;
-        }
-
         if (this.procesServer) {
             this.draw(this.searchTerm, true);
         } else {
