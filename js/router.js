@@ -41,20 +41,28 @@ const Router = {
 
     async handleRoute() {
         const hash = window.location.hash.replace('#/', '') || 'introduction';
-        const section = hash.split('?')[0];
+        const [section, anchor] = hash.split('#');
 
         if (!this.sections[section]) {
             this.renderNotFound(section);
             return;
         }
 
-        if (this.currentSection === section) return;
+        if (this.currentSection !== section) {
+            this.currentSection = section;
+            await this.loadSection(section);
+            this.updateActiveLink(section);
+            this.updateDocumentTitle(section);
+        }
 
-        this.currentSection = section;
-        await this.loadSection(section);
-        this.updateActiveLink(section);
-        this.updateDocumentTitle(section);
-        this.scrollToTop();
+        if (anchor) {
+            const target = document.getElementById(anchor);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        } else {
+            this.scrollToTop();
+        }
     },
 
     async loadSection(name) {

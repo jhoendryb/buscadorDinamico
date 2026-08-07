@@ -88,3 +88,79 @@ import 'buscador-dinamico/css/buscador-dinamico.css';</code></pre>
 // o
 import { Search } from 'buscador-dinamico';
 console.log(typeof Search); // "function" (ES Module)</code></pre>
+
+<h2 id="ssr">SSR (Server-Side Rendering)</h2>
+
+<p>La librería es compatible con entornos SSR (Next.js, Nuxt, SvelteKit, etc.). El constructor no accede al DOM, por lo que puedes crear la instancia en el servidor sin errores. Sin embargo, <code>init()</code> accede al DOM y <strong>debe ejecutarse solo en el cliente</strong>.</p>
+
+<h3>React / Next.js</h3>
+
+<p>Usa <code>useEffect</code> para inicializar solo en el cliente:</p>
+
+<pre data-lang="jsx"><code>'use client'; // Next.js App Router: marca el componente como cliente
+import { useEffect, useRef } from 'react';
+import { Search } from 'buscador-dinamico';
+import 'buscador-dinamico/css/buscador-dinamico.css';
+
+export default function SearchComponent({ data }) {
+    const searchRef = useRef(null);
+
+    useEffect(() => {
+        searchRef.current = new Search({
+            element: '#my-search',
+            data: data,
+            theme: 'clean-white'
+        }).init();
+
+        return () => searchRef.current?.destroy();
+    }, [data]);
+
+    return &lt;div id="my-search" className="app-search"&gt;&lt;/div&gt;;
+}</code></pre>
+
+<h3>Vue / Nuxt</h3>
+
+<p>Usa <code>onMounted</code> para inicializar solo en el cliente:</p>
+
+<pre data-lang="vue"><code>&lt;template&gt;
+    &lt;div id="my-search" class="app-search"&gt;&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+import { onMounted, onUnmounted } from 'vue';
+import { Search } from 'buscador-dinamico';
+import 'buscador-dinamico/css/buscador-dinamico.css';
+
+const props = defineProps({ data: Array });
+let search = null;
+
+onMounted(() => {
+    search = new Search({
+        element: '#my-search',
+        data: props.data,
+        theme: 'clean-white'
+    }).init();
+});
+
+onUnmounted(() => search?.destroy());
+&lt;/script&gt;</code></pre>
+
+<h3>HTML estático / SPA</h3>
+
+<p>Si no usas SSR, puedes inicializar directamente:</p>
+
+<pre data-lang="javascript"><code>import { Search } from 'buscador-dinamico';
+import 'buscador-dinamico/css/buscador-dinamico.css';
+
+new Search({
+    element: '#my-search',
+    data: [...]
+}).init();</code></pre>
+
+<div class="doc-callout doc-callout--info">
+    <span class="doc-callout__icon">ℹ️</span>
+    <div class="doc-callout__content">
+        <strong>Regla general</strong>
+        <p><code>new Search()</code> es seguro en cualquier entorno. Solo <code>init()</code> necesita el navegador. Si usas un framework con SSR, asegúrate de que <code>init()</code> se ejecute dentro de un hook que corra solo en el cliente (<code>useEffect</code>, <code>onMounted</code>, <code>onMount</code>).</p>
+    </div>
+</div>
