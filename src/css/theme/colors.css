@@ -10,8 +10,6 @@
 
 .content-pagination-items {
     background-color: var(--search-bg-color, #ffffff);
-    border: 1px solid var(--search-input-border-color, transparent);
-    /* box-shadow: var(--search-shadow, 0 4px 12px var(--shadow-color, rgba(0,0,0,0.1))); */
 }
 
 .search-highlight {
@@ -43,7 +41,7 @@
 
 .items.selected {
     background-color: var(--search-selected-bg-color);
-    border-left-color: var(--search-selected-border-color); 
+    border-left-color: var(--search-selected-border-color);
     color: var(--search-text-color);
 }
 
