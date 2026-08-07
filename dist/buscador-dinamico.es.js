@@ -11,13 +11,13 @@ var e = Object.defineProperty, t = (t, n) => {
 	constructor(t) {
 		this.currentDrawId = 0, this.isLoadingMore = !1, this._destroyed = !1, this.abortController = null;
 		let { translation: n, ...r } = t;
-		console.log("que esta pasando", r), this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = v, this.zIndex = _, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = x.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), console.log("que esta pasando 2", this.data), this.boundKeydownHandler = () => {}, this.boundClickHandler = () => {}, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
+		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = v, this.zIndex = _, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = x.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundKeydownHandler = () => {}, this.boundClickHandler = () => {}, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
 		try {
 			this.#t(), this.scrollObserver = null, this._ajaxResponse = {}, this.t = {
 				...e.#e,
 				...n
-			}, this._data = this.data, console.log("que esta pasando 3", this._data), this.searchingLocal = new m(), this.searchingServer = new h(this.errorHandler, this.responseAdapter), this.renderer = new p({
-				content: document.querySelector(this.element),
+			}, this._data = this.data, this.searchingLocal = new m(), this.searchingServer = new h(this.errorHandler, this.responseAdapter), this.renderer = new p({
+				content: void 0,
 				contentSearch: void 0,
 				inputSearch: void 0,
 				renderItems: void 0,
@@ -37,7 +37,7 @@ var e = Object.defineProperty, t = (t, n) => {
 	}
 	init() {
 		try {
-			if (this.errorHandler.validateElementExists(this.element, a.ELEMENT_NOT_FOUND), this.renderer.setTheme(this.theme), !this.procesServer && this.data.length == 0) {
+			if (this.errorHandler.validateElementExists(this.element, a.ELEMENT_NOT_FOUND), this.renderer.body.content = document.querySelector(this.element), this.renderer.setTheme(this.theme), !this.procesServer && this.data.length == 0) {
 				let e = this.searchingLocal.isExtractData(this.renderer.body.content);
 				e && (this.data = e, this._data = this.data);
 			}
@@ -149,13 +149,13 @@ var e = Object.defineProperty, t = (t, n) => {
 		return `${e}_${t}`;
 	}
 	sort(e, t = "asc") {
-		return this._destroyed ? this : (this.sortBy = e, this.sortOrder = t, this.sortBy === null ? (this.clearSort(), this) : (this.procesServer ? this.draw(this.searchTerm, !0) : this._data?.sort((n, r) => {
+		return this._destroyed ? this : (this.sortBy = e, this.sortOrder = t, this.procesServer ? this.draw(this.searchTerm, !0) : this._data?.sort((n, r) => {
 			let i = n[e], a = r[e];
 			return i < a ? t === "asc" ? -1 : 1 : i > a ? t === "asc" ? 1 : -1 : 0;
 		}), this.events.emit("sortChange", {
 			field: e,
 			order: t
-		}), this));
+		}), this);
 	}
 	clearSort() {
 		return this._destroyed ? this : (this.sortOrder = "asc", this.sort(this.sortBy || "", this.sortOrder), this.sortBy = null, this.procesServer && this.fetch?.body && (this.fetch.body.sortBy = null, this.fetch.body.sortOrder = "asc"), this.cache.clear(), this);
@@ -173,7 +173,7 @@ var e = Object.defineProperty, t = (t, n) => {
 			if (e.preventDefault(), !t) return;
 			let i = e.target.closest(".items"), a = t.querySelectorAll(".items");
 			i && (this.selectedIndex = Array.from(a).indexOf(i), this.#u(a), this.#d(i), r(n));
-		}, t?.addEventListener("click", this.boundClickHandler), e.addEventListener("keydown", this.boundKeydownHandler), this;
+		}, t?.addEventListener("click", this.boundClickHandler), e?.addEventListener("keydown", this.boundKeydownHandler), this;
 	}
 	#u(e) {
 		e.forEach((e, t) => {
@@ -197,7 +197,7 @@ var e = Object.defineProperty, t = (t, n) => {
 		return this._destroyed ? this : (this.searchTerm = "", this.renderer.body.inputSearch && (this.renderer.body.inputSearch.value = this.searchTerm), this.renderer.body.renderItems && (this.renderer.body.renderItems.innerHTML = ""), this.sortBy !== null && this.clearSort(), this.cache.clear(), this.pagination.goToPage(1), this.draw(this.searchTerm, !0), this.selectedIndex = -1, this);
 	}
 	destroy() {
-		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content.removeEventListener("keydown", this.boundKeydownHandler), this.renderer.body.renderItems?.removeEventListener("click", this.boundClickHandler), this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
+		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content?.removeEventListener("keydown", this.boundKeydownHandler), this.renderer.body.renderItems?.removeEventListener("click", this.boundClickHandler), this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
 			let e = this.renderer.body.inputSearch.cloneNode(!0);
 			this.renderer.body.inputSearch.parentNode && this.renderer.body.inputSearch.parentNode.replaceChild(e, this.renderer.body.inputSearch);
 		}
@@ -605,8 +605,10 @@ var i = class {
 		this.body = e, this.uniqueClassNameFn = t, this._isVisible = !1, this._hideTimeout = null, this._animationTimeouts = [], this.timeHiddenResults = n;
 	}
 	setTheme(e) {
-		let t = Array.from(this.body.content.classList).find((e) => e.startsWith("theme-"));
-		return t && this.body.content.classList.remove(t), e && e !== "default" && this.body.content.classList.add(`theme-${e}`), this;
+		let t = this.body.content;
+		if (!t) return this;
+		let n = Array.from(t.classList).find((e) => e.startsWith("theme-"));
+		return n && t.classList.remove(n), e && e !== "default" && t.classList.add(`theme-${e}`), this;
 	}
 	getUniqueClassName(e) {
 		return this.uniqueClassNameFn(e);
@@ -617,12 +619,12 @@ var i = class {
 	}
 	contentSearch() {
 		if (this.body.contentSearch) return this.body.contentSearch;
-		let e = this.body.content, t = e.querySelector(".input-search"), n = r({
+		let e = this.body.content, t = e?.querySelector(".input-search"), n = r({
 			element: t,
 			className: this.#e(`input-search ${this.getUniqueClassName("input-search")}`, t?.className),
 			...t ? {} : { element: "search" }
 		});
-		return t || e.appendChild(n), this.body.contentSearch = n, n;
+		return t || e?.appendChild(n), this.body.contentSearch = n, n;
 	}
 	renderSearch({ onInput: e, debounceTime: t, placeholder: n, ariaLabel: i }) {
 		if (this.body.inputSearch) return this.body.inputSearch;
@@ -782,12 +784,12 @@ var i = class {
 	}
 	renderContentPaginationItems() {
 		if (this.body.contentPaginationItems) return this.body.contentPaginationItems;
-		let e = this.body.content, t = e.querySelector(".content-pagination-items"), n = r({
+		let e = this.body.content, t = e?.querySelector(".content-pagination-items"), n = r({
 			element: t,
 			className: this.#e(`content-pagination-items ${this.getUniqueClassName("content-pagination-items")}`, t?.className),
 			...t ? {} : { element: "div" }
 		});
-		return t || e.appendChild(n), this.body.contentPaginationItems = n, n;
+		return t || e?.appendChild(n), this.body.contentPaginationItems = n, n;
 	}
 	destroy() {
 		this._animationTimeouts.forEach((e) => clearTimeout(e)), this._animationTimeouts = [], this._hideTimeout &&= (clearTimeout(this._hideTimeout), null), this.body.contentSearch = void 0, this.body.inputSearch = void 0, this.body.renderItems = void 0, this.body.paginationItems = void 0, this.body.contentPaginationItems = void 0;

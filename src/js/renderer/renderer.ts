@@ -35,14 +35,18 @@ export class SearchRenderer {
      * @returns {SearchRenderer} Instancia actual de SearchRenderer
      */
     setTheme(theme: string): SearchRenderer {
-        const existingThemeClass = Array.from(this.body.content.classList)
+        const content = this.body.content;
+
+        if (!content) return this;
+
+        const existingThemeClass = Array.from(content.classList)
             .find(cls => cls.startsWith('theme-'));
 
         if (existingThemeClass) {
-            this.body.content.classList.remove(existingThemeClass);
+            content.classList.remove(existingThemeClass);
         }
         if (theme && theme !== 'default') {
-            this.body.content.classList.add(`theme-${theme}`);
+            content.classList.add(`theme-${theme}`);
         }
         return this;
     }
@@ -75,8 +79,9 @@ export class SearchRenderer {
     contentSearch(): HTMLElement {
         if (this.body.contentSearch) return this.body.contentSearch;
 
-        const element = this.body.content;
-        let contentSearch = element.querySelector('.input-search') as HTMLElement;
+        const content: HTMLElement | undefined = this.body.content;
+
+        const contentSearch = content?.querySelector('.input-search') as HTMLElement;
 
         let jsonContentSearch: Types.CreateElementConfig = {
             element: contentSearch,
@@ -84,12 +89,12 @@ export class SearchRenderer {
             ...(!contentSearch ? {
                 element: "search"
             } : {})
-        }
+        };
 
         const newContentSearch = createElement(jsonContentSearch);
 
         if (!contentSearch) {
-            element.appendChild(newContentSearch);
+            content?.appendChild(newContentSearch);
         }
 
         this.body.contentSearch = newContentSearch;
@@ -450,8 +455,9 @@ export class SearchRenderer {
     renderContentPaginationItems(): HTMLElement {
         if (this.body.contentPaginationItems) return this.body.contentPaginationItems;
 
-        const element = this.body.content;
-        let contentPaginationItems = element.querySelector('.content-pagination-items') as HTMLElement;
+        const content: HTMLElement | undefined = this.body.content;
+
+        let contentPaginationItems = content?.querySelector('.content-pagination-items') as HTMLElement;
 
         let jsonContentPagItems: Types.CreateElementConfig = {
             element: contentPaginationItems,
@@ -464,7 +470,7 @@ export class SearchRenderer {
         const newContentPagItems = createElement(jsonContentPagItems)
 
         if (!contentPaginationItems) {
-            element.appendChild(newContentPagItems);
+            content?.appendChild(newContentPagItems);
         }
 
         this.body.contentPaginationItems = newContentPagItems;

@@ -65,8 +65,6 @@ class Search {
     constructor(params: Types.SearchParams) {
         const { translation, ...newParams } = params;
 
-        console.log("que esta pasando", newParams);
-
         this.element = undefined as unknown as string;
         this.searchTerm = "";
         this.data = [];
@@ -90,8 +88,6 @@ class Search {
 
         Object.assign(this, newParams);
 
-        console.log("que esta pasando 2", this.data);
-
         this.boundKeydownHandler = () => { };
         this.boundClickHandler = () => { };
         this.errorHandler = ErrorHandler.getInstance(this.developmentMode);
@@ -107,19 +103,17 @@ class Search {
 
             this._data = this.data;
 
-            console.log("que esta pasando 3", this._data);
-
             this.searchingLocal = new SearchingLocal();
             this.searchingServer = new SearchingServer(this.errorHandler, this.responseAdapter);
 
             this.renderer = new SearchRenderer({
-                content: document.querySelector(this.element) as HTMLElement, // ".input-search" - contenedor que contiene la app Search
+                content: undefined, // ".input-search" - contenedor que contiene la app Search
                 contentSearch: undefined, // ".app-search" - contenedor del Search
                 inputSearch: undefined, // "#filter-search" - input donde se escribe la búsqueda
                 renderItems: undefined, // ".items-search" - elemento donde se muestran los items
                 paginationItems: undefined, // ".index-search" - elemento donde se muestra la paginación
                 counterItems: undefined // ".items-counter" - elemento donde se muestra el contador de registros
-            }, this.#getUniqueClassName.bind(this), Constants.DEFAULT_TIME_HIDDEN_RESULTS);
+            } as Types.BodyConfig, this.#getUniqueClassName.bind(this), Constants.DEFAULT_TIME_HIDDEN_RESULTS);
             this.cache = new LRUCache<Types.SearchResult>(this.cacheMaxSize, this.cacheTtlSeconds);
             this.pagination = new Pagination(this.itemsPerPage, Constants.FIRST_PAGE);
             this.pagination.setCountFunction(() => {
@@ -151,11 +145,13 @@ class Search {
         try {
             this.errorHandler.validateElementExists(this.element, ErrorCode.ELEMENT_NOT_FOUND);
 
+            this.renderer.body.content = document.querySelector(this.element) as HTMLElement
+
             this.renderer.setTheme(this.theme);
 
             if (!this.procesServer && this.data.length == 0) {
                 const extracted = this.searchingLocal.isExtractData(this.renderer.body.content);
-                if (extracted) {    
+                if (extracted) {
                     this.data = extracted;
                     this._data = this.data;
                 }
@@ -441,11 +437,11 @@ class Search {
     clearSort(): Search {
         if (this._destroyed) return this;
         this.sortOrder = Constants.SORT_ORDER;
-        
+
         this.sort(this.sortBy || "", this.sortOrder);
-        
+
         this.sortBy = null;
-        
+
         if (this.procesServer) {
             if (this.fetch?.body) {
                 this.fetch.body.sortBy = null;
@@ -517,7 +513,7 @@ class Search {
 
         renderItems?.addEventListener('click', this.boundClickHandler);
 
-        content.addEventListener('keydown', this.boundKeydownHandler);
+        content?.addEventListener('keydown', this.boundKeydownHandler);
 
         return this;
     }
@@ -594,7 +590,7 @@ class Search {
         this._destroyed = true;
         this.events.emit('destroy', { timestamp: new Date().toISOString() } as Types.DestroyEventData);
 
-        this.renderer.body.content.removeEventListener('keydown', this.boundKeydownHandler);
+        this.renderer.body.content?.removeEventListener('keydown', this.boundKeydownHandler);
         this.renderer.body.renderItems?.removeEventListener('click', this.boundClickHandler);
 
         if (this.scrollObserver) {

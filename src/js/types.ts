@@ -42,7 +42,7 @@ export interface TranslationCache {
 }
 
 export interface BodyConfig {
-    content: HTMLElement;
+    content?: HTMLElement;
     contentSearch?: HTMLElement;
     inputSearch?: HTMLElement;
     renderItems?: HTMLElement;
@@ -162,3 +162,10 @@ export interface SearchEventMap {
     destroy: DestroyEventData;
     error: ErrorData;
 }
+
+// content: undefined, // ".input-search" - contenedor que contiene la app Search
+// contentSearch: undefined, // ".app-search" - contenedor del Search
+// inputSearch: undefined, // "#filter-search" - input donde se escribe la búsqueda
+// renderItems: undefined, // ".items-search" - elemento donde se muestran los items
+// paginationItems: undefined, // ".index-search" - elemento donde se muestra la paginación
+// counterItems: undefined
