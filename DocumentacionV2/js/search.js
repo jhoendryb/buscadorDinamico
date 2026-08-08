@@ -88,6 +88,13 @@ const SEARCH_DATA = [
     { title: 'Crear un tema personalizado', route: '#/css-themes', segment: 'crear-un-tema-personalizado', category: 'Guías', badge: 'success', description: 'Definir .app-search.theme-mi-tema con variables', keywords: 'crear tema personalizado custom theme' },
     { title: 'Soporte dark/light mode', route: '#/css-themes', segment: 'soporte-dark-light-mode', category: 'Guías', badge: 'success', description: 'Tema adaptative con prefers-color-scheme', keywords: 'dark light mode prefer system' },
 
+    // ── SSR ──────────────────────────────────────────────────────
+    { title: 'SSR (Server-Side Rendering)', route: '#/ssr', segment: '', category: 'Guías', badge: 'success', description: 'Compatibilidad con Next.js, Nuxt y SvelteKit', keywords: 'ssr server side rendering next nuxt sveltekit servidor' },
+    { title: 'Regla general', route: '#/ssr', segment: 'regla-general', category: 'Guías', badge: 'success', description: 'Ejecutar toda la inicialización dentro de hooks de cliente', keywords: 'regla general useEffect onMounted cliente inicializacion' },
+    { title: 'React / Next.js', route: '#/ssr', segment: 'react-next-js', category: 'Guías', badge: 'success', description: 'Inicializar con useEffect en Next.js App Router', keywords: 'react next useEffect useRef use client cliente' },
+    { title: 'Vue / Nuxt', route: '#/ssr', segment: 'vue-nuxt', category: 'Guías', badge: 'success', description: 'Inicializar con onMounted en Vue/Nuxt', keywords: 'vue nuxt onMounted onUnmounted composition' },
+    { title: 'HTML estático / SPA', route: '#/ssr', segment: 'html-estatico-spa', category: 'Guías', badge: 'success', description: 'Inicialización directa sin SSR', keywords: 'html estatico spa directo sin ssr' },
+
     // ── API ────────────────────────────────────────────────────────
     { title: 'API', route: '#/api', segment: '', category: 'Referencia', badge: 'warning', description: 'Referencia completa de la interfaz pública', keywords: 'api referencia publica interfaz' },
     { title: 'Constructor', route: '#/api', segment: 'constructor', category: 'Referencia', badge: 'warning', description: 'new Search(params: SearchParams): Search', keywords: 'constructor new crear instancia' },

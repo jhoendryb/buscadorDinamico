@@ -1,0 +1,83 @@
+<h1>SSR (Server-Side Rendering)</h1>
+
+<p>La librería es compatible con entornos SSR (Next.js, Nuxt, SvelteKit, etc.). Ni el import del módulo ni el constructor acceden al DOM, por lo que el paquete se puede importar y construir durante el render en servidor sin errores.</p>
+
+<p><code>init()</code> sí requiere el navegador y <strong>debe ejecutarse solo en el cliente</strong>.</p>
+
+<h2 id="regla-general">Regla general</h2>
+
+<p>La seguridad SSR no viene de dividir la creación en dos fases, sino de ejecutar <strong>toda</strong> la inicialización (<code>new Search(...).init()</code>) dentro de un hook que corra solo en el cliente (<code>useEffect</code>, <code>onMounted</code>, <code>onMount</code>). Así, la sentencia completa se ejecuta exclusivamente en el navegador y no es necesario instanciar en el servidor.</p>
+
+<p>El hecho de que el constructor no toque el DOM garantiza que importar el módulo o construirlo durante el render en servidor no produzca errores.</p>
+
+<h2 id="react-next-js">React / Next.js</h2>
+
+<p>Usa <code>useEffect</code> para inicializar solo en el cliente:</p>
+
+<pre data-lang="jsx"><code>'use client'; // Next.js App Router: marca el componente como cliente
+import { useEffect, useRef } from 'react';
+import { Search } from 'buscador-dinamico';
+import 'buscador-dinamico/css/buscador-dinamico.css';
+
+export default function SearchComponent({ data }) {
+    const searchRef = useRef(null);
+
+    useEffect(() => {
+        searchRef.current = new Search({
+            element: '#my-search',
+            data: data,
+            theme: 'clean-white'
+        }).init();
+
+        return () => searchRef.current?.destroy();
+    }, [data]);
+
+    return &lt;div id="my-search" className="app-search"&gt;&lt;/div&gt;;
+}</code></pre>
+
+<h2 id="vue-nuxt">Vue / Nuxt</h2>
+
+<p>Usa <code>onMounted</code> para inicializar solo en el cliente:</p>
+
+<pre data-lang="vue"><code>&lt;template&gt;
+    &lt;div id="my-search" class="app-search"&gt;&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+import { onMounted, onUnmounted } from 'vue';
+import { Search } from 'buscador-dinamico';
+import 'buscador-dinamico/css/buscador-dinamico.css';
+
+const props = defineProps({ data: Array });
+let search = null;
+
+onMounted(() => {
+    search = new Search({
+        element: '#my-search',
+        data: props.data,
+        theme: 'clean-white'
+    }).init();
+});
+
+onUnmounted(() => search?.destroy());
+&lt;/script&gt;</code></pre>
+
+<h2 id="html-estatico-spa">HTML estático / SPA</h2>
+
+<p>Si no usas SSR, puedes inicializar directamente:</p>
+
+<pre data-lang="javascript"><code>import { Search } from 'buscador-dinamico';
+import 'buscador-dinamico/css/buscador-dinamico.css';
+
+new Search({
+    element: '#my-search',
+    data: [...]
+}).init();</code></pre>
+
+<div class="doc-callout doc-callout--info">
+    <span class="doc-callout__icon">ℹ️</span>
+    <div class="doc-callout__content">
+        <strong>Nota</strong>
+        <p>La integración con frameworks también se cubre en la sección <a href="#/examples#react">Ejemplos &middot; React</a> y <a href="#/examples#vue">Ejemplos &middot; Vue</a>. En SSR, la diferencia clave es que <code>init()</code> debe vivir dentro de un hook de ciclo de vida que solo corra en el cliente.</p>
+    </div>
+</div>
