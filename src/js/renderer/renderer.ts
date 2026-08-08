@@ -2,6 +2,7 @@ import { createElement } from '../renderElement';
 import { EventEmitter } from '../events/eventEmitter';
 import { TemplateEngine } from './templateEngine';
 import * as Types from '../types';
+import * as Constants from '../constants';
 
 /**
  * Clase helper para crear la estructura DOM inicial de los componentes.
@@ -255,13 +256,13 @@ export class SearchRenderer {
      * Añade items al contenedor sin reemplazar el contenido existente.
      * @param {Record<string, any>[]} data - Items a añadir
      * @param {string|Function|null} template - Template personalizado (opcional)
-     * @param {string} [noResults="No hay resultados."] - Mensaje sin resultados
+     * @param {string} [noResults=Constants.DEFAULT_TRANSLATIONS.noResults] - Mensaje sin resultados
      * @param {EventEmitter} events - Instancia de EventEmitter
      * @param {boolean} [firstLoad=false] - Si es la primera carga
      * @param {Function} [highlightText] - Función para resaltar texto de búsqueda
      * @returns {boolean} Indica si se pudo añadir los items exitosamente
      */
-    appendItems(data: Record<string, any>[], template: string | Function | null, noResults: string = "No hay resultados.", events: EventEmitter, firstLoad: boolean = false, highlightText?: ((text: string) => string) | undefined): boolean {
+    appendItems(data: Record<string, any>[], template: string | Function | null, noResults: string = Constants.DEFAULT_TRANSLATIONS.noResults, events: EventEmitter, firstLoad: boolean = false, highlightText?: ((text: string) => string) | undefined): boolean {
 
         const container = this.body.renderItems;
         if (!container) return false;
@@ -326,7 +327,7 @@ export class SearchRenderer {
         const counter = this.body.counterItems;
 
         if (!pagination.textPagination) {
-            pagination.textPagination = '{{to}} de {{total}}';
+            pagination.textPagination = Constants.DEFAULT_TRANSLATIONS.pagination;
         }
 
         const { textPagination, ...propertyCounter } = pagination;

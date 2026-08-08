@@ -288,7 +288,7 @@ class Search {
         if (!container) return this;
 
         if (typeof IntersectionObserver === 'undefined') {
-            console.warn('IntersectionObserver no está disponible. Scroll infinito no funcionará en este entorno.');
+            console.warn(this.t.noIntersectionObserver);
             return this;
         }
 
