@@ -56,7 +56,6 @@ function reactionSearch({ form, search, emit = null }: Record<string, any>): Sea
     Array.from(formData.keys()).forEach((key) => {
         let value = formData.get(key);
         if (typeof value === 'string' && value.trim() !== "") {
-            
             if ([
                 "procesServer", "keyboardEnabled", 
                 "cacheEnabled", "developmentMode", 
