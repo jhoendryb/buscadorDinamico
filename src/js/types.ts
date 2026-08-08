@@ -38,7 +38,8 @@ export interface TranslationCache {
     loading?: string;
     noResults?: string;
     pagination?: string;
-    [key: string]: string | undefined;
+    noIntersectionObserver?: string;
+    ariaLabel?: string;
 }
 
 export interface BodyConfig {

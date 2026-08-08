@@ -26,7 +26,8 @@ export const DEFAULT_TRANSLATIONS = {
     searchPlaceholder: 'Ingrese palabra clave...',
     noResults: 'No se encontraron resultados',
     loading: 'Buscando...',
-    pagination: '{{to}} de {{total}}'
+    pagination: '{{to}} de {{total}}',
+    noIntersectionObserver: 'IntersectionObserver no está disponible. Scroll infinito no funcionará en este entorno.'
 };
 
 // Clases CSS por defecto
