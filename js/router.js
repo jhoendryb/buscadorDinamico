@@ -12,7 +12,8 @@ const Router = {
         this.registerSections([
             'introduction', 'installation', 'configuration',
             'api', 'events', 'templates', 'i18n', 'cache',
-            'errors', 'css-themes', 'examples', 'typescript', 'changelog'
+            'errors', 'css-themes', 'examples', 'typescript', 'changelog',
+            'ssr'
         ]);
 
         window.addEventListener('hashchange', () => this.handleRoute());
@@ -164,6 +165,7 @@ const Router = {
             'css-themes': 'Temas CSS',
             examples: 'Ejemplos',
             typescript: 'TypeScript',
+            ssr: 'SSR',
             changelog: 'Changelog'
         };
         const title = titles[section] || section;

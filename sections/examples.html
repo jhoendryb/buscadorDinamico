@@ -4,7 +4,7 @@
 
 <p><strong>Importante:</strong> el contenedor raíz del buscador debe tener la clase <code>app-search</code>. La estructura interna (<code>content-pagination-items</code>, <code>items-search</code>) la crea automáticamente la librería, pero si proporcionas datos iniciales en el HTML, escribe los <code>items</code> dentro de esa estructura para que se reutilicen.</p>
 
-<h2>Búsqueda básica local</h2>
+<h2 id="busqueda-basica-local">Búsqueda básica local</h2>
 
 <pre data-lang="html"><code>&lt;div id="buscador" class="app-search"&gt;&lt;/div&gt;
 
@@ -28,7 +28,7 @@
     }).init();
 &lt;/script&gt;</code></pre>
 
-<h2>Con plantilla personalizada</h2>
+<h2 id="con-plantilla-personalizada">Con plantilla personalizada</h2>
 
 <pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
 
@@ -49,7 +49,7 @@ new Search({
     `
 }).init();</code></pre>
 
-<h2>Búsqueda desde DOM</h2>
+<h2 id="busqueda-desde-dom">Búsqueda desde DOM</h2>
 
 <p>Extrae datos automáticamente de elementos HTML existentes:</p>
 
@@ -71,7 +71,7 @@ new Search({
     }).init();
 &lt;/script&gt;</code></pre>
 
-<h2>Búsqueda remota (servidor)</h2>
+<h2 id="busqueda-remota-servidor">Búsqueda remota (servidor)</h2>
 
 <pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
 
@@ -100,7 +100,7 @@ new Search({
     `
 }).init();</code></pre>
 
-<h2>Múltiples instancias</h2>
+<h2 id="multiples-instancias">Múltiples instancias</h2>
 
 <pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
 
@@ -126,7 +126,7 @@ const searchUsuarios = new Search({
     itemsPerPage: 5
 }).init();</code></pre>
 
-<h2>Con resaltado de texto</h2>
+<h2 id="con-resaltado-de-texto">Con resaltado de texto</h2>
 
 <pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
 
@@ -157,7 +157,7 @@ new Search({
     border-radius: 2px;
 }</code></pre>
 
-<h2>Con eventos</h2>
+<h2 id="con-eventos">Con eventos</h2>
 
 <pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
 
@@ -187,7 +187,7 @@ search
         console.log(`Página ${data.page}/${data.totalPages}`);
     });</code></pre>
 
-<h2>Con caché y sort</h2>
+<h2 id="con-cache-y-sort">Con caché y sort</h2>
 
 <pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
 
@@ -222,7 +222,7 @@ document.getElementById('btn-clear').addEventListener('click', () => {
     search.clear();
 });</code></pre>
 
-<h2>Con adapter de respuesta</h2>
+<h2 id="con-adapter-de-respuesta">Con adapter de respuesta</h2>
 
 <pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
 
@@ -243,7 +243,7 @@ new Search({
     }
 }).init();</code></pre>
 
-<h2>Con búsqueda en objetos anidados</h2>
+<h2 id="con-busqueda-en-objetos-anidados">Con búsqueda en objetos anidados</h2>
 
 <pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
 
@@ -259,9 +259,9 @@ new Search({
 
 // Buscar por "caracas" encuentra el item con capital.name = "Caracas"</code></pre>
 
-<h2>Integración con frameworks</h2>
+<h2 id="integracion-con-frameworks">Integración con frameworks</h2>
 
-<h3>React</h3>
+<h3 id="react">React</h3>
 
 <pre data-lang="jsx"><code>import { useEffect, useRef } from 'react';
 import { Search } from 'buscador-dinamico';
@@ -286,7 +286,7 @@ function SearchComponent({ data }) {
     return &lt;div id="react-search" ref={containerRef} className="app-search"&gt;&lt;/div&gt;;
 }</code></pre>
 
-<h3>Vue</h3>
+<h3 id="vue">Vue</h3>
 
 <pre data-lang="vue"><code>&lt;template&gt;
     &lt;div id="vue-search" class="app-search"&gt;&lt;/div&gt;
