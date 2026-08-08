@@ -8,7 +8,7 @@
 
 <pre data-lang="typescript"><code>const DEFAULT_TRANSLATIONS = {
     searchPlaceholder: 'Ingrese palabra clave...',
-    searchLabel: 'Filtrar por Búsqueda',
+    ariaLabel: 'Filtrar por Búsqueda',
     noResults: 'No se encontraron resultados',
     loading: 'Buscando...',
     pagination: '{{to}} de {{total}}'
@@ -23,7 +23,7 @@
     data: items,
     translation: {
         searchPlaceholder: 'Search...',
-        searchLabel: 'Search field',
+        ariaLabel: 'Search field',
         noResults: 'No results found',
         loading: 'Loading...'
     }
@@ -36,19 +36,19 @@
 <pre data-lang="javascript"><code>const translations = {
     es: {
         searchPlaceholder: 'Escriba para buscar...',
-        searchLabel: 'Campo de búsqueda',
+        ariaLabel: 'Campo de búsqueda',
         noResults: 'No se encontraron resultados',
         loading: 'Cargando...'
     },
     en: {
         searchPlaceholder: 'Type to search...',
-        searchLabel: 'Search field',
+        ariaLabel: 'Search field',
         noResults: 'No results found',
         loading: 'Loading...'
     },
     pt: {
         searchPlaceholder: 'Digite para pesquisar...',
-        searchLabel: 'Campo de pesquisa',
+        ariaLabel: 'Campo de pesquisa',
         noResults: 'Nenhum resultado encontrado',
         loading: 'Carregando...'
     }
@@ -79,7 +79,7 @@ const search = new BuscadorDinamico.Search({
             <td>Input del buscador</td>
         </tr>
         <tr>
-            <td><code>searchLabel</code></td>
+            <td><code>ariaLabel</code></td>
             <td>Label accesible del input (aria-label)</td>
             <td>Input del buscador</td>
         </tr>

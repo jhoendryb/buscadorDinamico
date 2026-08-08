@@ -22,7 +22,7 @@ export const SORT_ORDER = "asc";
 
 // Traducciones por defecto
 export const DEFAULT_TRANSLATIONS = {
-    searchLabel: 'Filtrar por Búsqueda',
+    ariaLabel: 'Filtrar por Búsqueda',
     searchPlaceholder: 'Ingrese palabra clave...',
     noResults: 'No se encontraron resultados',
     loading: 'Buscando...',

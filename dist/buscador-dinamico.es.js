@@ -47,7 +47,7 @@ var e = Object.defineProperty, t = (t, n) => {
 					onInput: (e, t) => this.draw(e, t),
 					debounceTime: this.debounceTime,
 					placeholder: this.t.searchPlaceholder,
-					ariaLabel: this.t.searchLabel
+					ariaLabel: this.t.ariaLabel
 				}
 			}), this.setupKeyboardNavigation(), this.draw(this.searchTerm), this.events.emit("init", {
 				searchTerm: this.searchTerm,
@@ -59,7 +59,17 @@ var e = Object.defineProperty, t = (t, n) => {
 		}
 	}
 	#t() {
-		this.errorHandler.validateRequired(this.element, "element", a.ELEMENT_REQUIRED), this.errorHandler.validateType(this.element, "string", "element", a.ELEMENT_TYPE_INVALID), this.procesServer && this.errorHandler.validateRequired(this.fetch?.url, "fetch.url", a.FETCH_URL_REQUIRED), this.itemsPerPage && (this.errorHandler.validateType(this.itemsPerPage, "number", "itemsPerPage", a.ITEMSPERPAGE_TYPE_INVALID), this.errorHandler.validateRange(this.itemsPerPage, 1, "itemsPerPage", a.ITEMSPERPAGE_VALUE_INVALID)), this.highlightClass && this.errorHandler.validateType(this.highlightClass, "string", "highlightClass", a.INVALID_TYPE_FORMAT);
+		this.errorHandler.validateRequired(this.element, "element", a.ELEMENT_REQUIRED), this.errorHandler.validateType(this.element, "string", "element", a.ELEMENT_TYPE_INVALID);
+		let e = {
+			procesServer: this.procesServer,
+			keyboardEnabled: this.keyboardEnabled,
+			cacheEnabled: this.cacheEnabled,
+			developmentMode: this.developmentMode,
+			highlightEnabled: this.highlightEnabled
+		};
+		Object.keys(e).forEach((t) => {
+			this.errorHandler.validateType(e[t], "boolean", t, a.INVALID_TYPE_FORMAT);
+		}), this.procesServer && this.errorHandler.validateRequired(this.fetch?.url, "fetch.url", a.FETCH_URL_REQUIRED), this.itemsPerPage && (this.errorHandler.validateType(this.itemsPerPage, "number", "itemsPerPage", a.ITEMSPERPAGE_TYPE_INVALID), this.errorHandler.validateRange(this.itemsPerPage, 1, "itemsPerPage", a.ITEMSPERPAGE_VALUE_INVALID)), this.highlightClass && this.errorHandler.validateType(this.highlightClass, "string", "highlightClass", a.INVALID_TYPE_FORMAT);
 	}
 	#n(e) {
 		if (!this.highlightEnabled || !this.searchTerm) return e;
@@ -925,7 +935,7 @@ var i = class {
 	SORT_DESC: () => 1,
 	SORT_ORDER: () => "asc"
 }), _ = 1e3, v = "adaptative", y = {
-	searchLabel: "Filtrar por Búsqueda",
+	ariaLabel: "Filtrar por Búsqueda",
 	searchPlaceholder: "Ingrese palabra clave...",
 	noResults: "No se encontraron resultados",
 	loading: "Buscando...",

@@ -163,7 +163,7 @@ class Search {
                     onInput: (searchTerm: string, isEvent: boolean) => this.draw(searchTerm, isEvent),
                     debounceTime: this.debounceTime,
                     placeholder: this.t.searchPlaceholder,
-                    ariaLabel: this.t.searchLabel
+                    ariaLabel: this.t.ariaLabel
                 }
             } as Types.RenderByDomOptions);
 
