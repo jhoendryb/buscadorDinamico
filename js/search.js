@@ -61,7 +61,7 @@ const SEARCH_DATA = [
     { title: 'Idioma por defecto', route: '#/i18n', segment: 'idioma-por-defecto', category: 'Guías', badge: 'success', description: 'Traducciones predeterminadas en español', keywords: 'idioma defecto español spanish default' },
     { title: 'Personalizar traducciones', route: '#/i18n', segment: 'personalizar-traducciones', category: 'Guías', badge: 'success', description: 'Sobrescribir cadenas con el parámetro translation', keywords: 'personalizar traducciones custom translation' },
     { title: 'Soporte multiidioma completo', route: '#/i18n', segment: 'soporte-multiidioma-completo', category: 'Guías', badge: 'success', description: 'Ejemplo con múltiples idiomas y selección dinámica', keywords: 'multiidioma multiple languages soporte' },
-    { title: 'Referencia de claves', route: '#/i18n', segment: 'referencia-de-claves', category: 'Guías', badge: 'success', description: '5 claves: searchPlaceholder, searchLabel, noResults, loading, pagination', keywords: 'claves keys referencia searchPlaceholder noResults pagination' },
+    { title: 'Referencia de claves', route: '#/i18n', segment: 'referencia-de-claves', category: 'Guías', badge: 'success', description: '5 claves: searchPlaceholder, ariaLabel, noResults, loading, pagination', keywords: 'claves keys referencia searchPlaceholder noResults pagination' },
     { title: 'Cambiar idioma dinámicamente', route: '#/i18n', segment: 'cambiar-idioma-dinamicamente', category: 'Guías', badge: 'success', description: 'Recrear instancia para cambiar idioma en runtime', keywords: 'cambiar idioma dinamico runtime ejecucion' },
 
     // ── Caché ──────────────────────────────────────────────────────
@@ -260,7 +260,7 @@ const DocSearch = {
             template: (item) => this.renderResult(item),
             translation: {
                 searchPlaceholder: 'Buscar en la documentación...',
-                searchLabel: 'Buscar en la documentación',
+                ariaLabel: 'Buscar en la documentación',
                 noResults: 'No se encontraron resultados',
                 loading: 'Buscando...'
             }
