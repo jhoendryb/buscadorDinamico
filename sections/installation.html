@@ -91,7 +91,9 @@ console.log(typeof Search); // "function" (ES Module)</code></pre>
 
 <h2 id="ssr">SSR (Server-Side Rendering)</h2>
 
-<p>La librería es compatible con entornos SSR (Next.js, Nuxt, SvelteKit, etc.). El constructor no accede al DOM, por lo que puedes crear la instancia en el servidor sin errores. Sin embargo, <code>init()</code> accede al DOM y <strong>debe ejecutarse solo en el cliente</strong>.</p>
+<p>La librería es compatible con entornos SSR (Next.js, Nuxt, SvelteKit, etc.). Ni el import del módulo ni el constructor acceden al DOM, por lo que el paquete se puede importar y construir durante el render en servidor sin errores. <code>init()</code> sí requiere el navegador y <strong>debe ejecutarse solo en el cliente</strong>.</p>
+
+<p>En la práctica, el patrón recomendado es crear <strong>y</strong> inicializar la instancia dentro de un hook que corra solo en el cliente (<code>useEffect</code>, <code>onMounted</code>). Así, la sentencia completa <code>new Search(...).init()</code> se ejecuta exclusivamente en el navegador y no es necesario instanciar en el servidor.</p>
 
 <h3>React / Next.js</h3>
 
@@ -161,6 +163,6 @@ new Search({
     <span class="doc-callout__icon">ℹ️</span>
     <div class="doc-callout__content">
         <strong>Regla general</strong>
-        <p><code>new Search()</code> es seguro en cualquier entorno. Solo <code>init()</code> necesita el navegador. Si usas un framework con SSR, asegúrate de que <code>init()</code> se ejecute dentro de un hook que corra solo en el cliente (<code>useEffect</code>, <code>onMounted</code>, <code>onMount</code>).</p>
+        <p>La seguridad SSR no viene de dividir la creación en dos fases, sino de ejecutar <strong>toda</strong> la inicialización (<code>new Search(...).init()</code>) dentro de un hook de cliente (<code>useEffect</code>, <code>onMounted</code>, <code>onMount</code>). El hecho de que el constructor no toque el DOM garantiza que importar el módulo o construirlo durante el render en servidor no produzca errores.</p>
     </div>
 </div>
