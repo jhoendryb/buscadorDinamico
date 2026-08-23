@@ -214,6 +214,19 @@
                         </div>
                     </div>
                     <hr class="my-4">
+                    <h5 class="mb-3">Response Adapter</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <textarea data-type="object" data-default="{}" id="input-responseAdapter"
+                                name="responseAdapter" class="form-control font-monospace" rows="6"
+                                placeholder=""></textarea>
+                            <div class="form-text text-white">La propiedad <code>responseAdapter</code> te permite adaptar la estructura de los datos devueltos
+                                por el servidor al formato esperado por el componente. Por ejemplo, si el servidor devuelve
+                                <code>{ items: [], count: 0 }</code>, puedes definir la estructura de la respuesta como:
+                                <code>(response) => ({ data: response.items, countPage: response.count })</code>.</div>
+                        </div>
+                    </div>
+                    <hr class="my-4">
                     <h5 class="mb-3">fetch (requerido si procesServer=true)</h5>
                     <div class="row g-3 mb-4">
                         <div class="col-md-12">
@@ -223,25 +236,6 @@
                                 mostrar datos.</div> -->
                         </div>
                     </div>
-                    <!-- <div class="row g-3 mb-4 d-flex flex-column">
-                        <div class="col-md-6">
-                            <label for="input-fetch-url" class="form-label fw-semibold">fetch.url *</label>
-                            <input id="input-fetch-url" type="url" name="fetch[url]" class="form-control"
-                                placeholder="/api/search.php">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="input-fetch-method" class="form-label fw-semibold">fetch.method</label>
-                            <select id="input-fetch-method" name="fetch[method]" class="form-select">
-                                <option selected="" value="POST">POST</option>
-                                <option value="GET">GET</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="input-fetch-timeout" class="form-label fw-semibold">fetch.timeout (ms)</label>
-                            <input value="5000" id="input-fetch-timeout" type="number" name="fetch[timeout]"
-                                class="form-control">
-                        </div>
-                    </div> -->
                     <hr class="my-4">
                     <h5 class="mb-3">Traducciones (translation)</h5>
                     <div class="row g-3 mb-4">

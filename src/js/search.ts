@@ -37,6 +37,13 @@ const DEFAULT_DATA = Array.from({ length: 2 }, (_, i) => ({
     description: `Description item ${i}`
 }));
 
+const DEFAULT_RESPONSE_ADAPTER = (response: any): any => {
+    return {
+        data: response.items,
+        countPage: response.count
+    }
+};
+
 function copiarCodigo(boton: HTMLElement) {
     const contenedor = boton.parentElement as HTMLElement;
     const codigo = contenedor.querySelector("code") as HTMLElement;
@@ -52,22 +59,24 @@ function copiarCodigo(boton: HTMLElement) {
 function reactionSearch({ form, search, emit = null }: Record<string, any>): Search {
 
     const formData = new FormData(form as HTMLFormElement);
-    let values: { [key: string]: string | number | boolean } = {};
+    let values: { [key: string]: string | number | boolean | Function } = {};
     Array.from(formData.keys()).forEach((key) => {
         let value = formData.get(key);
         if (typeof value === 'string' && value.trim() !== "") {
             if ([
-                "procesServer", "keyboardEnabled", 
-                "cacheEnabled", "developmentMode", 
+                "procesServer", "keyboardEnabled",
+                "cacheEnabled", "developmentMode",
                 "highlightEnabled"
             ].includes(key) !== false) {
                 values[key] = true;
-            } else if (key == "fetch") {
+            } else if (key === "fetch") {
                 values[key] = JSON.parse(value.trim());
-            } else if (key == "translation") {
+            } else if (key === "translation") {
                 values[key] = JSON.parse(value.trim());
-            } else if (key == "data") {
+            } else if (key === "data") {
                 values[key] = JSON.parse(value.trim());
+            } else if (key === "responseAdapter") {
+                values[key] = new Function(`return ${value.trim()}`)();
             } else {
                 values[key] = !isNaN(Number(value)) ? Number(value) : value;
             }
@@ -76,7 +85,12 @@ function reactionSearch({ form, search, emit = null }: Record<string, any>): Sea
 
     const code: HTMLElement | null = document.querySelector(".code-prepareSearch");
     if (code) {
-        code.innerHTML = `new Search(${JSON.stringify(values, null, 2)}).init()`;
+        code.innerHTML = `new Search(${JSON.stringify(values, (_, value) => {
+            if (typeof value === 'function') {
+                return value.toString();
+            }
+            return value;
+        }, 2)}).init()`;
     }
 
     if (emit && emit.name === "theme") {
@@ -129,6 +143,13 @@ window.addEventListener('load', () => {
         element: inputData,
         placeholder: JSON.stringify(DEFAULT_DATA, null, 2),
         innerHTML: JSON.stringify(DEFAULT_DATA, null, 2)
+    } as Types.CreateElementConfig);
+
+    const inputResponseAdapter: HTMLTextAreaElement | null = form?.querySelector("#input-responseAdapter") || null;
+    createElement({
+        element: inputResponseAdapter,
+        placeholder: DEFAULT_RESPONSE_ADAPTER.toString(),
+        innerHTML: DEFAULT_RESPONSE_ADAPTER.toString()
     } as Types.CreateElementConfig);
     // const match = key.match(/^(\w+)\[(\w+)\]$/);
     let search: Search = reactionSearch({ form });
