@@ -208,7 +208,11 @@ describe('SearchRenderer', () => {
         renderer.renderItems();
         renderer.renderPagination();
 
-        renderer.updateCounter(10, 25);
+        renderer.updateCounter({
+            from: 10,
+            to: 25,
+            total: 100
+        });
 
         const counter = renderer.body.paginationItems?.querySelector('.items-counter');
         expect(counter?.textContent).toContain('10');
@@ -252,9 +256,9 @@ describe('SearchRenderer', () => {
         expect(renderer.body.paginationItems).toBeTruthy();
 
         // Verificar orden en el DOM
-        const children = renderer.body.content.children;
-        expect(children[0].className).toContain('input-search');
-        expect(children[1].className).toContain('content-pagination-items');
+        const children = renderer.body.content?.children;
+        expect(children?.[0].className).toContain('input-search');
+        expect(children?.[1].className).toContain('content-pagination-items');
     });
 
 });

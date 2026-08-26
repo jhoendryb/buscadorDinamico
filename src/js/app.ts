@@ -190,8 +190,8 @@ class Search {
         this.errorHandler.validateType(this.element, 'string', 'element', ErrorCode.ELEMENT_TYPE_INVALID);
 
         const isBoolean = {
-            procesServer: this.procesServer, keyboardEnabled: this.keyboardEnabled, 
-            cacheEnabled: this.cacheEnabled, developmentMode: this.developmentMode, 
+            procesServer: this.procesServer, keyboardEnabled: this.keyboardEnabled,
+            cacheEnabled: this.cacheEnabled, developmentMode: this.developmentMode,
             highlightEnabled: this.highlightEnabled
         }
 
@@ -315,9 +315,13 @@ class Search {
 
         // Crear elemento sentinel al final
         const sentinel = createElement({
-            element: "div",
+            element: "li",
             className: "scroll-sentinel",
-            attributes: { 'style': 'height: 1px; visibility: hidden; padding: 0; margin: 0;' }
+            attributes: { 
+                'style': 'height: 1px; visibility: hidden; padding: 0; margin: 0;',
+                'role': 'presentation',
+                'aria-hidden': 'true'
+            }
         });
 
         container.appendChild(sentinel);

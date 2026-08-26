@@ -25,6 +25,7 @@
         "ignoreDeprecations": "5.0",
         "types": [
             "jest",
+            "node",
             "vite/client"
         ],
         "isolatedModules": true
@@ -35,6 +36,6 @@
     "exclude": [
         "node_modules",
         "dist",
-        "src/tests"
+        // "src/tests"
     ]
 }

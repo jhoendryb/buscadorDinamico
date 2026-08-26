@@ -100,12 +100,12 @@ describe('Search', () => {
         expect(search._data.length).toBe(25);
     });
 
-    test('debe filtrar sin importar mayúsculas/minúsculas', () => {
+    test('debe filtrar sin importar mayúsculas/minúsculas', async () => {
         const search = new Search({
             element: '.test',
             data: [{ name: 'Juan' }, { name: 'Maria' }]
         });
-        search.draw('JUAN', false);
+        await search.draw('JUAN', false);
         if (!search._data) {
             throw new Error('search._data is null');
         }
@@ -113,13 +113,13 @@ describe('Search', () => {
         expect(search._data[0].name).toBe('Juan');
     });
 
-    test('debe filtrar datos correctamente', () => {
+    test('debe filtrar datos correctamente', async () => {
         const search = new Search({
             element: '.test',
-            data: [{ name: 'Juan' }, { name: 'Maria' }]
+            data: [{ "name": 'Juan' }, { "name": 'Maria' }]
         });
         search.init();
-        search.draw('juan', false);
+        await search.draw('juan', false);
         if (!search._data) {
             throw new Error('search._data is null');
         }
@@ -139,22 +139,22 @@ describe('Search', () => {
             cacheMaxSize: 10
         });
 
-        await search.init();
+        search.init();
 
         // Primera búsqueda - debe almacenar en caché
-        search.draw('juan', false);
+        await search.draw('juan', false);
         if (!search._data) {
             throw new Error('search._data is null');
         }
-        const firstResults = search.data;
+        const firstResults = search._data;
         expect(firstResults.length).toBe(1);
 
         // Segunda búsqueda igual - debe usar caché
-        search.draw('juan', false);
+        await search.draw('juan', false);
         expect(search._data).toEqual(firstResults);
 
         // Búsqueda diferente - no debe usar caché
-        search.draw('maria', false);
+        await search.draw('maria', false);
         expect(search._data.length).toBe(1);
         expect(search._data[0].name).toBe('Maria');
     });
@@ -323,6 +323,8 @@ describe('Search', () => {
         });
 
         search.setupKeyboardNavigation();
+
+        search.init();
 
         const content = search.renderer.body.content;
         expect(content).toBeTruthy();

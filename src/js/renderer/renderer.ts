@@ -120,12 +120,16 @@ export class SearchRenderer {
 
         let jsonInput = {
             element: inputSearch,
+            type: "search",
             id: this.getUniqueClassName('input-search'),
             placeholder: placeholder || 'Ingrese palabra clave...',
             className: this.#classDefault(`${this.getUniqueClassName("filter-search")}`, inputSearch?.className),
             attributes: {
                 "aria-label": ariaLabel || 'Filtrar por Búsqueda',
-                "role": "searchbox",
+                "role": "combobox",
+                "aria-expanded": "false",
+                "aria-haspopup": "listbox",
+                "aria-autocomplete": "list",
                 "aria-controls": this.getUniqueClassName('items-search')
             },
             event: {
@@ -178,8 +182,7 @@ export class SearchRenderer {
             attributes: {
                 'aria-label': 'Resultados de búsqueda',
                 'role': 'listbox',
-                'aria-activedescendant': '',
-                'aria-hidden': 'true',
+                'aria-hidden': 'true'
             },
             style: { zIndex },
             ...(!renderItems ? {
@@ -376,12 +379,15 @@ export class SearchRenderer {
      */
     showResults(): void {
         const contentPagination = this.body.contentPaginationItems;
-
+        
         if (!contentPagination) return;
-
+        
         contentPagination.classList.remove('content-pagination-hidden');
         contentPagination.classList.add('content-pagination-visible');
         contentPagination.removeAttribute('hidden');
+
+        const renderItems = this.body.renderItems;
+        renderItems?.setAttribute('aria-hidden', String(this._isVisible));
 
         this._isVisible = true;
 
@@ -413,6 +419,8 @@ export class SearchRenderer {
         if (contentPagination) {
             contentPagination.classList.remove('content-pagination-visible');
             contentPagination.classList.add('content-pagination-hidden');
+            const renderItems = this.body.renderItems;
+            renderItems?.setAttribute('aria-hidden', String(this._isVisible));
             // Esperar a que termine la animación antes de ocultar
             timeout = setTimeout(() => {
                 if (contentPagination.classList.contains('content-pagination-hidden')) {
@@ -420,6 +428,7 @@ export class SearchRenderer {
                 }
             }, this.timeHiddenResults);
             this._animationTimeouts.push(timeout);
+            this._isVisible = false;
         }
     }
 

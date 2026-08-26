@@ -1,5 +1,5 @@
 import { SearchingLocal } from '../../js/searching/searchingLocal';
-import { ErrorHandler, ErrorCode } from '../../js/error-handler';
+import { ErrorHandler } from '../../js/error-handler';
 
 describe('SearchingLocal', () => {
     let searchingLocal: SearchingLocal;
@@ -35,13 +35,23 @@ describe('SearchingLocal', () => {
             processInfiniteScroll: jest.fn(),
             sort: jest.fn()
         };
-        searchingLocal = new SearchingLocal(mockSearchInstance, errorHandler);
+        searchingLocal = new SearchingLocal();
     });
 
     describe('isExtractData', () => {
         it('debe retornar false si ya hay datos', () => {
             mockSearchInstance.data = [{ id: 1 }];
-            expect(searchingLocal.isExtractData()).toBe(false);
+            // Agregar un elemento de ejemplo al DOM para que se extraigan datos
+            const container = document.createElement('div');
+            // Sin flag class="items" para el ejemplo
+            container.innerHTML = `
+                <div data-id="1" data-name="Juan">
+                <div data-id="2" data-name="Maria">
+            `;
+            document.body.appendChild(container);
+            expect(searchingLocal.isExtractData(container)).toBe(null);
+            // Limpiar el ejemplo del DOM
+            document.body.removeChild(container);
         });
 
         it('debe extraer datos del DOM', () => {
@@ -55,13 +65,13 @@ describe('SearchingLocal', () => {
                 { name: 'Juan', id: 1 },
                 { name: 'Maria', id: 2 }
             ];
-            searchingLocal.searching('juan');
-            expect(mockSearchInstance._data).toHaveLength(1);
+            const result = searchingLocal.search('juan', mockSearchInstance.data);
+            expect(result).toHaveLength(1);
         });
 
         it('debe lanzar error si data no es array', () => {
             mockSearchInstance.data = 'invalid';
-            expect(() => searchingLocal.searching('test')).toThrow();
+            expect(() => searchingLocal.search('test', mockSearchInstance.data)).toThrow();
         });
     });
 });

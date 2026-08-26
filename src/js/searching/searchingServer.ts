@@ -38,6 +38,14 @@ export class SearchingServer {
         const response = await this.executeFetch(fetchConfig, userSignal);
         const adapter = this.responseAdapter;
         const result = adapter ? adapter(response) : response;
+
+        if (!result || typeof result !== 'object' || !Array.isArray(result.data)) {
+            this.errorHandler.throwCustomError(ErrorCode.EMPTY_RESPONSE, {
+                context: 'empty_response',
+                url: fetchConfig.url
+            });
+        }
+
         return {
             data: result.data,
             countPage: result.countPage
@@ -162,7 +170,7 @@ export class SearchingServer {
                 });
             }
 
-            if (!data || (Array.isArray(data) && data.length === 0)) {
+            if (!data) {
                 this.errorHandler.throwCustomError(ErrorCode.EMPTY_RESPONSE, {
                     context: 'empty_response',
                     url: config.url
