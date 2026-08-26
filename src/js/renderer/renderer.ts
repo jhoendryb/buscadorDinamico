@@ -1,4 +1,5 @@
 import { createElement } from '../renderElement';
+import { VisibilityManager } from './visibilityManager';
 import { EventEmitter } from '../events/eventEmitter';
 import { TemplateEngine } from './templateEngine';
 import * as Types from '../types';
@@ -12,10 +13,8 @@ import * as Constants from '../constants';
 export class SearchRenderer {
     public body: Types.BodyConfig;
     private uniqueClassNameFn: (baseClass: string) => string;
-    private _isVisible: boolean;
-    private _hideTimeout: ReturnType<typeof setTimeout> | null;
-    private _animationTimeouts: ReturnType<typeof setTimeout>[];
     private timeHiddenResults: number;
+    readonly visibility: VisibilityManager;
     /**
      * Crea una instancia de SearchRenderer.
      * @param {Types.BodyConfig} body - Objeto con referencias a elementos del DOM
@@ -25,10 +24,13 @@ export class SearchRenderer {
     constructor(body: Types.BodyConfig, uniqueClassNameFn: (baseClass: string) => string, timeHiddenResults: number) {
         this.body = body;
         this.uniqueClassNameFn = uniqueClassNameFn;
-        this._isVisible = false; // Nuevo: estado de visibilidad
-        this._hideTimeout = null; // Nuevo: timeout para delay al ocultar
-        this._animationTimeouts = [];
         this.timeHiddenResults = timeHiddenResults;
+        this.visibility = new VisibilityManager({
+            panel: () => this.body.contentPaginationItems,
+            control: () => this.body.inputSearch as HTMLElement,
+            listbox: () => this.body.renderItems as HTMLElement,
+            hideDelayMs: this.timeHiddenResults
+        });
     }
     /**
      * Agrega una clase de tema al contenedor principal y devuelve la instancia actual.
@@ -142,10 +144,10 @@ export class SearchRenderer {
                 },
                 focus: () => {
                     const count = this.body.renderItems?.querySelectorAll(".items").length || 0;
-                    if (count > 0) this.showResults();
+                    if (count > 0) this.visibility.open('focus');
                 },
                 blur: () => {
-                    this.hideResultsWithDelay();
+                    this.visibility.close({ reason: 'blur' });
                 }
             },
             ...(!inputSearch ? {
@@ -276,21 +278,13 @@ export class SearchRenderer {
             element: "li",
             className: "items",
             tabindex: '0',
-            attributes: { 'role': 'option' },
-            event: {
-                pointerdown: (e: PointerEvent) => {
-                    e.preventDefault();
-                    this._isVisible = true;
-                }
-            }
+            attributes: { 'role': 'option' }
         };
 
         // Si es la primera carga y no hay items, mostrar mensaje
         if (container.children.length === 0 && (!data || data.length === 0)) {
             jsonItem.textContent = noResults;
             container.appendChild(createElement(jsonItem));
-            // Ocultar si no hay resultados
-            // this.hideResults();
             return false;
         }
 
@@ -374,75 +368,6 @@ export class SearchRenderer {
     }
 
     /**
-     * Muestra el contenedor de resultados.
-     * Actualiza aria-expanded y remueve atributo hidden.
-     */
-    showResults(): void {
-        const contentPagination = this.body.contentPaginationItems;
-        
-        if (!contentPagination) return;
-        
-        contentPagination.classList.remove('content-pagination-hidden');
-        contentPagination.classList.add('content-pagination-visible');
-        contentPagination.removeAttribute('hidden');
-
-        const renderItems = this.body.renderItems;
-        renderItems?.setAttribute('aria-hidden', String(this._isVisible));
-
-        this._isVisible = true;
-
-        if (this._hideTimeout) {
-            clearTimeout(this._hideTimeout);
-            this._hideTimeout = null;
-        }
-    }
-
-    /**
-     * Oculta el contenedor de resultados con delay.
-     * Permite que el usuario haga clic en un resultado antes de ocultar.
-     */
-    hideResultsWithDelay(delay: number = this.timeHiddenResults): void {
-        this._hideTimeout = setTimeout(() => {
-            this.hideResults();
-        }, delay);
-    }
-
-    /**
-     * Oculta el contenedor de resultados inmediatamente.
-     * Actualiza aria-expanded y agrega atributo hidden.
-     */
-    hideResults(): void {
-        const contentPagination = this.body.contentPaginationItems;
-
-        let timeout;
-
-        if (contentPagination) {
-            contentPagination.classList.remove('content-pagination-visible');
-            contentPagination.classList.add('content-pagination-hidden');
-            const renderItems = this.body.renderItems;
-            renderItems?.setAttribute('aria-hidden', String(this._isVisible));
-            // Esperar a que termine la animación antes de ocultar
-            timeout = setTimeout(() => {
-                if (contentPagination.classList.contains('content-pagination-hidden')) {
-                    contentPagination.setAttribute('hidden', 'true');
-                }
-            }, this.timeHiddenResults);
-            this._animationTimeouts.push(timeout);
-            this._isVisible = false;
-        }
-    }
-
-    /**
-     * Toggle de visibilidad de resultados.
-     */
-    toggleResults(): void {
-        if (this._isVisible) {
-            this.hideResults();
-        } else {
-            this.showResults();
-        }
-    }
-    /**
      * Muestra el indicador de carga.
      * @param {string} loadingText - Texto a mostrar mientras se carga
      */
@@ -487,15 +412,7 @@ export class SearchRenderer {
         return newContentPagItems;
     }
     destroy(): void {
-        // Limpiar timeouts de animación
-        this._animationTimeouts.forEach(t => clearTimeout(t));
-        this._animationTimeouts = [];
-
-        // Limpiar hideTimeout
-        if (this._hideTimeout) {
-            clearTimeout(this._hideTimeout);
-            this._hideTimeout = null;
-        }
+        this.visibility.destroy();
 
         // Resetear referencias
         this.body.contentSearch = undefined;

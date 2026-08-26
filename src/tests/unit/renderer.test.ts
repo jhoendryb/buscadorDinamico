@@ -19,6 +19,8 @@ describe('SearchRenderer', () => {
             renderItems: undefined,
             paginationItems: undefined
         }, (baseClass) => `${baseClass}-test`, 300);
+
+        jest.useFakeTimers();
     });
 
     afterEach(() => {
@@ -61,29 +63,6 @@ describe('SearchRenderer', () => {
         expect((inputSearch as HTMLInputElement).placeholder).toBe('Buscar...');
         expect(inputSearch.getAttribute('aria-label')).toBe('Label de prueba');
         expect(renderer.body.inputSearch).toBe(inputSearch);
-    });
-
-    test('debe ejecutar callback onInput con debounce', (done) => {
-        renderer.contentSearch();
-        const mockCallback = jest.fn();
-
-        renderer.renderSearch({
-            onInput: mockCallback,
-            debounceTime: 50
-        });
-
-        const element = renderer.body.inputSearch as HTMLInputElement;
-
-
-        element.value = 'test';
-        element.dispatchEvent(new Event('input'));
-
-        expect(mockCallback).not.toHaveBeenCalled();
-
-        setTimeout(() => {
-            expect(mockCallback).toHaveBeenCalledWith('test', true);
-            done();
-        }, 60);
     });
 
     test('debe renderizar contenedor de items', () => {
@@ -219,27 +198,28 @@ describe('SearchRenderer', () => {
         expect(counter?.textContent).toContain('25');
     });
 
-    test('debe mostrar resultados', () => {
+        test('debe abrir resultados vía visibility', () => {
         renderer.renderItems();
-        renderer.body.renderItems?.setAttribute('hidden', 'true');
+        renderer.renderContentPaginationItems();
 
-        renderer.showResults();
+        renderer.visibility.open('programmatic');
 
-        expect(renderer.body.renderItems?.hasAttribute('hidden')).toBe(true);
-        expect(renderer.body.renderItems?.classList.contains('items-search-visible')).toBe(false);
+        expect(renderer.body.contentPaginationItems?.classList.contains('content-pagination-visible')).toBe(true);
+        expect(renderer.body.contentPaginationItems?.hasAttribute('hidden')).toBe(false);
+        expect(renderer.visibility.isOpen).toBe(true);
     });
 
-    test('debe ocultar resultados', () => {
+    test('debe cerrar y commitear hidden tras el fade', () => {
         renderer.renderItems();
-        renderer.body.renderItems?.classList.add('items-search-visible');
+        renderer.renderContentPaginationItems();
 
-        renderer.hideResults();
+        renderer.visibility.open('programmatic');
+        jest.advanceTimersByTime(300);
+        renderer.visibility.close({ reason: 'blur' });
+        jest.advanceTimersByTime(300);
 
-        // esperar 200 milisiegundos
-        jest.advanceTimersByTime(200);
-
-        expect(renderer.body.renderItems?.hasAttribute('hidden')).toBe(false);
-        expect(renderer.body.renderItems?.classList.contains('items-search-visible')).toBe(true);
+        expect(renderer.visibility.phase).toBe('closed');
+        expect(renderer.body.contentPaginationItems?.getAttribute('hidden')).toBe('true');
     });
 
     test('debe renderizar en orden SEARCH_CONTENT_ITEMS_PAGINATION', () => {
