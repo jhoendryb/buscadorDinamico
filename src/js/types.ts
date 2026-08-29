@@ -163,3 +163,37 @@ export interface SearchEventMap {
     destroy: DestroyEventData;
     error: ErrorData;
 }
+
+// visibility Manager
+
+export type DropdownPhase = 'closed' | 'opening' | 'open' | 'closing';
+export type CloseReason = 'blur' | 'select' | 'toggle' | 'programmatic';
+export type OpenReason = 'focus' | 'results' | 'toggle' | 'programmatic';
+
+export interface VisibilityHooks {
+    onOpen?(reason: OpenReason): void;
+    onOpened?(reason: OpenReason): void;
+    onClose?(reason: CloseReason): void;
+    onClosed?(reason: CloseReason): void;
+}
+
+export interface VisibilityManagerOptions {
+    /** Accesor al contenedor desplegable (body.contentPaginationItems) */
+    panel: () => HTMLElement | null | undefined;
+    /** Accesor al input (body.inputSearch) para aria-expanded */
+    control?: () => HTMLElement | null | undefined;
+    /** Accesor al listbox (body.renderItems) para aria-hidden */
+    listbox?: () => HTMLElement | null | undefined;
+    /** Única duración: gracia de blur + ventana de animación CSS. Default 200 */
+    hideDelayMs?: number;
+    /** Duración con prefers-reduced-motion. Default 0 (síncrono) */
+    reducedMotionMs?: number;
+    hooks?: VisibilityHooks;
+}
+
+export interface CloseOptions {
+    reason?: CloseReason;
+    /** Commit inmediato y síncrono (selección de item). Ignora shouldStayOpen */
+    immediate?: boolean;
+}
+

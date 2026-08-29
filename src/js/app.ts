@@ -317,7 +317,7 @@ class Search {
         const sentinel = createElement({
             element: "li",
             className: "scroll-sentinel",
-            attributes: { 
+            attributes: {
                 'style': 'height: 1px; visibility: hidden; padding: 0; margin: 0;',
                 'role': 'presentation',
                 'aria-hidden': 'true'
@@ -568,7 +568,7 @@ class Search {
      * this.#selectItem(items[0]);
      */
     #selectItem(item: Record<string, any>): void {
-        this.events.emit('itemSelected', { item, index: this.selectedIndex, close: () => this.renderer.hideResults() } as Types.ItemSelectedEventData);
+        this.events.emit('itemSelected', { item, index: this.selectedIndex, close: () => this.renderer.visibility.close({ reason: 'select', immediate: true }) } as Types.ItemSelectedEventData);
     }
     clear(): Search {
         if (this._destroyed) return this;
