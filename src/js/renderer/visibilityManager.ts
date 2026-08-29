@@ -113,8 +113,6 @@ export class VisibilityManager {
         this.#phase = 'closed';
     }
 
-    // ======================= PRIVADO =======================
-
     #enterOpening(reason: Types.OpenReason): void {
         this.#phase = 'opening';
         this.#syncDom();
@@ -226,7 +224,11 @@ export class VisibilityManager {
 
         this.#bind(panel, 'pointerenter', () => { this.#pointerInside = true; });
         this.#bind(panel, 'pointerleave', () => { this.#pointerInside = false; });
-        this.#bind(panel, 'pointerdown', () => this.stickForInteraction());
+        /*  
+            ? this.#bind(panel, 'pointerdown', () => this.stickForInteraction());
+            TODO: Esto no me sirve, pero es posible que tenga
+                una razon para existir, revisar.
+        */
         this.#bind(panel, 'focusin', () => { this.#focusInside = true; });
         this.#bind(panel, 'focusout', ((e: FocusEvent) => {
             const related = e.relatedTarget as Node | null;

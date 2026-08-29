@@ -184,10 +184,10 @@ var e = Object.defineProperty, t = (t, n) => {
 			let i = t.querySelectorAll(".items");
 			e.key === "ArrowDown" ? (e.preventDefault(), this.selectedIndex = Math.min(this.selectedIndex + 1, i.length - 1), this.#u(i)) : e.key === "ArrowUp" ? (e.preventDefault(), this.selectedIndex = Math.max(this.selectedIndex - 1, 0), this.#u(i)) : ["enter"].includes(e.key.toLowerCase()) && this.selectedIndex >= 0 && (e.preventDefault(), this.#d(i[this.selectedIndex]), r(n));
 		}, this.boundClickHandler = (e) => {
-			if (e.preventDefault(), !t) return;
+			if (console.log("Mira di click loco hablame"), e.preventDefault(), !t) return;
 			let i = e.target.closest(".items"), a = t.querySelectorAll(".items");
 			i && (this.selectedIndex = Array.from(a).indexOf(i), this.#u(a), this.#d(i), r(n));
-		}, t?.addEventListener("click", this.boundClickHandler), e?.addEventListener("keydown", this.boundKeydownHandler), this;
+		}, t?.addEventListener("pointerdown", this.boundClickHandler), e?.addEventListener("keydown", this.boundKeydownHandler), this;
 	}
 	#u(e) {
 		e.forEach((e, t) => {
@@ -717,7 +717,7 @@ var i = class {
 			this.#a = !0;
 		}), this.#x(e, "pointerleave", () => {
 			this.#a = !1;
-		}), this.#x(e, "pointerdown", () => this.stickForInteraction()), this.#x(e, "focusin", () => {
+		}), this.#x(e, "focusin", () => {
 			this.#o = !0;
 		}), this.#x(e, "focusout", ((t) => {
 			let n = t.relatedTarget;

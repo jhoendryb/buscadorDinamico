@@ -511,7 +511,9 @@ class Search {
                 eventPreviu(input as HTMLInputElement);
             }
         };
+
         this.boundClickHandler = (e: Event) => {
+            console.log("Mira di click loco hablame");
             e.preventDefault();
             if (!renderItems) return;
 
@@ -525,7 +527,7 @@ class Search {
             }
         };
 
-        renderItems?.addEventListener('click', this.boundClickHandler);
+        renderItems?.addEventListener('pointerdown', this.boundClickHandler);
 
         content?.addEventListener('keydown', this.boundKeydownHandler);
 
