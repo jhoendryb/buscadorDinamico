@@ -7,16 +7,16 @@ var e = Object.defineProperty, t = (t, n) => {
 	});
 	return n || e(r, Symbol.toStringTag, { value: "Module" }), r;
 }, n = class e {
-	static #e = y;
+	static #e = _;
 	constructor(t) {
 		this.currentDrawId = 0, this.isLoadingMore = !1, this._destroyed = !1, this.abortController = null;
 		let { translation: n, ...r } = t;
-		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = v, this.zIndex = _, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = x.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundKeydownHandler = () => {}, this.boundClickHandler = () => {}, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
+		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = g, this.zIndex = h, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = y.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundKeydownHandler = () => {}, this.boundClickHandler = () => {}, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
 		try {
 			this.#t(), this.scrollObserver = null, this._ajaxResponse = {}, this.t = {
 				...e.#e,
 				...n
-			}, this._data = this.data, this.searchingLocal = new m(), this.searchingServer = new h(this.errorHandler, this.responseAdapter), this.renderer = new p({
+			}, this._data = this.data, this.searchingLocal = new x(), this.searchingServer = new S(this.errorHandler, this.responseAdapter), this.renderer = new b({
 				content: void 0,
 				contentSearch: void 0,
 				inputSearch: void 0,
@@ -101,7 +101,7 @@ var e = Object.defineProperty, t = (t, n) => {
 	#i() {
 		let e = this.renderer.body.renderItems;
 		if (!e) return this;
-		if (typeof IntersectionObserver > "u") return console.warn("IntersectionObserver no está disponible. Scroll infinito no funcionará en este entorno."), this;
+		if (typeof IntersectionObserver > "u") return console.warn(this.t.noIntersectionObserver), this;
 		let t = e.querySelector(".scroll-sentinel");
 		t && (this.scrollObserver?.unobserve(t), t.remove()), this.scrollObserver ||= new IntersectionObserver((e) => {
 			e.forEach((e) => {
@@ -113,9 +113,13 @@ var e = Object.defineProperty, t = (t, n) => {
 			threshold: .1
 		});
 		let n = r({
-			element: "div",
+			element: "li",
 			className: "scroll-sentinel",
-			attributes: { style: "height: 1px; visibility: hidden; padding: 0; margin: 0;" }
+			attributes: {
+				style: "height: 1px; visibility: hidden; padding: 0; margin: 0;",
+				role: "presentation",
+				"aria-hidden": "true"
+			}
 		});
 		return e.appendChild(n), this.scrollObserver.observe(n), this;
 	}
@@ -200,7 +204,10 @@ var e = Object.defineProperty, t = (t, n) => {
 		this.events.emit("itemSelected", {
 			item: e,
 			index: this.selectedIndex,
-			close: () => this.renderer.hideResults()
+			close: () => this.renderer.visibility.close({
+				reason: "select",
+				immediate: !0
+			})
 		});
 	}
 	clear() {
@@ -599,6 +606,132 @@ var i = class {
 		this.currentPage = e, this.countFn = void 0, this.dataItemsFn = void 0;
 	}
 }, u = class {
+	#e;
+	#t = "closed";
+	#n = "programmatic";
+	#r = 0;
+	#i = null;
+	#a = !1;
+	#o = !1;
+	#s = 0;
+	#c = [];
+	#l = !1;
+	constructor(e) {
+		this.#e = {
+			panel: e.panel,
+			control: e.control ?? (() => null),
+			listbox: e.listbox ?? (() => null),
+			hideDelayMs: e.hideDelayMs ?? 200,
+			reducedMotionMs: e.reducedMotionMs ?? 0,
+			hooks: e.hooks ?? {}
+		};
+	}
+	get phase() {
+		return this.#t;
+	}
+	get isOpen() {
+		return this.#t === "open" || this.#t === "opening";
+	}
+	open(e = "programmatic") {
+		this.#l || this.isOpen || (this.#r++, this.#g(), this.#b(), this.#u(e));
+	}
+	close(e = {}) {
+		if (this.#l || this.#t === "closed" || !e.immediate && this.#t === "closing") return;
+		let t = e.reason ?? "programmatic";
+		this.#n = t, this.#r++, this.#g(), this.#s = 0;
+		let n = this.#_();
+		if (e.immediate || n <= 0) {
+			this.#e.hooks.onClose?.(t), this.#f(t);
+			return;
+		}
+		this.#t = "closing", this.#y(), this.#e.hooks.onClose?.(t), this.#h(() => this.#p(), n);
+	}
+	toggle() {
+		this.isOpen ? this.close({ reason: "toggle" }) : this.open("toggle");
+	}
+	stickForInteraction() {
+		this.#l || (this.#s = Date.now() + this.#e.hideDelayMs, this.cancelPendingClose());
+	}
+	cancelPendingClose() {
+		this.#l || this.#t !== "closing" || (this.#r++, this.#g(), this.#u("focus"));
+	}
+	refresh() {
+		this.#l || this.#y();
+	}
+	destroy() {
+		this.#l = !0, this.#r++, this.#g(), this.#c.forEach(([e, t, n]) => e.removeEventListener(t, n)), this.#c = [], this.#a = !1, this.#o = !1, this.#s = 0, this.#t = "closed";
+	}
+	#u(e) {
+		this.#t = "opening", this.#y(), this.#e.hooks.onOpen?.(e);
+		let t = this.#_();
+		t <= 0 ? this.#d(e) : this.#h(() => this.#d(e), t);
+	}
+	#d(e) {
+		this.#l || !this.isOpen || (this.#t = "open", this.#y(), this.#e.hooks.onOpened?.(e));
+	}
+	#f(e) {
+		this.#t = "closed", this.#y(), this.#e.hooks.onClosed?.(e);
+	}
+	#p() {
+		if (this.#t === "closing") {
+			if (this.#m()) {
+				this.cancelPendingClose();
+				return;
+			}
+			this.#f(this.#n);
+		}
+	}
+	#m() {
+		if (this.#a || this.#o || Date.now() < this.#s) return !0;
+		let e = this.#e.panel(), t = typeof document < "u" ? document.activeElement : null;
+		return !!e && !!t && t !== document.body && e.contains(t);
+	}
+	#h(e, t) {
+		let n = ++this.#r;
+		this.#g(), this.#i = setTimeout(() => {
+			n === this.#r && e();
+		}, t);
+	}
+	#g() {
+		this.#i !== null && (clearTimeout(this.#i), this.#i = null);
+	}
+	#_() {
+		return this.#v() ? this.#e.reducedMotionMs : this.#e.hideDelayMs;
+	}
+	#v() {
+		try {
+			return typeof matchMedia == "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+		} catch {
+			return !1;
+		}
+	}
+	#y() {
+		let e = this.#e.panel();
+		if (!e) return;
+		let t = this.#t === "open" || this.#t === "opening";
+		e.classList.toggle("content-pagination-visible", t), e.classList.toggle("content-pagination-hidden", !t), t ? e.removeAttribute("hidden") : this.#t === "closed" && e.setAttribute("hidden", "true"), this.#e.control?.()?.setAttribute("aria-expanded", String(t)), this.#e.listbox?.()?.setAttribute("aria-hidden", String(!t));
+	}
+	#b() {
+		let e = this.#e.panel();
+		!e || this.#c.length > 0 || (this.#x(e, "pointerenter", () => {
+			this.#a = !0;
+		}), this.#x(e, "pointerleave", () => {
+			this.#a = !1;
+		}), this.#x(e, "pointerdown", () => this.stickForInteraction()), this.#x(e, "focusin", () => {
+			this.#o = !0;
+		}), this.#x(e, "focusout", ((t) => {
+			let n = t.relatedTarget;
+			this.#o = !!n && e.contains(n);
+		})));
+	}
+	#x(e, t, n) {
+		e.addEventListener(t, n), this.#c.push([
+			e,
+			t,
+			n
+		]);
+	}
+}, d = class {
 	render(e, t, n) {
 		if (typeof t == "function") return t(e, n);
 		if (typeof t == "string") return t.replace(/{{(\w+)}}/g, (t, r) => {
@@ -608,11 +741,50 @@ var i = class {
 		let r = Object.values(e).join(" ");
 		return n ? n(r) : r;
 	}
-}, d = /* @__PURE__ */ t({ DomComponent: () => f }), f = /* @__PURE__ */ function(e) {
+}, f = /* @__PURE__ */ t({ DomComponent: () => p }), p = /* @__PURE__ */ function(e) {
 	return e.SEARCH = "s", e.CONTENT = "c", e.ITEMS = "i", e.PAGINATION = "p", e;
-}({}), p = class {
+}({}), m = /* @__PURE__ */ t({
+	DEFAULT_CACHE_MAX_SIZE: () => 50,
+	DEFAULT_CACHE_TTL: () => 300,
+	DEFAULT_CSS_CLASSES: () => v,
+	DEFAULT_DEBOUNCE_TIME: () => 500,
+	DEFAULT_DEVELOPMENT_MODE: () => !1,
+	DEFAULT_HIGHLIGHT_ENABLED: () => !1,
+	DEFAULT_ITEMS_PER_PAGE: () => 10,
+	DEFAULT_THEME: () => g,
+	DEFAULT_TIME_HIDDEN_RESULTS: () => 200,
+	DEFAULT_TRANSLATIONS: () => _,
+	DEFAULT_Z_INDEX: () => h,
+	DOM_ORDERS: () => y,
+	FIRST_PAGE: () => 1,
+	NO_SELECTION: () => -1,
+	SORT_ASC: () => -1,
+	SORT_DESC: () => 1,
+	SORT_ORDER: () => "asc"
+}), h = 1e3, g = "adaptative", _ = {
+	ariaLabel: "Filtrar por Búsqueda",
+	searchPlaceholder: "Ingrese palabra clave...",
+	noResults: "No se encontraron resultados",
+	loading: "Buscando...",
+	pagination: "{{to}} de {{total}}",
+	noIntersectionObserver: "IntersectionObserver no está disponible. Scroll infinito no funcionará en este entorno."
+}, v = {
+	searchContainer: "input-search",
+	itemsContainer: "items-search",
+	paginationContainer: "index-search",
+	paginationList: "pagination",
+	item: "items"
+}, y = {
+	SEARCH_ITEMS_PAGINATION: "sip",
+	SEARCH_CONTENT_ITEMS_PAGINATION: "scip"
+}, b = class {
 	constructor(e, t, n) {
-		this.body = e, this.uniqueClassNameFn = t, this._isVisible = !1, this._hideTimeout = null, this._animationTimeouts = [], this.timeHiddenResults = n;
+		this.body = e, this.uniqueClassNameFn = t, this.timeHiddenResults = n, this.visibility = new u({
+			panel: () => this.body.contentPaginationItems,
+			control: () => this.body.inputSearch,
+			listbox: () => this.body.renderItems,
+			hideDelayMs: this.timeHiddenResults
+		});
 	}
 	setTheme(e) {
 		let t = this.body.content;
@@ -640,12 +812,16 @@ var i = class {
 		if (this.body.inputSearch) return this.body.inputSearch;
 		let a = this.body.contentSearch, o = a?.querySelector(".filter-search"), s, c = {
 			element: o,
+			type: "search",
 			id: this.getUniqueClassName("input-search"),
 			placeholder: n || "Ingrese palabra clave...",
 			className: this.#e(`${this.getUniqueClassName("filter-search")}`, o?.className),
 			attributes: {
 				"aria-label": i || "Filtrar por Búsqueda",
-				role: "searchbox",
+				role: "combobox",
+				"aria-expanded": "false",
+				"aria-haspopup": "listbox",
+				"aria-autocomplete": "list",
 				"aria-controls": this.getUniqueClassName("items-search")
 			},
 			event: {
@@ -656,10 +832,10 @@ var i = class {
 					}, t);
 				},
 				focus: () => {
-					(this.body.renderItems?.querySelectorAll(".items").length || 0) > 0 && this.showResults();
+					(this.body.renderItems?.querySelectorAll(".items").length || 0) > 0 && this.visibility.open("focus");
 				},
 				blur: () => {
-					this.hideResultsWithDelay();
+					this.visibility.close({ reason: "blur" });
 				}
 			},
 			...o ? {} : {
@@ -678,7 +854,6 @@ var i = class {
 			attributes: {
 				"aria-label": "Resultados de búsqueda",
 				role: "listbox",
-				"aria-activedescendant": "",
 				"aria-hidden": "true"
 			},
 			style: { zIndex: e },
@@ -712,7 +887,7 @@ var i = class {
 		});
 		return this.body.counterItems = t, t;
 	}
-	appendItems(e, t, n = "No hay resultados.", i, a = !1, o) {
+	appendItems(e, t, n = _.noResults, i, a = !1, o) {
 		let s = this.body.renderItems;
 		if (!s) return !1;
 		a && (s.innerHTML = "");
@@ -720,15 +895,12 @@ var i = class {
 			element: "li",
 			className: "items",
 			tabindex: "0",
-			attributes: { role: "option" },
-			event: { pointerdown: (e) => {
-				e.preventDefault(), this._isVisible = !0;
-			} }
+			attributes: { role: "option" }
 		};
 		if (s.children.length === 0 && (!e || e.length === 0)) return c.textContent = n, s.appendChild(r(c)), !1;
-		let l = this.body.renderItems?.children.length, d = l ? l - 1 : 0, f = document.createDocumentFragment(), p = new u();
+		let l = this.body.renderItems?.children.length, u = l ? l - 1 : 0, f = document.createDocumentFragment(), p = new d();
 		return e.forEach((e) => {
-			c.id = this.getUniqueClassName(`items-${d++}`);
+			c.id = this.getUniqueClassName(`items-${u++}`);
 			let n = r(c);
 			n.innerHTML = p.render(e, t, o), f.appendChild(n);
 		}), s.appendChild(f), i.emit("appendItems", {
@@ -739,7 +911,7 @@ var i = class {
 	updateCounter(e) {
 		if (!this.body.counterItems) return;
 		let t = this.body.counterItems;
-		e.textPagination ||= "{{to}} de {{total}}";
+		e.textPagination ||= _.pagination;
 		let { textPagination: n, ...r } = e;
 		if (t && n) {
 			let e = n;
@@ -750,32 +922,14 @@ var i = class {
 	}
 	renderByDom(e, t) {
 		let n = {
-			[f.SEARCH]: () => {
+			[p.SEARCH]: () => {
 				this.contentSearch(), this.renderSearch({ ...t.search });
 			},
-			[f.CONTENT]: () => this.renderContentPaginationItems(),
-			[f.ITEMS]: () => this.renderItems(),
-			[f.PAGINATION]: () => this.renderPagination()
+			[p.CONTENT]: () => this.renderContentPaginationItems(),
+			[p.ITEMS]: () => this.renderItems(),
+			[p.PAGINATION]: () => this.renderPagination()
 		}, r = e.split(""), i = r.filter((e) => "sc".includes(e)).join(""), a = r.filter((e) => "ip".includes(e)).join("");
 		for (let e of `${i}${a}`) n[e] && n[e]();
-	}
-	showResults() {
-		let e = this.body.contentPaginationItems;
-		e && (e.classList.remove("content-pagination-hidden"), e.classList.add("content-pagination-visible"), e.removeAttribute("hidden"), this._isVisible = !0, this._hideTimeout &&= (clearTimeout(this._hideTimeout), null));
-	}
-	hideResultsWithDelay(e = this.timeHiddenResults) {
-		this._hideTimeout = setTimeout(() => {
-			this.hideResults();
-		}, e);
-	}
-	hideResults() {
-		let e = this.body.contentPaginationItems, t;
-		e && (e.classList.remove("content-pagination-visible"), e.classList.add("content-pagination-hidden"), t = setTimeout(() => {
-			e.classList.contains("content-pagination-hidden") && e.setAttribute("hidden", "true");
-		}, this.timeHiddenResults), this._animationTimeouts.push(t));
-	}
-	toggleResults() {
-		this._isVisible ? this.hideResults() : this.showResults();
 	}
 	showLoading(e) {
 		if (!this.body.renderItems) return;
@@ -802,9 +956,9 @@ var i = class {
 		return t || e?.appendChild(n), this.body.contentPaginationItems = n, n;
 	}
 	destroy() {
-		this._animationTimeouts.forEach((e) => clearTimeout(e)), this._animationTimeouts = [], this._hideTimeout &&= (clearTimeout(this._hideTimeout), null), this.body.contentSearch = void 0, this.body.inputSearch = void 0, this.body.renderItems = void 0, this.body.paginationItems = void 0, this.body.contentPaginationItems = void 0;
+		this.visibility.destroy(), this.body.contentSearch = void 0, this.body.inputSearch = void 0, this.body.renderItems = void 0, this.body.paginationItems = void 0, this.body.contentPaginationItems = void 0;
 	}
-}, m = class {
+}, x = class {
 	isExtractData(e) {
 		let t = e.querySelectorAll(".items");
 		return t.length === 0 ? null : Array.from(t).map((e) => {
@@ -828,7 +982,7 @@ var i = class {
 	#t(e) {
 		return e.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 	}
-}, h = class {
+}, S = class {
 	constructor(e, t) {
 		this.defaultTimeout = 3e4, this.errorHandler = e, this.responseAdapter = t;
 	}
@@ -839,10 +993,13 @@ var i = class {
 			page: n,
 			searchTerm: e
 		};
-		let a = await this.executeFetch(t, i), o = this.responseAdapter, s = o ? o(a) : a;
-		return {
-			data: s.data,
-			countPage: s.countPage
+		let o = await this.executeFetch(t, i), s = this.responseAdapter, c = s ? s(o) : o;
+		return (!c || typeof c != "object" || !Array.isArray(c.data)) && this.errorHandler.throwCustomError(a.EMPTY_RESPONSE, {
+			context: "empty_response",
+			url: t.url
+		}), {
+			data: c.data,
+			countPage: c.countPage
 		};
 	}
 	#e(e) {
@@ -908,7 +1065,7 @@ var i = class {
 					originalError: t
 				});
 			}
-			return (!l || Array.isArray(l) && l.length === 0) && this.errorHandler.throwCustomError(a.EMPTY_RESPONSE, {
+			return l || this.errorHandler.throwCustomError(a.EMPTY_RESPONSE, {
 				context: "empty_response",
 				url: e.url
 			}), e.success && e.success(l, null), l;
@@ -916,39 +1073,6 @@ var i = class {
 			this.#r(t, e.url, e.timeout || this.defaultTimeout);
 		}
 	}
-}, g = /* @__PURE__ */ t({
-	DEFAULT_CACHE_MAX_SIZE: () => 50,
-	DEFAULT_CACHE_TTL: () => 300,
-	DEFAULT_CSS_CLASSES: () => b,
-	DEFAULT_DEBOUNCE_TIME: () => 500,
-	DEFAULT_DEVELOPMENT_MODE: () => !1,
-	DEFAULT_HIGHLIGHT_ENABLED: () => !1,
-	DEFAULT_ITEMS_PER_PAGE: () => 10,
-	DEFAULT_THEME: () => v,
-	DEFAULT_TIME_HIDDEN_RESULTS: () => 200,
-	DEFAULT_TRANSLATIONS: () => y,
-	DEFAULT_Z_INDEX: () => _,
-	DOM_ORDERS: () => x,
-	FIRST_PAGE: () => 1,
-	NO_SELECTION: () => -1,
-	SORT_ASC: () => -1,
-	SORT_DESC: () => 1,
-	SORT_ORDER: () => "asc"
-}), _ = 1e3, v = "adaptative", y = {
-	ariaLabel: "Filtrar por Búsqueda",
-	searchPlaceholder: "Ingrese palabra clave...",
-	noResults: "No se encontraron resultados",
-	loading: "Buscando...",
-	pagination: "{{to}} de {{total}}"
-}, b = {
-	searchContainer: "input-search",
-	itemsContainer: "items-search",
-	paginationContainer: "index-search",
-	paginationList: "pagination",
-	item: "items"
-}, x = {
-	SEARCH_ITEMS_PAGINATION: "sip",
-	SEARCH_CONTENT_ITEMS_PAGINATION: "scip"
 };
 //#endregion
-export { g as Constants, a as ErrorCode, s as ErrorHandler, c as EventEmitter, i as LRUCache, l as Pagination, n as Search, o as SearchError, p as SearchRenderer, m as SearchingLocal, h as SearchingServer, d as Types, r as createElement };
+export { m as Constants, a as ErrorCode, s as ErrorHandler, c as EventEmitter, i as LRUCache, l as Pagination, n as Search, o as SearchError, b as SearchRenderer, x as SearchingLocal, S as SearchingServer, f as Types, r as createElement };
