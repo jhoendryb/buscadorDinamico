@@ -32,7 +32,7 @@
 
 <h2>Arquitectura</h2>
 
-<p>El componente sigue un patrón de composición OOP con 8 módulos principales:</p>
+<p>El componente sigue un patrón de composición OOP con 9 módulos principales:</p>
 
 <table>
     <thead>
@@ -49,6 +49,10 @@
         <tr>
             <td><code>SearchRenderer</code></td>
             <td>Renderizado del DOM y gestión visual</td>
+        </tr>
+        <tr>
+            <td><code>VisibilityManager</code></td>
+            <td>Gestión de estados de visibilidad del panel (FSM: closed → opening → open → closing)</td>
         </tr>
         <tr>
             <td><code>SearchingLocal</code></td>

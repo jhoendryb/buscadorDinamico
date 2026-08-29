@@ -141,6 +141,77 @@ search.renderer.hideResultsWithDelay(300); // Con delay personalizado</code></pr
 
 <p>Limpia timeouts de animación, hideTimeout y reinicia las referencias del DOM. Se llama automáticamente desde <code>search.destroy()</code>.</p>
 
+<h3>renderer.visibility</h3>
+
+<p>Propiedad de solo lectura que expone la instancia de <code>VisibilityManager</code>, la máquina de estados que controla la apertura/cierre del panel de resultados.</p>
+
+<pre data-lang="typescript"><code>readonly visibility: VisibilityManager</code></pre>
+
+<h4>Métodos del VisibilityManager</h4>
+
+<pre data-lang="typescript"><code>visibility.open(reason?: OpenReason): void
+visibility.close(options?: CloseOptions): void
+visibility.toggle(): void
+visibility.stickForInteraction(): void
+visibility.cancelPendingClose(): void
+visibility.refresh(): void
+visibility.destroy(): void</code></pre>
+
+<table>
+    <thead>
+        <tr>
+            <th>Método</th>
+            <th>Descripción</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>open(reason?)</code></td>
+            <td>Abre el panel. Razones: <code>'focus'</code>, <code>'results'</code>, <code>'toggle'</code>, <code>'programmatic'</code></td>
+        </tr>
+        <tr>
+            <td><code>close(options?)</code></td>
+            <td>Cierra el panel. <code>options.immediate</code> para commit síncrono (selección de item). Razones: <code>'blur'</code>, <code>'select'</code>, <code>'toggle'</code>, <code>'programmatic'</code></td>
+        </tr>
+        <tr>
+            <td><code>toggle()</code></td>
+            <td>Alterna entre abierto y cerrado</td>
+        </tr>
+        <tr>
+            <td><code>stickForInteraction()</code></td>
+            <td>Mantiene abierto durante una interacción (click)</td>
+        </tr>
+        <tr>
+            <td><code>cancelPendingClose()</code></td>
+            <td>Revierte un cierre en curso (usado por <code>pointerenter</code>/<code>focusin</code> del panel)</td>
+        </tr>
+        <tr>
+            <td><code>refresh()</code></td>
+            <td>Re-sincroniza el DOM desde la fase actual</td>
+        </tr>
+        <tr>
+            <td><code>destroy()</code></td>
+            <td>Limpia timers, listeners y estado interno</td>
+        </tr>
+    </tbody>
+</table>
+
+<h4>Propiedades</h4>
+
+<pre data-lang="typescript"><code>visibility.phase: DropdownPhase  // 'closed' | 'opening' | 'open' | 'closing'
+visibility.isOpen: boolean        // true si phase es 'open' o 'opening'</code></pre>
+
+<h4>Comportamiento ARIA</h4>
+
+<p>El <code>VisibilityManager</code> sincroniza automáticamente los atributos ARIA al cambiar de fase:</p>
+
+<ul>
+    <li><code>aria-expanded</code> del <code>&lt;input&gt;</code> → <code>true</code> cuando abierto, <code>false</code> cuando cerrado</li>
+    <li><code>aria-hidden</code> del <code>&lt;ul&gt;</code> → <code>false</code> cuando abierto, <code>true</code> cuando cerrado</li>
+    <li>Clases CSS: <code>content-pagination-visible</code> / <code>content-pagination-hidden</code></li>
+    <li>Atributo <code>hidden</code> del panel cuando está cerrado</li>
+</ul>
+
 <h2>Métodos de Paginación</h2>
 
 <h3>pagination.getRange()</h3>

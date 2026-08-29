@@ -2,7 +2,49 @@
 
 <p>Historial de versiones y cambios del componente.</p>
 
-<h2>v1.0.0 <span class="doc-badge doc-badge--success">Latest</span></h2>
+<h2>v2.5.0 <span class="doc-badge doc-badge--success">Latest</span></h2>
+
+<p><em>Fecha: 2026</em></p>
+
+<h3 id="anadido-v2-5-0">Añadido</h3>
+
+<ul>
+    <li><code>VisibilityManager</code> — máquina de estados finita (FSM) para gestión de visibilidad del panel de resultados
+        <ul>
+            <li>Estados: <code>closed → opening → open → closing → closed</code></li>
+            <li>Patrón generation-counter para evitar race conditions con timers</li>
+            <li><code>stickForInteraction()</code> para mantener abierto durante interacciones de click</li>
+            <li><code>close({immediate: true})</code> para cierre síncrono al seleccionar items</li>
+            <li><code>cancelPendingClose()</code> para revertir cierres en curso</li>
+            <li><code>refresh()</code> para re-sincronizar DOM desde el estado actual</li>
+        </ul>
+    </li>
+    <li><code>&lt;search&gt;</code> como elemento semántico HTML5 para el contenedor del input (landmark)</li>
+    <li>Patrón ARIA combobox completo en el <code>&lt;input&gt;</code>:
+        <ul>
+            <li><code>role="combobox"</code>, <code>aria-expanded</code>, <code>aria-haspopup="listbox"</code>, <code>aria-autocomplete="list"</code>, <code>aria-controls</code></li>
+        </ul>
+    </li>
+    <li><code>type="search"</code> en el <code>&lt;input&gt;</code> — habilita botón de limpieza nativo</li>
+    <li><code>&lt;span class="search-icon" aria-hidden="true"&gt;</code> — icono oculto de lectores de pantalla</li>
+    <li><code>aria-hidden</code> dinámico en el <code>&lt;ul&gt;</code> (listbox) — sincronizado por VisibilityManager</li>
+    <li><code>aria-label="Resultados de búsqueda"</code> en el <code>&lt;ul&gt;</code> (listbox)</li>
+    <li><code>aria-activedescendant</code> en el <code>&lt;ul&gt;</code> para item destacado por teclado</li>
+    <li><code>&lt;li class="scroll-sentinel" role="presentation" aria-hidden="true"&gt;</code> — sentinel de scroll semántico</li>
+    <li><code>role="status"</code> y <code>aria-live="polite"</code> en el contenedor del contador</li>
+    <li>Propiedad pública <code>renderer.visibility</code> para acceder al VisibilityManager</li>
+</ul>
+
+<h3 id="mejorado-v2-5-0">Mejorado</h3>
+
+<ul>
+    <li>Estructura HTML usa <code>&lt;search&gt;</code> landmark en lugar de <code>&lt;div&gt;</code> para el wrapper del input</li>
+    <li>Items renderizados con <code>role="option"</code> y IDs únicos para <code>aria-activedescendant</code></li>
+    <li><code>aria-expanded</code> del input se sincroniza automáticamente con el estado del panel</li>
+    <li>Scroll sentinel usa <code>&lt;li&gt;</code> en lugar de <code>&lt;div&gt;</code> para validez semántica dentro de <code>&lt;ul&gt;</code></li>
+</ul>
+
+<h2>v1.0.0</h2>
 
 <p><em>Fecha: 2026</em></p>
 
