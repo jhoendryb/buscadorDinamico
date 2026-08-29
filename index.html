@@ -256,9 +256,15 @@
                 <div class="col-6 content-search">
                     <search class="app-search app-search1">
                         <div class="input-search prueba">
-                            <span class="search-icon">🔍</span>
-                            <input type="text" name="filterSearch" id="filter-search"
-                                class="filter-search form-control input-sm" placeholder="Ingrese palabra clave...">
+                            <span class="search-icon" aria-hidden="true">🔍</span>
+                            <input type="search" name="filterSearch" id="filter-search"
+                                class="filter-search form-control input-sm" placeholder="Ingrese palabra clave..."
+                                aria-label="Filtrar por Búsqueda"
+                                role="combobox"
+                                aria-expanded="false"
+                                aria-haspopup="listbox"
+                                aria-autocomplete="list"
+                                aria-controls="items-search-app-search1">
                         </div>
                         
                     </search>
@@ -370,8 +376,15 @@ background: linear-gradient(90deg,rgba(255, 255, 255, 1) 50%, rgba(0, 0, 0, 1) 5
 
     <div class="app-search app-search3">
         <search class="input-search">
-            <input type="text" name="filterSearch" class="filter-search form-control input-lg"
-                placeholder="Ingrese palabra clave...">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input type="search" name="filterSearch" class="filter-search form-control input-lg"
+                placeholder="Ingrese palabra clave..."
+                aria-label="Filtrar por Búsqueda"
+                role="combobox"
+                aria-expanded="false"
+                aria-haspopup="listbox"
+                aria-autocomplete="list"
+                aria-controls="items-search-app-search3">
         </search>
         <div class="content-pagination-items">
             <ul class="items-search scroll-personalize">

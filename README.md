@@ -454,20 +454,35 @@ Si tienes datos ya en el HTML, puedes incluir elementos con data attributes:
 ```html
 <div class="app-search app-search1">
     <search class="input-search prueba">
-        <input type="text" name="filterSearch" id="filter-search" class="filter-search form-control input-sm"
-            placeholder="Ingrese palabra clave...">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input type="search" name="filterSearch" id="input-search-app-search1"
+            class="filter-search-app-search1 filter-search form-control input-sm"
+            placeholder="Ingrese palabra clave..."
+            aria-label="Filtrar por Búsqueda"
+            role="combobox"
+            aria-expanded="false"
+            aria-haspopup="listbox"
+            aria-autocomplete="list"
+            aria-controls="items-search-app-search1">
     </search>
-    <div class="content-pagination-items">
-        <ul class="items-search scroll-personalize">
-            <li class="items" data-country="VE" data-name="Venezuela"
+    <div class="content-pagination-items content-pagination-items-app-search1">
+        <ul aria-label="Resultados de búsqueda"
+            role="listbox"
+            aria-hidden="true"
+            class="items-search scroll-personalize items-search-app-search1"
+            id="items-search-app-search1"
+            style="z-index: 999;">
+            <li role="option" class="items" data-country="VE" data-name="Venezuela"
                 data-descripcion="El pais mas rico en petroleo.">
             </li>
-            <li class="items" data-country="CO" data-name="Colombia"
+            <li role="option" class="items" data-country="CO" data-name="Colombia"
                 data-descripcion="Un pais con una gran riqueza cultural.">
             </li>
             <!-- ... más items -->
+            <li class="scroll-sentinel" role="presentation" aria-hidden="true"
+                style="height: 1px; visibility: hidden; padding: 0; margin: 0;"></li>
         </ul>
-        <div class="pagination-items">
+        <div role="status" aria-live="polite" class="pagination-items">
             <div class="items-counter">20 de 498</div>
         </div>
     </div>
@@ -483,15 +498,26 @@ Si el contenedor está vacío, la clase Search generará automáticamente:
 ```html
 <div class="app-search">
     <search class="input-search">
-        <input type="text" name="filterSearch" class="filter-search form-control input-lg"
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input type="search" name="filterSearch" class="filter-search form-control input-lg"
             placeholder="Ingrese palabra clave..."
-            aria-label="Campo de búsqueda">
+            aria-label="Filtrar por Búsqueda"
+            role="combobox"
+            aria-expanded="false"
+            aria-haspopup="listbox"
+            aria-autocomplete="list"
+            aria-controls="items-search">
     </search>
     <div class="content-pagination-items">
-        <ul class="items-search scroll-personalize">
+        <ul aria-label="Resultados de búsqueda"
+            role="listbox"
+            aria-hidden="true"
+            class="items-search scroll-personalize">
             <!-- Aquí se renderizan los resultados -->
+            <li class="scroll-sentinel" role="presentation" aria-hidden="true"
+                style="height: 1px; visibility: hidden; padding: 0; margin: 0;"></li>
         </ul>
-        <div class="pagination-items">
+        <div role="status" aria-live="polite" class="pagination-items">
             <div class="items-counter">0 de 0</div>
         </div>
     </div>
@@ -511,14 +537,23 @@ Esto evita conflictos de estilos entre múltiples instancias.
 
 ### ARIA Attributes y Accesibilidad
 
-El componente incluye atributos ARIA para accesibilidad:
+El componente implementa el patrón **ARIA combobox** estándar para autocompletado:
 
 ```html
-<input type="text" 
-    aria-label="Campo de búsqueda"
-    placeholder="Ingrese palabra clave..."
-    role="searchbox">
+<search class="input-search">
+    <span class="search-icon" aria-hidden="true">🔍</span>
+    <input type="search"
+        aria-label="Filtrar por Búsqueda"
+        placeholder="Ingrese palabra clave..."
+        role="combobox"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-autocomplete="list"
+        aria-controls="items-search">
+</search>
 ```
+
+El elemento `<search>` es un landmark semántico HTML5 que mejora la navegación por lectores de pantalla. Los atributos ARIA se sincronizan dinámicamente via `VisibilityManager`:
 
 ## CSS y Estilos
 
@@ -715,16 +750,31 @@ search.init();
 ```html
 <div class="app-search app-search1">
     <search class="input-search prueba">
-        <input type="text" name="filterSearch" id="filter-search" class="filter-search form-control input-sm"
-            placeholder="Ingrese palabra clave...">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input type="search" name="filterSearch" id="input-search-app-search1"
+            class="filter-search-app-search1 filter-search form-control input-sm"
+            placeholder="Ingrese palabra clave..."
+            aria-label="Filtrar por Búsqueda"
+            role="combobox"
+            aria-expanded="false"
+            aria-haspopup="listbox"
+            aria-autocomplete="list"
+            aria-controls="items-search-app-search1">
     </search>
-    <div class="content-pagination-items">
-        <ul class="items-search scroll-personalize">
-            <li class="items" data-country="VE" data-name="Venezuela"
+    <div class="content-pagination-items content-pagination-items-app-search1">
+        <ul aria-label="Resultados de búsqueda"
+            role="listbox"
+            aria-hidden="true"
+            class="items-search scroll-personalize items-search-app-search1"
+            id="items-search-app-search1"
+            style="z-index: 999;">
+            <li role="option" class="items" data-country="VE" data-name="Venezuela"
                 data-descripcion="El pais mas rico en petroleo.">
             </li>
+            <li class="scroll-sentinel" role="presentation" aria-hidden="true"
+                style="height: 1px; visibility: hidden; padding: 0; margin: 0;"></li>
         </ul>
-        <div class="pagination-items">
+        <div role="status" aria-live="polite" class="pagination-items">
             <div class="items-counter">20 de 498</div>
         </div>
     </div>
@@ -1663,7 +1713,7 @@ La búsqueda ignora tildes y diacriticos automáticamente:
 | Clave | Default | Descripción |
 |-------|---------|-------------|
 | `searchPlaceholder` | "Ingrese palabra clave..." | Placeholder del input |
-| `searchLabel` | "Filtrar por Búsqueda" | Label del input (aria-label) |
+| `ariaLabel` | "Filtrar por Búsqueda" | Label del input (aria-label) |
 | `noResults` | "No se encontraron resultados" | Mensaje sin resultados |
 | `loading` | "Buscando..." | Mensaje de carga |
 | `pagination` | `"{{to}} de {{total}}"` | Template del contador. Variables: `{{from}}`, `{{to}}`, `{{total}}` |
@@ -1675,21 +1725,19 @@ const search = new Search({
     element: '.app-search',
     translation: {
         searchPlaceholder: 'Escribe la búsqueda aquí...',
-        searchLabel: 'Buscar',
+        ariaLabel: 'Buscar',
         noResults: 'No hay resultados',
         loading: 'Cargando datos...'
     },
     data: [/* datos */]
 });
-
-search.init();
 ```
 
 ### Traducciones por Defecto
 
 ```typescript
 static #defaultTranslations = {
-    searchLabel: "Filtrar por Búsqueda",
+    ariaLabel: "Filtrar por Búsqueda",
     searchPlaceholder: "Ingrese palabra clave...",
     noResults: "No se encontraron resultados",
     loading: "Buscando...",
@@ -2456,7 +2504,7 @@ interface SearchResult {
 
 ```typescript
 interface TranslationCache {
-    searchLabel?: string;
+    ariaLabel?: string;
     searchPlaceholder?: string;
     loading?: string;
     noResults?: string;
@@ -2705,53 +2753,104 @@ El sistema de caché LRU con TTL optimiza el rendimiento:
 
 ## Accesibilidad
 
-### ARIA Attributes
+### Patrón ARIA Combobox
 
-El componente incluye atributos ARIA para accesibilidad:
-
-```html
-<input type="text" 
-    aria-label="Campo de búsqueda"
-    placeholder="Ingrese palabra clave..."
-    role="searchbox">
-```
-
-### Navegación por Teclado
-
-- **ArrowUp/ArrowDown**: Navegar entre items
-- **Enter**: Seleccionar item destacado
-- **Tab**: Navegar entre elementos del formulario
-
-### Roles Semánticos
+El componente implementa el patrón [ARIA combobox](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/) estándar para autocompletado:
 
 ```html
 <search class="input-search">
-    <input type="text" name="filterSearch" class="filter-search" role="searchbox">
+    <span class="search-icon" aria-hidden="true">🔍</span>
+    <input type="search"
+        aria-label="Filtrar por Búsqueda"
+        placeholder="Ingrese palabra clave..."
+        role="combobox"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-autocomplete="list"
+        aria-controls="items-search-app-search1">
 </search>
 <div class="content-pagination-items">
-    <ul class="items-search scroll-personalize" role="listbox">
-        <li class="items" role="option"></li>
+    <ul aria-label="Resultados de búsqueda"
+        role="listbox"
+        aria-hidden="true"
+        class="items-search scroll-personalize items-search-app-search1"
+        id="items-search-app-search1">
+        <li role="option" class="items" id="items-0-app-search1">...</li>
+        <li role="option" class="items" id="items-1-app-search1">...</li>
+        <li class="scroll-sentinel" role="presentation" aria-hidden="true"
+            style="height: 1px; visibility: hidden; padding: 0; margin: 0;"></li>
     </ul>
+    <div role="status" aria-live="polite" class="pagination-items">
+        <div class="items-counter">2 de 2</div>
+    </div>
 </div>
 ```
 
-### Labels Descriptivos
+### Referencia de Atributos ARIA
 
-```javascript
-translation: {
-    searchPlaceholder: 'Ingrese palabra clave...'
-}
+| Elemento | Atributo | Valor | Descripción |
+|----------|----------|-------|-------------|
+| `<input>` | `type` | `search` | Habilita el botón de limpieza nativo del navegador |
+| `<input>` | `role` | `combobox` | Indica que es un control de autocompletado |
+| `<input>` | `aria-expanded` | `true` / `false` | Estado del panel — sincronizado por VisibilityManager |
+| `<input>` | `aria-haspopup` | `listbox` | Indica que abre un listbox |
+| `<input>` | `aria-autocomplete` | `list` | Indica que muestra una lista de sugerencias |
+| `<input>` | `aria-controls` | ID del `<ul>` | Conecta el input con su listbox |
+| `<input>` | `aria-label` | Texto configurable | Label accesible del input (configurable vía `translation.ariaLabel`) |
+| `<span>` | `aria-hidden` | `true` | Oculta el icono decorativo de lectores de pantalla |
+| `<ul>` | `role` | `listbox` | Lista de resultados |
+| `<ul>` | `aria-hidden` | `true` / `false` | Visibilidad del panel — sincronizado por VisibilityManager |
+| `<ul>` | `aria-label` | "Resultados de búsqueda" | Label descriptivo del listbox |
+| `<ul>` | `aria-activedescendant` | ID del item | Item destacado por teclado — se agrega/remueve dinámicamente |
+| `<li>` | `role` | `option` | Cada item de resultado |
+| `<div>` | `role` | `status` | Región live para el contador |
+| `<div>` | `aria-live` | `polite` | Anuncia cambios al contador |
+| `<li>` sentinel | `role` | `presentation` | Sentinel de scroll, oculto de AT |
+| `<li>` sentinel | `aria-hidden` | `true` | Oculto de lectores de pantalla |
+
+### Elemento Semántico `<search>`
+
+El contenedor del input se renderiza como un elemento `<search>` (HTML5 landmark), no un `<div>`. Esto mejora la semántica del documento y la navegación por lectores de pantalla.
+
+### VisibilityManager
+
+El `VisibilityManager` es una máquina de estados finita (FSM) que controla la apertura/cierre del panel de resultados. Gestiona automáticamente:
+
+- `aria-expanded` del `<input>` — `true` cuando abierto, `false` cuando cerrado
+- `aria-hidden` del `<ul>` — `false` cuando abierto, `true` cuando cerrado
+- Clases CSS: `content-pagination-visible` / `content-pagination-hidden`
+- Atributo `hidden` del panel cuando está cerrado
+- `aria-activedescendant` del `<ul>` al navegar por teclado
+
+**Estados del VisibilityManager:**
+
 ```
+closed → opening → open → closing → closed
+```
+
+**Razones de apertura:** `focus`, `results`, `toggle`, `programmatic`
+**Razones de cierre:** `blur`, `select`, `toggle`, `programmatic`
+
+Al seleccionar un item (`close({immediate: true})`), el panel se cierra inmediatamente sin esperar la animación.
+
+### Navegación por Teclado
+
+- **ArrowDown**: Navegar al siguiente item (actualiza `aria-activedescendant`)
+- **ArrowUp**: Navegar al item anterior (actualiza `aria-activedescendant`)
+- **Enter**: Seleccionar item destacado (cierra el panel)
+- **Tab**: Navegar entre elementos del formulario
 
 ### Soporte de Screen Readers
 
 El componente es compatible con screen readers gracias a:
 
-- ARIA attributes
-- Roles semánticos
-- Labels descriptivos
-- Navegación por teclado
-- Estados visuales claros
+- Patrón ARIA combobox completo
+- `aria-expanded` sincronizado con el estado del panel
+- `aria-activedescendant` para navegación por teclado
+- `aria-hidden` dinámico en el panel de resultados
+- `aria-live="polite"` en el contador de resultados
+- Labels descriptivos configurables vía i18n
+- Elemento semántico `<search>` como landmark
 
 ## Troubleshooting
 
@@ -2963,7 +3062,37 @@ Para navegadores antiguos, usa un polyfill:
 
 ## Changelog
 
-### Versión 2.4.0 (Actual)
+### Versión 2.5.0 (Actual)
+
+**Añadido:**
+
+- `VisibilityManager` — máquina de estados finita (FSM) para gestión de visibilidad del panel de resultados
+  - Estados: `closed → opening → open → closing → closed`
+  - Patrón generation-counter para evitar race conditions con timers
+  - `stickForInteraction()` para mantener abierto durante interacciones de click
+  - `close({immediate: true})` para cierre síncrono al seleccionar items
+  - `cancelPendingClose()` para revertir cierres en curso
+  - `refresh()` para re-sincronizar DOM desde el estado actual
+- `<search>` como elemento semántico HTML5 para el contenedor del input (landmark)
+- Patrón ARIA combobox completo en el `<input>`:
+  - `role="combobox"`, `aria-expanded`, `aria-haspopup="listbox"`, `aria-autocomplete="list"`, `aria-controls`
+- `type="search"` en el `<input>` (antes `type="text"`) — habilita botón de limpieza nativo
+- `<span class="search-icon" aria-hidden="true">` — icono oculto de lectores de pantalla
+- `aria-hidden` dinámico en el `<ul>` (listbox) — sincronizado por VisibilityManager
+- `aria-label="Resultados de búsqueda"` en el `<ul>` (listbox)
+- `aria-activedescendant` en el `<ul>` para item destacado por teclado
+- `<li class="scroll-sentinel" role="presentation" aria-hidden="true">` — sentinel de scroll semántico
+- `role="status"` y `aria-live="polite"` en el contenedor del contador
+- Propiedad pública `renderer.visibility` para acceder al VisibilityManager desde el exterior
+
+**Mejorado:**
+
+- Estructura HTML usa `<search>` landmark en lugar de `<div>` para el wrapper del input
+- Items renderizados con `role="option"` y IDs únicos para `aria-activedescendant`
+- `aria-expanded` del input se sincroniza automáticamente con el estado del panel
+- Scroll sentinel usa `<li>` en lugar de `<div>` para validez semántica dentro de `<ul>`
+
+### Versión 2.4.0
 
 **Añadido:**
 

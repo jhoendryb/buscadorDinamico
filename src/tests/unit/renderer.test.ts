@@ -241,4 +241,65 @@ describe('SearchRenderer', () => {
         expect(children?.[1].className).toContain('content-pagination-items');
     });
 
+    test('debe sincronizar aria-expanded y aria-hidden al abrir/cerrar', () => {
+        renderer.renderItems();
+        renderer.renderContentPaginationItems();
+        renderer.renderSearch({
+            onInput: jest.fn(),
+            debounceTime: 100,
+        });
+
+        renderer.visibility.open('programmatic');
+        expect(renderer.body.inputSearch?.getAttribute('aria-expanded')).toBe('true');
+        expect(renderer.body.renderItems?.getAttribute('aria-hidden')).toBe('false');
+
+        renderer.visibility.close({ reason: 'programmatic', immediate: true });
+        expect(renderer.body.inputSearch?.getAttribute('aria-expanded')).toBe('false');
+        expect(renderer.body.renderItems?.getAttribute('aria-hidden')).toBe('true');
+    });
+
+    test('debe destruir el visibility manager y limpiar estado', () => {
+        renderer.renderItems();
+        renderer.renderContentPaginationItems();
+
+        renderer.visibility.open('programmatic');
+        jest.advanceTimersByTime(300);
+
+        renderer.destroy();
+
+        expect(renderer.visibility.phase).toBe('closed');
+        expect(renderer.visibility.isOpen).toBe(false);
+        // Post-destroy open should be a no-op
+        renderer.visibility.open('programmatic');
+        expect(renderer.visibility.phase).toBe('closed');
+    });
+
+    test('debe cerrar inmediatamente sin timers con immediate: true', () => {
+        renderer.renderItems();
+        renderer.renderContentPaginationItems();
+
+        renderer.visibility.open('programmatic');
+        jest.advanceTimersByTime(300);
+
+        renderer.visibility.close({ reason: 'select', immediate: true });
+
+        expect(renderer.visibility.phase).toBe('closed');
+        expect(renderer.body.contentPaginationItems?.getAttribute('hidden')).toBe('true');
+        expect(jest.getTimerCount()).toBe(0);
+    });
+
+    test('debe alternar visibilidad via toggle', () => {
+        renderer.renderItems();
+        renderer.renderContentPaginationItems();
+
+        renderer.visibility.toggle();
+        expect(renderer.visibility.isOpen).toBe(true);
+
+        renderer.visibility.toggle();
+        expect(renderer.visibility.phase).toBe('closing');
+
+        jest.advanceTimersByTime(300);
+        expect(renderer.visibility.isOpen).toBe(false);
+    });
+
 });

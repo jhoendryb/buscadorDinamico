@@ -71,6 +71,172 @@ new Search({
     }).init();
 &lt;/script&gt;</code></pre>
 
+<h2 id="estructura-html-generada">Estructura HTML generada</h2>
+
+<p>Cuando proporcionas un contenedor vacío, la librería genera automáticamente la siguiente estructura con soporte ARIA completo:</p>
+
+<pre data-lang="html"><code>&lt;search class="app-search app-search1"&gt;
+    &lt;div class="input-search input-search-app-search1"&gt;
+        &lt;span class="search-icon" aria-hidden="true"&gt;🔍&lt;/span&gt;
+        &lt;input type="search" name="filterSearch"
+            id="input-search-app-search1"
+            class="filter-search-app-search1 filter-search form-control"
+            placeholder="Ingrese palabra clave..."
+            aria-label="Filtrar por Búsqueda"
+            role="combobox"
+            aria-expanded="false"
+            aria-haspopup="listbox"
+            aria-autocomplete="list"
+            aria-controls="items-search-app-search1"&gt;
+    &lt;/div&gt;
+    &lt;div class="content-pagination-items content-pagination-items-app-search1"&gt;
+        &lt;ul aria-label="Resultados de búsqueda"
+            role="listbox"
+            aria-hidden="true"
+            class="items-search scroll-personalize items-search-app-search1"
+            id="items-search-app-search1"&gt;
+            &lt;li role="option" class="items" id="items-0-app-search1"&gt;...&lt;/li&gt;
+            &lt;li role="option" class="items" id="items-1-app-search1"&gt;...&lt;/li&gt;
+            &lt;li class="scroll-sentinel" role="presentation"
+                aria-hidden="true"
+                style="height:1px;visibility:hidden;padding:0;margin:0;"&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;div role="status" aria-live="polite" class="pagination-items"&gt;
+            &lt;div class="items-counter"&gt;2 de 2&lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/search&gt;</code></pre>
+
+<h3>Elemento semántico &lt;search&gt;</h3>
+
+<p>El contenedor del input se renderiza como un elemento <code>&lt;search&gt;</code> (HTML5 landmark), no un <code>&lt;div&gt;</code>. Esto mejora la semántica del documento y la navegación por lectores de pantalla.</p>
+
+<h3>Patrón ARIA combobox</h3>
+
+<p>El componente implementa el patrón <a href="https://www.w3.org/WAI/ARIA/apg/patterns/combobox/" target="_blank">ARIA combobox</a> estándar para autocompletado:</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Elemento</th>
+            <th>Atributo</th>
+            <th>Valor</th>
+            <th>Descripción</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>&lt;input&gt;</code></td>
+            <td><code>type</code></td>
+            <td><code>search</code></td>
+            <td>Habilita el botón de limpieza nativo del navegador</td>
+        </tr>
+        <tr>
+            <td><code>&lt;input&gt;</code></td>
+            <td><code>role</code></td>
+            <td><code>combobox</code></td>
+            <td>Indica que es un control de autocompletado</td>
+        </tr>
+        <tr>
+            <td><code>&lt;input&gt;</code></td>
+            <td><code>aria-expanded</code></td>
+            <td><code>true</code> / <code>false</code></td>
+            <td>Estado del panel — sincronizado por VisibilityManager</td>
+        </tr>
+        <tr>
+            <td><code>&lt;input&gt;</code></td>
+            <td><code>aria-haspopup</code></td>
+            <td><code>listbox</code></td>
+            <td>Indica que abre un listbox</td>
+        </tr>
+        <tr>
+            <td><code>&lt;input&gt;</code></td>
+            <td><code>aria-autocomplete</code></td>
+            <td><code>list</code></td>
+            <td>Indica que muestra una lista de sugerencias</td>
+        </tr>
+        <tr>
+            <td><code>&lt;input&gt;</code></td>
+            <td><code>aria-controls</code></td>
+            <td>ID del <code>&lt;ul&gt;</code></td>
+            <td>Conecta el input con su listbox</td>
+        </tr>
+        <tr>
+            <td><code>&lt;span&gt;</code></td>
+            <td><code>aria-hidden</code></td>
+            <td><code>true</code></td>
+            <td>Oculta el icono decorativo de lectores de pantalla</td>
+        </tr>
+        <tr>
+            <td><code>&lt;ul&gt;</code></td>
+            <td><code>role</code></td>
+            <td><code>listbox</code></td>
+            <td>Lista de resultados</td>
+        </tr>
+        <tr>
+            <td><code>&lt;ul&gt;</code></td>
+            <td><code>aria-hidden</code></td>
+            <td><code>true</code> / <code>false</code></td>
+            <td>Visibilidad del panel — sincronizado por VisibilityManager</td>
+        </tr>
+        <tr>
+            <td><code>&lt;ul&gt;</code></td>
+            <td><code>aria-label</code></td>
+            <td>"Resultados de búsqueda"</td>
+            <td>Label descriptivo del listbox</td>
+        </tr>
+        <tr>
+            <td><code>&lt;ul&gt;</code></td>
+            <td><code>aria-activedescendant</code></td>
+            <td>ID del item</td>
+            <td>Item destacado por teclado — se agrega/remueve dinámicamente</td>
+        </tr>
+        <tr>
+            <td><code>&lt;li&gt;</code></td>
+            <td><code>role</code></td>
+            <td><code>option</code></td>
+            <td>Cada item de resultado</td>
+        </tr>
+        <tr>
+            <td><code>&lt;div&gt;</code></td>
+            <td><code>role</code></td>
+            <td><code>status</code></td>
+            <td>Región live para el contador</td>
+        </tr>
+        <tr>
+            <td><code>&lt;div&gt;</code></td>
+            <td><code>aria-live</code></td>
+            <td><code>polite</code></td>
+            <td>Anuncia cambios al contador</td>
+        </tr>
+        <tr>
+            <td><code>&lt;li&gt;</code> sentinel</td>
+            <td><code>role</code></td>
+            <td><code>presentation</code></td>
+            <td>Sentinel de scroll, oculto de AT</td>
+        </tr>
+        <tr>
+            <td><code>&lt;li&gt;</code> sentinel</td>
+            <td><code>aria-hidden</code></td>
+            <td><code>true</code></td>
+            <td>Oculto de lectores de pantalla</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>VisibilityManager</h3>
+
+<p>El <code>VisibilityManager</code> es una máquina de estados finita (FSM) que sincroniza los atributos ARIA al cambiar de fase:</p>
+
+<ul>
+    <li><code>aria-expanded</code> del <code>&lt;input&gt;</code> → <code>true</code> cuando abierto, <code>false</code> cuando cerrado</li>
+    <li><code>aria-hidden</code> del <code>&lt;ul&gt;</code> → <code>false</code> cuando abierto, <code>true</code> cuando cerrado</li>
+    <li>Clases CSS: <code>content-pagination-visible</code> / <code>content-pagination-hidden</code></li>
+    <li>Atributo <code>hidden</code> del panel cuando está cerrado</li>
+</ul>
+
+<p>Al seleccionar un item, el panel se cierra inmediatamente via <code>close({immediate: true})</code>.</p>
+
 <h2 id="busqueda-remota-servidor">Búsqueda remota (servidor)</h2>
 
 <pre data-lang="javascript"><code>import { Search } from './dist/buscador-dinamico.es.js';
