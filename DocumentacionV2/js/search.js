@@ -234,9 +234,14 @@ const DocSearch = {
      */
     createSearchContainer() {
         this.container.innerHTML = '';
-        const wrapper = document.createElement('div');
+        const wrapper = document.createElement('search');
         wrapper.className = 'app-search';
         wrapper.id = 'doc-search';
+
+        const inputWrapper = document.createElement('div');
+        inputWrapper.className = 'input-search';
+        wrapper.appendChild(inputWrapper);
+
         this.container.appendChild(wrapper);
     },
 
