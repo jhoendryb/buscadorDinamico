@@ -2,11 +2,11 @@
 
 <p>Ejemplos prácticos de uso del componente en diferentes escenarios.</p>
 
-<p><strong>Importante:</strong> el contenedor raíz del buscador debe tener la clase <code>app-search</code>. La estructura interna (<code>content-pagination-items</code>, <code>items-search</code>) la crea automáticamente la librería, pero si proporcionas datos iniciales en el HTML, escribe los <code>items</code> dentro de esa estructura para que se reutilicen.</p>
+<p><strong>Importante:</strong> el contenedor raíz del buscador debe ser un elemento <code>&lt;search&gt;</code> con la clase <code>app-search</code>. La estructura interna (<code>content-pagination-items</code>, <code>items-search</code>) la crea automáticamente la librería, pero si proporcionas datos iniciales en el HTML, escribe los <code>items</code> dentro de esa estructura para que se reutilicen.</p>
 
 <h2 id="busqueda-basica-local">Búsqueda básica local</h2>
 
-<pre data-lang="html"><code>&lt;div id="buscador" class="app-search"&gt;&lt;/div&gt;
+<pre data-lang="html"><code>&lt;search id="buscador" class="app-search"&gt;&lt;/search&gt;
 
 &lt;script type="module"&gt;
     import { Search } from './dist/buscador-dinamico.es.js';
@@ -53,7 +53,7 @@ new Search({
 
 <p>Extrae datos automáticamente de elementos HTML existentes:</p>
 
-<pre data-lang="html"><code>&lt;div id="buscador" class="app-search"&gt;
+<pre data-lang="html"><code>&lt;search id="buscador" class="app-search"&gt;
     &lt;div class="content-pagination-items"&gt;
         &lt;ul class="items-search scroll-personalize"&gt;
             &lt;li class="items" data-nombre="Laptop HP" data-precio="999"&gt;&lt;/li&gt;
@@ -61,7 +61,7 @@ new Search({
             &lt;li class="items" data-nombre="Teclado Mecánico" data-precio="89"&gt;&lt;/li&gt;
         &lt;/ul&gt;
     &lt;/div&gt;
-&lt;/div&gt;
+&lt;/search&gt;
 
 &lt;script type="module"&gt;
     import { Search } from './dist/buscador-dinamico.es.js';
@@ -449,13 +449,13 @@ function SearchComponent({ data }) {
         };
     }, [data]);
 
-    return &lt;div id="react-search" ref={containerRef} className="app-search"&gt;&lt;/div&gt;;
+    return &lt;search id="react-search" ref={containerRef} className="app-search"&gt;&lt;/search&gt;;
 }</code></pre>
 
 <h3 id="vue">Vue</h3>
 
 <pre data-lang="vue"><code>&lt;template&gt;
-    &lt;div id="vue-search" class="app-search"&gt;&lt;/div&gt;
+    &lt;search id="vue-search" class="app-search"&gt;&lt;/search&gt;
 &lt;/template&gt;
 
 &lt;script setup&gt;
