@@ -54,20 +54,47 @@
         }
 
         .dynamic_search nav {
+            max-width: 30%;
             min-width: 30%;
-            max-width: 250px;
             height: 100%;
             overflow-y: auto;
         }
 
         .dynamic_search article {
             display: flex;
+            max-width: 70%;
+            min-width: 70%;
+            height: 100%;
+        }
+
+        .dynamic_search article .content-code {
+            position: relative;
+        }
+
+        .dynamic_search article .content-code button{
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            background-color: #1080ff50;
+            border: none;
+            padding: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .dynamic_search article .content-code button:hover{
+            background-color: #1080ff;
+            color: white;
         }
 
         .dynamic_search article .content-code pre {
-            height: 500px;
-            max-height: 500px;
+            height: 100%;
             overflow: auto;
+        }
+        .dynamic_search article .content-search {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         /* .dynamic_search article .content-search {} */
@@ -218,10 +245,13 @@
                             <textarea data-type="object" data-default="{}" id="input-responseAdapter"
                                 name="responseAdapter" class="form-control font-monospace" rows="6"
                                 placeholder=""></textarea>
-                            <div class="form-text text-white">La propiedad <code>responseAdapter</code> te permite adaptar la estructura de los datos devueltos
-                                por el servidor al formato esperado por el componente. Por ejemplo, si el servidor devuelve
+                            <div class="form-text text-white">La propiedad <code>responseAdapter</code> te permite
+                                adaptar la estructura de los datos devueltos
+                                por el servidor al formato esperado por el componente. Por ejemplo, si el servidor
+                                devuelve
                                 <code>{ items: [], count: 0 }</code>, puedes definir la estructura de la respuesta como:
-                                <code>(response) => ({ data: response.items, countPage: response.count })</code>.</div>
+                                <code>(response) => ({ data: response.items, countPage: response.count })</code>.
+                            </div>
                         </div>
                     </div>
                     <hr class="my-4">
@@ -257,14 +287,11 @@
                             <span class="search-icon" aria-hidden="true">🔍</span>
                             <input type="search" name="filterSearch" id="filter-search"
                                 class="filter-search form-control input-sm" placeholder="Ingrese palabra clave..."
-                                aria-label="Filtrar por Búsqueda"
-                                role="combobox"
-                                aria-expanded="false"
-                                aria-haspopup="listbox"
-                                aria-autocomplete="list"
+                                aria-label="Filtrar por Búsqueda" role="combobox" aria-expanded="false"
+                                aria-haspopup="listbox" aria-autocomplete="list"
                                 aria-controls="items-search-app-search1">
                         </div>
-                        
+
                     </search>
                 </div>
             </article>
