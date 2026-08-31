@@ -9,14 +9,15 @@
 <pre data-lang="javascript"><code>const search = new BuscadorDinamico.Search({
     element: '#app',
     data: productos,
-    template: '&lt;div class="producto"&gt;&lt;strong&gt;{{nombre}}&lt;/strong&gt; - ${precio}&lt;/div&gt;'
+    template: '&lt;div class="producto"&gt;&lt;strong&gt;{{nombre}}&lt;/strong&gt; - ${{precio}}&lt;/div&gt;'
 }).init();</code></pre>
 
 <div class="doc-callout doc-callout--info">
     <span class="doc-callout__icon">💡</span>
     <div class="doc-callout__content">
         <strong>Sintaxis de interpolación</strong>
-        <p>Usa la sintaxis de doble llave <code>{{campo}}</code> para insertar valores del item. El sistema reemplaza automáticamente estas marcas con los valores correspondientes.</p>
+        <p>Usa la sintaxis de doble llave <code>{{campo}}</code> para insertar valores del item. El sistema reemplaza
+            automáticamente estas marcas con los valores correspondientes.</p>
     </div>
 </div>
 
@@ -41,7 +42,10 @@
     <span class="doc-callout__icon">💡</span>
     <div class="doc-callout__content">
         <strong>Callback highlightText</strong>
-        <p>Cuando <code>highlightEnabled</code> está activo, el segundo parámetro <code>highlightText</code> es una función que envuelve el texto con un <code>&lt;span&gt;</code> resaltado. Puedes usarla en cualquier campo del item. Si <code>highlightEnabled</code> es <code>false</code>, el callback retorna el texto sin modificar.</p>
+        <p>Cuando <code>highlightEnabled</code> está activo, el segundo parámetro <code>highlightText</code> es una
+            función que envuelve el texto con un <code>&lt;span&gt;</code> resaltado. Puedes usarla en cualquier campo
+            del item. Si <code>highlightEnabled</code> es <code>false</code>, el callback retorna el texto sin
+            modificar.</p>
     </div>
 </div>
 
@@ -69,13 +73,15 @@
 
 <p>Cuando no se proporciona un template, el componente concatena todos los valores del objeto separados por espacio.</p>
 
-<pre data-lang="html"><code>&lt;div class="items"&gt;valor de todas las propiedades concatenadas&lt;/div&gt;</code></pre>
+<pre
+    data-lang="html"><code>&lt;div class="items"&gt;valor de todas las propiedades concatenadas&lt;/div&gt;</code></pre>
 
 <div class="doc-callout doc-callout--warning">
     <span class="doc-callout__icon">⚠️</span>
     <div class="doc-callout__content">
         <strong>XSS</strong>
-        <p>Si usas <code>innerHTML</code> directamente en plantillas con datos del usuario, asegúrate de sanitizar el contenido para prevenir ataques de inyección de scripts.</p>
+        <p>Si usas <code>innerHTML</code> directamente en plantillas con datos del usuario, asegúrate de sanitizar el
+            contenido para prevenir ataques de inyección de scripts.</p>
     </div>
 </div>
 
