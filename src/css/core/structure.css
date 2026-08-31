@@ -17,11 +17,13 @@
     border-radius: var(--search-border-radius);
 }
 
-.input-search input {
+.input-search input,
+.input-search input:focus {
     flex-grow: 1;
     border: none;
     outline: none;
     background-color: transparent;
+    box-shadow: none;
     color: var(--search-text-color);
 }
 
