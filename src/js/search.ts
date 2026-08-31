@@ -83,6 +83,8 @@ function reactionSearch({ form, search, emit = null }: Record<string, any>): Sea
         }
     });
 
+    if (!values["procesServer"]) delete values["fetch"];
+
     const code: HTMLElement | null = document.querySelector(".code-prepareSearch");
     if (code) {
         code.innerHTML = `new Search(${JSON.stringify(values, (_, value) => {
