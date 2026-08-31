@@ -274,7 +274,7 @@ const DocSearch = {
         this.instance.on('itemSelected', ({ item, close }) => {
             console.log(item);
             this.handleResultSelection(item);
-            close();
+            // close();
         });
     },
 
