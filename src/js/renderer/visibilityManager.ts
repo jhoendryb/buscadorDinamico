@@ -217,18 +217,25 @@ export class VisibilityManager {
         this.#opts.listbox?.()?.setAttribute('aria-hidden', String(!visible));
     }
 
-    /** Listeners delegados en el contenedor: cubren items añadidos dinámicamente. */
+        /** Listeners delegados en el contenedor: cubren items añadidos dinámicamente. */
     #ensureListeners(): void {
         const panel = this.#opts.panel();
         if (!panel || this.#listeners.length > 0) return;
 
+        this.#bind(panel, 'pointerdown', () => {
+            this.#pointerInside = true;
+            this.stickForInteraction();
+        });
+        this.#bind(panel, 'pointermove', () => {
+            this.#pointerInside = true;
+            this.stickForInteraction();
+        });
         this.#bind(panel, 'pointerenter', () => { this.#pointerInside = true; });
         this.#bind(panel, 'pointerleave', () => { this.#pointerInside = false; });
-        /*  
-            ? this.#bind(panel, 'pointerdown', () => this.stickForInteraction());
-            TODO: Esto no me sirve, pero es posible que tenga
-                una razon para existir, revisar.
-        */
+        this.#bind(panel, 'touchstart', () => {
+            this.#pointerInside = true;
+            this.stickForInteraction();
+        }, { passive: true });
         this.#bind(panel, 'focusin', () => { this.#focusInside = true; });
         this.#bind(panel, 'focusout', ((e: FocusEvent) => {
             const related = e.relatedTarget as Node | null;
@@ -236,8 +243,8 @@ export class VisibilityManager {
         }) as EventListener);
     }
 
-    #bind(element: HTMLElement, eventName: string, fn: EventListener): void {
-        element.addEventListener(eventName, fn);
+    #bind(element: HTMLElement, eventName: string, fn: EventListener, options?: AddEventListenerOptions): void {
+        element.addEventListener(eventName, fn, options);
         this.#listeners.push([element, eventName, fn]);
     }
 }

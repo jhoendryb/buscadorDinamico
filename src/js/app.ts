@@ -48,7 +48,13 @@ class Search {
     private searchingLocal: SearchingLocal;
     private searchingServer: SearchingServer;
     private boundKeydownHandler: (e: KeyboardEvent) => void;
-    private boundClickHandler: (e: Event) => void;
+    // private boundClickHandler: (e: Event) => void;
+
+    private boundPointerDownHandler: (e: PointerEvent) => void;
+    private boundPointerUpHandler: (e: PointerEvent) => void;
+    private pointerStartX: number = 0;
+    private pointerStartY: number = 0;
+
     private currentDrawId: number = 0;
     private isLoadingMore: boolean = false;
     private _destroyed: boolean = false;
@@ -89,7 +95,8 @@ class Search {
         Object.assign(this, newParams);
 
         this.boundKeydownHandler = () => { };
-        this.boundClickHandler = () => { };
+        this.boundPointerDownHandler = () => { };
+        this.boundPointerUpHandler = () => { };
         this.errorHandler = ErrorHandler.getInstance(this.developmentMode);
         this.events = new EventEmitter<Types.SearchEventMap>(this.errorHandler);
 
@@ -168,6 +175,7 @@ class Search {
             } as Types.RenderByDomOptions);
 
             this.setupKeyboardNavigation();
+            this.setupClickNavigation();
 
             this.draw(this.searchTerm);
 
@@ -485,13 +493,6 @@ class Search {
         const content = this.renderer.body.content;
         const renderItems = this.renderer.body.renderItems;
         const input = this.renderer.body.inputSearch;
-        const eventPreviu = (input?: HTMLInputElement) => {
-            if (input) {
-                input.value = '';
-                input.dispatchEvent(new Event('input'));
-                input.blur();
-            }
-        }
 
         this.boundKeydownHandler = (e: KeyboardEvent) => {
             if (!renderItems) return;
@@ -508,29 +509,53 @@ class Search {
             } else if (['enter'].includes(e.key.toLowerCase()) && this.selectedIndex >= 0) {
                 e.preventDefault();
                 this.#selectItem(items[this.selectedIndex]);
-                eventPreviu(input as HTMLInputElement);
+                if (input) {
+                    (input as HTMLInputElement).value = '';
+                    input.dispatchEvent(new Event('input'));
+                    input.blur();
+                }
             }
         };
-
-        this.boundClickHandler = (e: Event) => {
-            console.log("Mira di click loco hablame");
-            e.preventDefault();
-            if (!renderItems) return;
-
-            const item = (e.target as HTMLElement).closest('.items');
-            const items = renderItems.querySelectorAll('.items') as any;
-            if (item) {
-                this.selectedIndex = Array.from(items).indexOf(item);
-                this.#highlightItem(items);
-                this.#selectItem(item);
-                eventPreviu(input as HTMLInputElement);
-            }
-        };
-
-        renderItems?.addEventListener('pointerdown', this.boundClickHandler);
 
         content?.addEventListener('keydown', this.boundKeydownHandler);
 
+        return this;
+    }
+    setupClickNavigation(): Search {
+        if (this._destroyed) return this;
+
+        const renderItems = this.renderer.body.renderItems;
+        const input = this.renderer.body.inputSearch;
+
+        this.boundPointerDownHandler = (e: PointerEvent) => {
+            this.pointerStartX = e.clientX;
+            this.pointerStartY = e.clientY;
+        };
+
+        this.boundPointerUpHandler = (e: PointerEvent) => {
+            if (!renderItems) return;
+
+            const dx = Math.abs(e.clientX - this.pointerStartX);
+            const dy = Math.abs(e.clientY - this.pointerStartY);
+
+            if (dx < 10 && dy < 10) {
+                const item = (e.target as HTMLElement).closest('.items');
+                const items = renderItems.querySelectorAll('.items') as any;
+                if (item) {
+                    this.selectedIndex = Array.from(items).indexOf(item);
+                    this.#highlightItem(items);
+                    this.#selectItem(item);
+                    if (input) {
+                        (input as HTMLInputElement).value = '';
+                        input.dispatchEvent(new Event('input'));
+                        input.blur();
+                    }
+                }
+            }
+        };
+
+        renderItems?.addEventListener('pointerdown', this.boundPointerDownHandler);
+        renderItems?.addEventListener('pointerup', this.boundPointerUpHandler);
         return this;
     }
     /**
@@ -607,7 +632,8 @@ class Search {
         this.events.emit('destroy', { timestamp: new Date().toISOString() } as Types.DestroyEventData);
 
         this.renderer.body.content?.removeEventListener('keydown', this.boundKeydownHandler);
-        this.renderer.body.renderItems?.removeEventListener('click', this.boundClickHandler);
+        this.renderer.body.renderItems?.removeEventListener('pointerdown', this.boundPointerDownHandler);
+        this.renderer.body.renderItems?.removeEventListener('pointerup', this.boundPointerUpHandler);
 
         if (this.scrollObserver) {
             this.#cleanupScrollDetection();

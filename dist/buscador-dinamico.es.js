@@ -9,9 +9,9 @@ var e = Object.defineProperty, t = (t, n) => {
 }, n = class e {
 	static #e = _;
 	constructor(t) {
-		this.currentDrawId = 0, this.isLoadingMore = !1, this._destroyed = !1, this.abortController = null;
+		this.pointerStartX = 0, this.pointerStartY = 0, this.currentDrawId = 0, this.isLoadingMore = !1, this._destroyed = !1, this.abortController = null;
 		let { translation: n, ...r } = t;
-		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = g, this.zIndex = h, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = y.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundKeydownHandler = () => {}, this.boundClickHandler = () => {}, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
+		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = g, this.zIndex = h, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = y.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundKeydownHandler = () => {}, this.boundPointerDownHandler = () => {}, this.boundPointerUpHandler = () => {}, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
 		try {
 			this.#t(), this.scrollObserver = null, this._ajaxResponse = {}, this.t = {
 				...e.#e,
@@ -49,7 +49,7 @@ var e = Object.defineProperty, t = (t, n) => {
 					placeholder: this.t.searchPlaceholder,
 					ariaLabel: this.t.ariaLabel
 				}
-			}), this.setupKeyboardNavigation(), this.draw(this.searchTerm), this.events.emit("init", {
+			}), this.setupKeyboardNavigation(), this.setupClickNavigation(), this.draw(this.searchTerm), this.events.emit("init", {
 				searchTerm: this.searchTerm,
 				itemsPerPage: this.itemsPerPage,
 				procesServer: this.procesServer
@@ -176,18 +176,26 @@ var e = Object.defineProperty, t = (t, n) => {
 	}
 	setupKeyboardNavigation() {
 		if (this._destroyed || !this.keyboardEnabled) return this;
-		let e = this.renderer.body.content, t = this.renderer.body.renderItems, n = this.renderer.body.inputSearch, r = (e) => {
-			e && (e.value = "", e.dispatchEvent(new Event("input")), e.blur());
-		};
+		let e = this.renderer.body.content, t = this.renderer.body.renderItems, n = this.renderer.body.inputSearch;
 		return this.boundKeydownHandler = (e) => {
 			if (!t) return;
-			let i = t.querySelectorAll(".items");
-			e.key === "ArrowDown" ? (e.preventDefault(), this.selectedIndex = Math.min(this.selectedIndex + 1, i.length - 1), this.#u(i)) : e.key === "ArrowUp" ? (e.preventDefault(), this.selectedIndex = Math.max(this.selectedIndex - 1, 0), this.#u(i)) : ["enter"].includes(e.key.toLowerCase()) && this.selectedIndex >= 0 && (e.preventDefault(), this.#d(i[this.selectedIndex]), r(n));
-		}, this.boundClickHandler = (e) => {
-			if (console.log("Mira di click loco hablame"), e.preventDefault(), !t) return;
-			let i = e.target.closest(".items"), a = t.querySelectorAll(".items");
-			i && (this.selectedIndex = Array.from(a).indexOf(i), this.#u(a), this.#d(i), r(n));
-		}, t?.addEventListener("pointerdown", this.boundClickHandler), e?.addEventListener("keydown", this.boundKeydownHandler), this;
+			let r = t.querySelectorAll(".items");
+			e.key === "ArrowDown" ? (e.preventDefault(), this.selectedIndex = Math.min(this.selectedIndex + 1, r.length - 1), this.#u(r)) : e.key === "ArrowUp" ? (e.preventDefault(), this.selectedIndex = Math.max(this.selectedIndex - 1, 0), this.#u(r)) : ["enter"].includes(e.key.toLowerCase()) && this.selectedIndex >= 0 && (e.preventDefault(), this.#d(r[this.selectedIndex]), n && (n.value = "", n.dispatchEvent(new Event("input")), n.blur()));
+		}, e?.addEventListener("keydown", this.boundKeydownHandler), this;
+	}
+	setupClickNavigation() {
+		if (this._destroyed) return this;
+		let e = this.renderer.body.renderItems, t = this.renderer.body.inputSearch;
+		return this.boundPointerDownHandler = (e) => {
+			this.pointerStartX = e.clientX, this.pointerStartY = e.clientY;
+		}, this.boundPointerUpHandler = (n) => {
+			if (!e) return;
+			let r = Math.abs(n.clientX - this.pointerStartX), i = Math.abs(n.clientY - this.pointerStartY);
+			if (r < 10 && i < 10) {
+				let r = n.target.closest(".items"), i = e.querySelectorAll(".items");
+				r && (this.selectedIndex = Array.from(i).indexOf(r), this.#u(i), this.#d(r), t && (t.value = "", t.dispatchEvent(new Event("input")), t.blur()));
+			}
+		}, e?.addEventListener("pointerdown", this.boundPointerDownHandler), e?.addEventListener("pointerup", this.boundPointerUpHandler), this;
 	}
 	#u(e) {
 		e.forEach((e, t) => {
@@ -214,7 +222,7 @@ var e = Object.defineProperty, t = (t, n) => {
 		return this._destroyed ? this : (this.searchTerm = "", this.renderer.body.inputSearch && (this.renderer.body.inputSearch.value = this.searchTerm), this.renderer.body.renderItems && (this.renderer.body.renderItems.innerHTML = ""), this.sortBy !== null && this.clearSort(), this.cache.clear(), this.pagination.goToPage(1), this.draw(this.searchTerm, !0), this.selectedIndex = -1, this);
 	}
 	destroy() {
-		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content?.removeEventListener("keydown", this.boundKeydownHandler), this.renderer.body.renderItems?.removeEventListener("click", this.boundClickHandler), this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
+		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content?.removeEventListener("keydown", this.boundKeydownHandler), this.renderer.body.renderItems?.removeEventListener("pointerdown", this.boundPointerDownHandler), this.renderer.body.renderItems?.removeEventListener("pointerup", this.boundPointerUpHandler), this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
 			let e = this.renderer.body.inputSearch.cloneNode(!0);
 			this.renderer.body.inputSearch.parentNode && this.renderer.body.inputSearch.parentNode.replaceChild(e, this.renderer.body.inputSearch);
 		}
@@ -713,19 +721,25 @@ var i = class {
 	}
 	#b() {
 		let e = this.#e.panel();
-		!e || this.#c.length > 0 || (this.#x(e, "pointerenter", () => {
+		!e || this.#c.length > 0 || (this.#x(e, "pointerdown", () => {
+			this.#a = !0, this.stickForInteraction();
+		}), this.#x(e, "pointermove", () => {
+			this.#a = !0, this.stickForInteraction();
+		}), this.#x(e, "pointerenter", () => {
 			this.#a = !0;
 		}), this.#x(e, "pointerleave", () => {
 			this.#a = !1;
-		}), this.#x(e, "focusin", () => {
+		}), this.#x(e, "touchstart", () => {
+			this.#a = !0, this.stickForInteraction();
+		}, { passive: !0 }), this.#x(e, "focusin", () => {
 			this.#o = !0;
 		}), this.#x(e, "focusout", ((t) => {
 			let n = t.relatedTarget;
 			this.#o = !!n && e.contains(n);
 		})));
 	}
-	#x(e, t, n) {
-		e.addEventListener(t, n), this.#c.push([
+	#x(e, t, n, r) {
+		e.addEventListener(t, n, r), this.#c.push([
 			e,
 			t,
 			n

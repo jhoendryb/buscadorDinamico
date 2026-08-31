@@ -5,7 +5,7 @@
 
 .input-search {
     background-color: var(--search-input-bg-color, transparent);
-    /* border: 1px solid var(--search-input-border-color, transparent); */
+    border: 0px solid var(--search-input-border-color, transparent);
 }
 
 .content-pagination-items {
