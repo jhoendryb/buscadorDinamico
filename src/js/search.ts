@@ -84,6 +84,7 @@ function reactionSearch({ form, search, emit = null }: Record<string, any>): Sea
     });
 
     if (!values["procesServer"]) delete values["fetch"];
+    values["keyboardEnabled"] = true;
 
     const code: HTMLElement | null = document.querySelector(".code-prepareSearch");
     if (code) {
@@ -116,8 +117,9 @@ function reactionSearch({ form, search, emit = null }: Record<string, any>): Sea
 
     search = new Search(values as unknown as Types.SearchParams).init();
 
+    search.on('itemSelected', (data: any) => console.log(data));
     search.on('destroy', (data: any) => console.log(data));
-    search.on('search', (data: any) => console.log(data, "buscando"));
+    // search.on('search', (data: any) => console.log(data, "buscando"));
 
     return search;
 }

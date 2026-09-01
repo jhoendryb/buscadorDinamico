@@ -168,11 +168,11 @@ export class SearchRenderer {
      * @param {number} [zIndex=999] - z-index del contenedor de items
      * @returns {HTMLElement} Contenedor de items
      */
-    renderItems(zIndex: number = 999): HTMLElement {
+    renderItems({ zIndex = 999, ready }: { zIndex?: number, ready?: () => void }): HTMLElement {
         if (this.body.renderItems) return this.body.renderItems;
 
         if (!this.body.contentPaginationItems) {
-            this.renderContentPaginationItems();
+            this.renderContentPaginationItems({ ready });
         }
 
         const element = this.body.contentPaginationItems;
@@ -207,9 +207,9 @@ export class SearchRenderer {
      * Renderiza el contenedor de paginación.
      * @returns {HTMLElement} Contenedor de paginación
      */
-    renderPagination(): HTMLElement {
+    renderPagination({ ready }: { ready?: () => void }): HTMLElement {
         if (!this.body.contentPaginationItems) {
-            this.renderContentPaginationItems();
+            this.renderContentPaginationItems({ ready });
         }
 
         const element = this.body.contentPaginationItems;
@@ -350,9 +350,9 @@ export class SearchRenderer {
                 this.contentSearch();
                 this.renderSearch({ ...options.search });
             },
-            [Types.DomComponent.CONTENT]: () => this.renderContentPaginationItems(),
-            [Types.DomComponent.ITEMS]: () => this.renderItems(),
-            [Types.DomComponent.PAGINATION]: () => this.renderPagination()
+            [Types.DomComponent.CONTENT]: () => this.renderContentPaginationItems({ ...options.renderPaginationItems }),
+            [Types.DomComponent.ITEMS]: () => this.renderItems({ ...options.renderPaginationItems }),
+            [Types.DomComponent.PAGINATION]: () => this.renderPagination({ ...options.renderPaginationItems })
         };
 
         const order = domString.split('');
@@ -387,7 +387,7 @@ export class SearchRenderer {
      * Renderiza el contenedor padre que envuelve items-search y pagination-items.
      * @returns {HTMLElement} Contenedor padre content-pagination-items
      */
-    renderContentPaginationItems(): HTMLElement {
+    renderContentPaginationItems({ ready }: { ready?: () => void }): HTMLElement {
         if (this.body.contentPaginationItems) return this.body.contentPaginationItems;
 
         const content: HTMLElement | undefined = this.body.content;
@@ -406,6 +406,10 @@ export class SearchRenderer {
 
         if (!contentPaginationItems) {
             content?.appendChild(newContentPagItems);
+        }
+
+        if (ready) {
+            ready();
         }
 
         this.body.contentPaginationItems = newContentPagItems;

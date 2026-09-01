@@ -9,7 +9,7 @@ var e = Object.defineProperty, t = (t, n) => {
 }, n = class e {
 	static #e = _;
 	constructor(t) {
-		this.pointerStartX = 0, this.pointerStartY = 0, this.currentDrawId = 0, this.isLoadingMore = !1, this._destroyed = !1, this.abortController = null;
+		this.pointerStartX = 0, this.pointerStartY = 0, this.isPointerHandled = !1, this.currentDrawId = 0, this.isLoadingMore = !1, this._destroyed = !1, this.abortController = null;
 		let { translation: n, ...r } = t;
 		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = g, this.zIndex = h, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = y.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundKeydownHandler = () => {}, this.boundPointerDownHandler = () => {}, this.boundPointerUpHandler = () => {}, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
 		try {
@@ -185,17 +185,27 @@ var e = Object.defineProperty, t = (t, n) => {
 	}
 	setupClickNavigation() {
 		if (this._destroyed) return this;
+		console.log("todo bien?");
 		let e = this.renderer.body.renderItems, t = this.renderer.body.inputSearch;
 		return this.boundPointerDownHandler = (e) => {
-			this.pointerStartX = e.clientX, this.pointerStartY = e.clientY;
+			this.pointerStartX = e.clientX, this.pointerStartY = e.clientY, this.isPointerHandled = !1;
 		}, this.boundPointerUpHandler = (n) => {
 			if (!e) return;
 			let r = Math.abs(n.clientX - this.pointerStartX), i = Math.abs(n.clientY - this.pointerStartY);
 			if (r < 10 && i < 10) {
+				this.isPointerHandled = !0;
 				let r = n.target.closest(".items"), i = e.querySelectorAll(".items");
 				r && (this.selectedIndex = Array.from(i).indexOf(r), this.#u(i), this.#d(r), t && (t.value = "", t.dispatchEvent(new Event("input")), t.blur()));
 			}
-		}, e?.addEventListener("pointerdown", this.boundPointerDownHandler), e?.addEventListener("pointerup", this.boundPointerUpHandler), this;
+		}, e?.addEventListener("click", (n) => {
+			if (this.isPointerHandled) {
+				this.isPointerHandled = !1;
+				return;
+			}
+			if (!e) return;
+			let r = n.target.closest(".items"), i = e.querySelectorAll(".items");
+			r && (this.selectedIndex = Array.from(i).indexOf(r), this.#u(i), this.#d(r), t && (t.value = "", t.dispatchEvent(new Event("input")), t.blur()));
+		}), e?.addEventListener("pointerdown", this.boundPointerDownHandler), e?.addEventListener("pointerup", this.boundPointerUpHandler), this;
 	}
 	#u(e) {
 		e.forEach((e, t) => {
