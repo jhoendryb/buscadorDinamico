@@ -1,4 +1,5 @@
-import { Search } from '../dist/buscador-dinamico.es.js';
+import { Search } from '../../dist/buscador-dinamico.es.js';
+// import { Search } from '../dist/buscador-dinamico.es.js';
 
 /**
  * Slugify — genera IDs de ancla consistentes a partir del texto de los encabezados.
