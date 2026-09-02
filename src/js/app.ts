@@ -47,13 +47,13 @@ class Search {
     private errorHandler: ErrorHandler;
     private searchingLocal: SearchingLocal;
     private searchingServer: SearchingServer;
-    private boundKeydownHandler: (e: KeyboardEvent) => void;
-    // private boundClickHandler: (e: Event) => void;
 
-    private boundPointerDownHandler: (e: PointerEvent) => void;
-    private boundPointerUpHandler: (e: PointerEvent) => void;
-    private pointerStartX: number = 0;
-    private pointerStartY: number = 0;
+    private boundClickHandler: (e: MouseEvent) => void;
+    private boundKeydownHandler: (e: KeyboardEvent) => void;
+    private boundFocusInHandler: (e: FocusEvent) => void;
+    private boundFocusOutHandler: (e: FocusEvent) => void;
+    private boundInputHandler: (e: Event) => void;
+    private selectingItem: boolean = false;
 
     private currentDrawId: number = 0;
     private isLoadingMore: boolean = false;
@@ -94,9 +94,12 @@ class Search {
 
         Object.assign(this, newParams);
 
+        this.boundClickHandler = () => { };
         this.boundKeydownHandler = () => { };
-        this.boundPointerDownHandler = () => { };
-        this.boundPointerUpHandler = () => { };
+        this.boundFocusInHandler = () => { };
+        this.boundFocusOutHandler = () => { };
+        this.boundInputHandler = () => { };
+        this.selectingItem = false;
         this.errorHandler = ErrorHandler.getInstance(this.developmentMode);
         this.events = new EventEmitter<Types.SearchEventMap>(this.errorHandler);
 
@@ -174,8 +177,7 @@ class Search {
                 }
             } as Types.RenderByDomOptions);
 
-            this.setupKeyboardNavigation();
-            this.setupClickNavigation();
+            this.setupEventDelegation();
 
             this.draw(this.searchTerm);
 
@@ -475,87 +477,88 @@ class Search {
         return this;
     }
     /**
-     * Configures keyboard navigation for the component.
-     * Enables the following keys:
-     * - ArrowUp/ArrowDown: Navigate between items
-     * - ArrowLeft/ArrowRight: Navigate between pages
-     * - Enter: Select highlighted item
+     * Configura la delegación de eventos en el contenedor principal.
+     * Todos los eventos de interacción (focus, blur, click, keyboard, input)
+     * se manejan en el contenedor <search> usando event delegation.
      *
-     * Requires that `keyboardEnabled` is true.
-     *
-     * @return {Search} - The current instance of {@link Search} for chaining methods.
+     * @return {Search} - The current instance for chaining methods.
      */
-    setupKeyboardNavigation(): Search {
+    setupEventDelegation(): Search {
         if (this._destroyed) return this;
-
-        if (!this.keyboardEnabled) return this;
 
         const content = this.renderer.body.content;
         const renderItems = this.renderer.body.renderItems;
         const input = this.renderer.body.inputSearch;
 
-        this.boundKeydownHandler = (e: KeyboardEvent) => {
-            if (!renderItems) return;
+        if (!content || !renderItems || !input) return this;
 
+        // --- Focusin: abrir panel cuando el input recibe foco ---
+        this.boundFocusInHandler = (e: FocusEvent) => {
+            if (e.target !== input) return;
+            const count = renderItems?.querySelectorAll(".items").length || 0;
+            if (count > 0) this.renderer.visibility.open('focus');
+        };
+        content.addEventListener('focusin', this.boundFocusInHandler);
+
+        // --- Focusout: cerrar panel cuando foco sale del contenedor ---
+        this.boundFocusOutHandler = (e: FocusEvent) => {
+            console.log("Esto realmente funciona?");
+            const related = e.relatedTarget as Node | null;
+            if (related && !content.contains(related)) return;
+            setTimeout(() => {
+                if (this.selectingItem || this._destroyed) return;
+                this.renderer.visibility.close({ reason: 'blur' });
+            }, 0);
+        };
+        content.addEventListener('focusout', this.boundFocusOutHandler);
+
+        // --- Click: seleccionar items (delegado al contenedor) ---
+        this.boundClickHandler = (e: MouseEvent) => {
+            if (!renderItems) return;
+            const item = (e.target as HTMLElement).closest('.items');
             const items = renderItems.querySelectorAll('.items') as any;
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
+            if (item) {
+                this.selectingItem = true;
+                this.selectedIndex = Array.from(items).indexOf(item);
                 this.#highlightItem(items);
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
-                this.#highlightItem(items);
-            } else if (['enter'].includes(e.key.toLowerCase()) && this.selectedIndex >= 0) {
-                e.preventDefault();
-                this.#selectItem(items[this.selectedIndex]);
+                this.#selectItem(item);
                 if (input) {
+                    console.log("click", input);
                     (input as HTMLInputElement).value = '';
-                    input.dispatchEvent(new Event('input'));
                     input.blur();
+                    this.renderer.visibility.close({ reason: 'blur', immediate: true });
                 }
+                queueMicrotask(() => { this.selectingItem = false; });
             }
         };
+        content.addEventListener('click', this.boundClickHandler);
 
-        content?.addEventListener('keydown', this.boundKeydownHandler);
-
-        return this;
-    }
-    setupClickNavigation(): Search {
-        if (this._destroyed) return this;
-
-        const renderItems = this.renderer.body.renderItems;
-        const input = this.renderer.body.inputSearch;
-
-        this.boundPointerDownHandler = (e: PointerEvent) => {
-            this.pointerStartX = e.clientX;
-            this.pointerStartY = e.clientY;
-        };
-
-        this.boundPointerUpHandler = (e: PointerEvent) => {
-            if (!renderItems) return;
-
-            const dx = Math.abs(e.clientX - this.pointerStartX);
-            const dy = Math.abs(e.clientY - this.pointerStartY);
-
-            if (dx < 10 && dy < 10) {
-                const item = (e.target as HTMLElement).closest('.items');
+        // --- Keyboard navigation ---
+        if (this.keyboardEnabled) {
+            this.boundKeydownHandler = (e: KeyboardEvent) => {
+                if (!renderItems) return;
                 const items = renderItems.querySelectorAll('.items') as any;
-                if (item) {
-                    this.selectedIndex = Array.from(items).indexOf(item);
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
                     this.#highlightItem(items);
-                    this.#selectItem(item);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
+                    this.#highlightItem(items);
+                } else if (['enter'].includes(e.key.toLowerCase()) && this.selectedIndex >= 0) {
+                    e.preventDefault();
+                    this.#selectItem(items[this.selectedIndex]);
                     if (input) {
                         (input as HTMLInputElement).value = '';
-                        input.dispatchEvent(new Event('input'));
                         input.blur();
+                        this.renderer.visibility.close({ reason: 'blur', immediate: true });
                     }
                 }
-            }
-        };
+            };
+            content.addEventListener('keydown', this.boundKeydownHandler);
+        }
 
-        renderItems?.addEventListener('pointerdown', this.boundPointerDownHandler);
-        renderItems?.addEventListener('pointerup', this.boundPointerUpHandler);
         return this;
     }
     /**
@@ -631,9 +634,11 @@ class Search {
         this._destroyed = true;
         this.events.emit('destroy', { timestamp: new Date().toISOString() } as Types.DestroyEventData);
 
+        this.renderer.body.content?.removeEventListener('input', this.boundInputHandler);
+        this.renderer.body.content?.removeEventListener('focusin', this.boundFocusInHandler);
+        this.renderer.body.content?.removeEventListener('focusout', this.boundFocusOutHandler);
+        this.renderer.body.content?.removeEventListener('click', this.boundClickHandler);
         this.renderer.body.content?.removeEventListener('keydown', this.boundKeydownHandler);
-        this.renderer.body.renderItems?.removeEventListener('pointerdown', this.boundPointerDownHandler);
-        this.renderer.body.renderItems?.removeEventListener('pointerup', this.boundPointerUpHandler);
 
         if (this.scrollObserver) {
             this.#cleanupScrollDetection();

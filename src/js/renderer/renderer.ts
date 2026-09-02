@@ -142,13 +142,13 @@ export class SearchRenderer {
                         if (onInput) onInput(searchTerm, e instanceof Event);
                     }, debounceTime);
                 },
-                focus: () => {
-                    const count = this.body.renderItems?.querySelectorAll(".items").length || 0;
-                    if (count > 0) this.visibility.open('focus');
-                },
-                blur: () => {
-                    this.visibility.close({ reason: 'blur' });
-                }
+                // focus: () => {
+                //     const count = this.body.renderItems?.querySelectorAll(".items").length || 0;
+                //     if (count > 0) this.visibility.open('focus');
+                // },
+                // blur: () => {
+                //     this.visibility.close({ reason: 'blur' });
+                // }
             },
             ...(!inputSearch ? {
                 element: "input",
@@ -396,7 +396,8 @@ export class SearchRenderer {
 
         let jsonContentPagItems: Types.CreateElementConfig = {
             element: contentPaginationItems,
-            className: this.#classDefault(`content-pagination-items ${this.getUniqueClassName("content-pagination-items")}`, contentPaginationItems?.className),
+            className: this.#classDefault(`content-pagination-items ${this.getUniqueClassName("content-pagination-items")} content-pagination-hidden`, contentPaginationItems?.className),
+            hidden: true,
             ...(!contentPaginationItems ? {
                 element: "div",
             } : {})
