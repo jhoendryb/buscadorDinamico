@@ -1,29 +1,17 @@
 .content-pagination-items {
     opacity: 0;
     transform: translateY(-10px);
-    pointer-events: none;
 }
 
 
 .content-pagination-items.content-pagination-visible {
     opacity: 1;
     transform: translateY(0);
-    pointer-events: auto;
 }
 
 .content-pagination-items.content-pagination-hidden {
     opacity: 0;
     transform: translateY(-10px);
-    pointer-events: none;
 }
-
-.content-pagination-items[hidden="true"] {
-    display: none;
-}
-
-.content-pagination-items:not([hidden="true"]).content-pagination-visible {
-    display: flex;
-}
-
 
 @supports selector(:has(*)) {}

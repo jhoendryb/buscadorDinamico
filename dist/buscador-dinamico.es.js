@@ -9,9 +9,9 @@ var e = Object.defineProperty, t = (t, n) => {
 }, n = class e {
 	static #e = _;
 	constructor(t) {
-		this.pointerStartX = 0, this.pointerStartY = 0, this.isPointerHandled = !1, this.currentDrawId = 0, this.isLoadingMore = !1, this._destroyed = !1, this.abortController = null;
+		this.selectingItem = !1, this.currentDrawId = 0, this.isLoadingMore = !1, this._destroyed = !1, this.abortController = null;
 		let { translation: n, ...r } = t;
-		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = g, this.zIndex = h, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = y.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundKeydownHandler = () => {}, this.boundPointerDownHandler = () => {}, this.boundPointerUpHandler = () => {}, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
+		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = g, this.zIndex = h, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = y.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundClickHandler = () => {}, this.boundKeydownHandler = () => {}, this.boundFocusInHandler = () => {}, this.boundFocusOutHandler = () => {}, this.boundInputHandler = () => {}, this.selectingItem = !1, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
 		try {
 			this.#t(), this.scrollObserver = null, this._ajaxResponse = {}, this.t = {
 				...e.#e,
@@ -49,7 +49,7 @@ var e = Object.defineProperty, t = (t, n) => {
 					placeholder: this.t.searchPlaceholder,
 					ariaLabel: this.t.ariaLabel
 				}
-			}), this.setupKeyboardNavigation(), this.setupClickNavigation(), this.draw(this.searchTerm), this.events.emit("init", {
+			}), this.setupEventDelegation(), this.draw(this.searchTerm), this.events.emit("init", {
 				searchTerm: this.searchTerm,
 				itemsPerPage: this.itemsPerPage,
 				procesServer: this.procesServer
@@ -174,37 +174,33 @@ var e = Object.defineProperty, t = (t, n) => {
 	clearSort() {
 		return this._destroyed ? this : (this.sortOrder = "asc", this.sort(this.sortBy || "", this.sortOrder), this.sortBy = null, this.procesServer && this.fetch?.body && (this.fetch.body.sortBy = null, this.fetch.body.sortOrder = "asc"), this.cache.clear(), this);
 	}
-	setupKeyboardNavigation() {
-		if (this._destroyed || !this.keyboardEnabled) return this;
+	setupEventDelegation() {
+		if (this._destroyed) return this;
 		let e = this.renderer.body.content, t = this.renderer.body.renderItems, n = this.renderer.body.inputSearch;
-		return this.boundKeydownHandler = (e) => {
+		return !e || !t || !n ? this : (this.boundFocusInHandler = (e) => {
+			e.target === n && (t?.querySelectorAll(".items").length || 0) > 0 && this.renderer.visibility.open("focus");
+		}, e.addEventListener("focusin", this.boundFocusInHandler), this.boundFocusOutHandler = (t) => {
+			let n = t.relatedTarget;
+			n && e.contains(n) || setTimeout(() => {
+				this.selectingItem || this._destroyed || this.renderer.visibility.close({ reason: "blur" });
+			}, 0);
+		}, e.addEventListener("focusout", this.boundFocusOutHandler), this.boundClickHandler = (e) => {
+			if (!t) return;
+			let r = e.target.closest(".items"), i = t.querySelectorAll(".items");
+			r && (this.selectingItem = !0, this.selectedIndex = Array.from(i).indexOf(r), this.#u(i), this.#d(r), n && (console.log("click", n), n.value = "", n.blur(), this.renderer.visibility.close({
+				reason: "blur",
+				immediate: !0
+			})), queueMicrotask(() => {
+				this.selectingItem = !1;
+			}));
+		}, e.addEventListener("click", this.boundClickHandler), this.keyboardEnabled && (this.boundKeydownHandler = (e) => {
 			if (!t) return;
 			let r = t.querySelectorAll(".items");
-			e.key === "ArrowDown" ? (e.preventDefault(), this.selectedIndex = Math.min(this.selectedIndex + 1, r.length - 1), this.#u(r)) : e.key === "ArrowUp" ? (e.preventDefault(), this.selectedIndex = Math.max(this.selectedIndex - 1, 0), this.#u(r)) : ["enter"].includes(e.key.toLowerCase()) && this.selectedIndex >= 0 && (e.preventDefault(), this.#d(r[this.selectedIndex]), n && (n.value = "", n.dispatchEvent(new Event("input")), n.blur()));
-		}, e?.addEventListener("keydown", this.boundKeydownHandler), this;
-	}
-	setupClickNavigation() {
-		if (console.log("todo bien?"), this._destroyed) return this;
-		let e = this.renderer.body.renderItems, t = this.renderer.body.inputSearch;
-		return this.boundPointerDownHandler = (e) => {
-			this.pointerStartX = e.clientX, this.pointerStartY = e.clientY, this.isPointerHandled = !1;
-		}, this.boundPointerUpHandler = (n) => {
-			if (!e) return;
-			let r = Math.abs(n.clientX - this.pointerStartX), i = Math.abs(n.clientY - this.pointerStartY);
-			if (r < 10 && i < 10) {
-				this.isPointerHandled = !0;
-				let r = n.target.closest(".items"), i = e.querySelectorAll(".items");
-				r && (this.selectedIndex = Array.from(i).indexOf(r), this.#u(i), this.#d(r), t && (t.value = "", t.dispatchEvent(new Event("input")), t.blur()));
-			}
-		}, e?.addEventListener("click", (n) => {
-			if (this.isPointerHandled) {
-				this.isPointerHandled = !1;
-				return;
-			}
-			if (!e) return;
-			let r = n.target.closest(".items"), i = e.querySelectorAll(".items");
-			r && (this.selectedIndex = Array.from(i).indexOf(r), this.#u(i), this.#d(r), t && (t.value = "", t.dispatchEvent(new Event("input")), t.blur()));
-		}), e?.addEventListener("pointerdown", this.boundPointerDownHandler), e?.addEventListener("pointerup", this.boundPointerUpHandler), this;
+			e.key === "ArrowDown" ? (e.preventDefault(), this.selectedIndex = Math.min(this.selectedIndex + 1, r.length - 1), this.#u(r)) : e.key === "ArrowUp" ? (e.preventDefault(), this.selectedIndex = Math.max(this.selectedIndex - 1, 0), this.#u(r)) : ["enter"].includes(e.key.toLowerCase()) && this.selectedIndex >= 0 && (e.preventDefault(), this.#d(r[this.selectedIndex]), n && (n.value = "", n.blur(), this.renderer.visibility.close({
+				reason: "blur",
+				immediate: !0
+			})));
+		}, e.addEventListener("keydown", this.boundKeydownHandler)), this);
 	}
 	#u(e) {
 		e.forEach((e, t) => {
@@ -231,7 +227,7 @@ var e = Object.defineProperty, t = (t, n) => {
 		return this._destroyed ? this : (this.searchTerm = "", this.renderer.body.inputSearch && (this.renderer.body.inputSearch.value = this.searchTerm), this.renderer.body.renderItems && (this.renderer.body.renderItems.innerHTML = ""), this.sortBy !== null && this.clearSort(), this.cache.clear(), this.pagination.goToPage(1), this.draw(this.searchTerm, !0), this.selectedIndex = -1, this);
 	}
 	destroy() {
-		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content?.removeEventListener("keydown", this.boundKeydownHandler), this.renderer.body.renderItems?.removeEventListener("pointerdown", this.boundPointerDownHandler), this.renderer.body.renderItems?.removeEventListener("pointerup", this.boundPointerUpHandler), this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
+		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content?.removeEventListener("input", this.boundInputHandler), this.renderer.body.content?.removeEventListener("focusin", this.boundFocusInHandler), this.renderer.body.content?.removeEventListener("focusout", this.boundFocusOutHandler), this.renderer.body.content?.removeEventListener("click", this.boundClickHandler), this.renderer.body.content?.removeEventListener("keydown", this.boundKeydownHandler), this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
 			let e = this.renderer.body.inputSearch.cloneNode(!0);
 			this.renderer.body.inputSearch.parentNode && this.renderer.body.inputSearch.parentNode.replaceChild(e, this.renderer.body.inputSearch);
 		}
@@ -847,20 +843,12 @@ var i = class {
 				"aria-autocomplete": "list",
 				"aria-controls": this.getUniqueClassName("items-search")
 			},
-			event: {
-				input: (n) => {
-					let r = n.target.value.trim().toLowerCase();
-					clearTimeout(s), s = setTimeout(() => {
-						e && e(r, n instanceof Event);
-					}, t);
-				},
-				focus: () => {
-					(this.body.renderItems?.querySelectorAll(".items").length || 0) > 0 && this.visibility.open("focus");
-				},
-				blur: () => {
-					this.visibility.close({ reason: "blur" });
-				}
-			},
+			event: { input: (n) => {
+				let r = n.target.value.trim().toLowerCase();
+				clearTimeout(s), s = setTimeout(() => {
+					e && e(r, n instanceof Event);
+				}, t);
+			} },
 			...o ? {} : {
 				element: "input",
 				name: this.getUniqueClassName("filterSearch")
@@ -868,38 +856,38 @@ var i = class {
 		};
 		return o = r(c), c.element === "input" && a && a.appendChild(o), this.body.inputSearch = o, o;
 	}
-	renderItems(e = 999) {
+	renderItems({ zIndex: e = 999, ready: t }) {
 		if (this.body.renderItems) return this.body.renderItems;
-		this.body.contentPaginationItems || this.renderContentPaginationItems();
-		let t = this.body.contentPaginationItems, n = t?.querySelector(".items-search"), i = r({
-			element: n,
-			className: this.#e(`items-search scroll-personalize ${this.getUniqueClassName("items-search")}`, n?.className),
+		this.body.contentPaginationItems || this.renderContentPaginationItems({ ready: t });
+		let n = this.body.contentPaginationItems, i = n?.querySelector(".items-search"), a = r({
+			element: i,
+			className: this.#e(`items-search scroll-personalize ${this.getUniqueClassName("items-search")}`, i?.className),
 			attributes: {
 				"aria-label": "Resultados de búsqueda",
 				role: "listbox",
 				"aria-hidden": "true"
 			},
 			style: { zIndex: e },
-			...n ? {} : {
+			...i ? {} : {
 				element: "ul",
 				id: this.getUniqueClassName("items-search")
 			}
 		});
-		return !n && t && t.appendChild(i), this.body.renderItems = i, i;
+		return !i && n && n.appendChild(a), this.body.renderItems = a, a;
 	}
-	renderPagination() {
-		this.body.contentPaginationItems || this.renderContentPaginationItems();
-		let e = this.body.contentPaginationItems, t = e?.querySelector(".pagination-items"), n = r({
-			element: t,
-			className: this.#e("pagination-items", t?.className),
+	renderPagination({ ready: e }) {
+		this.body.contentPaginationItems || this.renderContentPaginationItems({ ready: e });
+		let t = this.body.contentPaginationItems, n = t?.querySelector(".pagination-items"), i = r({
+			element: n,
+			className: this.#e("pagination-items", n?.className),
 			attributes: {
 				role: "status",
 				"aria-live": "polite"
 			},
 			child: this.renderCounter(),
-			...t ? {} : { element: "div" }
+			...n ? {} : { element: "div" }
 		});
-		return !t && e && e.appendChild(n), this.body.paginationItems = n, n;
+		return !n && t && t.appendChild(i), this.body.paginationItems = i, i;
 	}
 	renderCounter() {
 		if (this.body.counterItems) return this.body.counterItems;
@@ -948,9 +936,9 @@ var i = class {
 			[p.SEARCH]: () => {
 				this.contentSearch(), this.renderSearch({ ...t.search });
 			},
-			[p.CONTENT]: () => this.renderContentPaginationItems(),
-			[p.ITEMS]: () => this.renderItems(),
-			[p.PAGINATION]: () => this.renderPagination()
+			[p.CONTENT]: () => this.renderContentPaginationItems({ ...t.renderPaginationItems }),
+			[p.ITEMS]: () => this.renderItems({ ...t.renderPaginationItems }),
+			[p.PAGINATION]: () => this.renderPagination({ ...t.renderPaginationItems })
 		}, r = e.split(""), i = r.filter((e) => "sc".includes(e)).join(""), a = r.filter((e) => "ip".includes(e)).join("");
 		for (let e of `${i}${a}`) n[e] && n[e]();
 	}
@@ -969,14 +957,15 @@ var i = class {
 		});
 		this.body.renderItems.innerHTML = t.outerHTML;
 	}
-	renderContentPaginationItems() {
+	renderContentPaginationItems({ ready: e }) {
 		if (this.body.contentPaginationItems) return this.body.contentPaginationItems;
-		let e = this.body.content, t = e?.querySelector(".content-pagination-items"), n = r({
-			element: t,
-			className: this.#e(`content-pagination-items ${this.getUniqueClassName("content-pagination-items")}`, t?.className),
-			...t ? {} : { element: "div" }
+		let t = this.body.content, n = t?.querySelector(".content-pagination-items"), i = r({
+			element: n,
+			className: this.#e(`content-pagination-items ${this.getUniqueClassName("content-pagination-items")} content-pagination-hidden`, n?.className),
+			hidden: !0,
+			...n ? {} : { element: "div" }
 		});
-		return t || e?.appendChild(n), this.body.contentPaginationItems = n, n;
+		return n || t?.appendChild(i), e && e(), this.body.contentPaginationItems = i, i;
 	}
 	destroy() {
 		this.visibility.destroy(), this.body.contentSearch = void 0, this.body.inputSearch = void 0, this.body.renderItems = void 0, this.body.paginationItems = void 0, this.body.contentPaginationItems = void 0;
