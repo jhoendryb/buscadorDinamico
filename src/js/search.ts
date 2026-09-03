@@ -3,7 +3,7 @@ import { Search } from './app';
 import { createElement } from './renderElement';
 
 const DEFAULT_FETCH = {
-    url: "/api/example",
+    url: "/buscadorDinamico/src/php/responseAjax.php",
     method: "POST",
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -83,6 +83,8 @@ function reactionSearch({ form, search, emit = null }: Record<string, any>): Sea
         }
     });
 
+    values["templete"] = `<div>{{name}} - {{id_ciudad}}</div>`;
+    values["procesServer"] = true;
     if (!values["procesServer"]) delete values["fetch"];
     // values["keyboardEnabled"] = true;
 
@@ -149,12 +151,12 @@ window.addEventListener('load', () => {
         innerHTML: JSON.stringify(DEFAULT_DATA, null, 2)
     } as Types.CreateElementConfig);
 
-    const inputResponseAdapter: HTMLTextAreaElement | null = form?.querySelector("#input-responseAdapter") || null;
-    createElement({
-        element: inputResponseAdapter,
-        placeholder: DEFAULT_RESPONSE_ADAPTER.toString(),
-        innerHTML: DEFAULT_RESPONSE_ADAPTER.toString()
-    } as Types.CreateElementConfig);
+    // const inputResponseAdapter: HTMLTextAreaElement | null = form?.querySelector("#input-responseAdapter") || null;
+    // createElement({
+    //     element: inputResponseAdapter,
+    //     placeholder: DEFAULT_RESPONSE_ADAPTER.toString(),
+    //     innerHTML: DEFAULT_RESPONSE_ADAPTER.toString()
+    // } as Types.CreateElementConfig);
     // const match = key.match(/^(\w+)\[(\w+)\]$/);
     let search: Search = reactionSearch({ form });
 

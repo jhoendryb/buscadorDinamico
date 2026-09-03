@@ -64,27 +64,6 @@ export class LRUCache<T = any> {
     }
 
     /**
-     * Obtiene un valor del caché o lo carga si no existe.
-     * @param {string} key - Clave del valor a obtener
-     * @param {() => Promise<T>} fetch - Función para cargar el valor si no existe en el caché
-     * @param {() => void} onMiss - Función para ejecutar cuando el valor no existe en el caché
-     * @returns {Promise<T>} Valor almacenado o cargado
-     */
-    async getOrFetch(
-        key: string,
-        fetch: () => Promise<T>,
-        onMiss?: () => void
-    ): Promise<T> {
-        const cached = this.get(key);
-        if (cached !== undefined) return cached;
-
-        if (onMiss) onMiss();
-
-        const value = await fetch();
-        this.set(key, value);
-        return value;
-    }
-    /**
      * Obtiene un valor del caché.
      * @param {string} key - Clave del valor a obtener
      * @returns {*|undefined} Valor almacenado o undefined si no existe

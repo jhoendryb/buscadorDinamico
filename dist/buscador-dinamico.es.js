@@ -144,7 +144,16 @@ var e = Object.defineProperty, t = (t, n) => {
 		return `${e}-${this.element.replace(/^[.#]/, "")}`;
 	}
 	async #c(e, t, n = !1) {
-		let r = this.getCacheKey(e, t), i = async () => await this.searchingServer.search(e, this.fetch, t, this.itemsPerPage, this.abortController?.signal), a = this.cacheEnabled ? await this.cache.getOrFetch(r, i, (() => n ? this.renderer.showLoading(this.t.loading || "") : void 0)) : await i();
+		let r = this.getCacheKey(e, t), i = async () => {
+			if (this.cacheEnabled) {
+				let e = this.cache.get(r);
+				if (e !== void 0) return e;
+			}
+			let n = await this.searchingServer.search(e, this.fetch, t, this.itemsPerPage, this.abortController?.signal);
+			return this.cacheEnabled && this.cache.set(r, n), n;
+		};
+		n && this.renderer.showLoading(this.t.loading || "");
+		let a = await i();
 		return a && (this._ajaxResponse.success = { countPage: a.countPage }), a;
 	}
 	#l(e = !1) {
@@ -180,8 +189,9 @@ var e = Object.defineProperty, t = (t, n) => {
 		return !e || !t || !n ? this : (this.boundFocusInHandler = (e) => {
 			e.target === n && (t?.querySelectorAll(".items").length || 0) > 0 && this.renderer.visibility.open("focus");
 		}, e.addEventListener("focusin", this.boundFocusInHandler), this.boundFocusOutHandler = (t) => {
+			console.log("Esto realmente funciona?");
 			let n = t.relatedTarget;
-			n && e.contains(n) || setTimeout(() => {
+			n && !e.contains(n) || setTimeout(() => {
 				this.selectingItem || this._destroyed || this.renderer.visibility.close({ reason: "blur" });
 			}, 0);
 		}, e.addEventListener("focusout", this.boundFocusOutHandler), this.boundClickHandler = (e) => {
@@ -283,13 +293,6 @@ var i = class {
 			value: t,
 			expiresAt: Date.now() + this.ttlSeconds * 1e3
 		});
-	}
-	async getOrFetch(e, t, n) {
-		let r = this.get(e);
-		if (r !== void 0) return r;
-		n && n();
-		let i = await t();
-		return this.set(e, i), i;
 	}
 	get(e) {
 		let t = this.cache.get(e);

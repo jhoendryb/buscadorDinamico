@@ -381,16 +381,30 @@ class Search {
     }
     async #fetchFromServer(searchTerm: string, page: number, showLoading: boolean = false): Promise<Types.SearchResult | null> {
         const cacheKey = this.getCacheKey(searchTerm, page);
-        const loadFetch = async () => await this.searchingServer.search(
-            searchTerm,
-            this.fetch as Types.FetchConfig,
-            page,
-            this.itemsPerPage,
-            this.abortController?.signal
-        );
-        const result = this.cacheEnabled
-            ? await this.cache.getOrFetch(cacheKey, loadFetch, (() => showLoading ? this.renderer.showLoading(this.t.loading || '') : undefined))
-            : await loadFetch();
+        const loadFetch = async () => {
+            if(this.cacheEnabled) {
+                const cacheData = this.cache.get(cacheKey);
+                if(cacheData !== undefined) return cacheData;
+            }
+
+            const fetchData = await this.searchingServer.search(
+                searchTerm,
+                this.fetch as Types.FetchConfig,
+                page,
+                this.itemsPerPage,
+                this.abortController?.signal
+            )
+
+            if(this.cacheEnabled) this.cache.set(cacheKey, fetchData);
+
+            return fetchData;
+        }
+
+        if(showLoading) {
+            this.renderer.showLoading(this.t.loading || '');
+        }
+        
+        const result = await loadFetch();
         if (result) {
             this._ajaxResponse.success = { countPage: result.countPage };
         }

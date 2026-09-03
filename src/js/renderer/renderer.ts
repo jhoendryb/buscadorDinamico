@@ -381,6 +381,7 @@ export class SearchRenderer {
                 { element: "p", textContent: loadingText }
             ]
         });
+        
         this.body.renderItems.innerHTML = loading.outerHTML;
     }
     /**
