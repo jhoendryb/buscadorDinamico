@@ -3,7 +3,6 @@
     transform: translateY(-10px);
 }
 
-
 .content-pagination-items.content-pagination-visible {
     opacity: 1;
     transform: translateY(0);
