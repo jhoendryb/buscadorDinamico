@@ -11,7 +11,8 @@
     ariaLabel: 'Filtrar por Búsqueda',
     noResults: 'No se encontraron resultados',
     loading: 'Buscando...',
-    pagination: '{{to}} de {{total}}'
+    pagination: '{{to}} de {{total}}',
+    noIntersectionObserver: 'Su navegador no soporta IntersectionObserver'
 };</code></pre>
 
 <h2>Personalizar traducciones</h2>
@@ -97,6 +98,11 @@ const search = new BuscadorDinamico.Search({
             <td><code>pagination</code></td>
             <td>Template del contador: <code>{{from}}</code>, <code>{{to}}</code>, <code>{{total}}</code></td>
             <td>Contador de registros</td>
+        </tr>
+        <tr>
+            <td><code>noIntersectionObserver</code></td>
+            <td>Mensaje de advertencia cuando el navegador no soporta IntersectionObserver</td>
+            <td>Console warning</td>
         </tr>
     </tbody>
 </table>

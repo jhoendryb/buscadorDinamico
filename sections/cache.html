@@ -92,41 +92,51 @@ console.log(key); // "laptop_1"</code></pre>
     </tbody>
 </table>
 
-<h2>Patrón getOrFetch</h2>
-
-<pre data-lang="javascript"><code>const result = await search.cache.getOrFetch(
-    'mi_clave',
-    async () => {
-        // Esta función solo se ejecuta si no hay caché
-        return await fetchDataFromServer();
-    },
-    () => {
-        // Opcional: se ejecuta cuando hay cache miss
-        search.showLoading('Cargando...');
-    }
-);</code></pre>
-
 <h2>Métodos de LRUCache</h2>
 
 <table>
     <thead>
         <tr>
             <th>Método</th>
+            <th>Retorno</th>
             <th>Descripción</th>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td><code>set(key, value)</code></td>
+            <td><code>void</code></td>
             <td>Almacena un valor en caché con la clave especificada</td>
         </tr>
         <tr>
             <td><code>get(key)</code></td>
+            <td><code>T | undefined</code></td>
             <td>Obtiene un valor de caché por clave. Refresca el TTL al acceder</td>
         </tr>
         <tr>
             <td><code>has(key)</code></td>
-            <td>Verifica si una clave existe en caché y no ha expirado</td>
+            <td><code>boolean</code></td>
+            <td>Verifica si una clave existe en caché y no ha expirado. Refresca el TTL</td>
+        </tr>
+        <tr>
+            <td><code>size()</code></td>
+            <td><code>number</code></td>
+            <td>Retorna el número actual de entradas en caché</td>
+        </tr>
+        <tr>
+            <td><code>clear()</code></td>
+            <td><code>void</code></td>
+            <td>Elimina todas las entradas de caché</td>
+        </tr>
+        <tr>
+            <td><code>clearCacheByPrefix(searchTerm)</code></td>
+            <td><code>LRUCache</code></td>
+            <td>Elimina todas las entradas cuya clave empiece con el prefijo dado. Retorna <code>this</code> para encadenamiento</td>
+        </tr>
+        <tr>
+            <td><code>delete(key)</code></td>
+            <td><code>boolean</code></td>
+            <td>Elimina una entrada específica. Retorna <code>true</code> si existía</td>
         </tr>
     </tbody>
 </table>

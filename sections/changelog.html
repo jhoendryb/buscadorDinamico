@@ -1,12 +1,12 @@
 <h1>Changelog</h1>
 
-<p>Historial de versiones y cambios del componente.</p>
+<p>Historial de versiones y cambios del componente basado en el historial real del repositorio.</p>
 
-<h2>v2.5.0 <span class="doc-badge doc-badge--success">Latest</span></h2>
+<h2>v1.0.0 <span class="doc-badge doc-badge--success">Latest</span> — VisibilityManager + ARIA + Event Delegation</h2>
 
-<p><em>Fecha: 2026</em></p>
+<p><em>Septiembre 2026</em></p>
 
-<h3 id="anadido-v2-5-0">Añadido</h3>
+<h3 id="anadido-v1-0-0">Añadido</h3>
 
 <ul>
     <li><code>VisibilityManager</code> — máquina de estados finita (FSM) para gestión de visibilidad del panel de resultados
@@ -17,6 +17,14 @@
             <li><code>close({immediate: true})</code> para cierre síncrono al seleccionar items</li>
             <li><code>cancelPendingClose()</code> para revertir cierres en curso</li>
             <li><code>refresh()</code> para re-sincronizar DOM desde el estado actual</li>
+        </ul>
+    </li>
+    <li><code>setupEventDelegation()</code> — delegación centralizada de eventos en el contenedor <code>&lt;search&gt;</code> (reemplaza <code>setupKeyboardNavigation()</code> y <code>setupClickNavigation()</code> separados)
+        <ul>
+            <li><code>focusin</code> en el input abre el panel</li>
+            <li><code>click</code> fuera del contenedor cierra el panel</li>
+            <li><code>click</code> en un item selecciona y cierra</li>
+            <li><code>keydown</code> para navegación por teclado (flechas + Enter)</li>
         </ul>
     </li>
     <li><code>&lt;search&gt;</code> como elemento semántico HTML5 para el contenedor del input (landmark)</li>
@@ -33,91 +41,78 @@
     <li><code>&lt;li class="scroll-sentinel" role="presentation" aria-hidden="true"&gt;</code> — sentinel de scroll semántico</li>
     <li><code>role="status"</code> y <code>aria-live="polite"</code> en el contenedor del contador</li>
     <li>Propiedad pública <code>renderer.visibility</code> para acceder al VisibilityManager</li>
+    <li>Navegación táctil para dispositivos móviles (scroll con dedo)</li>
+    <li>Soporte para <code>prefers-reduced-motion</code> — desactiva transiciones en el panel</li>
 </ul>
 
-<h3 id="mejorado-v2-5-0">Mejorado</h3>
+<h3 id="mejorado-v1-0-0">Mejorado</h3>
 
 <ul>
     <li>Estructura HTML usa <code>&lt;search&gt;</code> landmark en lugar de <code>&lt;div&gt;</code> para el wrapper del input</li>
     <li>Items renderizados con <code>role="option"</code> y IDs únicos para <code>aria-activedescendant</code></li>
     <li><code>aria-expanded</code> del input se sincroniza automáticamente con el estado del panel</li>
     <li>Scroll sentinel usa <code>&lt;li&gt;</code> en lugar de <code>&lt;div&gt;</code> para validez semántica dentro de <code>&lt;ul&gt;</code></li>
+    <li>Visibilidad del panel ahora es gestionada por <code>VisibilityManager</code> (FSM) en lugar de timers sueltos</li>
+    <li>Navegación por teclado centralizada en un solo handler delegado</li>
 </ul>
 
-<h2>v1.0.0</h2>
+<h2>v0.9.0 — Sort + Validación + i18n</h2>
 
-<p><em>Fecha: 2026</em></p>
+<p><em>Agosto 2026</em></p>
 
-<h3 id="anadido-v2-4-0">Añadido</h3>
+<h3 id="anadido-v0-9-0">Añadido</h3>
 
 <ul>
-    <li><code>SearchEventMap</code> — Mapa tipado de eventos que asocia cada nombre con su tipo de datos</li>
-    <li><code>EventEmitter&lt;T&gt;</code> genérico con type-safety completo (<code>EventEmitter&lt;SearchEventMap&gt;</code>)</li>
-    <li><code>DomComponent</code> enum para controlar el orden de renderizado (<code>SEARCH</code>, <code>CONTENT</code>, <code>ITEMS</code>, <code>PAGINATION</code>)</li>
-    <li><code>SearchResult</code> interface <code>{ data: Record&lt;string, any&gt;[]; countPage?: number }</code></li>
-    <li><code>PaginationRange</code> interface <code>{ from: number; to: number; total: number }</code></li>
-    <li>Método <code>Pagination.getRange()</code> para el rango actual de items</li>
-    <li>Método <code>Pagination.getTotalPages()</code> para total de páginas</li>
-    <li>Método <code>Pagination.getTotalLoaded()</code> para items cargados</li>
-    <li>Método <code>Pagination.loadNextPage()</code> para avanzar página</li>
-    <li>Método <code>Pagination.hasMorePages()</code> para verificar páginas restantes</li>
-    <li>Método <code>EventEmitter.emitAsync()</code> para eventos asíncronos</li>
-    <li>Método <code>EventEmitter.getEventList()</code> para lista detallada de eventos</li>
-    <li>Método <code>SearchRenderer.destroy()</code> para limpiar timeouts y referencias DOM</li>
-    <li>Método <code>SearchRenderer.toggleResults()</code> para toggle de visibilidad</li>
-    <li>Método <code>SearchRenderer.hideResultsWithDelay(delay?)</code></li>
-    <li>Parámetro <code>loadingText</code> en <code>showLoading(text)</code> para texto de carga personalizado</li>
-    <li>Propiedad <code>LRUCache.stats</code> — estadísticas de caché (hits, misses, evictions)</li>
-    <li>Método <code>LRUCache.getOrFetch(key, fetch, onMiss?)</code></li>
-    <li>Método <code>LRUCache.delete(key)</code> y <code>LRUCache.size()</code></li>
-    <li>Clave <code>pagination</code> en traducciones para personalizar el contador</li>
-    <li><code>ItemSelectedEventData.close</code> — método para cerrar resultados</li>
-    <li>Interfaces completas: <code>SearchEventData</code>, <code>ErrorData</code>, <code>ResultsClearedEventData</code>, <code>AppendItemsEventData</code></li>
+    <li>Método <code>sort(field, order?)</code> para ordenar datos por un campo específico</li>
+    <li>Método <code>clearSort()</code> para eliminar el orden y reiniciar a orden natural</li>
+    <li>Evento <code>sortChange</code> emitido al cambiar el ordenamiento</li>
+    <li>Validación de parámetros booleanos en el constructor</li>
+    <li>Clave <code>noIntersectionObserver</code> en traducciones para navegadores sin soporte</li>
+    <li>Sección SSR en la documentación</li>
 </ul>
 
-<h3 id="mejorado-v2-4-0">Mejorado</h3>
+<h3 id="mejorado-v0-9-0">Mejorado</h3>
 
 <ul>
-    <li><code>Search.on()</code> tipado con genéricos: <code>on&lt;K extends keyof SearchEventMap&gt;(...)</code></li>
-    <li><code>SearchRenderer.updateCounter()</code> acepta objeto <code>{ from, to, total, textPagination? }</code></li>
-    <li><code>EventEmitter</code> constructor acepta <code>ErrorHandler</code> opcional</li>
-    <li>Manejo de errores en callbacks: errores individuales no afectan a otros listeners</li>
-    <li>Traducción por defecto <code>pagination: "{{to}} de {{total}}"</code></li>
+    <li>Soporte de <code>showLoading(text)</code> con texto de carga personalizado</li>
+    <li>Validación de <code>itemsPerPage</code> con rango mínimo</li>
 </ul>
 
-<h2>v2.3.0</h2>
+<h2>v0.8.0 — Temas CSS + Documentación V2</h2>
 
-<p><em>Fecha: 2026</em></p>
+<p><em>Junio-Julio 2026</em></p>
 
-<h3 id="anadido-v2-3-0">Añadido</h3>
+<h3 id="anadido-v0-8-0">Añadido</h3>
 
 <ul>
+    <li>5 temas CSS: <code>adaptative</code>, <code>clean-white</code>, <code>blue-black</code>, <code>onyx-black</code>, <code>forest-green</code></li>
+    <li>Tema <code>adaptative</code> — se adapta automáticamente al tema del sistema con <code>prefers-color-scheme</code></li>
+    <li>Sistema de temas modular con CSS variables por tema</li>
+    <li>Documentación V2 completa con arquitectura SPA y secciones HTML</li>
+    <li>GitHub Actions para despliegue automático de documentación</li>
     <li>Parámetro <code>responseAdapter</code> para transformar respuestas del servidor personalizadas</li>
-    <li>Método <code>clear()</code> para resetear estado sin destruir la instancia</li>
-    <li>Evento <code>resultsCleared</code> emitido al cambiar término de búsqueda</li>
-    <li>Evento <code>searchComplete</code> emitido al completar búsqueda y renderizado</li>
     <li>Búsqueda recursiva en objetos anidados (<code>flattenValues</code>)</li>
     <li>Normalización Unicode para búsqueda con tildes/diacriticos</li>
+    <li>Evento <code>resultsCleared</code> emitido al cambiar término de búsqueda</li>
+    <li>Evento <code>searchComplete</code> emitido al completar búsqueda y renderizado</li>
+    <li>Método <code>clear()</code> para resetear estado sin destruir la instancia</li>
     <li>Protección contra condiciones de carrera en <code>draw()</code></li>
     <li>Protección contra re-entrancy en <code>#loadMore()</code></li>
     <li>Estilos de scrollbar cross-browser para Firefox</li>
-    <li><code>prefers-reduced-motion</code> ahora desactiva TODAS las transiciones globalmente</li>
+    <li><code>prefers-reduced-motion</code> desactiva transiciones globalmente</li>
 </ul>
 
-<h3 id="mejorado-v2-3-0">Mejorado</h3>
+<h3 id="mejorado-v0-8-0">Mejorado</h3>
 
 <ul>
-    <li><code>draw()</code> ahora retorna <code>Promise&lt;Search&gt;</code></li>
-    <li><code>cache.has()</code> refresca TTL (Time To Live) al acceder (true LRU)</li>
-    <li><code>setItemsPerPage()</code> valida que el valor sea &gt;= 1</li>
-    <li><code>hideResults()</code> usa <code>timeHiddenResults</code> configurable</li>
+    <li><code>draw()</code> retorna <code>Promise&lt;Search&gt;</code></li>
+    <li><code>cache.has()</code> refresca TTL al acceder (true LRU)</li>
     <li><code>destroy()</code> re-inicializa objetos en lugar de nullificarlos</li>
-    <li><code>destroy()</code> remueve event listeners por referencia</li>
     <li><code>#highlightText()</code> escapa caracteres especiales de regex</li>
-    <li>Typo corregido: <code>firtsLoad</code> &gt; <code>firstLoad</code></li>
+    <li>Typo corregido: <code>firtsLoad</code> → <code>firstLoad</code></li>
 </ul>
 
-<h3 id="corregido-v2-3-0">Corregido</h3>
+<h3 id="corregido-v0-8-0">Corregido</h3>
 
 <ul>
     <li><code>highlightText()</code> escapa caracteres regex especiales</li>
@@ -126,51 +121,92 @@
     <li><code>processInfiniteScroll()</code> ya no se llama desde searchingServer</li>
 </ul>
 
-<h2>v2.2.0</h2>
+<h2>v0.7.0 — TypeScript + Vite + Tests + Arquitectura Modular</h2>
 
-<p><em>Fecha: 2026</em></p>
+<p><em>Junio 2026</em></p>
 
-<h3>Características iniciales</h3>
+<h3 id="anadido-v0-7-0">Añadido</h3>
 
 <ul>
-    <li>Búsqueda local en tiempo real con debounce configurable</li>
-    <li>Búsqueda remota vía Fetch API con soporte para JSON, FormData y URL-encoded</li>
-    <li>Paginación por scroll infinito con Intersection Observer</li>
-    <li>Sistema de caché LRU (Least Recently Used) con TTL (Time To Live) configurable</li>
-    <li>5 temas CSS predefinidos (adaptative, clean-white, blue-black, onyx-black, forest-green)</li>
-    <li>Sistema de eventos personalizado con 8 eventos</li>
-    <li>Navegación por teclado (flechas arriba/abajo, Enter)</li>
-    <li>Plantillas personalizables (string y funciones)</li>
-    <li>Sistema i18n con traducciones configurables</li>
-    <li>Gestión centralizada de errores con 14 códigos específicos</li>
-    <li>Soporte completo de TypeScript con tipos exportados</li>
-    <li>Arquitectura modular OOP con 8 clases independientes</li>
-    <li>Build dual: ES Module + UMD</li>
-    <li>Accesibilidad: roles ARIA, navegación por teclado, labels</li>
+    <li><strong>Migración completa a TypeScript</strong> — todos los módulos convertidos de JS a TS</li>
+    <li><strong>Sistema de build Vite</strong> — output dual ES Module + UMD con tipos <code>.d.ts</code></li>
+    <li>Extracción modular de 8 clases independientes:
+        <ul>
+            <li><code>SearchRenderer</code> — motor de renderizado DOM</li>
+            <li><code>Pagination</code> — paginación con scroll infinito</li>
+            <li><code>EventEmitter&lt;T&gt;</code> — sistema de eventos genérico</li>
+            <li><code>LRUCache</code> — caché LRU con TTL</li>
+            <li><code>SearchingLocal</code> — búsqueda en memoria</li>
+            <li><code>SearchingServer</code> — búsqueda remota vía Fetch API</li>
+            <li><code>ErrorHandler</code> — gestión centralizada de errores (14 códigos)</li>
+            <li><code>TemplateEngine</code> — motor de plantillas con interpolación</li>
+        </ul>
+    </li>
+    <li>Infraestructura de testing con Jest + Babel</li>
+    <li>Unit tests para todos los módulos (app, cache, events, pagination, renderer, searchingLocal, searchingServer)</li>
+    <li>Migración de XMLHttpRequest a <strong>Fetch API</strong> con AbortController y timeout</li>
+    <li><code>SearchEventMap</code> — mapa tipado de eventos con type-safety</li>
+    <li><code>DomComponent</code> enum para orden de renderizado</li>
+    <li>Interfaces: <code>SearchResult</code>, <code>PaginationRange</code>, <code>SearchEventInit</code>, <code>SearchEventData</code>, <code>ErrorData</code>, <code>ResultsClearedEventData</code>, <code>AppendItemsEventData</code></li>
+    <li>Métodos de paginación: <code>getRange()</code>, <code>getTotalPages()</code>, <code>getTotalLoaded()</code>, <code>loadNextPage()</code>, <code>hasMorePages()</code></li>
+    <li>Métodos de EventEmitter: <code>emitAsync()</code>, <code>getEventList()</code></li>
+    <li>Propiedad <code>LRUCache.stats</code> — estadísticas de caché (hits, misses, evictions)</li>
+    <li>Métodos de cache: <code>delete(key)</code>, <code>size()</code>, <code>clearCacheByPrefix(searchTerm)</code></li>
+    <li>Clave <code>pagination</code> en traducciones para personalizar el contador</li>
     <li>Soporte para múltiples instancias en la misma página</li>
 </ul>
 
-<h3>Temas CSS</h3>
+<h3 id="mejorado-v0-7-0">Mejorado</h3>
 
 <ul>
-    <li><code>adaptative</code> — Se adapta al tema del sistema (light/dark)</li>
-    <li><code>clean-white</code> — Diseño limpio y minimalista en blanco</li>
-    <li><code>blue-black</code> — Tema oscuro con acentos azules</li>
-    <li><code>onyx-black</code> — Tema completamente oscuro</li>
-    <li><code>forest-green</code> — Tema oscuro con tonos verdes</li>
+    <li><code>Search.on()</code> tipado con genéricos: <code>on&lt;K extends keyof SearchEventMap&gt;(...)</code></li>
+    <li><code>SearchRenderer.updateCounter()</code> acepta objeto <code>{ from, to, total, textPagination? }</code></li>
+    <li>Manejo de errores en callbacks: errores individuales no afectan a otros listeners</li>
+    <li>Traducción por defecto <code>pagination: "{{to}} de {{total}}"</code></li>
+    <li>Validación de parámetros con <code>SearchError</code> y códigos de error específicos</li>
 </ul>
 
-<h3>Eventos</h3>
+<h2>v0.6.0 — Arquitectura Modular Inicial</h2>
+
+<p><em>Mayo 2026</em></p>
+
+<h3 id="anadido-v0-6-0">Añadido</h3>
 
 <ul>
-    <li><code>init</code> — Emite al inicializar el componente</li>
-    <li><code>search</code> — Emite después de cada búsqueda</li>
-    <li><code>pageChange</code> — Emite al cambiar de página</li>
-    <li><code>sortChange</code> — Emite al cambiar el ordenamiento</li>
-    <li><code>itemSelected</code> — Emite al seleccionar un item</li>
-    <li><code>itemHighlighted</code> — Emite al destacar un item</li>
-    <li><code>appendItems</code> — Emite al añadir items al DOM</li>
-    <li><code>destroy</code> — Emite antes de destruir la instancia</li>
+    <li>Extracción de <code>renderElement.js</code> — helper para creación de DOM</li>
+    <li>Extracción de <code>searchngHandle.js</code> — lógica de búsqueda separada</li>
+    <li>Accesibilidad ARIA completada</li>
+    <li>Sistema de plantillas personalizables refactorizado</li>
+</ul>
+
+<h2>v0.5.0 — Reescritura Search v3</h2>
+
+<p><em>Marzo 2026</em></p>
+
+<h3 id="cambiado-v0-5-0">Cambiado</h3>
+
+<ul>
+    <li>Reescritura completa del motor de búsqueda (Search v3)</li>
+    <li>Archivado de versiones anteriores (<code>appOldv2.js</code>)</li>
+</ul>
+
+<h2>v0.1.0 — Proyecto Inicial</h2>
+
+<p><em>Abril 2025</em></p>
+
+<h3 id="anadido-v0-1-0">Añadido</h3>
+
+<ul>
+    <li>Búsqueda local en tiempo real con debounce configurable</li>
+    <li>Búsqueda remota vía XMLHttpRequest con soporte para JSON y FormData</li>
+    <li>Paginación por scroll infinito con Intersection Observer</li>
+    <li>Sistema de caché LRU con TTL configurable</li>
+    <li>Sistema de eventos personalizado</li>
+    <li>Navegación por teclado (flechas arriba/abajo, Enter)</li>
+    <li>Plantillas personalizables (string y funciones)</li>
+    <li>Sistema i18n con traducciones configurables</li>
+    <li>Gestión centralizada de errores con códigos específicos</li>
+    <li>Soporte para múltiples instancias en la misma página</li>
 </ul>
 
 <h3>Códigos de error</h3>

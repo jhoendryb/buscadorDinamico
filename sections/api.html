@@ -92,11 +92,35 @@ search.sort('precio', 'desc');</code></pre>
 
 <p>Genera la clave de caché para una búsqueda y página específicas.</p>
 
-<h3>setupKeyboardNavigation()</h3>
+<h3>setupEventDelegation()</h3>
 
-<pre data-lang="typescript"><code>setupKeyboardNavigation(): Search</code></pre>
+<pre data-lang="typescript"><code>setupEventDelegation(): Search</code></pre>
 
-<p>Configura la navegación por teclado (flechas arriba/abajo, Enter para seleccionar).</p>
+<p>Configura la delegación de eventos en el contenedor principal <code>&lt;search&gt;</code>. Todos los eventos de interacción (focus, blur, click, keyboard) se manejan en el contenedor usando event delegation.</p>
+
+<p>Este método se llama automáticamente desde <code>init()</code>, pero puede reinvocarse si se modifica el DOM externamente.</p>
+
+<p>Comportamiento:</p>
+<ul>
+    <li><strong>focusin</strong> en el input: abre el panel si hay items</li>
+    <li><strong>click</strong> fuera del contenedor: cierra el panel</li>
+    <li><strong>click</strong> en un item: selecciona, limpia el input y cierra el panel</li>
+    <li><strong>keydown</strong> (solo si <code>keyboardEnabled: true</code>): ArrowUp/ArrowDown navega, Enter selecciona</li>
+</ul>
+
+<pre data-lang="javascript"><code>// Se llama automáticamente al hacer init()
+search.init(); // internamente llama setupEventDelegation()
+
+// O re-invocar si se necesita
+search.setupEventDelegation();</code></pre>
+
+<h3>processInfiniteScroll()</h3>
+
+<pre data-lang="typescript"><code>processInfiniteScroll(): void</code></pre>
+
+<p>Procesa la paginación en modo scroll infinito. Renderiza la página actual y configura el <code>IntersectionObserver</code> para detectar cuándo el usuario llega al final del contenedor.</p>
+
+<p>Se llama automáticamente después de cada búsqueda en <code>draw()</code>.</p>
 
 <h3>destroy()</h3>
 
@@ -121,19 +145,7 @@ search.sort('precio', 'desc');</code></pre>
     textPagination: '{{from}} - {{to}} de {{total}}'
 });</code></pre>
 
-<h3>renderer.showResults() / hideResults() / toggleResults()</h3>
-
-<pre data-lang="typescript"><code>renderer.showResults(): void
-renderer.hideResults(): void
-renderer.toggleResults(): void
-renderer.hideResultsWithDelay(delay?: number): void</code></pre>
-
-<p>Controla la visibilidad del panel de resultados.</p>
-
-<pre data-lang="javascript"><code>search.renderer.showResults();
-search.renderer.hideResults();
-search.renderer.toggleResults();
-search.renderer.hideResultsWithDelay(300); // Con delay personalizado</code></pre>
+<p><em>Los métodos <code>showResults()</code>, <code>hideResults()</code>, <code>toggleResults()</code> y <code>hideResultsWithDelay()</code> fueron reemplazados por <code>renderer.visibility</code> (VisibilityManager). Ver más abajo.</em></p>
 
 <h3>renderer.destroy()</h3>
 

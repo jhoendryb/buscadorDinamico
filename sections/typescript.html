@@ -24,14 +24,20 @@
     ErrorData,
     ErrorCode,
     SearchError,
-    EventEmitter
+    EventEmitter,
+    VisibilityManager,
+    VisibilityManagerOptions,
+    CloseOptions,
+    DropdownPhase,
+    OpenReason,
+    CloseReason
 } from 'buscador-dinamico';</code></pre>
 
 <h2>Interfaz SearchParams</h2>
 
 <pre data-lang="typescript"><code>interface SearchParams {
     element: string;
-    data?: Record&lt;string, any&gt;[];
+    data?: Object[];
     theme?: string;
     itemsPerPage?: number;
     debounceTime?: number;
@@ -43,8 +49,8 @@
     dom?: string;
     sortBy?: string | null;
     sortOrder?: 'asc' | 'desc';
-    template?: string | ((item: any, highlightText?: (text: string) => string) => string) | null;
-    translation?: Partial&lt;TranslationCache&gt;
+    template?: string | ((item: any) => string) | null;
+    translation?: Partial&lt;TranslationCache&gt;;
     procesServer?: boolean;
     fetch?: FetchConfig;
     developmentMode?: boolean;
@@ -57,6 +63,14 @@ interface SearchResult {
     data: Record&lt;string, any&gt;[];
     countPage?: number;
 }</code></pre>
+
+<div class="doc-callout doc-callout--info">
+    <span class="doc-callout__icon">💡</span>
+    <div class="doc-callout__content">
+        <strong>Parámetro template</strong>
+        <p>El tipo oficial en <code>types.ts</code> es <code>string | ((item: any) => string)</code>. Sin embargo, <code>TemplateEngine</code> pasa también <code>highlightText</code> como segundo argumento cuando <code>highlightEnabled: true</code>. Para usar resaltado, define la función con dos parámetros: <code>(item, highlightText) => ...</code>.</p>
+    </div>
+</div>
 
 <h2>Interfaz FetchConfig</h2>
 
@@ -77,7 +91,35 @@ interface SearchResult {
     loading?: string;
     noResults?: string;
     pagination?: string;
-    [key: string]: string | undefined;
+    noIntersectionObserver?: string;
+    ariaLabel?: string;
+}</code></pre>
+
+<h2>Tipos de VisibilityManager</h2>
+
+<pre data-lang="typescript"><code>type DropdownPhase = 'closed' | 'opening' | 'open' | 'closing';
+type OpenReason = 'focus' | 'results' | 'toggle' | 'programmatic';
+type CloseReason = 'blur' | 'select' | 'toggle' | 'programmatic';
+
+interface VisibilityHooks {
+    onOpen?(reason: OpenReason): void;
+    onOpened?(reason: OpenReason): void;
+    onClose?(reason: CloseReason): void;
+    onClosed?(reason: CloseReason): void;
+}
+
+interface VisibilityManagerOptions {
+    panel: () => HTMLElement | null | undefined;
+    control?: () => HTMLElement | null | undefined;
+    listbox?: () => HTMLElement | null | undefined;
+    hideDelayMs?: number;
+    reducedMotionMs?: number;
+    hooks?: VisibilityHooks;
+}
+
+interface CloseOptions {
+    reason?: CloseReason;
+    immediate?: boolean;
 }</code></pre>
 
 <h2>SearchEventMap — Mapa tipado de eventos</h2>
