@@ -508,9 +508,7 @@ class Search {
 
         // --- Click OutSide: cerrar panel cuando foco sale del contenedor ---
         this.boundFocusOutHandler = (e: MouseEvent) => {
-            console.log("Evento 2");
             const related = e.target as Node | null;
-            console.log(related, !content.contains(related), content.contains(related))
             if (related && content.contains(related)) return;
             setTimeout(() => {
                 if (this.selectingItem || this._destroyed) return;
@@ -521,11 +519,9 @@ class Search {
 
         // --- Focusin: abrir panel cuando el input recibe foco ---
         this.boundFocusInHandler = (e: FocusEvent) => {
-            console.log("Evento 1");
             if (e.target !== input) return;
             const count = renderItems?.querySelectorAll(".items").length || 0;
             if (count > 0) this.renderer.visibility.open('focus');
-
             document.addEventListener('click', this.boundFocusOutHandler);
         };
         content.addEventListener('focusin', this.boundFocusInHandler);
@@ -534,8 +530,6 @@ class Search {
         this.boundClickHandler = (e: MouseEvent) => {
             const eventCount = this.events.listenerCount('itemSelected');
             if (eventCount === 0) return;
-
-            console.log("Evento 3");
             if (!renderItems) return;
 
             const item = (e.target as HTMLElement).closest('.items');
@@ -558,7 +552,6 @@ class Search {
         // --- Keyboard navigation ---
         if (this.keyboardEnabled) {
             this.boundKeydownHandler = (e: KeyboardEvent) => {
-                console.log("Evento 4");
                 if (!renderItems) return;
                 const items = renderItems.querySelectorAll('.items') as any;
                 if (e.key === 'ArrowDown') {

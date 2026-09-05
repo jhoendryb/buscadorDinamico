@@ -75,8 +75,11 @@ function reactionSearch({ form, search, emit = null }: Record<string, any>): Sea
                 values[key] = JSON.parse(value.trim());
             } else if (key === "data") {
                 values[key] = JSON.parse(value.trim());
-            } else if (key === "responseAdapter") {
-                values[key] = new Function(`return ${value.trim()}`)();
+            } else if ([
+                "responseAdapter", "template"
+            ].includes(key) !== false) {
+                const convertFunction = new Function(`return ${value}`)();
+                values[key] = (typeof convertFunction !== 'function' ? `${value}` : convertFunction);
             } else {
                 values[key] = !isNaN(Number(value)) ? Number(value) : value;
             }
@@ -90,10 +93,15 @@ function reactionSearch({ form, search, emit = null }: Record<string, any>): Sea
 
     const code: HTMLElement | null = document.querySelector(".code-prepareSearch");
     if (code) {
-        code.innerHTML = `new Search(${JSON.stringify(values, (_, value) => {
+        code.innerHTML = `new Search(${JSON.stringify(values, (key, value) => {
             if (typeof value === 'function') {
                 return value.toString();
             }
+            
+            if (key == "template") {
+                return String(value).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+
             return value;
         }, 2)}).init()`;
     }

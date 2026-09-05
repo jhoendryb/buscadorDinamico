@@ -186,18 +186,20 @@ var e = Object.defineProperty, t = (t, n) => {
 	setupEventDelegation() {
 		if (this._destroyed) return this;
 		let e = this.renderer.body.content, t = this.renderer.body.renderItems, n = this.renderer.body.inputSearch;
-		return !e || !t || !n ? this : (this.boundFocusInHandler = (e) => {
-			e.target === n && (t?.querySelectorAll(".items").length || 0) > 0 && this.renderer.visibility.open("focus");
-		}, e.addEventListener("focusin", this.boundFocusInHandler), this.boundFocusOutHandler = (t) => {
-			console.log("Esto realmente funciona?");
-			let n = t.relatedTarget;
-			n && !e.contains(n) || setTimeout(() => {
-				this.selectingItem || this._destroyed || this.renderer.visibility.close({ reason: "blur" });
-			}, 0);
-		}, e.addEventListener("focusout", this.boundFocusOutHandler), this.boundClickHandler = (e) => {
-			if (!t) return;
+		return !e || !t || !n ? this : (this.boundFocusOutHandler = (t) => {
+			let n = t.target;
+			n && e.contains(n) || (setTimeout(() => {
+				this.selectingItem || this._destroyed || this.renderer.visibility.close({
+					reason: "blur",
+					immediate: !0
+				});
+			}, 0), document.removeEventListener("click", this.boundFocusOutHandler));
+		}, this.boundFocusInHandler = (e) => {
+			e.target === n && ((t?.querySelectorAll(".items").length || 0) > 0 && this.renderer.visibility.open("focus"), document.addEventListener("click", this.boundFocusOutHandler));
+		}, e.addEventListener("focusin", this.boundFocusInHandler), this.boundClickHandler = (e) => {
+			if (this.events.listenerCount("itemSelected") === 0 || !t) return;
 			let r = e.target.closest(".items"), i = t.querySelectorAll(".items");
-			r && (this.selectingItem = !0, this.selectedIndex = Array.from(i).indexOf(r), this.#u(i), this.#d(r), n && (console.log("click", n), n.value = "", n.blur(), this.renderer.visibility.close({
+			r && (this.selectingItem = !0, this.selectedIndex = Array.from(i).indexOf(r), this.#u(i), this.#d(r), n && (n.value = "", n.blur(), this.renderer.visibility.close({
 				reason: "blur",
 				immediate: !0
 			})), queueMicrotask(() => {
@@ -237,7 +239,7 @@ var e = Object.defineProperty, t = (t, n) => {
 		return this._destroyed ? this : (this.searchTerm = "", this.renderer.body.inputSearch && (this.renderer.body.inputSearch.value = this.searchTerm), this.renderer.body.renderItems && (this.renderer.body.renderItems.innerHTML = ""), this.sortBy !== null && this.clearSort(), this.cache.clear(), this.pagination.goToPage(1), this.draw(this.searchTerm, !0), this.selectedIndex = -1, this);
 	}
 	destroy() {
-		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content?.removeEventListener("input", this.boundInputHandler), this.renderer.body.content?.removeEventListener("focusin", this.boundFocusInHandler), this.renderer.body.content?.removeEventListener("focusout", this.boundFocusOutHandler), this.renderer.body.content?.removeEventListener("click", this.boundClickHandler), this.renderer.body.content?.removeEventListener("keydown", this.boundKeydownHandler), this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
+		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content?.removeEventListener("input", this.boundInputHandler), this.renderer.body.content?.removeEventListener("focusin", this.boundFocusInHandler), this.renderer.body.content?.removeEventListener("click", this.boundFocusOutHandler), this.renderer.body.content?.removeEventListener("click", this.boundClickHandler), this.renderer.body.content?.removeEventListener("keydown", this.boundKeydownHandler), this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
 			let e = this.renderer.body.inputSearch.cloneNode(!0);
 			this.renderer.body.inputSearch.parentNode && this.renderer.body.inputSearch.parentNode.replaceChild(e, this.renderer.body.inputSearch);
 		}
@@ -826,7 +828,7 @@ var i = class {
 		let e = this.body.content, t = e?.querySelector(".input-search"), n = r({
 			element: t,
 			className: this.#e(`input-search ${this.getUniqueClassName("input-search")}`, t?.className),
-			...t ? {} : { element: "search" }
+			...t ? {} : { element: "div" }
 		});
 		return t || e?.appendChild(n), this.body.contentSearch = n, n;
 	}
