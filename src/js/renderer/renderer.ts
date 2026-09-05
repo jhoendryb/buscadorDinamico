@@ -90,7 +90,7 @@ export class SearchRenderer {
             element: contentSearch,
             className: this.#classDefault(`input-search ${this.getUniqueClassName('input-search')}`, contentSearch?.className),
             ...(!contentSearch ? {
-                element: "search"
+                element: "div"
             } : {})
         };
 

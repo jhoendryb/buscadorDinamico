@@ -83,8 +83,8 @@ function reactionSearch({ form, search, emit = null }: Record<string, any>): Sea
         }
     });
 
-    values["templete"] = `<div>{{name}} - {{id_ciudad}}</div>`;
-    values["procesServer"] = true;
+    // values["templete"] = `<div>{{name}} - {{id_ciudad}}</div>`;
+    // values["procesServer"] = true;
     if (!values["procesServer"]) delete values["fetch"];
     // values["keyboardEnabled"] = true;
 

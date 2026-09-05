@@ -51,7 +51,7 @@ class Search {
     private boundClickHandler: (e: MouseEvent) => void;
     private boundKeydownHandler: (e: KeyboardEvent) => void;
     private boundFocusInHandler: (e: FocusEvent) => void;
-    private boundFocusOutHandler: (e: FocusEvent) => void;
+    private boundFocusOutHandler: (e: MouseEvent) => void;
     private boundInputHandler: (e: Event) => void;
     private selectingItem: boolean = false;
 
@@ -382,9 +382,9 @@ class Search {
     async #fetchFromServer(searchTerm: string, page: number, showLoading: boolean = false): Promise<Types.SearchResult | null> {
         const cacheKey = this.getCacheKey(searchTerm, page);
         const loadFetch = async () => {
-            if(this.cacheEnabled) {
+            if (this.cacheEnabled) {
                 const cacheData = this.cache.get(cacheKey);
-                if(cacheData !== undefined) return cacheData;
+                if (cacheData !== undefined) return cacheData;
             }
 
             const fetchData = await this.searchingServer.search(
@@ -395,15 +395,15 @@ class Search {
                 this.abortController?.signal
             )
 
-            if(this.cacheEnabled) this.cache.set(cacheKey, fetchData);
+            if (this.cacheEnabled) this.cache.set(cacheKey, fetchData);
 
             return fetchData;
         }
 
-        if(showLoading) {
+        if (showLoading) {
             this.renderer.showLoading(this.t.loading || '');
         }
-        
+
         const result = await loadFetch();
         if (result) {
             this._ajaxResponse.success = { countPage: result.countPage };
@@ -506,29 +506,38 @@ class Search {
 
         if (!content || !renderItems || !input) return this;
 
+        // --- Click OutSide: cerrar panel cuando foco sale del contenedor ---
+        this.boundFocusOutHandler = (e: MouseEvent) => {
+            console.log("Evento 2");
+            const related = e.target as Node | null;
+            console.log(related, !content.contains(related), content.contains(related))
+            if (related && content.contains(related)) return;
+            setTimeout(() => {
+                if (this.selectingItem || this._destroyed) return;
+                this.renderer.visibility.close({ reason: 'blur', immediate: true });
+            }, 0);
+            document.removeEventListener('click', this.boundFocusOutHandler);
+        };
+
         // --- Focusin: abrir panel cuando el input recibe foco ---
         this.boundFocusInHandler = (e: FocusEvent) => {
+            console.log("Evento 1");
             if (e.target !== input) return;
             const count = renderItems?.querySelectorAll(".items").length || 0;
             if (count > 0) this.renderer.visibility.open('focus');
+
+            document.addEventListener('click', this.boundFocusOutHandler);
         };
         content.addEventListener('focusin', this.boundFocusInHandler);
-
-        // --- Focusout: cerrar panel cuando foco sale del contenedor ---
-        this.boundFocusOutHandler = (e: FocusEvent) => {
-            console.log("Esto realmente funciona?");
-            const related = e.relatedTarget as Node | null;
-            if (related && !content.contains(related)) return;
-            setTimeout(() => {
-                if (this.selectingItem || this._destroyed) return;
-                this.renderer.visibility.close({ reason: 'blur' });
-            }, 0);
-        };
-        content.addEventListener('focusout', this.boundFocusOutHandler);
-
+        
         // --- Click: seleccionar items (delegado al contenedor) ---
         this.boundClickHandler = (e: MouseEvent) => {
+            const eventCount = this.events.listenerCount('itemSelected');
+            if (eventCount === 0) return;
+
+            console.log("Evento 3");
             if (!renderItems) return;
+
             const item = (e.target as HTMLElement).closest('.items');
             const items = renderItems.querySelectorAll('.items') as any;
             if (item) {
@@ -537,7 +546,6 @@ class Search {
                 this.#highlightItem(items);
                 this.#selectItem(item);
                 if (input) {
-                    console.log("click", input);
                     (input as HTMLInputElement).value = '';
                     input.blur();
                     this.renderer.visibility.close({ reason: 'blur', immediate: true });
@@ -550,6 +558,7 @@ class Search {
         // --- Keyboard navigation ---
         if (this.keyboardEnabled) {
             this.boundKeydownHandler = (e: KeyboardEvent) => {
+                console.log("Evento 4");
                 if (!renderItems) return;
                 const items = renderItems.querySelectorAll('.items') as any;
                 if (e.key === 'ArrowDown') {
@@ -650,7 +659,7 @@ class Search {
 
         this.renderer.body.content?.removeEventListener('input', this.boundInputHandler);
         this.renderer.body.content?.removeEventListener('focusin', this.boundFocusInHandler);
-        this.renderer.body.content?.removeEventListener('focusout', this.boundFocusOutHandler);
+        this.renderer.body.content?.removeEventListener('click', this.boundFocusOutHandler);
         this.renderer.body.content?.removeEventListener('click', this.boundClickHandler);
         this.renderer.body.content?.removeEventListener('keydown', this.boundKeydownHandler);
 

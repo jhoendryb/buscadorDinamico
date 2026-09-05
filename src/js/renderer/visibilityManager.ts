@@ -223,21 +223,25 @@ export class VisibilityManager {
         if (!panel || this.#listeners.length > 0) return;
 
         this.#bind(panel, 'pointerdown', () => {
+            console.log("Evento 5");
             this.#pointerInside = true;
             this.stickForInteraction();
         });
         this.#bind(panel, 'pointermove', () => {
+            console.log("Evento 6");
             this.#pointerInside = true;
             this.stickForInteraction();
         });
-        this.#bind(panel, 'pointerenter', () => { this.#pointerInside = true; });
-        this.#bind(panel, 'pointerleave', () => { this.#pointerInside = false; });
+        this.#bind(panel, 'pointerenter', () => { console.log("Evento 7"); this.#pointerInside = true; });
+        this.#bind(panel, 'pointerleave', () => { console.log("Evento 8"); this.#pointerInside = false; this.#resolveClosing(); });
         this.#bind(panel, 'touchstart', () => {
+            console.log("Evento 9");
             this.#pointerInside = true;
             this.stickForInteraction();
         }, { passive: true });
-        this.#bind(panel, 'focusin', () => { this.#focusInside = true; });
+        this.#bind(panel, 'focusin', () => { console.log("Evento 10"); this.#focusInside = true; });
         this.#bind(panel, 'focusout', ((e: FocusEvent) => {
+            console.log("Evento 11");
             const related = e.relatedTarget as Node | null;
             this.#focusInside = !!related && panel.contains(related);
         }) as EventListener);
