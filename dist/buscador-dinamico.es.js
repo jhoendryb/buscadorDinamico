@@ -662,7 +662,7 @@ var i = class {
 			this.#e.hooks.onClose?.(t), this.#f(t);
 			return;
 		}
-		this.#t = "closing", this.#y(), this.#e.hooks.onClose?.(t), this.#h(() => this.#p(), n);
+		this.#t = "closing", this.#y(), this.#h(() => this.#p(), n);
 	}
 	toggle() {
 		this.isOpen ? this.close({ reason: "toggle" }) : this.open("toggle");
@@ -671,7 +671,7 @@ var i = class {
 		this.#l || (this.#s = Date.now() + this.#e.hideDelayMs, this.cancelPendingClose());
 	}
 	cancelPendingClose() {
-		this.#l || this.#t !== "closing" || (this.#r++, this.#g(), this.#u("focus"));
+		this.#l || this.#t !== "closing" || (this.#g(), this.#u("focus"));
 	}
 	refresh() {
 		this.#l || this.#y();
@@ -696,7 +696,7 @@ var i = class {
 				this.cancelPendingClose();
 				return;
 			}
-			this.#f(this.#n);
+			this.#e.hooks.onClose?.(this.#n), this.#f(this.#n);
 		}
 	}
 	#m() {
