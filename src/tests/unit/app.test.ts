@@ -322,7 +322,7 @@ describe('Search', () => {
             keyboardEnabled: true
         });
 
-        search.setupKeyboardNavigation();
+        search.setupEventDelegation();
 
         search.init();
 
