@@ -51,7 +51,7 @@ class Search {
     private boundClickHandler: (e: MouseEvent) => void;
     private boundKeydownHandler: (e: KeyboardEvent) => void;
     private boundFocusInHandler: (e: FocusEvent) => void;
-    private boundFocusOutHandler: (e: MouseEvent) => void;
+    private boundFocusClickOutSide: (e: MouseEvent) => void;
     private boundInputHandler: (e: Event) => void;
     private selectingItem: boolean = false;
 
@@ -97,7 +97,7 @@ class Search {
         this.boundClickHandler = () => { };
         this.boundKeydownHandler = () => { };
         this.boundFocusInHandler = () => { };
-        this.boundFocusOutHandler = () => { };
+        this.boundFocusClickOutSide = () => { };
         this.boundInputHandler = () => { };
         this.selectingItem = false;
         this.errorHandler = ErrorHandler.getInstance(this.developmentMode);
@@ -507,14 +507,14 @@ class Search {
         if (!content || !renderItems || !input) return this;
 
         // --- Click OutSide: cerrar panel cuando foco sale del contenedor ---
-        this.boundFocusOutHandler = (e: MouseEvent) => {
+        this.boundFocusClickOutSide = (e: MouseEvent) => {
             const related = e.target as Node | null;
             if (related && content.contains(related)) return;
             setTimeout(() => {
                 if (this.selectingItem || this._destroyed) return;
                 this.renderer.visibility.close({ reason: 'blur', immediate: true });
             }, 0);
-            document.removeEventListener('click', this.boundFocusOutHandler);
+            document.removeEventListener('click', this.boundFocusClickOutSide);
         };
 
         // --- Focusin: abrir panel cuando el input recibe foco ---
@@ -522,7 +522,7 @@ class Search {
             if (e.target !== input) return;
             const count = renderItems?.querySelectorAll(".items").length || 0;
             if (count > 0) this.renderer.visibility.open('focus');
-            document.addEventListener('click', this.boundFocusOutHandler);
+            document.addEventListener('click', this.boundFocusClickOutSide);
         };
         content.addEventListener('focusin', this.boundFocusInHandler);
         
@@ -652,7 +652,7 @@ class Search {
 
         this.renderer.body.content?.removeEventListener('input', this.boundInputHandler);
         this.renderer.body.content?.removeEventListener('focusin', this.boundFocusInHandler);
-        this.renderer.body.content?.removeEventListener('click', this.boundFocusOutHandler);
+        document.removeEventListener('click', this.boundFocusClickOutSide);
         this.renderer.body.content?.removeEventListener('click', this.boundClickHandler);
         this.renderer.body.content?.removeEventListener('keydown', this.boundKeydownHandler);
 
