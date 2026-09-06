@@ -1235,21 +1235,22 @@ search.cache.clearCacheByPrefix('venezuela');
 
 **Retorna:** Instancia de LRUCache para encadenamiento
 
-### setupKeyboardNavigation()
+### setupEventDelegation()
 
-Configura la navegación por teclado para el componente.
+Configura la delegación de eventos centralizada en el contenedor `<search>`.
 
 ```javascript
-search.setupKeyboardNavigation();
+search.setupEventDelegation();
 ```
 
 **Retorna:** Instancia de Search para encadenamiento
 
 **Funcionamiento:**
 
-- Requiere que `keyboardEnabled` sea true
-- Habilita teclas: ArrowUp, ArrowDown, Enter
-- Emite eventos `itemHighlighted` y `itemSelected`
+- `focusin` en el input: abre el panel si hay items
+- `click` fuera del contenedor: cierra el panel
+- `click` en un item: selecciona, limpia el input y cierra el panel
+- `keydown` (solo si `keyboardEnabled: true`): ArrowUp/ArrowDown navega, Enter selecciona
 
 ### destroy()
 
@@ -3170,7 +3171,7 @@ Para navegadores antiguos, usa un polyfill:
 - `destroy()` remueve event listeners por referencia (cleanup correcto)
 - Typo corregido: `firtsLoad` -> `firstLoad` en `renderer.appendItems()`
 - `#highlightText()` escapa caracteres especiales de regex para evitar errores
-- `setupKeyboardNavigation()` almacena handlers en referencias bound para cleanup
+- `setupEventDelegation()` almacena handlers en referencias bound para cleanup
 - ScrollObserver se reutiliza en lugar de recrearse en cada página
 - Sentinel de scroll se limpia individualmente antes de reconfigurar
 
@@ -3200,7 +3201,7 @@ Para navegadores antiguos, usa un polyfill:
 
 **Corregido:**
 
-- Removido código comentado en `setupKeyboardNavigation`
+- Removido código comentado en `setupEventDelegation`
 - `DEFAULT_DEVELOPMENT_MODE` cambiado a `false` por defecto
 - Valor hardcodeado `max-height` reemplazado por variable CSS
 - Padding movido de colors.css a dimensions.css para mejor separación de responsabilidades

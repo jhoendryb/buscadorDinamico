@@ -11,7 +11,7 @@ var e = Object.defineProperty, t = (t, n) => {
 	constructor(t) {
 		this.selectingItem = !1, this.currentDrawId = 0, this.isLoadingMore = !1, this._destroyed = !1, this.abortController = null;
 		let { translation: n, ...r } = t;
-		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = g, this.zIndex = h, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = y.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundClickHandler = () => {}, this.boundKeydownHandler = () => {}, this.boundFocusInHandler = () => {}, this.boundFocusOutHandler = () => {}, this.boundInputHandler = () => {}, this.selectingItem = !1, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
+		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = g, this.zIndex = h, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = y.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundClickHandler = () => {}, this.boundKeydownHandler = () => {}, this.boundFocusInHandler = () => {}, this.boundFocusClickOutSide = () => {}, this.boundInputHandler = () => {}, this.selectingItem = !1, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
 		try {
 			this.#t(), this.scrollObserver = null, this._ajaxResponse = {}, this.t = {
 				...e.#e,
@@ -186,16 +186,16 @@ var e = Object.defineProperty, t = (t, n) => {
 	setupEventDelegation() {
 		if (this._destroyed) return this;
 		let e = this.renderer.body.content, t = this.renderer.body.renderItems, n = this.renderer.body.inputSearch;
-		return !e || !t || !n ? this : (this.boundFocusOutHandler = (t) => {
+		return !e || !t || !n ? this : (this.boundFocusClickOutSide = (t) => {
 			let n = t.target;
 			n && e.contains(n) || (setTimeout(() => {
 				this.selectingItem || this._destroyed || this.renderer.visibility.close({
 					reason: "blur",
 					immediate: !0
 				});
-			}, 0), document.removeEventListener("click", this.boundFocusOutHandler));
+			}, 0), document.removeEventListener("click", this.boundFocusClickOutSide));
 		}, this.boundFocusInHandler = (e) => {
-			e.target === n && ((t?.querySelectorAll(".items").length || 0) > 0 && this.renderer.visibility.open("focus"), document.addEventListener("click", this.boundFocusOutHandler));
+			e.target === n && ((t?.querySelectorAll(".items").length || 0) > 0 && this.renderer.visibility.open("focus"), document.addEventListener("click", this.boundFocusClickOutSide));
 		}, e.addEventListener("focusin", this.boundFocusInHandler), this.boundClickHandler = (e) => {
 			if (this.events.listenerCount("itemSelected") === 0 || !t) return;
 			let r = e.target.closest(".items"), i = t.querySelectorAll(".items");
@@ -239,7 +239,7 @@ var e = Object.defineProperty, t = (t, n) => {
 		return this._destroyed ? this : (this.searchTerm = "", this.renderer.body.inputSearch && (this.renderer.body.inputSearch.value = this.searchTerm), this.renderer.body.renderItems && (this.renderer.body.renderItems.innerHTML = ""), this.sortBy !== null && this.clearSort(), this.cache.clear(), this.pagination.goToPage(1), this.draw(this.searchTerm, !0), this.selectedIndex = -1, this);
 	}
 	destroy() {
-		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content?.removeEventListener("input", this.boundInputHandler), this.renderer.body.content?.removeEventListener("focusin", this.boundFocusInHandler), this.renderer.body.content?.removeEventListener("click", this.boundFocusOutHandler), this.renderer.body.content?.removeEventListener("click", this.boundClickHandler), this.renderer.body.content?.removeEventListener("keydown", this.boundKeydownHandler), this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
+		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content?.removeEventListener("input", this.boundInputHandler), this.renderer.body.content?.removeEventListener("focusin", this.boundFocusInHandler), document.removeEventListener("click", this.boundFocusClickOutSide), this.renderer.body.content?.removeEventListener("click", this.boundClickHandler), this.renderer.body.content?.removeEventListener("keydown", this.boundKeydownHandler), this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
 			let e = this.renderer.body.inputSearch.cloneNode(!0);
 			this.renderer.body.inputSearch.parentNode && this.renderer.body.inputSearch.parentNode.replaceChild(e, this.renderer.body.inputSearch);
 		}

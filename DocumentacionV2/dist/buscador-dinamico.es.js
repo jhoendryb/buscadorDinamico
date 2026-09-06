@@ -11,7 +11,7 @@ var e = Object.defineProperty, t = (t, n) => {
 	constructor(t) {
 		this.selectingItem = !1, this.currentDrawId = 0, this.isLoadingMore = !1, this._destroyed = !1, this.abortController = null;
 		let { translation: n, ...r } = t;
-		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = g, this.zIndex = h, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = y.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundClickHandler = () => {}, this.boundKeydownHandler = () => {}, this.boundFocusInHandler = () => {}, this.boundFocusOutHandler = () => {}, this.boundInputHandler = () => {}, this.selectingItem = !1, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
+		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = g, this.zIndex = h, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = y.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundClickHandler = () => {}, this.boundKeydownHandler = () => {}, this.boundFocusInHandler = () => {}, this.boundFocusClickOutSide = () => {}, this.boundInputHandler = () => {}, this.selectingItem = !1, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
 		try {
 			this.#t(), this.scrollObserver = null, this._ajaxResponse = {}, this.t = {
 				...e.#e,
@@ -144,7 +144,16 @@ var e = Object.defineProperty, t = (t, n) => {
 		return `${e}-${this.element.replace(/^[.#]/, "")}`;
 	}
 	async #c(e, t, n = !1) {
-		let r = this.getCacheKey(e, t), i = async () => await this.searchingServer.search(e, this.fetch, t, this.itemsPerPage, this.abortController?.signal), a = this.cacheEnabled ? await this.cache.getOrFetch(r, i, (() => n ? this.renderer.showLoading(this.t.loading || "") : void 0)) : await i();
+		let r = this.getCacheKey(e, t), i = async () => {
+			if (this.cacheEnabled) {
+				let e = this.cache.get(r);
+				if (e !== void 0) return e;
+			}
+			let n = await this.searchingServer.search(e, this.fetch, t, this.itemsPerPage, this.abortController?.signal);
+			return this.cacheEnabled && this.cache.set(r, n), n;
+		};
+		n && this.renderer.showLoading(this.t.loading || "");
+		let a = await i();
 		return a && (this._ajaxResponse.success = { countPage: a.countPage }), a;
 	}
 	#l(e = !1) {
@@ -177,17 +186,20 @@ var e = Object.defineProperty, t = (t, n) => {
 	setupEventDelegation() {
 		if (this._destroyed) return this;
 		let e = this.renderer.body.content, t = this.renderer.body.renderItems, n = this.renderer.body.inputSearch;
-		return !e || !t || !n ? this : (this.boundFocusInHandler = (e) => {
-			e.target === n && (t?.querySelectorAll(".items").length || 0) > 0 && this.renderer.visibility.open("focus");
-		}, e.addEventListener("focusin", this.boundFocusInHandler), this.boundFocusOutHandler = (t) => {
-			let n = t.relatedTarget;
-			n && e.contains(n) || setTimeout(() => {
-				this.selectingItem || this._destroyed || this.renderer.visibility.close({ reason: "blur" });
-			}, 0);
-		}, e.addEventListener("focusout", this.boundFocusOutHandler), this.boundClickHandler = (e) => {
-			if (!t) return;
+		return !e || !t || !n ? this : (this.boundFocusClickOutSide = (t) => {
+			let n = t.target;
+			n && e.contains(n) || (setTimeout(() => {
+				this.selectingItem || this._destroyed || this.renderer.visibility.close({
+					reason: "blur",
+					immediate: !0
+				});
+			}, 0), document.removeEventListener("click", this.boundFocusClickOutSide));
+		}, this.boundFocusInHandler = (e) => {
+			e.target === n && ((t?.querySelectorAll(".items").length || 0) > 0 && this.renderer.visibility.open("focus"), document.addEventListener("click", this.boundFocusClickOutSide));
+		}, e.addEventListener("focusin", this.boundFocusInHandler), this.boundClickHandler = (e) => {
+			if (this.events.listenerCount("itemSelected") === 0 || !t) return;
 			let r = e.target.closest(".items"), i = t.querySelectorAll(".items");
-			r && (this.selectingItem = !0, this.selectedIndex = Array.from(i).indexOf(r), this.#u(i), this.#d(r), n && (console.log("click", n), n.value = "", n.blur(), this.renderer.visibility.close({
+			r && (this.selectingItem = !0, this.selectedIndex = Array.from(i).indexOf(r), this.#u(i), this.#d(r), n && (n.value = "", n.blur(), this.renderer.visibility.close({
 				reason: "blur",
 				immediate: !0
 			})), queueMicrotask(() => {
@@ -227,7 +239,7 @@ var e = Object.defineProperty, t = (t, n) => {
 		return this._destroyed ? this : (this.searchTerm = "", this.renderer.body.inputSearch && (this.renderer.body.inputSearch.value = this.searchTerm), this.renderer.body.renderItems && (this.renderer.body.renderItems.innerHTML = ""), this.sortBy !== null && this.clearSort(), this.cache.clear(), this.pagination.goToPage(1), this.draw(this.searchTerm, !0), this.selectedIndex = -1, this);
 	}
 	destroy() {
-		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content?.removeEventListener("input", this.boundInputHandler), this.renderer.body.content?.removeEventListener("focusin", this.boundFocusInHandler), this.renderer.body.content?.removeEventListener("focusout", this.boundFocusOutHandler), this.renderer.body.content?.removeEventListener("click", this.boundClickHandler), this.renderer.body.content?.removeEventListener("keydown", this.boundKeydownHandler), this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
+		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content?.removeEventListener("input", this.boundInputHandler), this.renderer.body.content?.removeEventListener("focusin", this.boundFocusInHandler), document.removeEventListener("click", this.boundFocusClickOutSide), this.renderer.body.content?.removeEventListener("click", this.boundClickHandler), this.renderer.body.content?.removeEventListener("keydown", this.boundKeydownHandler), this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
 			let e = this.renderer.body.inputSearch.cloneNode(!0);
 			this.renderer.body.inputSearch.parentNode && this.renderer.body.inputSearch.parentNode.replaceChild(e, this.renderer.body.inputSearch);
 		}
@@ -283,13 +295,6 @@ var i = class {
 			value: t,
 			expiresAt: Date.now() + this.ttlSeconds * 1e3
 		});
-	}
-	async getOrFetch(e, t, n) {
-		let r = this.get(e);
-		if (r !== void 0) return r;
-		n && n();
-		let i = await t();
-		return this.set(e, i), i;
 	}
 	get(e) {
 		let t = this.cache.get(e);
@@ -657,7 +662,7 @@ var i = class {
 			this.#e.hooks.onClose?.(t), this.#f(t);
 			return;
 		}
-		this.#t = "closing", this.#y(), this.#e.hooks.onClose?.(t), this.#h(() => this.#p(), n);
+		this.#t = "closing", this.#y(), this.#h(() => this.#p(), n);
 	}
 	toggle() {
 		this.isOpen ? this.close({ reason: "toggle" }) : this.open("toggle");
@@ -666,7 +671,7 @@ var i = class {
 		this.#l || (this.#s = Date.now() + this.#e.hideDelayMs, this.cancelPendingClose());
 	}
 	cancelPendingClose() {
-		this.#l || this.#t !== "closing" || (this.#r++, this.#g(), this.#u("focus"));
+		this.#l || this.#t !== "closing" || (this.#g(), this.#u("focus"));
 	}
 	refresh() {
 		this.#l || this.#y();
@@ -691,7 +696,7 @@ var i = class {
 				this.cancelPendingClose();
 				return;
 			}
-			this.#f(this.#n);
+			this.#e.hooks.onClose?.(this.#n), this.#f(this.#n);
 		}
 	}
 	#m() {
@@ -823,7 +828,7 @@ var i = class {
 		let e = this.body.content, t = e?.querySelector(".input-search"), n = r({
 			element: t,
 			className: this.#e(`input-search ${this.getUniqueClassName("input-search")}`, t?.className),
-			...t ? {} : { element: "search" }
+			...t ? {} : { element: "div" }
 		});
 		return t || e?.appendChild(n), this.body.contentSearch = n, n;
 	}
