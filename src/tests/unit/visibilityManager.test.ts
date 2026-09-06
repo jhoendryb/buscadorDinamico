@@ -164,7 +164,8 @@ describe('VisibilityManager', () => {
 
         panel.dispatchEvent(new Event('pointerenter'));
         manager.close({ reason: 'blur' });
-        jest.advanceTimersByTime(300);
+        jest.advanceTimersByTime(300); // resolveClosing → cancelPendingClose → re-opens
+        jest.advanceTimersByTime(300); // commitOpen fires
 
         expect(manager.phase).toBe('open'); // rebote
 
@@ -186,7 +187,8 @@ describe('VisibilityManager', () => {
         panel.dispatchEvent(new Event('focusin'));
 
         manager.close({ reason: 'blur' });
-        jest.advanceTimersByTime(300);
+        jest.advanceTimersByTime(300); // resolveClosing → cancelPendingClose → re-opens
+        jest.advanceTimersByTime(300); // commitOpen fires
 
         expect(manager.phase).toBe('open');
     });
@@ -235,7 +237,7 @@ describe('VisibilityManager', () => {
             expect(otherPanel.classList.contains('content-pagination-visible')).toBe(true);
             expect(otherPanel.hasAttribute('hidden')).toBe(false);
             expect(panel.classList.contains('content-pagination-visible')).toBe(false);
-            expect(otherPanel.classList.contains('content-pagination-hidden')).toBe(true);
+            expect(otherPanel.classList.contains('content-pagination-hidden')).toBe(false);
         } finally {
             other.destroy();
             otherPanel.remove();

@@ -63,7 +63,6 @@ export class VisibilityManager {
 
         this.#phase = 'closing';
         this.#syncDom();
-        this.#opts.hooks.onClose?.(reason);
         this.#schedule(() => this.#resolveClosing(), duration);
     }
 
@@ -88,7 +87,6 @@ export class VisibilityManager {
     /** Revierte un cierre en curso (usado por pointerenter/focusin del panel). */
     cancelPendingClose(): void {
         if (this.#destroyed || this.#phase !== 'closing') return;
-        this.#generation++;
         this.#clearTimer();
         this.#enterOpening('focus');
     }
@@ -149,6 +147,7 @@ export class VisibilityManager {
             this.cancelPendingClose();
             return;
         }
+        this.#opts.hooks.onClose?.(this.#lastCloseReason);
         this.#commitClose(this.#lastCloseReason);
     }
 
