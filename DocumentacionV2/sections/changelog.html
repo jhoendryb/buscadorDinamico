@@ -2,7 +2,7 @@
 
 <p>Historial de versiones y cambios del componente basado en el historial real del repositorio.</p>
 
-<h2>v1.0.0 <span class="doc-badge doc-badge--success">Latest</span> — VisibilityManager + ARIA + Event Delegation</h2>
+<h2>v1.0.0-<span class="doc-badge doc-badge--info">BETA</span> — VisibilityManager + ARIA + Event Delegation</h2>
 
 <p><em>Septiembre 2026</em></p>
 
@@ -44,7 +44,7 @@
     <li>Navegación táctil para dispositivos móviles (scroll con dedo)</li>
     <li>Soporte para <code>prefers-reduced-motion</code> — desactiva transiciones en el panel</li>
     <li>Traducción <code>ariaLabel</code> — label accesible del input, default <code>"Filtrar por Búsqueda"</code></li>
-    <li><code>focusout</code> en el contenedor cierra el panel al perder foco del input</li>
+    <li><code>focusin</code>/<code>focusout</code> en el panel — el VisibilityManager trackea si el foco está dentro para evitar cierres accidentales</li>
 </ul>
 
 <h3 id="mejorado-v1-0-0">Mejorado</h3>
