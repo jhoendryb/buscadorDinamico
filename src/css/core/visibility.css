@@ -13,4 +13,8 @@
     transform: translateY(-10px);
 }
 
+.content-pagination-items[hidden] {
+    display: none !important;
+}
+
 @supports selector(:has(*)) {}
