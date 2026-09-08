@@ -1,5 +1,4 @@
 import { createElement } from '../renderElement';
-import { VisibilityManager } from './visibilityManager';
 import { EventEmitter } from '../events/eventEmitter';
 import { TemplateEngine } from './templateEngine';
 import * as Types from '../types';
@@ -13,8 +12,7 @@ import * as Constants from '../constants';
 export class SearchRenderer {
     public body: Types.BodyConfig;
     private uniqueClassNameFn: (baseClass: string) => string;
-    private timeHiddenResults: number;
-    readonly visibility: VisibilityManager;
+    public timeHiddenResults: number;
     /**
      * Crea una instancia de SearchRenderer.
      * @param {Types.BodyConfig} body - Objeto con referencias a elementos del DOM
@@ -25,12 +23,6 @@ export class SearchRenderer {
         this.body = body;
         this.uniqueClassNameFn = uniqueClassNameFn;
         this.timeHiddenResults = timeHiddenResults;
-        this.visibility = new VisibilityManager({
-            panel: () => this.body.contentPaginationItems,
-            control: () => this.body.inputSearch as HTMLElement,
-            listbox: () => this.body.renderItems as HTMLElement,
-            hideDelayMs: this.timeHiddenResults
-        });
     }
     /**
      * Agrega una clase de tema al contenedor principal y devuelve la instancia actual.
@@ -381,7 +373,7 @@ export class SearchRenderer {
                 { element: "p", textContent: loadingText }
             ]
         });
-        
+
         this.body.renderItems.innerHTML = loading.outerHTML;
     }
     /**
@@ -418,9 +410,6 @@ export class SearchRenderer {
         return newContentPagItems;
     }
     destroy(): void {
-        this.visibility.destroy();
-
-        // Resetear referencias
         this.body.contentSearch = undefined;
         this.body.inputSearch = undefined;
         this.body.renderItems = undefined;

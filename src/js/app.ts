@@ -6,6 +6,7 @@ import {
     EventEmitter,
     Pagination,
     SearchRenderer,
+    VisibilityManager,
     SearchError,
     ErrorCode,
     ErrorHandler,
@@ -59,6 +60,8 @@ class Search {
     private isLoadingMore: boolean = false;
     private _destroyed: boolean = false;
     private abortController: AbortController | null = null;
+
+    public visibility: VisibilityManager | undefined;
     /**
      * Instancia que almacena las traducciones predeterminadas.
      * @type {Types.TranslationCache}
@@ -140,6 +143,7 @@ class Search {
                     totalLoaded: this.pagination.getTotalLoaded()
                 } as Types.PageChangeEventData);
             });
+            this.visibility = undefined;
         } catch (error) {
             if (error instanceof SearchError) {
                 this.errorHandler.logError(error, this.events);
@@ -176,6 +180,24 @@ class Search {
                     ariaLabel: this.t.ariaLabel
                 }
             } as Types.RenderByDomOptions);
+
+            // ELIMINAR todo este bloque del constructor:
+            this.visibility = new VisibilityManager({
+                panel: () => this.renderer.body.contentPaginationItems,
+                control: () => this.renderer.body.inputSearch as HTMLElement,
+                listbox: () => this.renderer.body.renderItems as HTMLElement,
+                hideDelayMs: this.renderer.timeHiddenResults,
+                hooks: {
+                    onClosed: (reason) => {
+                        if (reason === 'blur' || reason === 'select') {
+                            const input = this.renderer.body.inputSearch as HTMLInputElement;
+                            if (input) input.value = '';
+                            input?.blur();
+                            this.draw('');
+                        }
+                    }
+                }
+            });
 
             this.setupEventDelegation();
 
@@ -510,10 +532,10 @@ class Search {
         this.boundFocusClickOutSide = (e: MouseEvent) => {
             const related = e.target as Node | null;
             if (related && content.contains(related)) return;
-            setTimeout(() => {
-                if (this.selectingItem || this._destroyed) return;
-                this.renderer.visibility.close({ reason: 'blur', immediate: true });
-            }, 0);
+            // setTimeout(() => {
+            // }, 0);
+            if (this.selectingItem || this._destroyed) return;
+            this.visibility?.close({ reason: 'blur', immediate: true });
             document.removeEventListener('click', this.boundFocusClickOutSide);
         };
 
@@ -521,11 +543,11 @@ class Search {
         this.boundFocusInHandler = (e: FocusEvent) => {
             if (e.target !== input) return;
             const count = renderItems?.querySelectorAll(".items").length || 0;
-            if (count > 0) this.renderer.visibility.open('focus');
+            if (count > 0) this.visibility?.open('focus');
             document.addEventListener('click', this.boundFocusClickOutSide);
         };
         content.addEventListener('focusin', this.boundFocusInHandler);
-        
+
         // --- Click: seleccionar items (delegado al contenedor) ---
         this.boundClickHandler = (e: MouseEvent) => {
             const eventCount = this.events.listenerCount('itemSelected');
@@ -539,11 +561,11 @@ class Search {
                 this.selectedIndex = Array.from(items).indexOf(item);
                 this.#highlightItem(items);
                 this.#selectItem(item);
-                if (input) {
-                    (input as HTMLInputElement).value = '';
-                    input.blur();
-                    this.renderer.visibility.close({ reason: 'blur', immediate: true });
-                }
+                // if (input) {
+                //     (input as HTMLInputElement).value = '';
+                //     input.blur();
+                // }
+                this.visibility?.close({ reason: 'blur', immediate: true });
                 queueMicrotask(() => { this.selectingItem = false; });
             }
         };
@@ -565,11 +587,11 @@ class Search {
                 } else if (['enter'].includes(e.key.toLowerCase()) && this.selectedIndex >= 0) {
                     e.preventDefault();
                     this.#selectItem(items[this.selectedIndex]);
-                    if (input) {
-                        (input as HTMLInputElement).value = '';
-                        input.blur();
-                        this.renderer.visibility.close({ reason: 'blur', immediate: true });
-                    }
+                    // if (input) {
+                    //     (input as HTMLInputElement).value = '';
+                    //     input.blur();
+                    // }
+                    this.visibility?.close({ reason: 'blur', immediate: true });
                 }
             };
             content.addEventListener('keydown', this.boundKeydownHandler);
@@ -614,7 +636,7 @@ class Search {
      * this.#selectItem(items[0]);
      */
     #selectItem(item: Record<string, any>): void {
-        this.events.emit('itemSelected', { item, index: this.selectedIndex, close: () => this.renderer.visibility.close({ reason: 'select', immediate: true }) } as Types.ItemSelectedEventData);
+        this.events.emit('itemSelected', { item, index: this.selectedIndex } as Types.ItemSelectedEventData);
     }
     clear(): Search {
         if (this._destroyed) return this;
