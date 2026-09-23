@@ -178,6 +178,8 @@ export interface VisibilityHooks {
 }
 
 export interface VisibilityManagerOptions {
+    /** Accesor al contenedor padre del componenete (body.content) */
+    parent: () => HTMLElement | null | undefined;
     /** Accesor al contenedor desplegable (body.contentPaginationItems) */
     panel: () => HTMLElement | null | undefined;
     /** Accesor al input (body.inputSearch) para aria-expanded */

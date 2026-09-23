@@ -1,3 +1,8 @@
+/**
+ * @license MIT
+ * Copyright (c) 2024 JhoendryB
+ */
+
 import {
     createElement,
     SearchingLocal,
@@ -181,19 +186,19 @@ class Search {
                 }
             } as Types.RenderByDomOptions);
 
-            // ELIMINAR todo este bloque del constructor:
             this.visibility = new VisibilityManager({
+                parent: () => this.renderer.body.content,
                 panel: () => this.renderer.body.contentPaginationItems,
                 control: () => this.renderer.body.inputSearch as HTMLElement,
                 listbox: () => this.renderer.body.renderItems as HTMLElement,
                 hideDelayMs: this.renderer.timeHiddenResults,
                 hooks: {
-                    onClosed: (reason) => {
+                    onClosed: async (reason) => {
                         if (reason === 'blur' || reason === 'select') {
+                            await this.draw('');
                             const input = this.renderer.body.inputSearch as HTMLInputElement;
                             if (input) input.value = '';
                             input?.blur();
-                            this.draw('');
                         }
                     }
                 }
@@ -530,10 +535,9 @@ class Search {
 
         // --- Click OutSide: cerrar panel cuando foco sale del contenedor ---
         this.boundFocusClickOutSide = (e: MouseEvent) => {
+            console.log("Evento 1")
             const related = e.target as Node | null;
             if (related && content.contains(related)) return;
-            // setTimeout(() => {
-            // }, 0);
             if (this.selectingItem || this._destroyed) return;
             this.visibility?.close({ reason: 'blur', immediate: true });
             document.removeEventListener('click', this.boundFocusClickOutSide);
@@ -541,6 +545,7 @@ class Search {
 
         // --- Focusin: abrir panel cuando el input recibe foco ---
         this.boundFocusInHandler = (e: FocusEvent) => {
+            console.log("Evento 2")
             if (e.target !== input) return;
             const count = renderItems?.querySelectorAll(".items").length || 0;
             if (count > 0) this.visibility?.open('focus');
@@ -550,6 +555,7 @@ class Search {
 
         // --- Click: seleccionar items (delegado al contenedor) ---
         this.boundClickHandler = (e: MouseEvent) => {
+            console.log("Evento 3");
             const eventCount = this.events.listenerCount('itemSelected');
             if (eventCount === 0) return;
             if (!renderItems) return;
@@ -561,10 +567,6 @@ class Search {
                 this.selectedIndex = Array.from(items).indexOf(item);
                 this.#highlightItem(items);
                 this.#selectItem(item);
-                // if (input) {
-                //     (input as HTMLInputElement).value = '';
-                //     input.blur();
-                // }
                 this.visibility?.close({ reason: 'blur', immediate: true });
                 queueMicrotask(() => { this.selectingItem = false; });
             }
@@ -587,10 +589,6 @@ class Search {
                 } else if (['enter'].includes(e.key.toLowerCase()) && this.selectedIndex >= 0) {
                     e.preventDefault();
                     this.#selectItem(items[this.selectedIndex]);
-                    // if (input) {
-                    //     (input as HTMLInputElement).value = '';
-                    //     input.blur();
-                    // }
                     this.visibility?.close({ reason: 'blur', immediate: true });
                 }
             };

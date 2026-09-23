@@ -19,6 +19,7 @@ export class VisibilityManager {
 
     constructor(options: Types.VisibilityManagerOptions) {
         this.#opts = {
+            parent: options.parent,
             panel: options.panel,
             control: options.control ?? (() => null),
             listbox: options.listbox ?? (() => null),
@@ -219,24 +220,38 @@ export class VisibilityManager {
     /** Listeners delegados en el contenedor: cubren items añadidos dinámicamente. */
     #ensureListeners(): void {
         const panel = this.#opts.panel();
-        if (!panel || this.#listeners.length > 0) return;
+        const content = this.#opts.parent();
+        if (!panel || !content || this.#listeners.length > 0) return;
 
+        this.#bind(content, 'keydown', (e: Event) => {
+            console.log("Evento2 1");
+            const event = e as KeyboardEvent;
+            if (event.key !== 'Escape') return;
+            if (event.key === 'Escape') {
+                this.close({ reason: 'blur' });
+                return;
+            }
+        }) as unknown as EventListener;
         this.#bind(panel, 'pointerdown', () => {
+            console.log("Evento2 2");
             this.#pointerInside = true;
             this.stickForInteraction();
         });
         this.#bind(panel, 'pointermove', () => {
+            console.log("Evento2 3");
             this.#pointerInside = true;
             this.stickForInteraction();
         });
-        this.#bind(panel, 'pointerenter', () => { this.#pointerInside = true; });
-        this.#bind(panel, 'pointerleave', () => { this.#pointerInside = false; });
+        this.#bind(panel, 'pointerenter', () => { console.log("Evento2 4"); this.#pointerInside = true; });
+        this.#bind(panel, 'pointerleave', () => { console.log("Evento2 5"); this.#pointerInside = false; });
         this.#bind(panel, 'touchstart', () => {
+            console.log("Evento2 6");
             this.#pointerInside = true;
             this.stickForInteraction();
         }, { passive: true });
-        this.#bind(panel, 'focusin', () => { this.#focusInside = true; });
+        this.#bind(panel, 'focusin', () => { console.log("Evento2 7"); this.#focusInside = true; });
         this.#bind(panel, 'focusout', ((e: FocusEvent) => {
+            console.log("Evento2 8");
             const related = e.relatedTarget as Node | null;
             this.#focusInside = !!related && panel.contains(related);
         }) as EventListener);

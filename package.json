@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "Buscador dinámico",
   "type": "commonjs",
+  "license": "MIT",
+  "author": "JhoendryB",
   "dependencies": {
     "bootstrap": "^5.3.3"
   },

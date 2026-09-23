@@ -7,16 +7,16 @@ var e = Object.defineProperty, t = (t, n) => {
 	});
 	return n || e(r, Symbol.toStringTag, { value: "Module" }), r;
 }, n = class e {
-	static #e = _;
+	static #e = g;
 	constructor(t) {
 		this.selectingItem = !1, this.currentDrawId = 0, this.isLoadingMore = !1, this._destroyed = !1, this.abortController = null;
 		let { translation: n, ...r } = t;
-		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = g, this.zIndex = h, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = y.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundClickHandler = () => {}, this.boundKeydownHandler = () => {}, this.boundFocusInHandler = () => {}, this.boundFocusClickOutSide = () => {}, this.boundInputHandler = () => {}, this.selectingItem = !1, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
+		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = h, this.zIndex = m, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = v.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundClickHandler = () => {}, this.boundKeydownHandler = () => {}, this.boundFocusInHandler = () => {}, this.boundFocusClickOutSide = () => {}, this.boundInputHandler = () => {}, this.selectingItem = !1, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
 		try {
 			this.#t(), this.scrollObserver = null, this._ajaxResponse = {}, this.t = {
 				...e.#e,
 				...n
-			}, this._data = this.data, this.searchingLocal = new x(), this.searchingServer = new S(this.errorHandler, this.responseAdapter), this.renderer = new b({
+			}, this._data = this.data, this.searchingLocal = new b(), this.searchingServer = new x(this.errorHandler, this.responseAdapter), this.renderer = new y({
 				content: void 0,
 				contentSearch: void 0,
 				inputSearch: void 0,
@@ -30,7 +30,7 @@ var e = Object.defineProperty, t = (t, n) => {
 					itemsOnPage: this.pagination.getPageItems(this.procesServer ? null : this._data).length,
 					totalLoaded: this.pagination.getTotalLoaded()
 				});
-			});
+			}), this.visibility = void 0;
 		} catch (e) {
 			throw e instanceof o && this.errorHandler.logError(e, this.events), e;
 		}
@@ -49,6 +49,17 @@ var e = Object.defineProperty, t = (t, n) => {
 					placeholder: this.t.searchPlaceholder,
 					ariaLabel: this.t.ariaLabel
 				}
+			}), this.visibility = new S({
+				panel: () => this.renderer.body.contentPaginationItems,
+				control: () => this.renderer.body.inputSearch,
+				listbox: () => this.renderer.body.renderItems,
+				hideDelayMs: this.renderer.timeHiddenResults,
+				hooks: { onClosed: (e) => {
+					if (e === "blur" || e === "select") {
+						let e = this.renderer.body.inputSearch;
+						e && (e.value = ""), e?.blur(), this.draw("");
+					}
+				} }
 			}), this.setupEventDelegation(), this.draw(this.searchTerm), this.events.emit("init", {
 				searchTerm: this.searchTerm,
 				itemsPerPage: this.itemsPerPage,
@@ -188,30 +199,28 @@ var e = Object.defineProperty, t = (t, n) => {
 		let e = this.renderer.body.content, t = this.renderer.body.renderItems, n = this.renderer.body.inputSearch;
 		return !e || !t || !n ? this : (this.boundFocusClickOutSide = (t) => {
 			let n = t.target;
-			n && e.contains(n) || (setTimeout(() => {
-				this.selectingItem || this._destroyed || this.renderer.visibility.close({
-					reason: "blur",
-					immediate: !0
-				});
-			}, 0), document.removeEventListener("click", this.boundFocusClickOutSide));
-		}, this.boundFocusInHandler = (e) => {
-			e.target === n && ((t?.querySelectorAll(".items").length || 0) > 0 && this.renderer.visibility.open("focus"), document.addEventListener("click", this.boundFocusClickOutSide));
-		}, e.addEventListener("focusin", this.boundFocusInHandler), this.boundClickHandler = (e) => {
-			if (this.events.listenerCount("itemSelected") === 0 || !t) return;
-			let r = e.target.closest(".items"), i = t.querySelectorAll(".items");
-			r && (this.selectingItem = !0, this.selectedIndex = Array.from(i).indexOf(r), this.#u(i), this.#d(r), n && (n.value = "", n.blur(), this.renderer.visibility.close({
+			n && e.contains(n) || this.selectingItem || this._destroyed || (this.visibility?.close({
 				reason: "blur",
 				immediate: !0
-			})), queueMicrotask(() => {
+			}), document.removeEventListener("click", this.boundFocusClickOutSide));
+		}, this.boundFocusInHandler = (e) => {
+			e.target === n && ((t?.querySelectorAll(".items").length || 0) > 0 && this.visibility?.open("focus"), document.addEventListener("click", this.boundFocusClickOutSide));
+		}, e.addEventListener("focusin", this.boundFocusInHandler), this.boundClickHandler = (e) => {
+			if (this.events.listenerCount("itemSelected") === 0 || !t) return;
+			let n = e.target.closest(".items"), r = t.querySelectorAll(".items");
+			n && (this.selectingItem = !0, this.selectedIndex = Array.from(r).indexOf(n), this.#u(r), this.#d(n), this.visibility?.close({
+				reason: "blur",
+				immediate: !0
+			}), queueMicrotask(() => {
 				this.selectingItem = !1;
 			}));
 		}, e.addEventListener("click", this.boundClickHandler), this.keyboardEnabled && (this.boundKeydownHandler = (e) => {
 			if (!t) return;
-			let r = t.querySelectorAll(".items");
-			e.key === "ArrowDown" ? (e.preventDefault(), this.selectedIndex = Math.min(this.selectedIndex + 1, r.length - 1), this.#u(r)) : e.key === "ArrowUp" ? (e.preventDefault(), this.selectedIndex = Math.max(this.selectedIndex - 1, 0), this.#u(r)) : ["enter"].includes(e.key.toLowerCase()) && this.selectedIndex >= 0 && (e.preventDefault(), this.#d(r[this.selectedIndex]), n && (n.value = "", n.blur(), this.renderer.visibility.close({
+			let n = t.querySelectorAll(".items");
+			e.key === "ArrowDown" ? (e.preventDefault(), this.selectedIndex = Math.min(this.selectedIndex + 1, n.length - 1), this.#u(n)) : e.key === "ArrowUp" ? (e.preventDefault(), this.selectedIndex = Math.max(this.selectedIndex - 1, 0), this.#u(n)) : ["enter"].includes(e.key.toLowerCase()) && this.selectedIndex >= 0 && (e.preventDefault(), this.#d(n[this.selectedIndex]), this.visibility?.close({
 				reason: "blur",
 				immediate: !0
-			})));
+			}));
 		}, e.addEventListener("keydown", this.boundKeydownHandler)), this);
 	}
 	#u(e) {
@@ -228,11 +237,7 @@ var e = Object.defineProperty, t = (t, n) => {
 	#d(e) {
 		this.events.emit("itemSelected", {
 			item: e,
-			index: this.selectedIndex,
-			close: () => this.renderer.visibility.close({
-				reason: "select",
-				immediate: !0
-			})
+			index: this.selectedIndex
 		});
 	}
 	clear() {
@@ -624,6 +629,336 @@ var i = class {
 		this.currentPage = e, this.countFn = void 0, this.dataItemsFn = void 0;
 	}
 }, u = class {
+	render(e, t, n) {
+		if (typeof t == "function") return t(e, n);
+		if (typeof t == "string") return t.replace(/{{(\w+)}}/g, (t, r) => {
+			let i = e[r];
+			return n ? n(String(i)) : String(i);
+		});
+		let r = Object.values(e).join(" ");
+		return n ? n(r) : r;
+	}
+}, d = /* @__PURE__ */ t({ DomComponent: () => f }), f = /* @__PURE__ */ function(e) {
+	return e.SEARCH = "s", e.CONTENT = "c", e.ITEMS = "i", e.PAGINATION = "p", e;
+}({}), p = /* @__PURE__ */ t({
+	DEFAULT_CACHE_MAX_SIZE: () => 50,
+	DEFAULT_CACHE_TTL: () => 300,
+	DEFAULT_CSS_CLASSES: () => _,
+	DEFAULT_DEBOUNCE_TIME: () => 500,
+	DEFAULT_DEVELOPMENT_MODE: () => !1,
+	DEFAULT_HIGHLIGHT_ENABLED: () => !1,
+	DEFAULT_ITEMS_PER_PAGE: () => 10,
+	DEFAULT_THEME: () => h,
+	DEFAULT_TIME_HIDDEN_RESULTS: () => 200,
+	DEFAULT_TRANSLATIONS: () => g,
+	DEFAULT_Z_INDEX: () => m,
+	DOM_ORDERS: () => v,
+	FIRST_PAGE: () => 1,
+	NO_SELECTION: () => -1,
+	SORT_ASC: () => -1,
+	SORT_DESC: () => 1,
+	SORT_ORDER: () => "asc"
+}), m = 1e3, h = "adaptative", g = {
+	ariaLabel: "Filtrar por Búsqueda",
+	searchPlaceholder: "Ingrese palabra clave...",
+	noResults: "No se encontraron resultados",
+	loading: "Buscando...",
+	pagination: "{{to}} de {{total}}",
+	noIntersectionObserver: "IntersectionObserver no está disponible. Scroll infinito no funcionará en este entorno."
+}, _ = {
+	searchContainer: "input-search",
+	itemsContainer: "items-search",
+	paginationContainer: "index-search",
+	paginationList: "pagination",
+	item: "items"
+}, v = {
+	SEARCH_ITEMS_PAGINATION: "sip",
+	SEARCH_CONTENT_ITEMS_PAGINATION: "scip"
+}, y = class {
+	constructor(e, t, n) {
+		this.body = e, this.uniqueClassNameFn = t, this.timeHiddenResults = n;
+	}
+	setTheme(e) {
+		let t = this.body.content;
+		if (!t) return this;
+		let n = Array.from(t.classList).find((e) => e.startsWith("theme-"));
+		return n && t.classList.remove(n), e && e !== "default" && t.classList.add(`theme-${e}`), this;
+	}
+	getUniqueClassName(e) {
+		return this.uniqueClassNameFn(e);
+	}
+	#e(e, t = "") {
+		let n = e.trim().split(/\s+/), r = t.trim().split(/\s+/), i = new Set([...n, ...r]);
+		return Array.from(i).join(" ");
+	}
+	contentSearch() {
+		if (this.body.contentSearch) return this.body.contentSearch;
+		let e = this.body.content, t = e?.querySelector(".input-search"), n = r({
+			element: t,
+			className: this.#e(`input-search ${this.getUniqueClassName("input-search")}`, t?.className),
+			...t ? {} : { element: "div" }
+		});
+		return t || e?.appendChild(n), this.body.contentSearch = n, n;
+	}
+	renderSearch({ onInput: e, debounceTime: t, placeholder: n, ariaLabel: i }) {
+		if (this.body.inputSearch) return this.body.inputSearch;
+		let a = this.body.contentSearch, o = a?.querySelector(".filter-search"), s, c = {
+			element: o,
+			type: "search",
+			id: this.getUniqueClassName("input-search"),
+			placeholder: n || "Ingrese palabra clave...",
+			className: this.#e(`${this.getUniqueClassName("filter-search")}`, o?.className),
+			attributes: {
+				"aria-label": i || "Filtrar por Búsqueda",
+				role: "combobox",
+				"aria-expanded": "false",
+				"aria-haspopup": "listbox",
+				"aria-autocomplete": "list",
+				"aria-controls": this.getUniqueClassName("items-search")
+			},
+			event: { input: (n) => {
+				let r = n.target.value.trim().toLowerCase();
+				clearTimeout(s), s = setTimeout(() => {
+					e && e(r, n instanceof Event);
+				}, t);
+			} },
+			...o ? {} : {
+				element: "input",
+				name: this.getUniqueClassName("filterSearch")
+			}
+		};
+		return o = r(c), c.element === "input" && a && a.appendChild(o), this.body.inputSearch = o, o;
+	}
+	renderItems({ zIndex: e = 999, ready: t }) {
+		if (this.body.renderItems) return this.body.renderItems;
+		this.body.contentPaginationItems || this.renderContentPaginationItems({ ready: t });
+		let n = this.body.contentPaginationItems, i = n?.querySelector(".items-search"), a = r({
+			element: i,
+			className: this.#e(`items-search scroll-personalize ${this.getUniqueClassName("items-search")}`, i?.className),
+			attributes: {
+				"aria-label": "Resultados de búsqueda",
+				role: "listbox",
+				"aria-hidden": "true"
+			},
+			style: { zIndex: e },
+			...i ? {} : {
+				element: "ul",
+				id: this.getUniqueClassName("items-search")
+			}
+		});
+		return !i && n && n.appendChild(a), this.body.renderItems = a, a;
+	}
+	renderPagination({ ready: e }) {
+		this.body.contentPaginationItems || this.renderContentPaginationItems({ ready: e });
+		let t = this.body.contentPaginationItems, n = t?.querySelector(".pagination-items"), i = r({
+			element: n,
+			className: this.#e("pagination-items", n?.className),
+			attributes: {
+				role: "status",
+				"aria-live": "polite"
+			},
+			child: this.renderCounter(),
+			...n ? {} : { element: "div" }
+		});
+		return !n && t && t.appendChild(i), this.body.paginationItems = i, i;
+	}
+	renderCounter() {
+		if (this.body.counterItems) return this.body.counterItems;
+		let e = this.body.contentPaginationItems?.querySelector(".items-counter"), t = r({
+			element: e,
+			className: this.#e("items-counter", e?.className),
+			...e ? {} : { element: "div" }
+		});
+		return this.body.counterItems = t, t;
+	}
+	appendItems(e, t, n = g.noResults, i, a = !1, o) {
+		let s = this.body.renderItems;
+		if (!s) return !1;
+		a && (s.innerHTML = "");
+		let c = {
+			element: "li",
+			className: "items",
+			tabindex: "0",
+			attributes: { role: "option" }
+		};
+		if (s.children.length === 0 && (!e || e.length === 0)) return c.textContent = n, s.appendChild(r(c)), !1;
+		let l = this.body.renderItems?.children.length, d = l ? l - 1 : 0, f = document.createDocumentFragment(), p = new u();
+		return e.forEach((e) => {
+			c.id = this.getUniqueClassName(`items-${d++}`);
+			let n = r(c);
+			n.innerHTML = p.render(e, t, o), f.appendChild(n);
+		}), s.appendChild(f), i.emit("appendItems", {
+			items: e,
+			content: s
+		}), !0;
+	}
+	updateCounter(e) {
+		if (!this.body.counterItems) return;
+		let t = this.body.counterItems;
+		e.textPagination ||= g.pagination;
+		let { textPagination: n, ...r } = e;
+		if (t && n) {
+			let e = n;
+			Object.entries(r).forEach(([t, n]) => {
+				e = e.replace(`{{${t}}}`, String(n));
+			}), t.textContent = e;
+		}
+	}
+	renderByDom(e, t) {
+		let n = {
+			[f.SEARCH]: () => {
+				this.contentSearch(), this.renderSearch({ ...t.search });
+			},
+			[f.CONTENT]: () => this.renderContentPaginationItems({ ...t.renderPaginationItems }),
+			[f.ITEMS]: () => this.renderItems({ ...t.renderPaginationItems }),
+			[f.PAGINATION]: () => this.renderPagination({ ...t.renderPaginationItems })
+		}, r = e.split(""), i = r.filter((e) => "sc".includes(e)).join(""), a = r.filter((e) => "ip".includes(e)).join("");
+		for (let e of `${i}${a}`) n[e] && n[e]();
+	}
+	showLoading(e) {
+		if (!this.body.renderItems) return;
+		let t = r({
+			element: "div",
+			className: "search-loading",
+			children: [{
+				element: "div",
+				className: "spinner"
+			}, {
+				element: "p",
+				textContent: e
+			}]
+		});
+		this.body.renderItems.innerHTML = t.outerHTML;
+	}
+	renderContentPaginationItems({ ready: e }) {
+		if (this.body.contentPaginationItems) return this.body.contentPaginationItems;
+		let t = this.body.content, n = t?.querySelector(".content-pagination-items"), i = r({
+			element: n,
+			className: this.#e(`content-pagination-items ${this.getUniqueClassName("content-pagination-items")} content-pagination-hidden`, n?.className),
+			hidden: !0,
+			...n ? {} : { element: "div" }
+		});
+		return n || t?.appendChild(i), e && e(), this.body.contentPaginationItems = i, i;
+	}
+	destroy() {
+		this.body.contentSearch = void 0, this.body.inputSearch = void 0, this.body.renderItems = void 0, this.body.paginationItems = void 0, this.body.contentPaginationItems = void 0;
+	}
+}, b = class {
+	isExtractData(e) {
+		let t = e.querySelectorAll(".items");
+		return t.length === 0 ? null : Array.from(t).map((e) => {
+			let t = {};
+			return Array.from(e.attributes).forEach((e) => {
+				e.name.startsWith("data-") && (t[e.name.replace("data-", "")] = e.value.trim());
+			}), t.children = e.innerHTML.trim(), t;
+		});
+	}
+	search(e, t, n, r) {
+		if (e === "" || !e) return t;
+		let i = t.filter((t) => this.#e(t).some((t) => this.#t(String(t)).includes(this.#t(e))));
+		return n && i.sort((e, t) => {
+			let i = e[n], a = t[n];
+			return i < a ? r === "asc" ? -1 : 1 : i > a ? r === "asc" ? 1 : -1 : 0;
+		}), i;
+	}
+	#e(e) {
+		return typeof e != "object" || !e ? [String(e)] : Object.values(e).flatMap((e) => this.#e(e));
+	}
+	#t(e) {
+		return e.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+	}
+}, x = class {
+	constructor(e, t) {
+		this.defaultTimeout = 3e4, this.errorHandler = e, this.responseAdapter = t;
+	}
+	async search(e, t, n, r, i) {
+		t.body = {
+			itemsPerPage: r,
+			...t.body,
+			page: n,
+			searchTerm: e
+		};
+		let o = await this.executeFetch(t, i), s = this.responseAdapter, c = s ? s(o) : o;
+		return (!c || typeof c != "object" || !Array.isArray(c.data)) && this.errorHandler.throwCustomError(a.EMPTY_RESPONSE, {
+			context: "empty_response",
+			url: t.url
+		}), {
+			data: c.data,
+			countPage: c.countPage
+		};
+	}
+	#e(e) {
+		this.errorHandler.validateRequired(e.url, "url", a.FETCH_URL_REQUIRED), this.errorHandler.validateRequired(e.method, "method", a.FETCH_URL_REQUIRED), this.errorHandler.validateType(e.method, "string", "method", a.FETCH_URL_REQUIRED);
+		let t = [
+			"GET",
+			"POST",
+			"PUT",
+			"DELETE",
+			"PATCH"
+		];
+		t.includes(e.method.toUpperCase()) || this.errorHandler.throwCustomError(a.FETCH_FAILED, {
+			context: "invalid_http_method",
+			providedMethod: e.method,
+			validMethods: t
+		});
+	}
+	#t(e) {
+		let t = new Headers(e.headers || {});
+		return e.method.toUpperCase() !== "GET" && e.body && (t.has("Content-Type") || t.set("Content-Type", "application/json")), t;
+	}
+	#n(e, t) {
+		if (!(e.method.toUpperCase() === "GET" || !e.body)) return this.errorHandler.validateType(e.body, "object", "body", a.INVALID_DATA_FORMAT), e.body instanceof FormData ? e.body : t.get("Content-Type")?.includes("application/x-www-form-urlencoded") ? new URLSearchParams(e.body) : JSON.stringify(e.body);
+	}
+	#r(e, t, n) {
+		if (e instanceof Error && e.name === "AbortError" && this.errorHandler.throwCustomError(a.NETWORK_ERROR, {
+			context: "request_timeout",
+			url: t,
+			timeout: n
+		}), e instanceof TypeError && e.message.includes("fetch") && this.errorHandler.throwCustomError(a.NETWORK_ERROR, {
+			context: "network_error",
+			url: t,
+			originalError: e
+		}), e instanceof o) throw e;
+		this.errorHandler.throwCustomError(a.FETCH_FAILED, {
+			context: "unknown_error",
+			url: t,
+			originalError: e
+		});
+	}
+	async executeFetch(e, t) {
+		try {
+			this.#e(e);
+			let n = new AbortController(), r = setTimeout(() => n.abort(), e.timeout || this.defaultTimeout), i = t ? AbortSignal.any([t, n.signal]) : n.signal, o = this.#t(e), s = this.#n(e, o), c = await fetch(e.url, {
+				method: e.method,
+				headers: o,
+				body: s,
+				signal: i
+			});
+			clearTimeout(r), c.ok || this.errorHandler.throwCustomError(a.FETCH_FAILED, {
+				context: "http_error",
+				status: c.status,
+				statusText: c.statusText,
+				url: e.url
+			});
+			let l;
+			try {
+				l = await c.json();
+			} catch (t) {
+				this.errorHandler.throwCustomError(a.INVALID_DATA_FORMAT, {
+					context: "json_parse_error",
+					url: e.url,
+					originalError: t
+				});
+			}
+			return l || this.errorHandler.throwCustomError(a.EMPTY_RESPONSE, {
+				context: "empty_response",
+				url: e.url
+			}), e.success && e.success(l, null), l;
+		} catch (t) {
+			this.#r(t, e.url, e.timeout || this.defaultTimeout);
+		}
+	}
+}, S = class {
 	#e;
 	#t = "closed";
 	#n = "programmatic";
@@ -755,341 +1090,6 @@ var i = class {
 			n
 		]);
 	}
-}, d = class {
-	render(e, t, n) {
-		if (typeof t == "function") return t(e, n);
-		if (typeof t == "string") return t.replace(/{{(\w+)}}/g, (t, r) => {
-			let i = e[r];
-			return n ? n(String(i)) : String(i);
-		});
-		let r = Object.values(e).join(" ");
-		return n ? n(r) : r;
-	}
-}, f = /* @__PURE__ */ t({ DomComponent: () => p }), p = /* @__PURE__ */ function(e) {
-	return e.SEARCH = "s", e.CONTENT = "c", e.ITEMS = "i", e.PAGINATION = "p", e;
-}({}), m = /* @__PURE__ */ t({
-	DEFAULT_CACHE_MAX_SIZE: () => 50,
-	DEFAULT_CACHE_TTL: () => 300,
-	DEFAULT_CSS_CLASSES: () => v,
-	DEFAULT_DEBOUNCE_TIME: () => 500,
-	DEFAULT_DEVELOPMENT_MODE: () => !1,
-	DEFAULT_HIGHLIGHT_ENABLED: () => !1,
-	DEFAULT_ITEMS_PER_PAGE: () => 10,
-	DEFAULT_THEME: () => g,
-	DEFAULT_TIME_HIDDEN_RESULTS: () => 200,
-	DEFAULT_TRANSLATIONS: () => _,
-	DEFAULT_Z_INDEX: () => h,
-	DOM_ORDERS: () => y,
-	FIRST_PAGE: () => 1,
-	NO_SELECTION: () => -1,
-	SORT_ASC: () => -1,
-	SORT_DESC: () => 1,
-	SORT_ORDER: () => "asc"
-}), h = 1e3, g = "adaptative", _ = {
-	ariaLabel: "Filtrar por Búsqueda",
-	searchPlaceholder: "Ingrese palabra clave...",
-	noResults: "No se encontraron resultados",
-	loading: "Buscando...",
-	pagination: "{{to}} de {{total}}",
-	noIntersectionObserver: "IntersectionObserver no está disponible. Scroll infinito no funcionará en este entorno."
-}, v = {
-	searchContainer: "input-search",
-	itemsContainer: "items-search",
-	paginationContainer: "index-search",
-	paginationList: "pagination",
-	item: "items"
-}, y = {
-	SEARCH_ITEMS_PAGINATION: "sip",
-	SEARCH_CONTENT_ITEMS_PAGINATION: "scip"
-}, b = class {
-	constructor(e, t, n) {
-		this.body = e, this.uniqueClassNameFn = t, this.timeHiddenResults = n, this.visibility = new u({
-			panel: () => this.body.contentPaginationItems,
-			control: () => this.body.inputSearch,
-			listbox: () => this.body.renderItems,
-			hideDelayMs: this.timeHiddenResults
-		});
-	}
-	setTheme(e) {
-		let t = this.body.content;
-		if (!t) return this;
-		let n = Array.from(t.classList).find((e) => e.startsWith("theme-"));
-		return n && t.classList.remove(n), e && e !== "default" && t.classList.add(`theme-${e}`), this;
-	}
-	getUniqueClassName(e) {
-		return this.uniqueClassNameFn(e);
-	}
-	#e(e, t = "") {
-		let n = e.trim().split(/\s+/), r = t.trim().split(/\s+/), i = new Set([...n, ...r]);
-		return Array.from(i).join(" ");
-	}
-	contentSearch() {
-		if (this.body.contentSearch) return this.body.contentSearch;
-		let e = this.body.content, t = e?.querySelector(".input-search"), n = r({
-			element: t,
-			className: this.#e(`input-search ${this.getUniqueClassName("input-search")}`, t?.className),
-			...t ? {} : { element: "div" }
-		});
-		return t || e?.appendChild(n), this.body.contentSearch = n, n;
-	}
-	renderSearch({ onInput: e, debounceTime: t, placeholder: n, ariaLabel: i }) {
-		if (this.body.inputSearch) return this.body.inputSearch;
-		let a = this.body.contentSearch, o = a?.querySelector(".filter-search"), s, c = {
-			element: o,
-			type: "search",
-			id: this.getUniqueClassName("input-search"),
-			placeholder: n || "Ingrese palabra clave...",
-			className: this.#e(`${this.getUniqueClassName("filter-search")}`, o?.className),
-			attributes: {
-				"aria-label": i || "Filtrar por Búsqueda",
-				role: "combobox",
-				"aria-expanded": "false",
-				"aria-haspopup": "listbox",
-				"aria-autocomplete": "list",
-				"aria-controls": this.getUniqueClassName("items-search")
-			},
-			event: { input: (n) => {
-				let r = n.target.value.trim().toLowerCase();
-				clearTimeout(s), s = setTimeout(() => {
-					e && e(r, n instanceof Event);
-				}, t);
-			} },
-			...o ? {} : {
-				element: "input",
-				name: this.getUniqueClassName("filterSearch")
-			}
-		};
-		return o = r(c), c.element === "input" && a && a.appendChild(o), this.body.inputSearch = o, o;
-	}
-	renderItems({ zIndex: e = 999, ready: t }) {
-		if (this.body.renderItems) return this.body.renderItems;
-		this.body.contentPaginationItems || this.renderContentPaginationItems({ ready: t });
-		let n = this.body.contentPaginationItems, i = n?.querySelector(".items-search"), a = r({
-			element: i,
-			className: this.#e(`items-search scroll-personalize ${this.getUniqueClassName("items-search")}`, i?.className),
-			attributes: {
-				"aria-label": "Resultados de búsqueda",
-				role: "listbox",
-				"aria-hidden": "true"
-			},
-			style: { zIndex: e },
-			...i ? {} : {
-				element: "ul",
-				id: this.getUniqueClassName("items-search")
-			}
-		});
-		return !i && n && n.appendChild(a), this.body.renderItems = a, a;
-	}
-	renderPagination({ ready: e }) {
-		this.body.contentPaginationItems || this.renderContentPaginationItems({ ready: e });
-		let t = this.body.contentPaginationItems, n = t?.querySelector(".pagination-items"), i = r({
-			element: n,
-			className: this.#e("pagination-items", n?.className),
-			attributes: {
-				role: "status",
-				"aria-live": "polite"
-			},
-			child: this.renderCounter(),
-			...n ? {} : { element: "div" }
-		});
-		return !n && t && t.appendChild(i), this.body.paginationItems = i, i;
-	}
-	renderCounter() {
-		if (this.body.counterItems) return this.body.counterItems;
-		let e = this.body.contentPaginationItems?.querySelector(".items-counter"), t = r({
-			element: e,
-			className: this.#e("items-counter", e?.className),
-			...e ? {} : { element: "div" }
-		});
-		return this.body.counterItems = t, t;
-	}
-	appendItems(e, t, n = _.noResults, i, a = !1, o) {
-		let s = this.body.renderItems;
-		if (!s) return !1;
-		a && (s.innerHTML = "");
-		let c = {
-			element: "li",
-			className: "items",
-			tabindex: "0",
-			attributes: { role: "option" }
-		};
-		if (s.children.length === 0 && (!e || e.length === 0)) return c.textContent = n, s.appendChild(r(c)), !1;
-		let l = this.body.renderItems?.children.length, u = l ? l - 1 : 0, f = document.createDocumentFragment(), p = new d();
-		return e.forEach((e) => {
-			c.id = this.getUniqueClassName(`items-${u++}`);
-			let n = r(c);
-			n.innerHTML = p.render(e, t, o), f.appendChild(n);
-		}), s.appendChild(f), i.emit("appendItems", {
-			items: e,
-			content: s
-		}), !0;
-	}
-	updateCounter(e) {
-		if (!this.body.counterItems) return;
-		let t = this.body.counterItems;
-		e.textPagination ||= _.pagination;
-		let { textPagination: n, ...r } = e;
-		if (t && n) {
-			let e = n;
-			Object.entries(r).forEach(([t, n]) => {
-				e = e.replace(`{{${t}}}`, String(n));
-			}), t.textContent = e;
-		}
-	}
-	renderByDom(e, t) {
-		let n = {
-			[p.SEARCH]: () => {
-				this.contentSearch(), this.renderSearch({ ...t.search });
-			},
-			[p.CONTENT]: () => this.renderContentPaginationItems({ ...t.renderPaginationItems }),
-			[p.ITEMS]: () => this.renderItems({ ...t.renderPaginationItems }),
-			[p.PAGINATION]: () => this.renderPagination({ ...t.renderPaginationItems })
-		}, r = e.split(""), i = r.filter((e) => "sc".includes(e)).join(""), a = r.filter((e) => "ip".includes(e)).join("");
-		for (let e of `${i}${a}`) n[e] && n[e]();
-	}
-	showLoading(e) {
-		if (!this.body.renderItems) return;
-		let t = r({
-			element: "div",
-			className: "search-loading",
-			children: [{
-				element: "div",
-				className: "spinner"
-			}, {
-				element: "p",
-				textContent: e
-			}]
-		});
-		this.body.renderItems.innerHTML = t.outerHTML;
-	}
-	renderContentPaginationItems({ ready: e }) {
-		if (this.body.contentPaginationItems) return this.body.contentPaginationItems;
-		let t = this.body.content, n = t?.querySelector(".content-pagination-items"), i = r({
-			element: n,
-			className: this.#e(`content-pagination-items ${this.getUniqueClassName("content-pagination-items")} content-pagination-hidden`, n?.className),
-			hidden: !0,
-			...n ? {} : { element: "div" }
-		});
-		return n || t?.appendChild(i), e && e(), this.body.contentPaginationItems = i, i;
-	}
-	destroy() {
-		this.visibility.destroy(), this.body.contentSearch = void 0, this.body.inputSearch = void 0, this.body.renderItems = void 0, this.body.paginationItems = void 0, this.body.contentPaginationItems = void 0;
-	}
-}, x = class {
-	isExtractData(e) {
-		let t = e.querySelectorAll(".items");
-		return t.length === 0 ? null : Array.from(t).map((e) => {
-			let t = {};
-			return Array.from(e.attributes).forEach((e) => {
-				e.name.startsWith("data-") && (t[e.name.replace("data-", "")] = e.value.trim());
-			}), t.children = e.innerHTML.trim(), t;
-		});
-	}
-	search(e, t, n, r) {
-		if (e === "" || !e) return t;
-		let i = t.filter((t) => this.#e(t).some((t) => this.#t(String(t)).includes(this.#t(e))));
-		return n && i.sort((e, t) => {
-			let i = e[n], a = t[n];
-			return i < a ? r === "asc" ? -1 : 1 : i > a ? r === "asc" ? 1 : -1 : 0;
-		}), i;
-	}
-	#e(e) {
-		return typeof e != "object" || !e ? [String(e)] : Object.values(e).flatMap((e) => this.#e(e));
-	}
-	#t(e) {
-		return e.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-	}
-}, S = class {
-	constructor(e, t) {
-		this.defaultTimeout = 3e4, this.errorHandler = e, this.responseAdapter = t;
-	}
-	async search(e, t, n, r, i) {
-		t.body = {
-			itemsPerPage: r,
-			...t.body,
-			page: n,
-			searchTerm: e
-		};
-		let o = await this.executeFetch(t, i), s = this.responseAdapter, c = s ? s(o) : o;
-		return (!c || typeof c != "object" || !Array.isArray(c.data)) && this.errorHandler.throwCustomError(a.EMPTY_RESPONSE, {
-			context: "empty_response",
-			url: t.url
-		}), {
-			data: c.data,
-			countPage: c.countPage
-		};
-	}
-	#e(e) {
-		this.errorHandler.validateRequired(e.url, "url", a.FETCH_URL_REQUIRED), this.errorHandler.validateRequired(e.method, "method", a.FETCH_URL_REQUIRED), this.errorHandler.validateType(e.method, "string", "method", a.FETCH_URL_REQUIRED);
-		let t = [
-			"GET",
-			"POST",
-			"PUT",
-			"DELETE",
-			"PATCH"
-		];
-		t.includes(e.method.toUpperCase()) || this.errorHandler.throwCustomError(a.FETCH_FAILED, {
-			context: "invalid_http_method",
-			providedMethod: e.method,
-			validMethods: t
-		});
-	}
-	#t(e) {
-		let t = new Headers(e.headers || {});
-		return e.method.toUpperCase() !== "GET" && e.body && (t.has("Content-Type") || t.set("Content-Type", "application/json")), t;
-	}
-	#n(e, t) {
-		if (!(e.method.toUpperCase() === "GET" || !e.body)) return this.errorHandler.validateType(e.body, "object", "body", a.INVALID_DATA_FORMAT), e.body instanceof FormData ? e.body : t.get("Content-Type")?.includes("application/x-www-form-urlencoded") ? new URLSearchParams(e.body) : JSON.stringify(e.body);
-	}
-	#r(e, t, n) {
-		if (e instanceof Error && e.name === "AbortError" && this.errorHandler.throwCustomError(a.NETWORK_ERROR, {
-			context: "request_timeout",
-			url: t,
-			timeout: n
-		}), e instanceof TypeError && e.message.includes("fetch") && this.errorHandler.throwCustomError(a.NETWORK_ERROR, {
-			context: "network_error",
-			url: t,
-			originalError: e
-		}), e instanceof o) throw e;
-		this.errorHandler.throwCustomError(a.FETCH_FAILED, {
-			context: "unknown_error",
-			url: t,
-			originalError: e
-		});
-	}
-	async executeFetch(e, t) {
-		try {
-			this.#e(e);
-			let n = new AbortController(), r = setTimeout(() => n.abort(), e.timeout || this.defaultTimeout), i = t ? AbortSignal.any([t, n.signal]) : n.signal, o = this.#t(e), s = this.#n(e, o), c = await fetch(e.url, {
-				method: e.method,
-				headers: o,
-				body: s,
-				signal: i
-			});
-			clearTimeout(r), c.ok || this.errorHandler.throwCustomError(a.FETCH_FAILED, {
-				context: "http_error",
-				status: c.status,
-				statusText: c.statusText,
-				url: e.url
-			});
-			let l;
-			try {
-				l = await c.json();
-			} catch (t) {
-				this.errorHandler.throwCustomError(a.INVALID_DATA_FORMAT, {
-					context: "json_parse_error",
-					url: e.url,
-					originalError: t
-				});
-			}
-			return l || this.errorHandler.throwCustomError(a.EMPTY_RESPONSE, {
-				context: "empty_response",
-				url: e.url
-			}), e.success && e.success(l, null), l;
-		} catch (t) {
-			this.#r(t, e.url, e.timeout || this.defaultTimeout);
-		}
-	}
 };
 //#endregion
-export { m as Constants, a as ErrorCode, s as ErrorHandler, c as EventEmitter, i as LRUCache, l as Pagination, n as Search, o as SearchError, b as SearchRenderer, x as SearchingLocal, S as SearchingServer, f as Types, r as createElement };
+export { p as Constants, a as ErrorCode, s as ErrorHandler, c as EventEmitter, i as LRUCache, l as Pagination, n as Search, o as SearchError, y as SearchRenderer, b as SearchingLocal, x as SearchingServer, d as Types, S as VisibilityManager, r as createElement };
