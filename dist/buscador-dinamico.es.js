@@ -50,14 +50,16 @@ var e = Object.defineProperty, t = (t, n) => {
 					ariaLabel: this.t.ariaLabel
 				}
 			}), this.visibility = new S({
+				parent: () => this.renderer.body.content,
 				panel: () => this.renderer.body.contentPaginationItems,
 				control: () => this.renderer.body.inputSearch,
 				listbox: () => this.renderer.body.renderItems,
 				hideDelayMs: this.renderer.timeHiddenResults,
-				hooks: { onClosed: (e) => {
+				hooks: { onClosed: async (e) => {
 					if (e === "blur" || e === "select") {
+						await this.draw("");
 						let e = this.renderer.body.inputSearch;
-						e && (e.value = ""), e?.blur(), this.draw("");
+						e && (e.value = ""), e?.blur();
 					}
 				} }
 			}), this.setupEventDelegation(), this.draw(this.searchTerm), this.events.emit("init", {
@@ -198,15 +200,16 @@ var e = Object.defineProperty, t = (t, n) => {
 		if (this._destroyed) return this;
 		let e = this.renderer.body.content, t = this.renderer.body.renderItems, n = this.renderer.body.inputSearch;
 		return !e || !t || !n ? this : (this.boundFocusClickOutSide = (t) => {
+			console.log("Evento 1");
 			let n = t.target;
 			n && e.contains(n) || this.selectingItem || this._destroyed || (this.visibility?.close({
 				reason: "blur",
 				immediate: !0
 			}), document.removeEventListener("click", this.boundFocusClickOutSide));
 		}, this.boundFocusInHandler = (e) => {
-			e.target === n && ((t?.querySelectorAll(".items").length || 0) > 0 && this.visibility?.open("focus"), document.addEventListener("click", this.boundFocusClickOutSide));
+			console.log("Evento 2"), e.target === n && ((t?.querySelectorAll(".items").length || 0) > 0 && this.visibility?.open("focus"), document.addEventListener("click", this.boundFocusClickOutSide));
 		}, e.addEventListener("focusin", this.boundFocusInHandler), this.boundClickHandler = (e) => {
-			if (this.events.listenerCount("itemSelected") === 0 || !t) return;
+			if (console.log("Evento 3"), this.events.listenerCount("itemSelected") === 0 || !t) return;
 			let n = e.target.closest(".items"), r = t.querySelectorAll(".items");
 			n && (this.selectingItem = !0, this.selectedIndex = Array.from(r).indexOf(n), this.#u(r), this.#d(n), this.visibility?.close({
 				reason: "blur",
@@ -971,6 +974,7 @@ var i = class {
 	#l = !1;
 	constructor(e) {
 		this.#e = {
+			parent: e.parent,
 			panel: e.panel,
 			control: e.control ?? (() => null),
 			listbox: e.listbox ?? (() => null),
@@ -1065,20 +1069,28 @@ var i = class {
 		e.classList.toggle("content-pagination-visible", t), e.classList.toggle("content-pagination-hidden", !t), t ? e.removeAttribute("hidden") : this.#t === "closed" && e.setAttribute("hidden", "true"), this.#e.control?.()?.setAttribute("aria-expanded", String(t)), this.#e.listbox?.()?.setAttribute("aria-hidden", String(!t));
 	}
 	#b() {
-		let e = this.#e.panel();
-		!e || this.#c.length > 0 || (this.#x(e, "pointerdown", () => {
-			this.#a = !0, this.stickForInteraction();
+		let e = this.#e.panel(), t = this.#e.parent();
+		!e || !t || this.#c.length > 0 || (this.#x(t, "keydown", (e) => {
+			console.log("Evento2 1");
+			let t = e;
+			if (t.key === "Escape" && t.key === "Escape") {
+				this.close({ reason: "blur" });
+				return;
+			}
+		}), this.#x(e, "pointerdown", () => {
+			console.log("Evento2 2"), this.#a = !0, this.stickForInteraction();
 		}), this.#x(e, "pointermove", () => {
-			this.#a = !0, this.stickForInteraction();
+			console.log("Evento2 3"), this.#a = !0, this.stickForInteraction();
 		}), this.#x(e, "pointerenter", () => {
-			this.#a = !0;
+			console.log("Evento2 4"), this.#a = !0;
 		}), this.#x(e, "pointerleave", () => {
-			this.#a = !1;
+			console.log("Evento2 5"), this.#a = !1;
 		}), this.#x(e, "touchstart", () => {
-			this.#a = !0, this.stickForInteraction();
+			console.log("Evento2 6"), this.#a = !0, this.stickForInteraction();
 		}, { passive: !0 }), this.#x(e, "focusin", () => {
-			this.#o = !0;
+			console.log("Evento2 7"), this.#o = !0;
 		}), this.#x(e, "focusout", ((t) => {
+			console.log("Evento2 8");
 			let n = t.relatedTarget;
 			this.#o = !!n && e.contains(n);
 		})));
