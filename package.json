@@ -5,6 +5,10 @@
   "type": "commonjs",
   "license": "MIT",
   "author": "JhoendryB",
+  "funding": {
+    "type": "binance",
+    "url": "https://app.binance.com/uni-qr/AJ5U9KbQ"
+  },
   "dependencies": {
     "bootstrap": "^5.3.3"
   },

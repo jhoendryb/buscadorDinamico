@@ -55,6 +55,7 @@ Una clase TypeScript flexible y moderna para crear buscadores dinámicos con sop
 - [Troubleshooting](#troubleshooting)
 - [Migración desde XMLHttpRequest](#migración-desde-xmlhttprequest)
 - [Changelog](#changelog)
+- [Donaciones](#donaciones)
 - [Licencia](#licencia)
 
 ## Instalación
@@ -384,7 +385,7 @@ const search = new Search({
 ### Descripción Detallada de Parámetros
 
 | Parámetro | Tipo | Default | Descripción |
-|-----------|------|---------|-------------|
+| ----------- | ------ | --------- | ------------- |
 | `element` | String | - | Selector CSS del contenedor (requerido) |
 | `theme` | String | `"adaptative"` | Nombre del tema CSS (`adaptative`, `clean-white`, `blue-black`, `onyx-black`, `forest-green`) |
 | `data` | Array | `[]` | Array de objetos para búsqueda local |
@@ -647,7 +648,7 @@ CSS de estilización personalizable:
 El componente incluye 5 temas predefinidos que puedes usar directamente:
 
 | Tema | Descripción |
-|------|-------------|
+| ------ | ------------- |
 | `adaptative` | **Tema por defecto**. Se adapta automáticamente al modo light/dark del sistema via atributo `data-theme` |
 | `clean-white` | Blanco limpio, bordes sutiles, azul para selección |
 | `blue-black` | Azul oscuro (#21213e), hover azul intenso |
@@ -937,7 +938,7 @@ fetch: {
 ### Lista Completa de Eventos
 
 | Evento | Cuándo se emite | Datos emitidos |
-|--------|----------------|----------------|
+| -------- | ---------------- | ---------------- |
 | `init` | Al inicializar el componente | `SearchEventInit` |
 | `search` | Al realizar una búsqueda | `SearchEventData` |
 | `resultsCleared` | Al cambiar término y limpiar resultados | `ResultsClearedEventData` |
@@ -1450,7 +1451,7 @@ El detector se configura automáticamente al inicializar el componente. No requi
 ### Teclas Disponibles
 
 | Tecla | Acción |
-|-------|--------|
+| ------- | -------- |
 | ArrowDown | Navegar al siguiente item |
 | ArrowUp | Navegar al item anterior |
 | Enter | Seleccionar item destacado |
@@ -1712,7 +1713,7 @@ La búsqueda ignora tildes y diacriticos automáticamente:
 ### Traducciones Disponibles
 
 | Clave | Default | Descripción |
-|-------|---------|-------------|
+| ------- | --------- | ------------- |
 | `searchPlaceholder` | "Ingrese palabra clave..." | Placeholder del input |
 | `ariaLabel` | "Filtrar por Búsqueda" | Label del input (aria-label) |
 | `noResults` | "No se encontraron resultados" | Mensaje sin resultados |
@@ -1878,7 +1879,7 @@ El componente incluye un sistema robusto de gestión de errores que proporciona 
 ### Códigos de Error
 
 | Código | Descripción | Solución |
-|--------|-------------|----------|
+| -------- | ------------- | ---------- |
 | SEARCH_001 | El parámetro 'element' es requerido | Proporciona el selector CSS del contenedor |
 | SEARCH_002 | El parámetro 'element' debe ser un string | Usa un selector CSS válido |
 | SEARCH_003 | El parámetro 'fetch.url' es requerido | Configura la URL del endpoint |
@@ -1955,7 +1956,7 @@ try {
 ### Parámetros Esperados por el Servidor
 
 | Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
+| ----------- | ------ | ------------- |
 | `searchTerm` | String | Término de búsqueda |
 | `page` | Number | Página actual |
 | `itemsPerPage` | Number | Items por página |
@@ -2790,7 +2791,7 @@ El componente implementa el patrón [ARIA combobox](https://www.w3.org/WAI/ARIA/
 ### Referencia de Atributos ARIA
 
 | Elemento | Atributo | Valor | Descripción |
-|----------|----------|-------|-------------|
+| ---------- | ---------- | ------- | ------------- |
 | `<input>` | `type` | `search` | Habilita el botón de limpieza nativo del navegador |
 | `<input>` | `role` | `combobox` | Indica que es un control de autocompletado |
 | `<input>` | `aria-expanded` | `true` / `false` | Estado del panel — sincronizado por VisibilityManager |
@@ -3000,7 +3001,7 @@ async fetch(config) {
 ### Diferencias entre XHR y Fetch
 
 | Aspecto | XMLHttpRequest | Fetch API |
-|---------|----------------|-----------|
+| --------- | ---------------- | ----------- |
 | API | Callbacks | Promises |
 | Timeout | Manual | AbortController |
 | Streams | Limitado | Nativo |
@@ -3271,6 +3272,16 @@ Para navegadores antiguos, usa un polyfill:
 - XMLHttpRequest para AJAX
 - Mixins para lógica de búsqueda
 - Sistema de eventos básico
+
+## 💰 Donaciones
+
+Si este proyecto te ha sido útil, considera hacer una donación para apoyar el desarrollo continuo.
+
+**Binance Pay:**
+
+- [Donar con Binance Pay](https://app.binance.com/uni-qr/AJ5U9KbQ)
+
+¡Gracias por tu apoyo! 🙏
 
 ## Licencia
 
