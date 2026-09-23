@@ -1,6 +1,6 @@
 /**
  * @license MIT
- * Copyright (c) 2024 JhoendryB
+ * Copyright (c) 2026 JhoendryB
  */
 
 import {
