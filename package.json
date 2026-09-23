@@ -1,16 +1,19 @@
 {
-  "name": "buscador-dinamico",
+  "name": "@jhoendryb/buscador-dinamico",
   "version": "1.0.0",
   "description": "Buscador dinámico",
-  "type": "commonjs",
+  "main": "./dist/buscador-dinamico.umd.js",
+  "module": "./dist/buscador-dinamico.es.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jhoendryb/buscadorDinamico"
+  },
   "license": "MIT",
   "author": "JhoendryB",
   "funding": {
     "type": "binance",
     "url": "https://app.binance.com/uni-qr/AJ5U9KbQ"
-  },
-  "dependencies": {
-    "bootstrap": "^5.3.3"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
@@ -38,5 +41,8 @@
     "src/css",
     "README.md",
     "LICENSE"
-  ]
+  ],
+  "dependencies": {
+    "@jhoendryb/buscador-dinamico": "^1.0.0"
+  }
 }

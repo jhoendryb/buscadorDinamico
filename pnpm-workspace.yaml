@@ -1,2 +1,4 @@
 allowBuilds:
   unrs-resolver: false
+minimumReleaseAgeExclude:
+  - '@jhoendryb/buscador-dinamico@1.0.0'
