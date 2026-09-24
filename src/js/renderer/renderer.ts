@@ -35,7 +35,7 @@ export class SearchRenderer {
         if (!content) return this;
 
         const existingThemeClass = Array.from(content.classList)
-            .find(cls => cls.startsWith('theme-'));
+            .find((cls: string) => cls.startsWith('theme-'));
 
         if (existingThemeClass) {
             content.classList.remove(existingThemeClass);

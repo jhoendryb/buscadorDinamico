@@ -16,8 +16,8 @@
 
 <pre data-lang="jsx"><code>'use client'; // Next.js App Router: marca el componente como cliente
 import { useEffect, useRef } from 'react';
-import { Search } from 'buscador-dinamico';
-import 'buscador-dinamico/css/buscador-dinamico.css';
+import { Search } from '@jhoendryb/buscador-dinamico';
+import '@jhoendryb/buscador-dinamico/dist/css/buscador-dinamico.css';
 
 export default function SearchComponent({ data }) {
     const searchRef = useRef(null);
@@ -45,8 +45,8 @@ export default function SearchComponent({ data }) {
 
 &lt;script setup&gt;
 import { onMounted, onUnmounted } from 'vue';
-import { Search } from 'buscador-dinamico';
-import 'buscador-dinamico/css/buscador-dinamico.css';
+import { Search } from '@jhoendryb/buscador-dinamico';
+import '@jhoendryb/buscador-dinamico/dist/css/buscador-dinamico.css';
 
 const props = defineProps({ data: Array });
 let search = null;
@@ -66,8 +66,8 @@ onUnmounted(() => search?.destroy());
 
 <p>Si no usas SSR, puedes inicializar directamente:</p>
 
-<pre data-lang="javascript"><code>import { Search } from 'buscador-dinamico';
-import 'buscador-dinamico/css/buscador-dinamico.css';
+<pre data-lang="javascript"><code>import { Search } from '@jhoendryb/buscador-dinamico';
+import '@jhoendryb/buscador-dinamico/dist/css/buscador-dinamico.css';
 
 new Search({
     element: '#my-search',

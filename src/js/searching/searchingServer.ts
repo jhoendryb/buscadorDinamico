@@ -92,7 +92,7 @@ export class SearchingServer {
             return JSON.stringify(config.body);
         }
     }
-    #handleFetchError(error: unknown, url: string, timeout: number): never {
+    #handleFetchError(error: unknown, url: string, timeout: number): void {
         if (error instanceof Error && error.name === 'AbortError') {
             this.errorHandler.throwCustomError(ErrorCode.NETWORK_ERROR, {
                 context: 'request_timeout',

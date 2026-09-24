@@ -1,4 +1,4 @@
-# Search Component
+# Search Component [![npm version](https://img.shields.io/npm/v/%40jhoendryb%2Fbuscador-dinamico.svg)](https://www.npmjs.com/package/@jhoendryb/buscador-dinamico) [![npm downloads](https://img.shields.io/npm/dm/%40jhoendryb%2Fbuscador-dinamico.svg)](https://www.npmjs.com/package/@jhoendryb/buscador-dinamico)
 
 Una clase TypeScript flexible y moderna para crear buscadores dinámicos con soporte para paginación, scroll infinito, búsqueda en tiempo real, navegación por teclado, temas CSS predefinidos y gestión de errores centralizada. Compatible con datos locales y peticiones AJAX al servidor usando Fetch API.
 
@@ -63,9 +63,9 @@ Una clase TypeScript flexible y moderna para crear buscadores dinámicos con sop
 ### Instalación con npm/pnpm
 
 ```bash
-npm install buscador-dinamico
+npm install @jhoendryb/buscador-dinamico
 # o
-pnpm install buscador-dinamico
+pnpm install @jhoendryb/buscador-dinamico
 ```
 
 ### Instalación Manual
@@ -169,6 +169,7 @@ buscadorDinamico/
 │       ├── i18n.html
 │       ├── installation.html
 │       ├── introduction.html
+│       ├── ssr.html
 │       ├── templates.html
 │       └── typescript.html
 ├── pnpm-lock.yaml
@@ -204,6 +205,9 @@ buscadorDinamico/
 │   │   │   ├── index.ts            # Barrel export
 │   │   │   ├── renderer.ts         # SearchRenderer
 │   │   │   └── templateEngine.ts   # Motor de templates
+│   │   ├── visibility/
+│   │   │   ├── index.ts            # Barrel export
+│   │   │   └── visibilityManager.ts # FSM open/close del panel
 │   │   └── utils/                  # Utilidades (deprecadas)
 │   │       └── deprecated/
 │   │           ├── extraJson.js
@@ -244,10 +248,11 @@ buscadorDinamico/
 │       │   ├── eventEmitter.test.ts
 │       │   ├── pagination.test.ts
 │       │   ├── renderElement.test.ts
-│       │   ├── renderer.test.ts
-│       │   ├── searchingLocal.test.ts
-│       │   └── searchingServer.test.ts
-│       └── integration/            # Tests de integración
+│   │   ├── renderer.test.ts
+│   │   ├── searchingLocal.test.ts
+│   │   ├── searchingServer.test.ts
+│   │   └── visibilityManager.test.ts
+│   └── integration/            # Tests de integración
 ├── dist/                           # Build de producción
 │   ├── buscador-dinamico.es.js     # Módulo ES
 │   ├── buscador-dinamico.umd.js    # UMD (window.BuscadorDinamico)
@@ -273,6 +278,7 @@ El componente sigue una arquitectura orientada a objetos (OOP) con separación d
 - **SearchingServer**: Maneja la búsqueda por servidor usando Fetch API
 - **Pagination**: Gestiona la paginación y scroll infinito
 - **SearchRenderer**: Renderiza el DOM y maneja la visualización
+- **VisibilityManager**: Máquina de estados para abrir/cerrar el panel de resultados
 - **EventEmitter**: Sistema de eventos personalizado
 - **ErrorHandler**: Gestión centralizada de errores
 - **LRUCache**: Sistema de caché con política LRU y TTL
@@ -1191,20 +1197,20 @@ search.on('search', (data) => {
 
 **Retorna:** `EventEmitter<SearchEventMap>` para encadenamiento. Usa `search.events.off(eventName, callback)` para remover.
 
-### showLoading(loadingText?)
+### renderer.showLoading(loadingText?)
 
-Muestra el indicador de carga con un texto opcional.
+Muestra el indicador de carga con un texto opcional. Pertenece al renderer.
 
 ```javascript
-search.showLoading();                    // Muestra "Buscando..."
-search.showLoading('Cargando datos...'); // Texto personalizado
+search.renderer.showLoading();                    // Muestra "Buscando..."
+search.renderer.showLoading('Cargando datos...'); // Texto personalizado
 ```
 
 **Parámetros:**
 
 - `loadingText` (string, opcional): Texto a mostrar durante la carga
 
-**Retorna:** Instancia de Search para encadenamiento
+**Retorna:** void
 
 ### getCacheKey(searchTerm, page)
 
@@ -1822,9 +1828,6 @@ console.log(search.cache.stats);
 ### Otros Métodos de Caché
 
 ```javascript
-// Obtener o cargar un valor (patrón getOrFetch)
-const result = await search.cache.getOrFetch(key, fetchFn, onMissFn);
-
 // Eliminar un elemento por clave
 search.cache.delete(key);
 
@@ -2403,11 +2406,10 @@ search.renderer.updateCounter({
     textPagination: '{{from}} - {{to}} de {{total}}'
 });
 
-// Mostrar/ocultar resultados manualmente
-search.renderer.showResults();
-search.renderer.hideResults();
-search.renderer.toggleResults();
-search.renderer.hideResultsWithDelay(300); // Con delay
+// Mostrar/ocultar resultados (VisibilityManager)
+search.renderer.visibility.open('programmatic');  // Abrir panel
+search.renderer.visibility.close({ reason: 'blur' }); // Cerrar panel
+search.renderer.visibility.toggle();               // Alternar
 
 // Destruir el renderizador (libera referencias del DOM)
 search.renderer.destroy();
@@ -3064,10 +3066,15 @@ Para navegadores antiguos, usa un polyfill:
 
 ## Changelog
 
-### Versión 2.5.0 (Actual)
+Historial de versiones y cambios del componente basado en el historial real del repositorio.
+
+### v1.0.0 (Actual) — VisibilityManager + ARIA + Event Delegation
+
+*Septiembre 2026*
 
 **Añadido:**
 
+- Publicación del paquete `@jhoendryb/buscador-dinamico` v1.0.0 en npm
 - `VisibilityManager` — máquina de estados finita (FSM) para gestión de visibilidad del panel de resultados
   - Estados: `closed → opening → open → closing → closed`
   - Patrón generation-counter para evitar race conditions con timers
@@ -3075,17 +3082,26 @@ Para navegadores antiguos, usa un polyfill:
   - `close({immediate: true})` para cierre síncrono al seleccionar items
   - `cancelPendingClose()` para revertir cierres en curso
   - `refresh()` para re-sincronizar DOM desde el estado actual
+- `setupEventDelegation()` — delegación centralizada de eventos en el contenedor `<search>` (reemplaza los manejos separados de teclado y click)
+  - `focusin` en el input abre el panel
+  - `click` fuera del contenedor cierra el panel
+  - `click` en un item selecciona y cierra
+  - `keydown` para navegación por teclado (flechas + Enter)
 - `<search>` como elemento semántico HTML5 para el contenedor del input (landmark)
 - Patrón ARIA combobox completo en el `<input>`:
   - `role="combobox"`, `aria-expanded`, `aria-haspopup="listbox"`, `aria-autocomplete="list"`, `aria-controls`
-- `type="search"` en el `<input>` (antes `type="text"`) — habilita botón de limpieza nativo
+- `type="search"` en el `<input>` — habilita botón de limpieza nativo
 - `<span class="search-icon" aria-hidden="true">` — icono oculto de lectores de pantalla
 - `aria-hidden` dinámico en el `<ul>` (listbox) — sincronizado por VisibilityManager
 - `aria-label="Resultados de búsqueda"` en el `<ul>` (listbox)
 - `aria-activedescendant` en el `<ul>` para item destacado por teclado
 - `<li class="scroll-sentinel" role="presentation" aria-hidden="true">` — sentinel de scroll semántico
 - `role="status"` y `aria-live="polite"` en el contenedor del contador
-- Propiedad pública `renderer.visibility` para acceder al VisibilityManager desde el exterior
+- Propiedad pública `renderer.visibility` para acceder al VisibilityManager
+- Navegación táctil para dispositivos móviles (scroll con dedo)
+- Soporte para `prefers-reduced-motion` — desactiva transiciones en el panel
+- Traducción `ariaLabel` — label accesible del input, default `"Filtrar por Búsqueda"`
+- Click outside — detecta clics fuera del contenedor para cerrar el panel (`boundFocusClickOutSide`)
 
 **Mejorado:**
 
@@ -3093,185 +3109,155 @@ Para navegadores antiguos, usa un polyfill:
 - Items renderizados con `role="option"` y IDs únicos para `aria-activedescendant`
 - `aria-expanded` del input se sincroniza automáticamente con el estado del panel
 - Scroll sentinel usa `<li>` en lugar de `<div>` para validez semántica dentro de `<ul>`
+- Visibilidad del panel ahora es gestionada por `VisibilityManager` (FSM) en lugar de timers sueltos
+- Navegación por teclado centralizada en un solo handler delegado
 
-### Versión 2.4.0
+### v0.9.0 — Sort + Validación + i18n
+
+*Agosto 2026*
 
 **Añadido:**
 
-- `SearchEventMap` — Mapa tipado de eventos que asocia cada nombre de evento con su tipo de datos
-- `EventEmitter<T>` genérico con type-safety completo (`EventEmitter<SearchEventMap>`)
-- `DomComponent` enum para controlar el orden de renderizado (`SEARCH`, `CONTENT`, `ITEMS`, `PAGINATION`)
-- `SearchResult` interface `{ data: Record<string, any>[]; countPage?: number }`
-- `PaginationRange` interface `{ from: number; to: number; total: number }`
-- Método `Pagination.getRange()` para obtener el rango actual de items visibles
-- Método `Pagination.getTotalPages()` para obtener el total de páginas
-- Método `Pagination.getTotalLoaded()` para obtener items cargados (scroll infinito)
-- Método `Pagination.loadNextPage()` para avanzar a la siguiente página
-- Método `Pagination.hasMorePages()` para verificar si hay más páginas
-- Método `EventEmitter.emitAsync()` para emitir eventos de forma asíncrona
-- Método `EventEmitter.getEventList()` para obtener lista detallada de eventos y listeners
-- Método `SearchRenderer.destroy()` para limpiar timeouts y referencias del DOM
-- Método `SearchRenderer.toggleResults()` para toggle de visibilidad de resultados
-- Método `SearchRenderer.hideResultsWithDelay(delay?)` para ocultar con delay configurable
-- Parámetro `loadingText` en `showLoading(text)` para texto personalizado de carga
-- Propiedad `LRUCache.stats` — estadísticas de caché (`hits`, `misses`, `evictions`)
-- Método `LRUCache.getOrFetch(key, fetch, onMiss?)` para obtener o cargar valores
-- Método `LRUCache.delete(key)` para eliminar un elemento específico
-- Método `LRUCache.size()` para obtener la cantidad de elementos en caché
-- Clave `pagination` en traducciones para personalizar el formato del contador
-- `ItemSelectedEventData.close` — método para cerrar resultados desde el evento
-- `SortChangeEventData` interface para evento de ordenamiento
-- `ItemHighlightedEventData` interface para evento de navegación por teclado
-- `AppendItemsEventData` interface para evento de adición de items
-- `ResultsClearedEventData` interface para evento de limpieza de resultados
-- `ErrorData` interface completa con `code`, `message`, `solution`, `context`
+- Método `sort(field, order?)` para ordenar datos por un campo específico
+- Método `clearSort()` para eliminar el orden y reiniciar a orden natural
+- Evento `sortChange` emitido al cambiar el ordenamiento
+- Validación de parámetros booleanos en el constructor
+- Clave `noIntersectionObserver` en traducciones para navegadores sin soporte
+- Sección SSR en la documentación
 
 **Mejorado:**
 
-- `Search.on()` ahora tipado con genéricos: `on<K extends keyof SearchEventMap>(...)` — el tipo de datos del callback se infiere automáticamente
-- `SearchRenderer.updateCounter()` acepta objeto `{ from, to, total, textPagination? }` (antes parámetros separados)
-- `EventEmitter` constructor acepta `ErrorHandler` opcional para logging de errores en callbacks
-- Manejo de errores en callbacks de eventos: errores individuales no afectan a otros listeners
-- Tema por defecto cambiado a `"adaptative"` (antes `"default"`)
-- Traducción por defecto `pagination: "{{to}} de {{total}}"` para el contador
+- Soporte de `showLoading(text)` con texto de carga personalizado
+- Validación de `itemsPerPage` con rango mínimo
 
-**Documentación:**
+### v0.8.0 — Temas CSS + Documentación V2
 
-- Documentación completa de `SearchEventMap` en sección TypeScript
-- Documentación de `DomComponent` enum y su uso en el parámetro `dom`
-- Documentación del `EventEmitter<T>` genérico con todos sus métodos
-- Documentación de `LRUCache.stats`, `getOrFetch()`, `delete()`, `size()`
-- Documentación de nuevos métodos de paginación: `getRange()`, `getTotalPages()`, `loadNextPage()`, `hasMorePages()`
-- Documentación de renderer APIs: `destroy()`, `toggleResults()`, `hideResultsWithDelay()`, `updateCounter()`
-- Documentación de `emitAsync()` y `getEventList()` en EventEmitter
-- Documentación de la clave `pagination` en internacionalización
-- Todos los tipos de datos de eventos ahora referencian sus interfaces TypeScript
-
-### Versión 2.3.0
+*Junio-Julio 2026*
 
 **Añadido:**
 
+- 5 temas CSS: `adaptative`, `clean-white`, `blue-black`, `onyx-black`, `forest-green`
+- Tema `adaptative` — se adapta automáticamente al tema del sistema con `prefers-color-scheme`
+- Sistema de temas modular con CSS variables por tema
+- Documentación V2 completa con arquitectura SPA y secciones HTML
+- GitHub Actions para despliegue automático de documentación
 - Parámetro `responseAdapter` para transformar respuestas del servidor personalizadas
-- Método `clear()` para resetear estado sin destruir la instancia
-- Evento `resultsCleared` emitido al cambiar término de búsqueda
-- Evento `searchComplete` emitido al completar búsqueda y renderizado
 - Búsqueda recursiva en objetos anidados (`flattenValues`)
 - Normalización Unicode para búsqueda con tildes/diacriticos
-- Protección contra condiciones de carrera en `draw()` (race condition guard)
-- Protección contra re-entrancy en `#loadMore()` (`isLoadingMore` guard)
-- Estilos de scrollbar cross-browser para Firefox (`scrollbar-width`, `scrollbar-color`)
-- `prefers-reduced-motion` ahora desactiva TODAS las transiciones/animaciones globalmente
+- Evento `resultsCleared` emitido al cambiar término de búsqueda
+- Evento `searchComplete` emitido al completar búsqueda y renderizado
+- Método `clear()` para resetear estado sin destruir la instancia
+- Protección contra condiciones de carrera en `draw()`
+- Protección contra re-entrancy en `#loadMore()`
+- Estilos de scrollbar cross-browser para Firefox
+- `prefers-reduced-motion` desactiva transiciones globalmente
 
 **Mejorado:**
 
-- `draw()` ahora retorna `Promise<Search>` (antes `Promise<void>`) para encadenamiento
-- `cache.has()` ahora refresca TTL al acceder (true LRU behavior)
-- `setItemsPerPage()` valida que el valor sea >= 1
-- `hideResults()` usa `timeHiddenResults` configurable (antes hardcodeado 200ms)
-- `destroy()` re-inicializa objetos en lugar de nullificarlos (previene null reference errors)
-- `destroy()` remueve event listeners por referencia (cleanup correcto)
-- Typo corregido: `firtsLoad` -> `firstLoad` en `renderer.appendItems()`
-- `#highlightText()` escapa caracteres especiales de regex para evitar errores
-- `setupEventDelegation()` almacena handlers en referencias bound para cleanup
-- ScrollObserver se reutiliza en lugar de recrearse en cada página
-- Sentinel de scroll se limpia individualmente antes de reconfigurar
+- `draw()` retorna `Promise<Search>`
+- `cache.has()` refresca TTL al acceder (true LRU)
+- `destroy()` re-inicializa objetos en lugar de nullificarlos
+- `#highlightText()` escapa caracteres especiales de regex
+- Typo corregido: `firtsLoad` → `firstLoad`
 
 **Corregido:**
 
-- `highlightText()` ahora escapa caracteres regex especiales (`(`, `+`, `[`, etc.)
-- Cache almacena `_data` completa en lugar de solo `data` (server mode)
-- `clearCacheByPrefix()` valida searchTerm vacío antes de iterar
-- `processInfiniteScroll()` ya no se llama desde `searchingServer` (manejado por `draw()`)
+- `highlightText()` escapa caracteres regex especiales
+- Cache almacena `_data` completa en server mode
+- `clearCacheByPrefix()` valida searchTerm vacío
+- `processInfiniteScroll()` ya no se llama desde searchingServer
 
-### Versión 2.2.0
+### v0.7.0 — TypeScript + Vite + Tests + Arquitectura Modular
+
+*Junio 2026*
 
 **Añadido:**
 
-- Resaltado de texto opcional para términos de búsqueda
-- Parámetro `highlightEnabled` para habilitar resaltado
-- Parámetro `highlightClass` para personalización CSS
-- Variables CSS `--search-highlight-bg-color` y `--search-highlight-text-color`
-- Enum `DomComponent` para mejor legibilidad en renderByDom
+- **Migración completa a TypeScript** — todos los módulos convertidos de JS a TS
+- **Sistema de build Vite** — output dual ES Module + UMD con tipos `.d.ts`
+- Extracción modular de 8 clases independientes:
+  - `SearchRenderer` — motor de renderizado DOM
+  - `Pagination` — paginación con scroll infinito
+  - `EventEmitter<T>` — sistema de eventos genérico
+  - `LRUCache` — caché LRU con TTL
+  - `SearchingLocal` — búsqueda en memoria
+  - `SearchingServer` — búsqueda remota vía Fetch API
+  - `ErrorHandler` — gestión centralizada de errores (14 códigos)
+  - `TemplateEngine` — motor de plantillas con interpolación
+- Infraestructura de testing con Jest + Babel
+- Unit tests para todos los módulos (app, cache, events, pagination, renderer, searchingLocal, searchingServer)
+- Migración de XMLHttpRequest a **Fetch API** con AbortController y timeout
+- `SearchEventMap` — mapa tipado de eventos con type-safety
+- `DomComponent` enum para orden de renderizado
+- Interfaces: `SearchResult`, `PaginationRange`, `SearchEventInit`, `SearchEventData`, `ErrorData`, `ResultsClearedEventData`, `AppendItemsEventData`
+- Métodos de paginación: `getRange()`, `getTotalPages()`, `getTotalLoaded()`, `loadNextPage()`, `hasMorePages()`
+- Métodos de EventEmitter: `emitAsync()`, `getEventList()`
+- Propiedad `LRUCache.stats` — estadísticas de caché (hits, misses, evictions)
+- Métodos de cache: `delete(key)`, `size()`, `clearCacheByPrefix(searchTerm)`
+- Clave `pagination` en traducciones para personalizar el contador
+- Soporte para múltiples instancias en la misma página
 
 **Mejorado:**
 
-- Refactorización del método `fetch` en searchingServer.ts (extraído a métodos privados)
-- Lógica mejorada en `setTheme` para cambio dinámico de temas
-- Constructor de EventEmitter ahora acepta parámetro opcional
-- Validación de parámetros extraída a método privado `#validateParameters`
+- `Search.on()` tipado con genéricos: `on<K extends keyof SearchEventMap>(...)`
+- `SearchRenderer.updateCounter()` acepta objeto `{ from, to, total, textPagination? }`
+- Manejo de errores en callbacks: errores individuales no afectan a otros listeners
+- Traducción por defecto `pagination: "{{to}} de {{total}}"`
+- Validación de parámetros con `SearchError` y códigos de error específicos
 
-**Corregido:**
+### v0.6.0 — Arquitectura Modular Inicial
 
-- Removido código comentado en `setupEventDelegation`
-- `DEFAULT_DEVELOPMENT_MODE` cambiado a `false` por defecto
-- Valor hardcodeado `max-height` reemplazado por variable CSS
-- Padding movido de colors.css a dimensions.css para mejor separación de responsabilidades
-- Inconsistencia en `selectedIndex` corregida usando constante `NO_SELECTION`
+*Mayo 2026*
 
-### Versión 2.1.0
+**Añadido:**
 
-**Nuevas características:**
+- Extracción de `renderElement.js` — helper para creación de DOM
+- Extracción de `searchngHandle.js` — lógica de búsqueda separada
+- Accesibilidad ARIA completada
+- Sistema de plantillas personalizables refactorizado
 
-- Temas CSS predefinidos (clean-white, blue-black, onyx-black, forest-green)
-- Propiedad `theme` para seleccionar tema desde configuración
-- 30+ variables CSS personalizables
-- Métodos de paginación: `prevPage()`, `goToPage()`, `firstPage()`, `lastPage()`, `getCurrentPage()`, `getPageItems()`, `setItemsPerPage()`
-- Métodos de EventEmitter: `once()`, `removeAllListeners()`, `listenerCount()`, `eventNames()`
-- Build con Vite (ES Module + UMD)
-- Tests unitarios con Jest
-- Función helper `createElement` para renderizado de DOM
-- Soporte para métodos HTTP: GET, POST, PUT, DELETE, PATCH
-- Validación de Content-Type automática (JSON, FormData, URL-encoded)
-- Soporte para `prefers-reduced-motion` en animaciones
+### v0.5.0 — Reescritura Search v3
 
-**Cambios:**
+*Marzo 2026*
 
-- `developmentMode` ahora es `true` por defecto (antes `false`)
-- `cacheTtlSeconds` ahora es `300` segundos por defecto (antes `60`)
-- Códigos de error actualizados y expandidos (SEARCH_001 a SEARCH_041)
-- Estructura de archivos reorganizada con barrel exports
-- CSS separado en 3 capas: core, theme, themes
+**Cambiado:**
 
-### Versión 2.0.0
+- Reescritura completa del motor de búsqueda (Search v3)
+- Archivado de versiones anteriores (`appOldv2.js`)
 
-**Nuevas características:**
+### v0.1.0 — Proyecto Inicial
 
-- Migración a TypeScript
-- Migración de XMLHttpRequest a Fetch API
-- Sistema de gestión de errores centralizado (ErrorHandler)
-- Clases SearchingLocal y SearchingServer (antes mixins)
-- Scroll infinito con Intersection Observer
-- Navegación por teclado
-- Templates personalizados
-- Internacionalización (i18n)
-- Sistema de caché LRU con TTL
-- Sistema de eventos mejorado
-- Timeout configurable con AbortController
+*Abril 2025*
 
-**Breaking changes:**
+**Añadido:**
 
-- Requiere TypeScript o transpilación
-- XMLHttpRequest reemplazado por Fetch API
-- Mixins reemplazados por clases
-- Nueva estructura de archivos
+- Búsqueda local en tiempo real con debounce configurable
+- Búsqueda remota vía XMLHttpRequest con soporte para JSON y FormData
+- Paginación por scroll infinito con Intersection Observer
+- Sistema de caché LRU con TTL configurable
+- Sistema de eventos personalizado
+- Navegación por teclado (flechas arriba/abajo, Enter)
+- Plantillas personalizables (string y funciones)
+- Sistema i18n con traducciones configurables
+- Gestión centralizada de errores con códigos específicos
+- Soporte para múltiples instancias en la misma página
 
-**Mejoras:**
+**Códigos de error:**
 
-- Mejor performance con caché
-- Mejor UX con scroll infinito
-- Mejor accesibilidad con ARIA
-- Mejor type safety con TypeScript
-- Mejor manejo de errores
-
-### Versión 1.0.0
-
-**Características iniciales:**
-
-- Búsqueda local y por servidor
-- Paginación
-- XMLHttpRequest para AJAX
-- Mixins para lógica de búsqueda
-- Sistema de eventos básico
+- `SEARCH_001` — element requerido
+- `SEARCH_002` — element debe ser string
+- `SEARCH_003` — fetch.url requerido en modo servidor
+- `SEARCH_004` — itemsPerPage debe ser número
+- `SEARCH_005` — itemsPerPage debe ser mayor a 0
+- `SEARCH_006` — tipo de parámetro inválido
+- `SEARCH_010` — elemento contenedor no encontrado
+- `SEARCH_011` — contenedor principal no encontrado
+- `SEARCH_020` — error de conexión al servidor
+- `SEARCH_021` — error al obtener datos del servidor
+- `SEARCH_030` — formato de datos inválido
+- `SEARCH_031` — respuesta del servidor vacía
+- `SEARCH_040` — error al inicializar el componente
+- `SEARCH_041` — error al renderizar el componente
 
 ## 💰 Donaciones
 

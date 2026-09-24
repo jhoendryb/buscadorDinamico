@@ -1,5 +1,5 @@
 
-import { VisibilityManager } from '../../js/renderer/visibilityManager';
+import { VisibilityManager } from '../../js/visibility/visibilityManager';
 
 describe('VisibilityManager', () => {
     let panel: HTMLElement;

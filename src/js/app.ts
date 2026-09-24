@@ -140,7 +140,7 @@ class Search {
             this.pagination.setDataItemsFunction((): Record<string, any>[] => {
                 return this._data || [];
             });
-            this.pagination.onPageChangeCallback((page, totalPages) => {
+            this.pagination.onPageChangeCallback((page: number, totalPages: number) => {
                 this.events.emit('pageChange', {
                     page,
                     totalPages,
@@ -193,7 +193,7 @@ class Search {
                 listbox: () => this.renderer.body.renderItems as HTMLElement,
                 hideDelayMs: this.renderer.timeHiddenResults,
                 hooks: {
-                    onClosed: async (reason) => {
+                    onClosed: async (reason: Types.CloseReason) => {
                         if (reason === 'blur' || reason === 'select') {
                             await this.draw('');
                             const input = this.renderer.body.inputSearch as HTMLInputElement;
@@ -294,7 +294,7 @@ class Search {
             this.events.emit('search', {
                 searchTerm,
                 results: this._data,
-                totalResults: this._data.length,
+                totalResults: this._data?.length,
                 timestamp: new Date().toISOString()
             } as Types.SearchEventData);
         }

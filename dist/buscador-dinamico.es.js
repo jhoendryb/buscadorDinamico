@@ -100,7 +100,7 @@ var e = Object.defineProperty, t = (t, n) => {
 		return n === this.currentDrawId ? (this._data = r?.data || [], this.searchTerm = e, t && this.events.emit("search", {
 			searchTerm: e,
 			results: this._data,
-			totalResults: this._data.length,
+			totalResults: this._data?.length,
 			timestamp: (/* @__PURE__ */ new Date()).toISOString()
 		}), this.processInfiniteScroll(), this.events.emit("searchComplete", {
 			searchTerm: e,

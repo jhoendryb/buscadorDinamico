@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@jhoendryb/buscador-dinamico':
-        specifier: ^1.0.0
-        version: 1.0.0
     devDependencies:
       '@babel/core':
         specifier: ^7.29.7
@@ -840,9 +836,6 @@ packages:
   '@jest/types@30.4.1':
     resolution: {integrity: sha512-f1x/vJXIfjOlEmejYpbkbgw1gOqpPECwMvMEtBqe47j7H2Hg8h8w3o3ikhSXq3MI15kg+oQ0exWO0uCtTNJLoQ==}
     engines: {node: ^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0}
-
-  '@jhoendryb/buscador-dinamico@1.0.0':
-    resolution: {integrity: sha512-hkjNQmcUlzZ8JGAUEhrzcF+V2s7CVBu+55OUeoOqIdbaj2FtFHVsE0xP6eYyAa8SeEVE7WiJNZygrTQbTSreZQ==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -3505,8 +3498,6 @@ snapshots:
       '@types/node': 25.9.1
       '@types/yargs': 17.0.35
       chalk: 4.1.2
-
-  '@jhoendryb/buscador-dinamico@1.0.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

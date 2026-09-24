@@ -1,4 +1,5 @@
 // import { Search } from '../../dist/buscador-dinamico.es.js';
+// import { Search } from '../../node_modules/@jhoendryb/buscador-dinamico/dist/buscador-dinamico.es.js';
 import { Search } from '../dist/buscador-dinamico.es.js';
 
 /**
@@ -62,7 +63,7 @@ const SEARCH_DATA = [
     { title: 'Idioma por defecto', route: '#/i18n', segment: 'idioma-por-defecto', category: 'Guías', badge: 'success', description: 'Traducciones predeterminadas en español', keywords: 'idioma defecto español spanish default' },
     { title: 'Personalizar traducciones', route: '#/i18n', segment: 'personalizar-traducciones', category: 'Guías', badge: 'success', description: 'Sobrescribir cadenas con el parámetro translation', keywords: 'personalizar traducciones custom translation' },
     { title: 'Soporte multiidioma completo', route: '#/i18n', segment: 'soporte-multiidioma-completo', category: 'Guías', badge: 'success', description: 'Ejemplo con múltiples idiomas y selección dinámica', keywords: 'multiidioma multiple languages soporte' },
-    { title: 'Referencia de claves', route: '#/i18n', segment: 'referencia-de-claves', category: 'Guías', badge: 'success', description: '5 claves: searchPlaceholder, ariaLabel, noResults, loading, pagination', keywords: 'claves keys referencia searchPlaceholder noResults pagination' },
+    { title: 'Referencia de claves', route: '#/i18n', segment: 'referencia-de-claves', category: 'Guías', badge: 'success', description: '6 claves: searchPlaceholder, ariaLabel, noResults, loading, pagination, noIntersectionObserver', keywords: 'claves keys referencia searchPlaceholder noResults pagination' },
     { title: 'Cambiar idioma dinámicamente', route: '#/i18n', segment: 'cambiar-idioma-dinamicamente', category: 'Guías', badge: 'success', description: 'Recrear instancia para cambiar idioma en runtime', keywords: 'cambiar idioma dinamico runtime ejecucion' },
 
     // ── Caché ──────────────────────────────────────────────────────
@@ -73,7 +74,7 @@ const SEARCH_DATA = [
     { title: 'Generación de claves', route: '#/cache', segment: 'generacion-de-claves', category: 'Guías', badge: 'success', description: 'Claves generadas automáticamente por término y página', keywords: 'claves key generate cacheKey' },
     { title: 'Limpiar caché', route: '#/cache', segment: 'limpiar-cache', category: 'Guías', badge: 'success', description: 'Métodos clear, delete y clearCacheByPrefix', keywords: 'limpiar borrar clear delete reset' },
     { title: 'Estadísticas de caché', route: '#/cache', segment: 'estadisticas-de-cache', category: 'Guías', badge: 'success', description: 'stats.hits, stats.misses, stats.evictions', keywords: 'estadisticas stats hits misses evictions' },
-    { title: 'Patrón getOrFetch', route: '#/cache', segment: 'patron-getorfetch', category: 'Guías', badge: 'success', description: 'Obtener o cargar valores con cache.getOrFetch()', keywords: 'getOrFetch cache load fetch pattern' },
+    { title: 'Métodos de LRUCache', route: '#/cache', segment: 'metodos-de-lrucache', category: 'Guías', badge: 'success', description: 'set, get, has, size, clear, delete y clearCacheByPrefix', keywords: 'cache methods size delete clearCacheByPrefix set get has' },
     { title: 'Uso con datos del servidor', route: '#/cache', segment: 'uso-con-datos-del-servidor', category: 'Guías', badge: 'success', description: 'Caché con búsquedas remotas para reducir peticiones HTTP', keywords: 'servidor http peticiones remote fetch' },
 
     // ── Temas CSS ──────────────────────────────────────────────────
@@ -110,9 +111,9 @@ const SEARCH_DATA = [
     { title: 'getCacheKey()', route: '#/api', segment: 'getcachekey-searchterm-page', category: 'Referencia', badge: 'warning', description: 'Genera clave de caché para búsqueda y página', keywords: 'getcachekey cache key clave' },
     { title: 'setupEventDelegation()', route: '#/api', segment: 'setupeventdelegation', category: 'Referencia', badge: 'success', description: 'Delegación centralizada de eventos (focus, click, keyboard)', keywords: 'event delegation focus click keyboard teclado navegacion' },
     { title: 'destroy()', route: '#/api', segment: 'destroy', category: 'Referencia', badge: 'warning', description: 'Destruye instancia y limpia todos los recursos', keywords: 'destroy destruir limpiar cleanup dispose' },
-    { title: 'Métodos del Renderer', route: '#/api', segment: 'metodos-del-renderer', category: 'Referencia', badge: 'warning', description: 'updateCounter, showResults, hideResults, toggleResults, destroy', keywords: 'renderer updateCounter showResults hideResults toggle' },
+    { title: 'Métodos del Renderer', route: '#/api', segment: 'metodos-del-renderer', category: 'Referencia', badge: 'warning', description: 'updateCounter, showLoading, destroy, visibility (VisibilityManager)', keywords: 'renderer updateCounter showLoading visibility destroy' },
     { title: 'renderer.updateCounter()', route: '#/api', segment: 'renderer-updatecounter', category: 'Referencia', badge: 'warning', description: 'Actualiza contador con { from, to, total, textPagination? }', keywords: 'updateCounter contador from to total textPagination' },
-    { title: 'renderer.showResults/hideResults/toggleResults', route: '#/api', segment: 'renderer-showresults-hideresults-toggleresults', category: 'Referencia', badge: 'warning', description: 'Control de visibilidad del panel de resultados', keywords: 'showResults hideResults toggleResults visibilidad' },
+    { title: 'renderer.visibility', route: '#/api', segment: 'renderer-visibility', category: 'Referencia', badge: 'success', description: 'VisibilityManager: open(), close(), toggle() para el panel de resultados', keywords: 'visibility open close toggle panel resultados visibilitymanager' },
     { title: 'renderer.destroy()', route: '#/api', segment: 'renderer-destroy', category: 'Referencia', badge: 'warning', description: 'Limpia timeouts y referencias del DOM', keywords: 'renderer destroy cleanup timeouts DOM' },
     { title: 'Métodos de Paginación', route: '#/api', segment: 'metodos-de-paginacion', category: 'Referencia', badge: 'warning', description: 'getRange, getTotalPages, getTotalLoaded, loadNextPage, hasMorePages', keywords: 'paginacion getRange getTotalPages loadNextPage hasMorePages' },
     { title: 'pagination.getRange()', route: '#/api', segment: 'pagination-getrange', category: 'Referencia', badge: 'warning', description: 'Rango actual: { from, to, total }', keywords: 'getRange from to total rango' },
@@ -188,12 +189,13 @@ const SEARCH_DATA = [
 
     // ── Changelog ──────────────────────────────────────────────────
     { title: 'Changelog', route: '#/changelog', segment: '', category: 'Recursos', badge: 'info', description: 'Historial de versiones y cambios', keywords: 'changelog versiones releases history cambios' },
-    { title: 'v1.0.0', route: '#/changelog', segment: 'v1-0-0', category: 'Recursos', badge: 'info', description: 'Versión inicial con SearchEventMap, DomComponent, EventEmitter genérico', keywords: 'v1.0.0 version release SearchEventMap DomComponent' },
-    { title: 'v0.3.0', route: '#/changelog', segment: 'v0-3-0', category: 'Recursos', badge: 'info', description: 'responseAdapter, clear(), resultados anidados, Unicode', keywords: 'v0.3.0 version release responseAdapter clear nested' },
-    { title: 'v0.2.0', route: '#/changelog', segment: 'v0-2-0', category: 'Recursos', badge: 'info', description: 'Resaltado de texto, refactorizaciones', keywords: 'v0.2.0 version release highlight' },
-    { title: 'Características iniciales', route: '#/changelog', segment: 'caracteristicas-iniciales', category: 'Recursos', badge: 'info', description: 'Funcionalidades principales del componente', keywords: 'caracteristicas iniciales features' },
-    { title: 'Temas CSS (Changelog)', route: '#/changelog', segment: 'temas-css', category: 'Recursos', badge: 'info', description: 'Historial de temas CSS', keywords: 'temas css themes changelog' },
-    { title: 'Eventos (Changelog)', route: '#/changelog', segment: 'eventos', category: 'Recursos', badge: 'info', description: 'Historial de eventos', keywords: 'eventos events changelog' },
+    { title: 'v1.0.0', route: '#/changelog', segment: 'v1-0-0', category: 'Recursos', badge: 'info', description: 'VisibilityManager, ARIA combobox, event delegation y publicación en npm', keywords: 'v1.0.0 version release visibilitymanager aria npm' },
+    { title: 'v0.9.0', route: '#/changelog', segment: 'v0-9-0', category: 'Recursos', badge: 'info', description: 'sort(), clearSort(), validación de parámetros e i18n', keywords: 'v0.9.0 version release sort clearSort i18n' },
+    { title: 'v0.8.0', route: '#/changelog', segment: 'v0-8-0', category: 'Recursos', badge: 'info', description: 'Temas CSS, Documentación V2, responseAdapter, resultados anidados', keywords: 'v0.8.0 version release themes responseAdapter nested' },
+    { title: 'v0.7.0', route: '#/changelog', segment: 'v0-7-0', category: 'Recursos', badge: 'info', description: 'Migración a TypeScript, Vite, tests y arquitectura modular', keywords: 'v0.7.0 version release typescript vite tests' },
+    { title: 'v0.6.0', route: '#/changelog', segment: 'v0-6-0', category: 'Recursos', badge: 'info', description: 'Arquitectura modular inicial y accesibilidad ARIA', keywords: 'v0.6.0 version release modular aria' },
+    { title: 'v0.5.0', route: '#/changelog', segment: 'v0-5-0', category: 'Recursos', badge: 'info', description: 'Reescritura completa del motor de búsqueda (Search v3)', keywords: 'v0.5.0 version release rewrite search v3' },
+    { title: 'v0.1.0', route: '#/changelog', segment: 'v0-1-0', category: 'Recursos', badge: 'info', description: 'Proyecto inicial: búsqueda, paginación, caché LRU y eventos', keywords: 'v0.1.0 version release inicial' },
     { title: 'Códigos de error (Changelog)', route: '#/changelog', segment: 'codigos-de-error', category: 'Recursos', badge: 'info', description: 'Historial de códigos de error', keywords: 'codigos error changelog search' }
 ];
 
