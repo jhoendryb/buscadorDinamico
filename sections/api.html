@@ -258,6 +258,32 @@ visibility.isOpen: boolean        // true si phase es 'open' o 'opening'</code><
 
 <p>Verifica si hay más páginas disponibles.</p>
 
+<h2>Métodos de Caché</h2>
+
+<h3>cache.size()</h3>
+
+<pre data-lang="typescript"><code>cache.size(): number</code></pre>
+
+<p>Retorna el número actual de entradas en caché.</p>
+
+<h3>cache.delete(key)</h3>
+
+<pre data-lang="typescript"><code>cache.delete(key: string): boolean</code></pre>
+
+<p>Elimina una entrada específica. Retorna <code>true</code> si la entrada existía.</p>
+
+<h3>cache.clearCacheByPrefix(prefix)</h3>
+
+<pre data-lang="typescript"><code>cache.clearCacheByPrefix(prefix: string): LRUCache</code></pre>
+
+<p>Elimina todas las entradas cuya clave empiece con el prefijo dado. Retorna la instancia <code>LRUCache</code> para encadenamiento.</p>
+
+<h3>cache.clear()</h3>
+
+<pre data-lang="typescript"><code>cache.clear(): void</code></pre>
+
+<p>Elimina todas las entradas de caché.</p>
+
 <h2>Propiedades públicas</h2>
 
 <table>

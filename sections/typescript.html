@@ -31,12 +31,13 @@
     DropdownPhase,
     OpenReason,
     CloseReason
-} from 'buscador-dinamico';</code></pre>
+} from '@jhoendryb/buscador-dinamico';</code></pre>
 
 <h2>Interfaz SearchParams</h2>
 
 <pre data-lang="typescript"><code>interface SearchParams {
     element: string;
+    searchTerm?: string;
     data?: Object[];
     theme?: string;
     itemsPerPage?: number;
@@ -109,6 +110,7 @@ interface VisibilityHooks {
 }
 
 interface VisibilityManagerOptions {
+    parent: () => HTMLElement | null | undefined;
     panel: () => HTMLElement | null | undefined;
     control?: () => HTMLElement | null | undefined;
     listbox?: () => HTMLElement | null | undefined;
@@ -233,7 +235,7 @@ search.events.emitAsync('search', { ... }); // Eventos asíncronos</code></pre>
 
 <h2>Uso con tipos</h2>
 
-<pre data-lang="typescript"><code>import { Search, SearchParams, SearchEventMap } from 'buscador-dinamico';
+<pre data-lang="typescript"><code>import { Search, SearchParams, SearchEventMap } from '@jhoendryb/buscador-dinamico';
 
 // Definir tipos para tus datos
 interface Producto {

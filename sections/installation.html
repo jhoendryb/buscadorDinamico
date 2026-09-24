@@ -6,26 +6,28 @@
 
 <p>La forma recomendada para proyectos con bundler (Vite, Webpack, Rollup, etc.):</p>
 
+<p>El paquete está disponible en npm como <a href="https://www.npmjs.com/package/@jhoendryb/buscador-dinamico"><code>@jhoendryb/buscador-dinamico</code></a> (v1.0.0).</p>
+
 <pre data-lang="bash"><code># Con npm
-npm install buscador-dinamico
+npm install @jhoendryb/buscador-dinamico
 
 # Con pnpm (recomendado)
-pnpm add buscador-dinamico</code></pre>
+pnpm add @jhoendryb/buscador-dinamico</code></pre>
 
 <p>Luego impórtalo en tu JavaScript:</p>
 
-<pre data-lang="typescript"><code>import { Search } from 'buscador-dinamico';
-import 'buscador-dinamico/css/buscador-dinamico.css';</code></pre>
+<pre data-lang="typescript"><code>import { Search } from '@jhoendryb/buscador-dinamico';
+import '@jhoendryb/buscador-dinamico/dist/css/buscador-dinamico.css';</code></pre>
 
 <h2>Vía CDN (UMD)</h2>
 
 <p>Para proyectos sin bundler o inclusiones rápidas:</p>
 
 <pre data-lang="html"><code>&lt;!-- CSS --&gt;
-&lt;link rel="stylesheet" href="https://unpkg.com/buscador-dinamico/dist/css/buscador-dinamico.css"&gt;
+&lt;link rel="stylesheet" href="https://unpkg.com/@jhoendryb/buscador-dinamico/dist/css/buscador-dinamico.css"&gt;
 
 &lt;!-- JavaScript (UMD) --&gt;
-&lt;script src="https://unpkg.com/buscador-dinamico/dist/buscador-dinamico.umd.js"&gt;&lt;/script&gt;
+&lt;script src="https://unpkg.com/@jhoendryb/buscador-dinamico/dist/buscador-dinamico.umd.js"&gt;&lt;/script&gt;
 
 &lt;script&gt;
   const search = new BuscadorDinamico.Search({
@@ -63,14 +65,15 @@ import 'buscador-dinamico/css/buscador-dinamico.css';</code></pre>
 
 <pre><code>tu-proyecto/
 ├── node_modules/
-│   └── buscador-dinamico/
-│       ├── dist/
-│       │   ├── buscador-dinamico.es.js
-│       │   ├── buscador-dinamico.umd.js
-│       │   └── css/
-│       │       └── buscador-dinamico.css
-│       └── src/
-│           └── css/ (estilos fuente)</code></pre>
+│   └── @jhoendryb/
+│       └── buscador-dinamico/
+│           ├── dist/
+│           │   ├── buscador-dinamico.es.js
+│           │   ├── buscador-dinamico.umd.js
+│           │   └── css/
+│           │       └── buscador-dinamico.css
+│           └── src/
+│               └── css/ (estilos fuente)</code></pre>
 
 <div class="doc-callout doc-callout--tip">
     <span class="doc-callout__icon">💡</span>
@@ -86,5 +89,5 @@ import 'buscador-dinamico/css/buscador-dinamico.css';</code></pre>
 
 <pre data-lang="javascript"><code>console.log(typeof BuscadorDinamico.Search); // "function" (UMD)
 // o
-import { Search } from 'buscador-dinamico';
+import { Search } from '@jhoendryb/buscador-dinamico';
 console.log(typeof Search); // "function" (ES Module)</code></pre>

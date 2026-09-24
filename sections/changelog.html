@@ -2,13 +2,14 @@
 
 <p>Historial de versiones y cambios del componente basado en el historial real del repositorio.</p>
 
-<h2>v1.0.0 <span class="doc-badge doc-badge--info">BETA</span> — VisibilityManager + ARIA + Event Delegation</h2>
+<h2 id="v1-0-0">v1.0.0 <span class="doc-badge doc-badge--success">Latest</span> — VisibilityManager + ARIA + Event Delegation</h2>
 
 <p><em>Septiembre 2026</em></p>
 
 <h3 id="anadido-v1-0-0">Añadido</h3>
 
 <ul>
+    <li>Publicación del paquete <code>@jhoendryb/buscador-dinamico</code> v1.0.0 en npm</li>
     <li><code>VisibilityManager</code> — máquina de estados finita (FSM) para gestión de visibilidad del panel de resultados
         <ul>
             <li>Estados: <code>closed → opening → open → closing → closed</code></li>
@@ -19,7 +20,7 @@
             <li><code>refresh()</code> para re-sincronizar DOM desde el estado actual</li>
         </ul>
     </li>
-    <li><code>setupEventDelegation()</code> — delegación centralizada de eventos en el contenedor <code>&lt;search&gt;</code> (reemplaza <code>setupKeyboardNavigation()</code> y <code>setupClickNavigation()</code> separados)
+    <li><code>setupEventDelegation()</code> — delegación centralizada de eventos en el contenedor <code>&lt;search&gt;</code> (reemplaza los manejos separados de teclado y click)
         <ul>
             <li><code>focusin</code> en el input abre el panel</li>
             <li><code>click</code> fuera del contenedor cierra el panel</li>
@@ -58,7 +59,7 @@
     <li>Navegación por teclado centralizada en un solo handler delegado</li>
 </ul>
 
-<h2>v0.9.0 — Sort + Validación + i18n</h2>
+<h2 id="v0-9-0">v0.9.0 — Sort + Validación + i18n</h2>
 
 <p><em>Agosto 2026</em></p>
 
@@ -80,7 +81,7 @@
     <li>Validación de <code>itemsPerPage</code> con rango mínimo</li>
 </ul>
 
-<h2>v0.8.0 — Temas CSS + Documentación V2</h2>
+<h2 id="v0-8-0">v0.8.0 — Temas CSS + Documentación V2</h2>
 
 <p><em>Junio-Julio 2026</em></p>
 
@@ -123,7 +124,7 @@
     <li><code>processInfiniteScroll()</code> ya no se llama desde searchingServer</li>
 </ul>
 
-<h2>v0.7.0 — TypeScript + Vite + Tests + Arquitectura Modular</h2>
+<h2 id="v0-7-0">v0.7.0 — TypeScript + Vite + Tests + Arquitectura Modular</h2>
 
 <p><em>Junio 2026</em></p>
 
@@ -168,7 +169,7 @@
     <li>Validación de parámetros con <code>SearchError</code> y códigos de error específicos</li>
 </ul>
 
-<h2>v0.6.0 — Arquitectura Modular Inicial</h2>
+<h2 id="v0-6-0">v0.6.0 — Arquitectura Modular Inicial</h2>
 
 <p><em>Mayo 2026</em></p>
 
@@ -181,7 +182,7 @@
     <li>Sistema de plantillas personalizables refactorizado</li>
 </ul>
 
-<h2>v0.5.0 — Reescritura Search v3</h2>
+<h2 id="v0-5-0">v0.5.0 — Reescritura Search v3</h2>
 
 <p><em>Marzo 2026</em></p>
 
@@ -192,7 +193,7 @@
     <li>Archivado de versiones anteriores (<code>appOldv2.js</code>)</li>
 </ul>
 
-<h2>v0.1.0 — Proyecto Inicial</h2>
+<h2 id="v0-1-0">v0.1.0 — Proyecto Inicial</h2>
 
 <p><em>Abril 2025</em></p>
 
@@ -211,7 +212,7 @@
     <li>Soporte para múltiples instancias en la misma página</li>
 </ul>
 
-<h3>Códigos de error</h3>
+<h3 id="codigos-de-error">Códigos de error</h3>
 
 <ul>
     <li><code>SEARCH_001</code> — element requerido</li>

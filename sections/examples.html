@@ -430,8 +430,8 @@ new Search({
 <h3 id="react">React</h3>
 
 <pre data-lang="jsx"><code>import { useEffect, useRef } from 'react';
-import { Search } from 'buscador-dinamico';
-import 'buscador-dinamico/css/buscador-dinamico.css';
+import { Search } from '@jhoendryb/buscador-dinamico';
+import '@jhoendryb/buscador-dinamico/dist/css/buscador-dinamico.css';
 
 function SearchComponent({ data }) {
     const containerRef = useRef(null);
@@ -460,8 +460,8 @@ function SearchComponent({ data }) {
 
 &lt;script setup&gt;
 import { onMounted, onUnmounted } from 'vue';
-import { Search } from 'buscador-dinamico';
-import 'buscador-dinamico/css/buscador-dinamico.css';
+import { Search } from '@jhoendryb/buscador-dinamico';
+import '@jhoendryb/buscador-dinamico/dist/css/buscador-dinamico.css';
 
 const props = defineProps({ data: Array });
 let search = null;
