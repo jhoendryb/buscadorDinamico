@@ -1,7 +1,7 @@
 {
   "name": "@jhoendryb/buscador-dinamico",
   "version": "1.0.0",
-  "description": "Buscador dinámico",
+  "description": "Buscador dinamico",
   "main": "./dist/buscador-dinamico.umd.js",
   "module": "./dist/buscador-dinamico.es.js",
   "type": "module",
