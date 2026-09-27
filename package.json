@@ -4,6 +4,7 @@
   "description": "Buscador dinamico",
   "main": "./dist/buscador-dinamico.umd.js",
   "module": "./dist/buscador-dinamico.es.js",
+  "homepage": "https://jhoendryb.github.io/buscadorDinamico/",
   "type": "module",
   "repository": {
     "type": "git",

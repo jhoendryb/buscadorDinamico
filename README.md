@@ -4,6 +4,8 @@
 
 Una clase TypeScript flexible y moderna para crear buscadores dinámicos con soporte para paginación, scroll infinito, búsqueda en tiempo real, navegación por teclado, temas CSS predefinidos y gestión de errores centralizada. Compatible con datos locales y peticiones AJAX al servidor usando Fetch API.
 
+📖 **Documentación completa:** https://jhoendryb.github.io/buscadorDinamico/
+
 ## Características
 
 - **Búsqueda en tiempo real** con debounce configurable
