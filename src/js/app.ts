@@ -427,7 +427,7 @@ class Search {
             return fetchData;
         }
 
-        if (showLoading) {
+        if (showLoading && page <= 1) {
             this.renderer.showLoading(this.t.loading || '');
         }
 
