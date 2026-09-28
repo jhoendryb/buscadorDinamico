@@ -195,9 +195,18 @@ class Search {
                 hooks: {
                     onClosed: async (reason: Types.CloseReason) => {
                         if (reason === 'blur' || reason === 'select') {
+                            const element = this.renderer.body;
+                            if (!element) return;
                             await this.draw('');
-                            const input = this.renderer.body.inputSearch as HTMLInputElement;
+                            const input = element.inputSearch as HTMLInputElement;
                             if (input) input.value = '';
+                            const renderItems = element.renderItems as HTMLElement;
+                            renderItems.scrollTo({
+                                top: 0,
+                                left: 0,
+                                behavior: 'instant'
+                            });
+                            // if(renderItems) renderItems.scrollTop = 0;
                             input?.blur();
                         }
                     }
@@ -275,6 +284,7 @@ class Search {
         if (this._destroyed) return this;
         const drawId = ++this.currentDrawId;
         if (searchTerm !== this.searchTerm && this.renderer.body.renderItems) {
+            console.log('draw', searchTerm);
             this.renderer.body.renderItems.scrollTop = 0;
             this.renderer.body.renderItems.innerHTML = '';
             this.events.emit('resultsCleared', { previousSearchTerm: this.searchTerm } as Types.ResultsClearedEventData);
