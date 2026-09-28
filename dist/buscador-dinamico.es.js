@@ -57,9 +57,15 @@ var e = Object.defineProperty, t = (t, n) => {
 				hideDelayMs: this.renderer.timeHiddenResults,
 				hooks: { onClosed: async (e) => {
 					if (e === "blur" || e === "select") {
+						let e = this.renderer.body;
+						if (!e) return;
 						await this.draw("");
-						let e = this.renderer.body.inputSearch;
-						e && (e.value = ""), e?.blur();
+						let t = e.inputSearch;
+						t && (t.value = ""), e.renderItems.scrollTo({
+							top: 0,
+							left: 0,
+							behavior: "instant"
+						}), t?.blur();
 					}
 				} }
 			}), this.setupEventDelegation(), this.draw(this.searchTerm), this.events.emit("init", {
@@ -95,7 +101,7 @@ var e = Object.defineProperty, t = (t, n) => {
 	async draw(e = this.searchTerm, t = !1) {
 		if (this._destroyed) return this;
 		let n = ++this.currentDrawId;
-		e !== this.searchTerm && this.renderer.body.renderItems && (this.renderer.body.renderItems.scrollTop = 0, this.renderer.body.renderItems.innerHTML = "", this.events.emit("resultsCleared", { previousSearchTerm: this.searchTerm }), this.renderer.body.renderItems.removeAttribute("aria-activedescendant"), this.pagination.goToPage(1), this.selectedIndex = -1);
+		e !== this.searchTerm && this.renderer.body.renderItems && (console.log("draw", e), this.renderer.body.renderItems.scrollTop = 0, this.renderer.body.renderItems.innerHTML = "", this.events.emit("resultsCleared", { previousSearchTerm: this.searchTerm }), this.renderer.body.renderItems.removeAttribute("aria-activedescendant"), this.pagination.goToPage(1), this.selectedIndex = -1);
 		let r = await this.#r(e, !0);
 		return n === this.currentDrawId ? (this._data = r?.data || [], this.searchTerm = e, t && this.events.emit("search", {
 			searchTerm: e,
@@ -165,7 +171,7 @@ var e = Object.defineProperty, t = (t, n) => {
 			let n = await this.searchingServer.search(e, this.fetch, t, this.itemsPerPage, this.abortController?.signal);
 			return this.cacheEnabled && this.cache.set(r, n), n;
 		};
-		n && this.renderer.showLoading(this.t.loading || "");
+		n && t <= 1 && this.renderer.showLoading(this.t.loading || "");
 		let a = await i();
 		return a && (this._ajaxResponse.success = { countPage: a.countPage }), a;
 	}
