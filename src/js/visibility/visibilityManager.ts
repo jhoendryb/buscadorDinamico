@@ -224,34 +224,43 @@ export class VisibilityManager {
         if (!panel || !content || this.#listeners.length > 0) return;
 
         this.#bind(content, 'keydown', (e: Event) => {
-            console.log("Evento2 1");
             const event = e as KeyboardEvent;
             if (event.key !== 'Escape') return;
             if (event.key === 'Escape') {
+                console.log("ESC presionado: cerrar panel de resultados");
                 this.close({ reason: 'blur' });
                 return;
             }
         }) as unknown as EventListener;
         this.#bind(panel, 'pointerdown', () => {
-            console.log("Evento2 2");
+            console.log("Click en panel: usuario interactuando con resultados");
             this.#pointerInside = true;
             this.stickForInteraction();
         });
         this.#bind(panel, 'pointermove', () => {
-            console.log("Evento2 3");
+            console.log("Movimiento del mouse sobre panel: mantener panel abierto");
             this.#pointerInside = true;
             this.stickForInteraction();
         });
-        this.#bind(panel, 'pointerenter', () => { console.log("Evento2 4"); this.#pointerInside = true; });
-        this.#bind(panel, 'pointerleave', () => { console.log("Evento2 5"); this.#pointerInside = false; });
+        this.#bind(panel, 'pointerenter', () => {
+            console.log("Mouse entra al panel: marcar usuario dentro");
+            this.#pointerInside = true;
+        });
+        this.#bind(panel, 'pointerleave', () => {
+            console.log("Mouse sale del panel: marcar usuario fuera");
+            this.#pointerInside = false;
+        });
         this.#bind(panel, 'touchstart', () => {
-            console.log("Evento2 6");
+            console.log("Toque en panel: usuario interactuando táctilmente");
             this.#pointerInside = true;
             this.stickForInteraction();
         }, { passive: true });
-        this.#bind(panel, 'focusin', () => { console.log("Evento2 7"); this.#focusInside = true; });
+        this.#bind(panel, 'focusin', () => {
+            console.log("Foco entra al panel: elemento recibió foco por teclado/navegación");
+            this.#focusInside = true;
+        });
         this.#bind(panel, 'focusout', ((e: FocusEvent) => {
-            console.log("Evento2 8");
+            console.log("Foco sale del panel: elemento perdió foco, verificar si sigue dentro");
             const related = e.relatedTarget as Node | null;
             this.#focusInside = !!related && panel.contains(related);
         }) as EventListener);

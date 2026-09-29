@@ -195,18 +195,12 @@ class Search {
                 hooks: {
                     onClosed: async (reason: Types.CloseReason) => {
                         if (reason === 'blur' || reason === 'select') {
+                            console.log("Que fue marico todo bien en casa?");
                             const element = this.renderer.body;
                             if (!element) return;
-                            await this.draw('');
                             const input = element.inputSearch as HTMLInputElement;
                             if (input) input.value = '';
-                            const renderItems = element.renderItems as HTMLElement;
-                            renderItems.scrollTo({
-                                top: 0,
-                                left: 0,
-                                behavior: 'instant'
-                            });
-                            // if(renderItems) renderItems.scrollTop = 0;
+                            await this.draw('');
                             input?.blur();
                         }
                     }
@@ -283,14 +277,14 @@ class Search {
     async draw(searchTerm: string = this.searchTerm, isEvent: boolean = false): Promise<Search> {
         if (this._destroyed) return this;
         const drawId = ++this.currentDrawId;
-        if (searchTerm !== this.searchTerm && this.renderer.body.renderItems) {
-            console.log('draw', searchTerm);
+        if (this.renderer.body.renderItems && (searchTerm !== this.searchTerm || searchTerm === "")) {
+            console.log('draw que fue', searchTerm, this.searchTerm);
             this.renderer.body.renderItems.scrollTop = 0;
             this.renderer.body.renderItems.innerHTML = '';
-            this.events.emit('resultsCleared', { previousSearchTerm: this.searchTerm } as Types.ResultsClearedEventData);
             this.renderer.body.renderItems.removeAttribute('aria-activedescendant');
             this.pagination.goToPage(1);
             this.selectedIndex = -1;
+            this.events.emit('resultsCleared', { previousSearchTerm: this.searchTerm } as Types.ResultsClearedEventData);
         }
 
         const searchResult = await this.#executeSearch(searchTerm, true);
@@ -545,27 +539,30 @@ class Search {
 
         // --- Click OutSide: cerrar panel cuando foco sale del contenedor ---
         this.boundFocusClickOutSide = (e: MouseEvent) => {
-            console.log("Evento 1")
             const related = e.target as Node | null;
             if (related && content.contains(related)) return;
             if (this.selectingItem || this._destroyed) return;
+            console.log("cerrar panel cuando foco sale del contenedor")
+            const renderItems = this.renderer.body.renderItems as HTMLElement;
+            if (renderItems) {
+                renderItems.scroll({ top: 0, behavior: 'instant' });
+            }
             this.visibility?.close({ reason: 'blur', immediate: true });
             document.removeEventListener('click', this.boundFocusClickOutSide);
         };
 
         // --- Focusin: abrir panel cuando el input recibe foco ---
         this.boundFocusInHandler = (e: FocusEvent) => {
-            console.log("Evento 2")
             if (e.target !== input) return;
             const count = renderItems?.querySelectorAll(".items").length || 0;
             if (count > 0) this.visibility?.open('focus');
+            console.log("abrir panel cuando el input recibe foco")
             document.addEventListener('click', this.boundFocusClickOutSide);
         };
         content.addEventListener('focusin', this.boundFocusInHandler);
 
         // --- Click: seleccionar items (delegado al contenedor) ---
         this.boundClickHandler = (e: MouseEvent) => {
-            console.log("Evento 3");
             const eventCount = this.events.listenerCount('itemSelected');
             if (eventCount === 0) return;
             if (!renderItems) return;
@@ -573,6 +570,7 @@ class Search {
             const item = (e.target as HTMLElement).closest('.items');
             const items = renderItems.querySelectorAll('.items') as any;
             if (item) {
+                console.log("seleccionar items (delegado al contenedor)");
                 this.selectingItem = true;
                 this.selectedIndex = Array.from(items).indexOf(item);
                 this.#highlightItem(items);
