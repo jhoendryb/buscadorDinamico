@@ -57,15 +57,11 @@ var e = Object.defineProperty, t = (t, n) => {
 				hideDelayMs: this.renderer.timeHiddenResults,
 				hooks: { onClosed: async (e) => {
 					if (e === "blur" || e === "select") {
+						console.log("Que fue marico todo bien en casa?");
 						let e = this.renderer.body;
 						if (!e) return;
-						await this.draw("");
 						let t = e.inputSearch;
-						t && (t.value = ""), e.renderItems.scrollTo({
-							top: 0,
-							left: 0,
-							behavior: "instant"
-						}), t?.blur();
+						t && (t.value = ""), await this.draw(""), t?.blur();
 					}
 				} }
 			}), this.setupEventDelegation(), this.draw(this.searchTerm), this.events.emit("init", {
@@ -101,7 +97,7 @@ var e = Object.defineProperty, t = (t, n) => {
 	async draw(e = this.searchTerm, t = !1) {
 		if (this._destroyed) return this;
 		let n = ++this.currentDrawId;
-		e !== this.searchTerm && this.renderer.body.renderItems && (console.log("draw", e), this.renderer.body.renderItems.scrollTop = 0, this.renderer.body.renderItems.innerHTML = "", this.events.emit("resultsCleared", { previousSearchTerm: this.searchTerm }), this.renderer.body.renderItems.removeAttribute("aria-activedescendant"), this.pagination.goToPage(1), this.selectedIndex = -1);
+		this.renderer.body.renderItems && (e !== this.searchTerm || e === "") && (console.log("draw que fue", e, this.searchTerm), this.renderer.body.renderItems.scrollTop = 0, this.renderer.body.renderItems.innerHTML = "", this.renderer.body.renderItems.removeAttribute("aria-activedescendant"), this.pagination.goToPage(1), this.selectedIndex = -1, this.events.emit("resultsCleared", { previousSearchTerm: this.searchTerm }));
 		let r = await this.#r(e, !0);
 		return n === this.currentDrawId ? (this._data = r?.data || [], this.searchTerm = e, t && this.events.emit("search", {
 			searchTerm: e,
@@ -206,18 +202,23 @@ var e = Object.defineProperty, t = (t, n) => {
 		if (this._destroyed) return this;
 		let e = this.renderer.body.content, t = this.renderer.body.renderItems, n = this.renderer.body.inputSearch;
 		return !e || !t || !n ? this : (this.boundFocusClickOutSide = (t) => {
-			console.log("Evento 1");
 			let n = t.target;
-			n && e.contains(n) || this.selectingItem || this._destroyed || (this.visibility?.close({
+			if (n && e.contains(n) || this.selectingItem || this._destroyed) return;
+			console.log("cerrar panel cuando foco sale del contenedor");
+			let r = this.renderer.body.renderItems;
+			r && r.scroll({
+				top: 0,
+				behavior: "instant"
+			}), this.visibility?.close({
 				reason: "blur",
 				immediate: !0
-			}), document.removeEventListener("click", this.boundFocusClickOutSide));
+			}), document.removeEventListener("click", this.boundFocusClickOutSide);
 		}, this.boundFocusInHandler = (e) => {
-			console.log("Evento 2"), e.target === n && ((t?.querySelectorAll(".items").length || 0) > 0 && this.visibility?.open("focus"), document.addEventListener("click", this.boundFocusClickOutSide));
+			e.target === n && ((t?.querySelectorAll(".items").length || 0) > 0 && this.visibility?.open("focus"), console.log("abrir panel cuando el input recibe foco"), document.addEventListener("click", this.boundFocusClickOutSide));
 		}, e.addEventListener("focusin", this.boundFocusInHandler), this.boundClickHandler = (e) => {
-			if (console.log("Evento 3"), this.events.listenerCount("itemSelected") === 0 || !t) return;
+			if (this.events.listenerCount("itemSelected") === 0 || !t) return;
 			let n = e.target.closest(".items"), r = t.querySelectorAll(".items");
-			n && (this.selectingItem = !0, this.selectedIndex = Array.from(r).indexOf(n), this.#u(r), this.#d(n), this.visibility?.close({
+			n && (console.log("seleccionar items (delegado al contenedor)"), this.selectingItem = !0, this.selectedIndex = Array.from(r).indexOf(n), this.#u(r), this.#d(n), this.visibility?.close({
 				reason: "blur",
 				immediate: !0
 			}), queueMicrotask(() => {
@@ -1077,26 +1078,25 @@ var i = class {
 	#b() {
 		let e = this.#e.panel(), t = this.#e.parent();
 		!e || !t || this.#c.length > 0 || (this.#x(t, "keydown", (e) => {
-			console.log("Evento2 1");
 			let t = e;
 			if (t.key === "Escape" && t.key === "Escape") {
-				this.close({ reason: "blur" });
+				console.log("ESC presionado: cerrar panel de resultados"), this.close({ reason: "blur" });
 				return;
 			}
 		}), this.#x(e, "pointerdown", () => {
-			console.log("Evento2 2"), this.#a = !0, this.stickForInteraction();
+			console.log("Click en panel: usuario interactuando con resultados"), this.#a = !0, this.stickForInteraction();
 		}), this.#x(e, "pointermove", () => {
-			console.log("Evento2 3"), this.#a = !0, this.stickForInteraction();
+			console.log("Movimiento del mouse sobre panel: mantener panel abierto"), this.#a = !0, this.stickForInteraction();
 		}), this.#x(e, "pointerenter", () => {
-			console.log("Evento2 4"), this.#a = !0;
+			console.log("Mouse entra al panel: marcar usuario dentro"), this.#a = !0;
 		}), this.#x(e, "pointerleave", () => {
-			console.log("Evento2 5"), this.#a = !1;
+			console.log("Mouse sale del panel: marcar usuario fuera"), this.#a = !1;
 		}), this.#x(e, "touchstart", () => {
-			console.log("Evento2 6"), this.#a = !0, this.stickForInteraction();
+			console.log("Toque en panel: usuario interactuando táctilmente"), this.#a = !0, this.stickForInteraction();
 		}, { passive: !0 }), this.#x(e, "focusin", () => {
-			console.log("Evento2 7"), this.#o = !0;
+			console.log("Foco entra al panel: elemento recibió foco por teclado/navegación"), this.#o = !0;
 		}), this.#x(e, "focusout", ((t) => {
-			console.log("Evento2 8");
+			console.log("Foco sale del panel: elemento perdió foco, verificar si sigue dentro");
 			let n = t.relatedTarget;
 			this.#o = !!n && e.contains(n);
 		})));
