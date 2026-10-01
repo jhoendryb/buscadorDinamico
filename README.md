@@ -34,6 +34,8 @@ O usando CDN:
 
 ## Ejemplo Básico
 
+### Con npm / ES Modules
+
 ```html
 <div class="app-search"></div>
 ```
@@ -64,6 +66,43 @@ const search = new Search({
 });
 
 search.init();
+```
+
+### Con CDN (script)
+
+Al cargar `buscador-dinamico.umd.js` por CDN, **no existe `import`**: la librería se expone en el global **`BuscadorDinamico`**, por lo que la clase se usa como `BuscadorDinamico.Search(...)`:
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/@jhoendryb/buscador-dinamico/dist/css/buscador-dinamico.css">
+<script src="https://unpkg.com/@jhoendryb/buscador-dinamico/dist/buscador-dinamico.umd.js"></script>
+
+<div class="app-search"></div>
+
+<script>
+    const search = new BuscadorDinamico.Search({
+        element: '.app-search',
+        theme: 'onyx-black',
+        data: [
+            {
+                country: 'VE',
+                name: 'Venezuela',
+                descripcion: 'El pais mas rico en petroleo.'
+            },
+            {
+                country: 'CO',
+                name: 'Colombia',
+                descripcion: 'El pais mas rico en cafe.'
+            },
+            {
+                country: 'MX',
+                name: 'Mexico',
+                descripcion: 'El pais mas rico en tacos.'
+            }
+        ]
+    });
+
+    search.init();
+</script>
 ```
 
 ## Contribuir
