@@ -270,7 +270,6 @@ class Search {
         if (this._destroyed) return this;
         const drawId = ++this.currentDrawId;
         if (this.renderer.body.renderItems && (searchTerm !== this.searchTerm || searchTerm === "")) {
-            console.log('draw que fue', searchTerm, this.searchTerm);
             this.renderer.body.renderItems.scrollTop = 0;
             this.renderer.body.renderItems.innerHTML = '';
             this.renderer.body.renderItems.removeAttribute('aria-activedescendant');
