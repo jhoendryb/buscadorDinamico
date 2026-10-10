@@ -14,7 +14,6 @@ export class VisibilityManager {
     #pointerInside: boolean = false;
     #focusInside: boolean = false;
     #stickyUntil: number = 0;
-    #listeners: Array<[HTMLElement, string, EventListener]> = [];
     #destroyed: boolean = false;
 
     constructor(options: Types.VisibilityManagerOptions) {
@@ -41,7 +40,6 @@ export class VisibilityManager {
         if (this.#destroyed || this.isOpen) return;
         this.#generation++;
         this.#clearTimer();
-        this.#ensureListeners();
         this.#enterOpening(reason);
     }
 
@@ -102,10 +100,6 @@ export class VisibilityManager {
         this.#destroyed = true;
         this.#generation++;
         this.#clearTimer();
-        this.#listeners.forEach(([element, eventName, fn]) =>
-            element.removeEventListener(eventName, fn)
-        );
-        this.#listeners = [];
         this.#pointerInside = false;
         this.#focusInside = false;
         this.#stickyUntil = 0;
@@ -196,6 +190,25 @@ export class VisibilityManager {
         }
     }
 
+    handleIntention(intention: Types.Intention): void {
+        if (this.#destroyed) return;
+        switch (intention.type) {
+            case 'open':
+                this.open(intention.source);
+                break;
+            case 'close':
+                this.close({ reason: intention.reason, immediate: intention.immediate });
+                break;
+            case 'sticky':
+                if (intention.region === 'pointer') this.#pointerInside = intention.on;
+                else if (intention.region === 'focus') this.#focusInside = intention.on;
+                else if (intention.on) this.stickForInteraction();
+                break;
+            default:
+                break;
+        }
+    }
+
     /** Único escritor de clases/atributos: elimina el drift por construcción. */
     #syncDom(): void {
         const panel = this.#opts.panel();
@@ -215,59 +228,5 @@ export class VisibilityManager {
 
         this.#opts.control?.()?.setAttribute('aria-expanded', String(visible));
         this.#opts.listbox?.()?.setAttribute('aria-hidden', String(!visible));
-    }
-
-    /** Listeners delegados en el contenedor: cubren items añadidos dinámicamente. */
-    #ensureListeners(): void {
-        const panel = this.#opts.panel();
-        const content = this.#opts.parent();
-        if (!panel || !content || this.#listeners.length > 0) return;
-
-        this.#bind(content, 'keydown', (e: Event) => {
-            const event = e as KeyboardEvent;
-            if (event.key !== 'Escape') return;
-            if (event.key === 'Escape') {
-                console.log("ESC presionado: cerrar panel de resultados");
-                this.close({ reason: 'blur' });
-                return;
-            }
-        }) as unknown as EventListener;
-        this.#bind(panel, 'pointerdown', () => {
-            console.log("Click en panel: usuario interactuando con resultados");
-            this.#pointerInside = true;
-            this.stickForInteraction();
-        });
-        this.#bind(panel, 'pointermove', () => {
-            console.log("Movimiento del mouse sobre panel: mantener panel abierto");
-            this.#pointerInside = true;
-            this.stickForInteraction();
-        });
-        this.#bind(panel, 'pointerenter', () => {
-            console.log("Mouse entra al panel: marcar usuario dentro");
-            this.#pointerInside = true;
-        });
-        this.#bind(panel, 'pointerleave', () => {
-            console.log("Mouse sale del panel: marcar usuario fuera");
-            this.#pointerInside = false;
-        });
-        this.#bind(panel, 'touchstart', () => {
-            console.log("Toque en panel: usuario interactuando táctilmente");
-            this.#pointerInside = true;
-            this.stickForInteraction();
-        }, { passive: true });
-        this.#bind(panel, 'focusin', () => {
-            console.log("Foco entra al panel: elemento recibió foco por teclado/navegación");
-            this.#focusInside = true;
-        });
-        this.#bind(panel, 'focusout', ((e: FocusEvent) => {
-            console.log("Foco sale del panel: elemento perdió foco, verificar si sigue dentro");
-            const related = e.relatedTarget as Node | null;
-            this.#focusInside = !!related && panel.contains(related);
-        }) as EventListener);
-    }
-
-    #bind(element: HTMLElement, eventName: string, fn: EventListener, options?: AddEventListenerOptions): void {
-        element.addEventListener(eventName, fn, options);
-        this.#listeners.push([element, eventName, fn]);
     }
 }

@@ -7,5 +7,6 @@ export { SearchRenderer } from './renderer/index';
 export { SearchingLocal, SearchingServer } from './searching/index';
 export { SearchError, ErrorCode, ErrorHandler } from './error-handler/index';
 export { VisibilityManager } from './visibility';
+export { InteractionManager } from './interaction';
 export * as Constants from './constants';
 export * as Types from './types';
