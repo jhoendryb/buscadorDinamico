@@ -196,6 +196,7 @@ class Search {
                 //         }
                 //     }
                 // }
+                //
             });
 
             this.setupEventDelegation();
