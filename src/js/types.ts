@@ -199,3 +199,9 @@ export interface CloseOptions {
     immediate?: boolean;
 }
 
+export type Intention =
+    | { type: 'open'; source: OpenReason }
+    | { type: 'close'; reason: CloseReason; immediate?: boolean; resetScroll?: boolean }
+    | { type: 'navigate'; delta: 1 | -1 }
+    | { type: 'select'; index?: number }
+    | { type: 'sticky'; region: 'pointer' | 'focus' | 'interaction'; on: boolean };

@@ -12,6 +12,7 @@ import {
     Pagination,
     SearchRenderer,
     VisibilityManager,
+    InteractionManager,
     SearchError,
     ErrorCode,
     ErrorHandler,
@@ -54,12 +55,7 @@ class Search {
     private searchingLocal: SearchingLocal;
     private searchingServer: SearchingServer;
 
-    private boundClickHandler: (e: MouseEvent) => void;
-    private boundKeydownHandler: (e: KeyboardEvent) => void;
-    private boundFocusInHandler: (e: FocusEvent) => void;
-    private boundFocusClickOutSide: (e: MouseEvent) => void;
-    private boundInputHandler: (e: Event) => void;
-    private selectingItem: boolean = false;
+    private interaction: InteractionManager | undefined;
 
     private currentDrawId: number = 0;
     private isLoadingMore: boolean = false;
@@ -102,12 +98,6 @@ class Search {
 
         Object.assign(this, newParams);
 
-        this.boundClickHandler = () => { };
-        this.boundKeydownHandler = () => { };
-        this.boundFocusInHandler = () => { };
-        this.boundFocusClickOutSide = () => { };
-        this.boundInputHandler = () => { };
-        this.selectingItem = false;
         this.errorHandler = ErrorHandler.getInstance(this.developmentMode);
         this.events = new EventEmitter<Types.SearchEventMap>(this.errorHandler);
 
@@ -149,6 +139,7 @@ class Search {
                 } as Types.PageChangeEventData);
             });
             this.visibility = undefined;
+            this.interaction = undefined;
         } catch (error) {
             if (error instanceof SearchError) {
                 this.errorHandler.logError(error, this.events);
@@ -192,19 +183,19 @@ class Search {
                 control: () => this.renderer.body.inputSearch as HTMLElement,
                 listbox: () => this.renderer.body.renderItems as HTMLElement,
                 hideDelayMs: this.renderer.timeHiddenResults,
-                hooks: {
-                    onClosed: async (reason: Types.CloseReason) => {
-                        if (reason === 'blur' || reason === 'select') {
-                            console.log("Que fue marico todo bien en casa?");
-                            const element = this.renderer.body;
-                            if (!element) return;
-                            const input = element.inputSearch as HTMLInputElement;
-                            if (input) input.value = '';
-                            await this.draw('');
-                            input?.blur();
-                        }
-                    }
-                }
+                // hooks: {
+                //     onClosed: async (reason: Types.CloseReason) => {
+                //         if (reason === 'blur' || reason === 'select') {
+                //             console.log("Que fue marico todo bien en casa?");
+                //             const element = this.renderer.body;
+                //             if (!element) return;
+                //             const input = element.inputSearch as HTMLInputElement;
+                //             if (input) input.value = '';
+                //             await this.draw('');
+                //             input?.blur();
+                //         }
+                //     }
+                // }
             });
 
             this.setupEventDelegation();
@@ -534,77 +525,68 @@ class Search {
         const content = this.renderer.body.content;
         const renderItems = this.renderer.body.renderItems;
         const input = this.renderer.body.inputSearch;
-
         if (!content || !renderItems || !input) return this;
 
-        // --- Click OutSide: cerrar panel cuando foco sale del contenedor ---
-        this.boundFocusClickOutSide = (e: MouseEvent) => {
-            const related = e.target as Node | null;
-            if (related && content.contains(related)) return;
-            if (this.selectingItem || this._destroyed) return;
-            console.log("cerrar panel cuando foco sale del contenedor")
-            const renderItems = this.renderer.body.renderItems as HTMLElement;
-            if (renderItems) {
-                renderItems.scroll({ top: 0, behavior: 'instant' });
-            }
-            this.visibility?.close({ reason: 'blur', immediate: true });
-            document.removeEventListener('click', this.boundFocusClickOutSide);
-        };
-
-        // --- Focusin: abrir panel cuando el input recibe foco ---
-        this.boundFocusInHandler = (e: FocusEvent) => {
-            if (e.target !== input) return;
-            const count = renderItems?.querySelectorAll(".items").length || 0;
-            if (count > 0) this.visibility?.open('focus');
-            console.log("abrir panel cuando el input recibe foco")
-            document.addEventListener('click', this.boundFocusClickOutSide);
-        };
-        content.addEventListener('focusin', this.boundFocusInHandler);
-
-        // --- Click: seleccionar items (delegado al contenedor) ---
-        this.boundClickHandler = (e: MouseEvent) => {
-            const eventCount = this.events.listenerCount('itemSelected');
-            if (eventCount === 0) return;
-            if (!renderItems) return;
-
-            const item = (e.target as HTMLElement).closest('.items');
-            const items = renderItems.querySelectorAll('.items') as any;
-            if (item) {
-                console.log("seleccionar items (delegado al contenedor)");
-                this.selectingItem = true;
-                this.selectedIndex = Array.from(items).indexOf(item);
-                this.#highlightItem(items);
-                this.#selectItem(item);
-                this.visibility?.close({ reason: 'blur', immediate: true });
-                queueMicrotask(() => { this.selectingItem = false; });
-            }
-        };
-        content.addEventListener('click', this.boundClickHandler);
-
-        // --- Keyboard navigation ---
-        if (this.keyboardEnabled) {
-            this.boundKeydownHandler = (e: KeyboardEvent) => {
-                if (!renderItems) return;
-                const items = renderItems.querySelectorAll('.items') as any;
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
-                    this.#highlightItem(items);
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
-                    this.#highlightItem(items);
-                } else if (['enter'].includes(e.key.toLowerCase()) && this.selectedIndex >= 0) {
-                    e.preventDefault();
-                    this.#selectItem(items[this.selectedIndex]);
-                    this.visibility?.close({ reason: 'blur', immediate: true });
-                }
-            };
-            content.addEventListener('keydown', this.boundKeydownHandler);
-        }
-
+        this.interaction = new InteractionManager({
+            targets: {
+                content: () => this.renderer.body.content as HTMLElement,
+                panel: () => this.renderer.body.contentPaginationItems as HTMLElement,
+                input: () => this.renderer.body.inputSearch as HTMLElement,
+                listbox: () => this.renderer.body.renderItems as HTMLElement
+            },
+            keyboardEnabled: this.keyboardEnabled,
+            hasSelection: () => this.selectedIndex >= 0,
+            emit: this.#onIntention
+        });
+        this.interaction.attach();
         return this;
     }
+
+    #onIntention = (i: Types.Intention): void => {
+        if (this._destroyed) return;
+
+        switch (i.type) {
+            case 'open':
+            case 'close':
+            case 'sticky':
+                if (i.type === 'close' && i.resetScroll) {
+                    this.renderer.body.renderItems?.scroll({ top: 0, behavior: 'instant' });
+                }
+                this.visibility?.handleIntention(i);
+                break;
+
+            case 'navigate': {
+                const listbox = this.renderer.body.renderItems;
+                if (!listbox) break;
+                const items = listbox.querySelectorAll('.items');
+                if (i.delta === 1) {
+                    this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
+                } else {
+                    this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
+                }
+                this.#highlightItem(items as unknown as Record<string, any>[]);
+                break;
+            }
+
+            case 'select': {
+                const listbox = this.renderer.body.renderItems;
+                if (!listbox) break;
+                const items = listbox.querySelectorAll('.items') as unknown as Record<string, any>[];
+
+                if (typeof i.index === 'number') {
+                    if (this.events.listenerCount('itemSelected') === 0) break;
+                    this.selectedIndex = i.index;
+                    this.#highlightItem(items);
+                    this.#selectItem(items[i.index]);
+                } else {
+                    if (this.selectedIndex < 0) break;
+                    this.#selectItem(items[this.selectedIndex]);
+                }
+                this.visibility?.close({ reason: 'blur', immediate: true });
+                break;
+            }
+        }
+    };
     /**
      * Destaca el item seleccionado agregando la clase 'selected'.
      * Remueve la clase de todos los demás items.
@@ -678,11 +660,8 @@ class Search {
         this._destroyed = true;
         this.events.emit('destroy', { timestamp: new Date().toISOString() } as Types.DestroyEventData);
 
-        this.renderer.body.content?.removeEventListener('input', this.boundInputHandler);
-        this.renderer.body.content?.removeEventListener('focusin', this.boundFocusInHandler);
-        document.removeEventListener('click', this.boundFocusClickOutSide);
-        this.renderer.body.content?.removeEventListener('click', this.boundClickHandler);
-        this.renderer.body.content?.removeEventListener('keydown', this.boundKeydownHandler);
+        this.interaction?.detach();
+        this.interaction = undefined;
 
         if (this.scrollObserver) {
             this.#cleanupScrollDetection();
