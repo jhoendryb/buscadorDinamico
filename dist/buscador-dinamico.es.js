@@ -9,9 +9,44 @@ var e = Object.defineProperty, t = (t, n) => {
 }, n = class e {
 	static #e = g;
 	constructor(t) {
-		this.selectingItem = !1, this.currentDrawId = 0, this.isLoadingMore = !1, this._destroyed = !1, this.abortController = null;
+		this.currentDrawId = 0, this.isLoadingMore = !1, this._destroyed = !1, this.abortController = null, this.#u = (e) => {
+			if (!this._destroyed) switch (e.type) {
+				case "open":
+				case "close":
+				case "sticky":
+					e.type === "close" && e.resetScroll && this.renderer.body.renderItems?.scroll({
+						top: 0,
+						behavior: "instant"
+					}), this.visibility?.handleIntention(e);
+					break;
+				case "navigate": {
+					let t = this.renderer.body.renderItems;
+					if (!t) break;
+					let n = t.querySelectorAll(".items");
+					e.delta === 1 ? this.selectedIndex = Math.min(this.selectedIndex + 1, n.length - 1) : this.selectedIndex = Math.max(this.selectedIndex - 1, 0), this.#d(n);
+					break;
+				}
+				case "select": {
+					let t = this.renderer.body.renderItems;
+					if (!t) break;
+					let n = t.querySelectorAll(".items");
+					if (typeof e.index == "number") {
+						if (this.events.listenerCount("itemSelected") === 0) break;
+						this.selectedIndex = e.index, this.#d(n), this.#f(n[e.index]);
+					} else {
+						if (this.selectedIndex < 0) break;
+						this.#f(n[this.selectedIndex]);
+					}
+					this.visibility?.close({
+						reason: "blur",
+						immediate: !0
+					});
+					break;
+				}
+			}
+		};
 		let { translation: n, ...r } = t;
-		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = h, this.zIndex = m, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = v.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.boundClickHandler = () => {}, this.boundKeydownHandler = () => {}, this.boundFocusInHandler = () => {}, this.boundFocusClickOutSide = () => {}, this.boundInputHandler = () => {}, this.selectingItem = !1, this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
+		this.element = void 0, this.searchTerm = "", this.data = [], this.procesServer = !1, this.keyboardEnabled = !1, this.cacheEnabled = !1, this.template = null, this.sortBy = null, this.theme = h, this.zIndex = m, this.sortOrder = "asc", this.itemsPerPage = 10, this.debounceTime = 500, this.cacheMaxSize = 50, this.cacheTtlSeconds = 300, this.dom = v.SEARCH_CONTENT_ITEMS_PAGINATION, this.selectedIndex = -1, this.developmentMode = !1, this.highlightEnabled = !1, this.highlightClass = "", Object.assign(this, r), this.errorHandler = s.getInstance(this.developmentMode), this.events = new c(this.errorHandler);
 		try {
 			this.#t(), this.scrollObserver = null, this._ajaxResponse = {}, this.t = {
 				...e.#e,
@@ -30,7 +65,7 @@ var e = Object.defineProperty, t = (t, n) => {
 					itemsOnPage: this.pagination.getPageItems(this.procesServer ? null : this._data).length,
 					totalLoaded: this.pagination.getTotalLoaded()
 				});
-			}), this.visibility = void 0;
+			}), this.visibility = void 0, this.interaction = void 0;
 		} catch (e) {
 			throw e instanceof o && this.errorHandler.logError(e, this.events), e;
 		}
@@ -54,16 +89,7 @@ var e = Object.defineProperty, t = (t, n) => {
 				panel: () => this.renderer.body.contentPaginationItems,
 				control: () => this.renderer.body.inputSearch,
 				listbox: () => this.renderer.body.renderItems,
-				hideDelayMs: this.renderer.timeHiddenResults,
-				hooks: { onClosed: async (e) => {
-					if (e === "blur" || e === "select") {
-						console.log("Que fue marico todo bien en casa?");
-						let e = this.renderer.body;
-						if (!e) return;
-						let t = e.inputSearch;
-						t && (t.value = ""), await this.draw(""), t?.blur();
-					}
-				} }
+				hideDelayMs: this.renderer.timeHiddenResults
 			}), this.setupEventDelegation(), this.draw(this.searchTerm), this.events.emit("init", {
 				searchTerm: this.searchTerm,
 				itemsPerPage: this.itemsPerPage,
@@ -201,39 +227,20 @@ var e = Object.defineProperty, t = (t, n) => {
 	setupEventDelegation() {
 		if (this._destroyed) return this;
 		let e = this.renderer.body.content, t = this.renderer.body.renderItems, n = this.renderer.body.inputSearch;
-		return !e || !t || !n ? this : (this.boundFocusClickOutSide = (t) => {
-			let n = t.target;
-			if (n && e.contains(n) || this.selectingItem || this._destroyed) return;
-			console.log("cerrar panel cuando foco sale del contenedor");
-			let r = this.renderer.body.renderItems;
-			r && r.scroll({
-				top: 0,
-				behavior: "instant"
-			}), this.visibility?.close({
-				reason: "blur",
-				immediate: !0
-			}), document.removeEventListener("click", this.boundFocusClickOutSide);
-		}, this.boundFocusInHandler = (e) => {
-			e.target === n && ((t?.querySelectorAll(".items").length || 0) > 0 && this.visibility?.open("focus"), console.log("abrir panel cuando el input recibe foco"), document.addEventListener("click", this.boundFocusClickOutSide));
-		}, e.addEventListener("focusin", this.boundFocusInHandler), this.boundClickHandler = (e) => {
-			if (this.events.listenerCount("itemSelected") === 0 || !t) return;
-			let n = e.target.closest(".items"), r = t.querySelectorAll(".items");
-			n && (console.log("seleccionar items (delegado al contenedor)"), this.selectingItem = !0, this.selectedIndex = Array.from(r).indexOf(n), this.#u(r), this.#d(n), this.visibility?.close({
-				reason: "blur",
-				immediate: !0
-			}), queueMicrotask(() => {
-				this.selectingItem = !1;
-			}));
-		}, e.addEventListener("click", this.boundClickHandler), this.keyboardEnabled && (this.boundKeydownHandler = (e) => {
-			if (!t) return;
-			let n = t.querySelectorAll(".items");
-			e.key === "ArrowDown" ? (e.preventDefault(), this.selectedIndex = Math.min(this.selectedIndex + 1, n.length - 1), this.#u(n)) : e.key === "ArrowUp" ? (e.preventDefault(), this.selectedIndex = Math.max(this.selectedIndex - 1, 0), this.#u(n)) : ["enter"].includes(e.key.toLowerCase()) && this.selectedIndex >= 0 && (e.preventDefault(), this.#d(n[this.selectedIndex]), this.visibility?.close({
-				reason: "blur",
-				immediate: !0
-			}));
-		}, e.addEventListener("keydown", this.boundKeydownHandler)), this);
+		return !e || !t || !n ? this : (this.interaction = new C({
+			targets: {
+				content: () => this.renderer.body.content,
+				panel: () => this.renderer.body.contentPaginationItems,
+				input: () => this.renderer.body.inputSearch,
+				listbox: () => this.renderer.body.renderItems
+			},
+			keyboardEnabled: this.keyboardEnabled,
+			hasSelection: () => this.selectedIndex >= 0,
+			emit: this.#u
+		}), this.interaction.attach(), this);
 	}
-	#u(e) {
+	#u;
+	#d(e) {
 		e.forEach((e, t) => {
 			t === this.selectedIndex ? (e.classList.add("selected"), this.renderer.body.renderItems?.setAttribute("aria-activedescendant", e.id), e.scrollIntoView({
 				behavior: "smooth",
@@ -244,7 +251,7 @@ var e = Object.defineProperty, t = (t, n) => {
 			})) : e.classList.remove("selected");
 		});
 	}
-	#d(e) {
+	#f(e) {
 		this.events.emit("itemSelected", {
 			item: e,
 			index: this.selectedIndex
@@ -254,7 +261,7 @@ var e = Object.defineProperty, t = (t, n) => {
 		return this._destroyed ? this : (this.searchTerm = "", this.renderer.body.inputSearch && (this.renderer.body.inputSearch.value = this.searchTerm), this.renderer.body.renderItems && (this.renderer.body.renderItems.innerHTML = ""), this.sortBy !== null && this.clearSort(), this.cache.clear(), this.pagination.goToPage(1), this.draw(this.searchTerm, !0), this.selectedIndex = -1, this);
 	}
 	destroy() {
-		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.renderer.body.content?.removeEventListener("input", this.boundInputHandler), this.renderer.body.content?.removeEventListener("focusin", this.boundFocusInHandler), document.removeEventListener("click", this.boundFocusClickOutSide), this.renderer.body.content?.removeEventListener("click", this.boundClickHandler), this.renderer.body.content?.removeEventListener("keydown", this.boundKeydownHandler), this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
+		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.interaction?.detach(), this.interaction = void 0, this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
 			let e = this.renderer.body.inputSearch.cloneNode(!0);
 			this.renderer.body.inputSearch.parentNode && this.renderer.body.inputSearch.parentNode.replaceChild(e, this.renderer.body.inputSearch);
 		}
@@ -977,8 +984,7 @@ var i = class {
 	#a = !1;
 	#o = !1;
 	#s = 0;
-	#c = [];
-	#l = !1;
+	#c = !1;
 	constructor(e) {
 		this.#e = {
 			parent: e.parent,
@@ -997,117 +1003,204 @@ var i = class {
 		return this.#t === "open" || this.#t === "opening";
 	}
 	open(e = "programmatic") {
-		this.#l || this.isOpen || (this.#r++, this.#g(), this.#b(), this.#u(e));
+		this.#c || this.isOpen || (this.#r++, this.#h(), this.#l(e));
 	}
 	close(e = {}) {
-		if (this.#l || this.#t === "closed" || !e.immediate && this.#t === "closing") return;
+		if (this.#c || this.#t === "closed" || !e.immediate && this.#t === "closing") return;
 		let t = e.reason ?? "programmatic";
-		this.#n = t, this.#r++, this.#g(), this.#s = 0;
-		let n = this.#_();
+		this.#n = t, this.#r++, this.#h(), this.#s = 0;
+		let n = this.#g();
 		if (e.immediate || n <= 0) {
-			this.#e.hooks.onClose?.(t), this.#f(t);
+			this.#e.hooks.onClose?.(t), this.#d(t);
 			return;
 		}
-		this.#t = "closing", this.#y(), this.#h(() => this.#p(), n);
+		this.#t = "closing", this.#v(), this.#m(() => this.#f(), n);
 	}
 	toggle() {
 		this.isOpen ? this.close({ reason: "toggle" }) : this.open("toggle");
 	}
 	stickForInteraction() {
-		this.#l || (this.#s = Date.now() + this.#e.hideDelayMs, this.cancelPendingClose());
+		this.#c || (this.#s = Date.now() + this.#e.hideDelayMs, this.cancelPendingClose());
 	}
 	cancelPendingClose() {
-		this.#l || this.#t !== "closing" || (this.#g(), this.#u("focus"));
+		this.#c || this.#t !== "closing" || (this.#h(), this.#l("focus"));
 	}
 	refresh() {
-		this.#l || this.#y();
+		this.#c || this.#v();
 	}
 	destroy() {
-		this.#l = !0, this.#r++, this.#g(), this.#c.forEach(([e, t, n]) => e.removeEventListener(t, n)), this.#c = [], this.#a = !1, this.#o = !1, this.#s = 0, this.#t = "closed";
+		this.#c = !0, this.#r++, this.#h(), this.#a = !1, this.#o = !1, this.#s = 0, this.#t = "closed";
+	}
+	#l(e) {
+		this.#t = "opening", this.#v(), this.#e.hooks.onOpen?.(e);
+		let t = this.#g();
+		t <= 0 ? this.#u(e) : this.#m(() => this.#u(e), t);
 	}
 	#u(e) {
-		this.#t = "opening", this.#y(), this.#e.hooks.onOpen?.(e);
-		let t = this.#_();
-		t <= 0 ? this.#d(e) : this.#h(() => this.#d(e), t);
+		this.#c || !this.isOpen || (this.#t = "open", this.#v(), this.#e.hooks.onOpened?.(e));
 	}
 	#d(e) {
-		this.#l || !this.isOpen || (this.#t = "open", this.#y(), this.#e.hooks.onOpened?.(e));
+		this.#t = "closed", this.#v(), this.#e.hooks.onClosed?.(e);
 	}
-	#f(e) {
-		this.#t = "closed", this.#y(), this.#e.hooks.onClosed?.(e);
-	}
-	#p() {
+	#f() {
 		if (this.#t === "closing") {
-			if (this.#m()) {
+			if (this.#p()) {
 				this.cancelPendingClose();
 				return;
 			}
-			this.#e.hooks.onClose?.(this.#n), this.#f(this.#n);
+			this.#e.hooks.onClose?.(this.#n), this.#d(this.#n);
 		}
 	}
-	#m() {
+	#p() {
 		if (this.#a || this.#o || Date.now() < this.#s) return !0;
 		let e = this.#e.panel(), t = typeof document < "u" ? document.activeElement : null;
 		return !!e && !!t && t !== document.body && e.contains(t);
 	}
-	#h(e, t) {
+	#m(e, t) {
 		let n = ++this.#r;
-		this.#g(), this.#i = setTimeout(() => {
+		this.#h(), this.#i = setTimeout(() => {
 			n === this.#r && e();
 		}, t);
 	}
-	#g() {
+	#h() {
 		this.#i !== null && (clearTimeout(this.#i), this.#i = null);
 	}
-	#_() {
-		return this.#v() ? this.#e.reducedMotionMs : this.#e.hideDelayMs;
+	#g() {
+		return this.#_() ? this.#e.reducedMotionMs : this.#e.hideDelayMs;
 	}
-	#v() {
+	#_() {
 		try {
 			return typeof matchMedia == "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 		} catch {
 			return !1;
 		}
 	}
-	#y() {
+	handleIntention(e) {
+		if (!this.#c) switch (e.type) {
+			case "open":
+				this.open(e.source);
+				break;
+			case "close":
+				this.close({
+					reason: e.reason,
+					immediate: e.immediate
+				});
+				break;
+			case "sticky":
+				e.region === "pointer" ? this.#a = e.on : e.region === "focus" ? this.#o = e.on : e.on && this.stickForInteraction();
+				break;
+			default: break;
+		}
+	}
+	#v() {
 		let e = this.#e.panel();
 		if (!e) return;
 		let t = this.#t === "open" || this.#t === "opening";
 		e.classList.toggle("content-pagination-visible", t), e.classList.toggle("content-pagination-hidden", !t), t ? e.removeAttribute("hidden") : this.#t === "closed" && e.setAttribute("hidden", "true"), this.#e.control?.()?.setAttribute("aria-expanded", String(t)), this.#e.listbox?.()?.setAttribute("aria-hidden", String(!t));
 	}
-	#b() {
-		let e = this.#e.panel(), t = this.#e.parent();
-		!e || !t || this.#c.length > 0 || (this.#x(t, "keydown", (e) => {
-			let t = e;
-			if (t.key === "Escape" && t.key === "Escape") {
-				console.log("ESC presionado: cerrar panel de resultados"), this.close({ reason: "blur" });
+}, C = class {
+	#e = null;
+	#t;
+	#n;
+	#r;
+	#i;
+	constructor(e) {
+		this.#t = e.targets, this.#n = e.keyboardEnabled, this.#r = e.hasSelection, this.#i = e.emit;
+	}
+	attach() {
+		if (this.#e) return;
+		let e = this.#t.content(), t = this.#t.panel();
+		if (!e || !t) return;
+		this.#e = new AbortController();
+		let n = this.#e.signal;
+		e.addEventListener("focusin", (e) => {
+			let t = this.#t.input();
+			e.target === t && ((this.#t.listbox()?.querySelectorAll(".items").length ?? 0) > 0 && this.#i({
+				type: "open",
+				source: "focus"
+			}), document.addEventListener("click", this.#a, { signal: n }));
+		}, { signal: n }), e.addEventListener("click", (e) => {
+			let t = this.#t.listbox();
+			if (!t) return;
+			let n = e.target.closest(".items");
+			if (!n) return;
+			let r = t.querySelectorAll(".items");
+			this.#i({
+				type: "select",
+				index: Array.from(r).indexOf(n)
+			});
+		}, { signal: n }), e.addEventListener("keydown", (e) => {
+			let t = e.key;
+			if (t === "Escape") {
+				e.preventDefault(), this.#i({
+					type: "close",
+					reason: "blur",
+					immediate: !0
+				});
 				return;
 			}
-		}), this.#x(e, "pointerdown", () => {
-			console.log("Click en panel: usuario interactuando con resultados"), this.#a = !0, this.stickForInteraction();
-		}), this.#x(e, "pointermove", () => {
-			console.log("Movimiento del mouse sobre panel: mantener panel abierto"), this.#a = !0, this.stickForInteraction();
-		}), this.#x(e, "pointerenter", () => {
-			console.log("Mouse entra al panel: marcar usuario dentro"), this.#a = !0;
-		}), this.#x(e, "pointerleave", () => {
-			console.log("Mouse sale del panel: marcar usuario fuera"), this.#a = !1;
-		}), this.#x(e, "touchstart", () => {
-			console.log("Toque en panel: usuario interactuando táctilmente"), this.#a = !0, this.stickForInteraction();
-		}, { passive: !0 }), this.#x(e, "focusin", () => {
-			console.log("Foco entra al panel: elemento recibió foco por teclado/navegación"), this.#o = !0;
-		}), this.#x(e, "focusout", ((t) => {
-			console.log("Foco sale del panel: elemento perdió foco, verificar si sigue dentro");
-			let n = t.relatedTarget;
-			this.#o = !!n && e.contains(n);
-		})));
+			if (this.#n) {
+				if (t === "ArrowDown") e.preventDefault(), this.#i({
+					type: "navigate",
+					delta: 1
+				});
+				else if (t === "ArrowUp") e.preventDefault(), this.#i({
+					type: "navigate",
+					delta: -1
+				});
+				else if (t === "Enter") {
+					if (!this.#r()) return;
+					e.preventDefault(), this.#i({ type: "select" });
+				}
+			}
+		}, { signal: n }), t.addEventListener("pointerenter", () => this.#i({
+			type: "sticky",
+			region: "pointer",
+			on: !0
+		}), { signal: n }), t.addEventListener("pointerleave", () => this.#i({
+			type: "sticky",
+			region: "pointer",
+			on: !1
+		}), { signal: n }), t.addEventListener("pointerdown", () => this.#i({
+			type: "sticky",
+			region: "interaction",
+			on: !0
+		}), { signal: n }), t.addEventListener("pointermove", () => this.#i({
+			type: "sticky",
+			region: "interaction",
+			on: !0
+		}), { signal: n }), t.addEventListener("touchstart", () => this.#i({
+			type: "sticky",
+			region: "interaction",
+			on: !0
+		}), {
+			signal: n,
+			passive: !0
+		}), t.addEventListener("focusin", () => this.#i({
+			type: "sticky",
+			region: "focus",
+			on: !0
+		}), { signal: n }), t.addEventListener("focusout", (e) => {
+			let n = e.relatedTarget;
+			this.#i({
+				type: "sticky",
+				region: "focus",
+				on: !!n && t.contains(n)
+			});
+		}, { signal: n });
 	}
-	#x(e, t, n, r) {
-		e.addEventListener(t, n, r), this.#c.push([
-			e,
-			t,
-			n
-		]);
+	detach() {
+		this.#e?.abort(), this.#e = null;
 	}
+	#a = (e) => {
+		let t = this.#t.content();
+		t && e.target instanceof Node && t.contains(e.target) || this.#i({
+			type: "close",
+			reason: "blur",
+			immediate: !0,
+			resetScroll: !0
+		});
+	};
 };
 //#endregion
-export { p as Constants, a as ErrorCode, s as ErrorHandler, c as EventEmitter, i as LRUCache, l as Pagination, n as Search, o as SearchError, y as SearchRenderer, b as SearchingLocal, x as SearchingServer, d as Types, S as VisibilityManager, r as createElement };
+export { p as Constants, a as ErrorCode, s as ErrorHandler, c as EventEmitter, C as InteractionManager, i as LRUCache, l as Pagination, n as Search, o as SearchError, y as SearchRenderer, b as SearchingLocal, x as SearchingServer, d as Types, S as VisibilityManager, r as createElement };
