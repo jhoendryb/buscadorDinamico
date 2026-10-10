@@ -123,7 +123,7 @@ var e = Object.defineProperty, t = (t, n) => {
 	async draw(e = this.searchTerm, t = !1) {
 		if (this._destroyed) return this;
 		let n = ++this.currentDrawId;
-		this.renderer.body.renderItems && (e !== this.searchTerm || e === "") && (console.log("draw que fue", e, this.searchTerm), this.renderer.body.renderItems.scrollTop = 0, this.renderer.body.renderItems.innerHTML = "", this.renderer.body.renderItems.removeAttribute("aria-activedescendant"), this.pagination.goToPage(1), this.selectedIndex = -1, this.events.emit("resultsCleared", { previousSearchTerm: this.searchTerm }));
+		this.renderer.body.renderItems && (e !== this.searchTerm || e === "") && (this.renderer.body.renderItems.scrollTop = 0, this.renderer.body.renderItems.innerHTML = "", this.renderer.body.renderItems.removeAttribute("aria-activedescendant"), this.pagination.goToPage(1), this.selectedIndex = -1, this.events.emit("resultsCleared", { previousSearchTerm: this.searchTerm }));
 		let r = await this.#r(e, !0);
 		return n === this.currentDrawId ? (this._data = r?.data || [], this.searchTerm = e, t && this.events.emit("search", {
 			searchTerm: e,
