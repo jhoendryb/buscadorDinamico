@@ -6,3 +6,5 @@ node_modules
 skills-lock.json
 opencode.json
 .env
+pruebas
+.playwright-mcp
