@@ -162,7 +162,7 @@ describe('VisibilityManager', () => {
         manager.open();
         jest.advanceTimersByTime(300);
 
-        panel.dispatchEvent(new Event('pointerenter'));
+        manager.handleIntention({ type: 'sticky', region: 'pointer', on: true });
         manager.close({ reason: 'blur' });
         jest.advanceTimersByTime(300); // resolveClosing → cancelPendingClose → re-opens
         jest.advanceTimersByTime(300); // commitOpen fires
@@ -170,7 +170,7 @@ describe('VisibilityManager', () => {
         expect(manager.phase).toBe('open'); // rebote
 
         // al salir el puntero, el siguiente blur sí cierra
-        panel.dispatchEvent(new Event('pointerleave'));
+        manager.handleIntention({ type: 'sticky', region: 'pointer', on: false });
         manager.close({ reason: 'blur' });
         jest.advanceTimersByTime(300);
 
@@ -200,7 +200,7 @@ describe('VisibilityManager', () => {
         manager.close({ reason: 'blur' });
         jest.advanceTimersByTime(100);
 
-        panel.dispatchEvent(new Event('pointerdown'));
+        manager.handleIntention({ type: 'sticky', region: 'interaction', on: true });
         jest.advanceTimersByTime(400);
 
         expect(manager.phase).toBe('open');
