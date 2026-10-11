@@ -183,20 +183,22 @@ class Search {
                 control: () => this.renderer.body.inputSearch as HTMLElement,
                 listbox: () => this.renderer.body.renderItems as HTMLElement,
                 hideDelayMs: this.renderer.timeHiddenResults,
-                // hooks: {
-                //     onClosed: async (reason: Types.CloseReason) => {
-                //         if (reason === 'blur' || reason === 'select') {
-                //             console.log("Que fue marico todo bien en casa?");
-                //             const element = this.renderer.body;
-                //             if (!element) return;
-                //             const input = element.inputSearch as HTMLInputElement;
-                //             if (input) input.value = '';
-                //             await this.draw('');
-                //             input?.blur();
-                //         }
-                //     }
-                // }
-                //
+                hooks: {
+                    onClosed: async (reason: Types.CloseReason) => {
+                        if (reason === 'blur' || reason === 'select') {
+                            const element = this.renderer.body;
+                            if (!element) return;
+                            const input = element.inputSearch as HTMLInputElement;
+                            if (input) input.value = '';
+                            /* 
+                                TODO: esto no esta bien siento que el draw es imnecesario,
+                                    revisar que se puede hacer.
+                            */
+                            await this.draw('');
+                            input?.blur();
+                        }
+                    }
+                }
             });
 
             this.setupEventDelegation();
