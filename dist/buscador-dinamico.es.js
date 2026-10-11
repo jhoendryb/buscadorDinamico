@@ -89,7 +89,15 @@ var e = Object.defineProperty, t = (t, n) => {
 				panel: () => this.renderer.body.contentPaginationItems,
 				control: () => this.renderer.body.inputSearch,
 				listbox: () => this.renderer.body.renderItems,
-				hideDelayMs: this.renderer.timeHiddenResults
+				hideDelayMs: this.renderer.timeHiddenResults,
+				hooks: { onClosed: async (e) => {
+					if (e === "blur" || e === "select") {
+						let e = this.renderer.body;
+						if (!e) return;
+						let t = e.inputSearch;
+						t && (t.value = ""), await this.draw(""), t?.blur();
+					}
+				} }
 			}), this.setupEventDelegation(), this.draw(this.searchTerm), this.events.emit("init", {
 				searchTerm: this.searchTerm,
 				itemsPerPage: this.itemsPerPage,
