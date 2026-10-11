@@ -31,6 +31,12 @@
     <li>Clic fuera del contenedor resetea el scroll del listbox antes de cerrar el panel</li>
 </ul>
 
+<h3 id="corregido-sin-publicar">Corregido</h3>
+
+<ul>
+    <li>El mensaje de "sin resultados" se trataba como una opción seleccionable (#30) — ahora se renderiza con la clase <code>search-no-results</code> y <code>role="status"</code> (sin <code>role="option"</code>, <code>tabindex</code> ni <code>id</code>), las flechas del teclado no marcan nada con la lista vacía, <code>Enter</code> y el clic en el mensaje no emiten <code>itemSelected</code>, y <code>selectedIndex</code> se mantiene en <code>-1</code></li>
+</ul>
+
 <h2 id="v1-0-2">v1.0.2 <span class="doc-badge doc-badge--success">Latest</span> — Items duplicados al cerrar</h2>
 
 <p><em>Septiembre 2026</em></p>
