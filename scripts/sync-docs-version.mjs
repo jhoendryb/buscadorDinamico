@@ -79,6 +79,16 @@ for (const { file, replacements } of targets) {
 }
 
 const versionJson = join(root, 'DocumentacionV2', 'version.json');
-writeFileSync(versionJson, JSON.stringify({ version }, null, 2) + '\n');
-console.log(`[docs:version] version.json escrito con v${version}`);
-console.log(`[docs:version] Listo (${changed} archivo(s) de HTML/JS actualizados).`);
+const desiredJson = JSON.stringify({ version }, null, 2) + '\n';
+let jsonChanged = false;
+if (!existsSync(versionJson) || readFileSync(versionJson, 'utf8') !== desiredJson) {
+    writeFileSync(versionJson, desiredJson);
+    jsonChanged = true;
+    console.log(`[docs:version] version.json escrito con v${version}`);
+}
+
+if (changed === 0 && !jsonChanged) {
+    console.log(`[docs:version] Sin cambios: la documentación ya está en v${version}.`);
+} else {
+    console.log(`[docs:version] Listo (${changed} archivo(s) de HTML/JS actualizados).`);
+}
