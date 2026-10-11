@@ -166,12 +166,10 @@ search.init(); // internamente llama setupEventDelegation()</code></pre>
 
 <pre data-lang="typescript"><code>visibility.open(reason?: OpenReason): void
 visibility.close(options?: CloseOptions): void
-visibility.toggle(): void
-visibility.stickForInteraction(): void
-visibility.cancelPendingClose(): void
-visibility.refresh(): void
 visibility.handleIntention(intention: Intention): void
 visibility.destroy(): void</code></pre>
+
+<p><em>Los métodos <code>toggle()</code>, <code>refresh()</code>, <code>stickForInteraction()</code> y <code>cancelPendingClose()</code> fueron eliminados o hechos internos: todo el comportamiento de apertura, cierre y permanencia se controla ahora a través de <code>handleIntention()</code> y las intenciones del <code>InteractionManager</code>. También se eliminó <code>refresh()</code> (escape hatch sin uso).</em></p>
 
 <table>
     <thead>
@@ -190,28 +188,12 @@ visibility.destroy(): void</code></pre>
             <td>Cierra el panel. <code>options.immediate</code> para commit síncrono (selección de item). Razones: <code>'blur'</code>, <code>'select'</code>, <code>'toggle'</code>, <code>'programmatic'</code></td>
         </tr>
         <tr>
-            <td><code>toggle()</code></td>
-            <td>Alterna entre abierto y cerrado</td>
-        </tr>
-        <tr>
-            <td><code>stickForInteraction()</code></td>
-            <td>Mantiene abierto durante una interacción (click)</td>
-        </tr>
-        <tr>
-            <td><code>cancelPendingClose()</code></td>
-            <td>Revierte un cierre en curso (usado por <code>pointerenter</code>/<code>focusin</code> del panel)</td>
-        </tr>
-        <tr>
-            <td><code>refresh()</code></td>
-            <td>Re-sincroniza el DOM desde la fase actual</td>
-        </tr>
-        <tr>
             <td><code>handleIntention(intention)</code></td>
-            <td>Aplica una intención del <code>InteractionManager</code> (<code>open</code>, <code>close</code>, <code>sticky</code>). Es el canal único entre la interacción del usuario y la FSM de visibilidad</td>
+            <td>Aplica una intención del <code>InteractionManager</code> (<code>open</code>, <code>close</code>, <code>sticky</code>). Es el canal único entre la interacción del usuario y la FSM de visibilidad; las intenciones <code>sticky</code> (pointer, foco o interacción/click) son las que mantienen abierto el panel o revierten un cierre en curso</td>
         </tr>
         <tr>
             <td><code>destroy()</code></td>
-            <td>Limpia timers y estado interno (los listeners de DOM ya no los gestiona él mismo)</td>
+            <td>Limpia timers y estado interno. Se llama automáticamente desde <code>search.destroy()</code></td>
         </tr>
     </tbody>
 </table>
