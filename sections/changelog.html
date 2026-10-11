@@ -2,7 +2,56 @@
 
 <p>Historial de versiones y cambios del componente basado en el historial real del repositorio.</p>
 
-<h2 id="v1-0-0">v1.0.0 <span class="doc-badge doc-badge--success">Latest</span> — VisibilityManager + ARIA + Event Delegation</h2>
+<h2 id="sin-publicar">Sin publicar <span class="doc-badge doc-badge--warning">En desarrollo</span> — InteractionManager (unificación de eventos)</h2>
+
+<p><em>Octubre 2026</em></p>
+
+<h3 id="anadido-sin-publicar">Añadido</h3>
+
+<ul>
+    <li><code>InteractionManager</code> — módulo centralizado que captura todos los eventos de interacción del DOM y los convierte en <em>intenciones</em> tipadas (<code>Types.Intention</code>: <code>open</code>, <code>close</code>, <code>navigate</code>, <code>select</code>, <code>sticky</code>)
+        <ul>
+            <li><code>attach()</code> / <code>detach()</code> — montaje y desmontaje atómico de listeners vía <code>AbortController</code></li>
+            <li>Listeners del panel (<code>pointerenter</code>/<code>pointerleave</code>/<code>pointerdown</code>/<code>pointermove</code>/<code>touchstart</code>/<code>focusin</code>/<code>focusout</code>) traducidos a intenciones <code>sticky</code></li>
+        </ul>
+    </li>
+    <li>Cierre del panel con la tecla <code>Escape</code> (siempre activo, independiente de <code>keyboardEnabled</code>)</li>
+    <li><code>VisibilityManager.handleIntention(intention)</code> — aplica intenciones de <code>open</code>, <code>close</code> y <code>sticky</code> sobre la FSM de visibilidad</li>
+    <li>Tipo <code>Intention</code> (unión discriminada) y exportación de <code>InteractionManager</code> desde el entrypoint del paquete</li>
+</ul>
+
+<h3 id="cambiado-sin-publicar">Cambiado</h3>
+
+<ul>
+    <li><code>setupEventDelegation()</code> ahora delega en un <code>InteractionManager</code> interno en lugar de 5 handlers sueltos (<code>boundClickHandler</code>, <code>boundKeydownHandler</code>, <code>boundFocusInHandler</code>, <code>boundFocusClickOutSide</code>, <code>boundInputHandler</code>)</li>
+    <li><code>destroy()</code> limpia todos los listeners de interacción con un solo <code>AbortController.abort()</code> vía <code>InteractionManager.detach()</code></li>
+    <li><code>VisibilityManager</code> ya no registra sus propios listeners de DOM (<code>#ensureListeners()</code> eliminado): los recibe como intenciones desde <code>InteractionManager</code></li>
+    <li>El evento <code>resultsCleared</code> se emite <em>después</em> de limpiar la lista, paginación, scroll y selección, y también cuando el término de búsqueda es vacío (<code>''</code>)</li>
+    <li>El indicador de carga solo se muestra al renderizar la página 1 (<code>showLoading && page &lt;= 1</code>), evitando parpadeos durante el scroll infinito</li>
+    <li>Clic fuera del contenedor resetea el scroll del listbox antes de cerrar el panel</li>
+</ul>
+
+<h2 id="v1-0-2">v1.0.2 <span class="doc-badge doc-badge--success">Latest</span> — Items duplicados al cerrar</h2>
+
+<p><em>Septiembre 2026</em></p>
+
+<h3 id="corregido-v1-0-2">Corregido</h3>
+
+<ul>
+    <li>Items duplicados al cerrar el componente (#13) — <code>draw('')</code> ahora limpia siempre la lista de resultados, resetea la paginación a la página 1, el scroll y la selección antes de re-renderizar</li>
+</ul>
+
+<h2 id="v1-0-1">v1.0.1 — Icono de carga</h2>
+
+<p><em>Septiembre 2026</em></p>
+
+<h3 id="corregido-v1-0-1">Corregido</h3>
+
+<ul>
+    <li>El icono de carga no se removía al abrir el componente (#12) — <code>renderer.showLoading()</code> solo se invoca cuando se renderiza la página 1</li>
+</ul>
+
+<h2 id="v1-0-0">v1.0.0 — VisibilityManager + ARIA + Event Delegation</h2>
 
 <p><em>Septiembre 2026</em></p>
 
@@ -41,7 +90,7 @@
     <li><code>aria-activedescendant</code> en el <code>&lt;ul&gt;</code> para item destacado por teclado</li>
     <li><code>&lt;li class="scroll-sentinel" role="presentation" aria-hidden="true"&gt;</code> — sentinel de scroll semántico</li>
     <li><code>role="status"</code> y <code>aria-live="polite"</code> en el contenedor del contador</li>
-    <li>Propiedad pública <code>renderer.visibility</code> para acceder al VisibilityManager</li>
+    <li>Propiedad pública <code>search.visibility</code> para acceder al VisibilityManager</li>
     <li>Navegación táctil para dispositivos móviles (scroll con dedo)</li>
     <li>Soporte para <code>prefers-reduced-motion</code> — desactiva transiciones en el panel</li>
     <li>Traducción <code>ariaLabel</code> — label accesible del input, default <code>"Filtrar por Búsqueda"</code></li>

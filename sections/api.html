@@ -22,7 +22,9 @@
 
 <pre data-lang="typescript"><code>draw(searchTerm?: string, isEvent?: boolean): Promise&lt;Search&gt;</code></pre>
 
-<p>Ejecuta una búsqueda y renderiza los resultados. Se llama automáticamente al escribir en el input. Incluye protección contra condiciones de carrera: si se ejecuta una nueva búsqueda antes de que termine la anterior, la anterior se descarta automáticamente.</p>
+<p>Ejecuta una búsqueda y renderiza los resultados. Se llama automáticamente al escribir en el input. Incluye protección contra condiciones de carrera: si se ejecuta una nueva búsqueda antes de que termine la anterior, la anterior se descarta automáticamente. En modo servidor, cada ejecución cancela la petición HTTP anterior en curso mediante <code>AbortController</code>.</p>
+
+<p>Cuando el término de búsqueda cambia <strong>o es vacío</strong> (<code>''</code>), se limpia la lista de resultados, se resetea la paginación a la página 1, el scroll del listbox y la selección, y se emite el evento <code>resultsCleared</code>. El indicador de carga (<code>showLoading</code>) solo se muestra al renderizar la página 1.</p>
 
 <table>
     <thead>
@@ -96,23 +98,24 @@ search.sort('precio', 'desc');</code></pre>
 
 <pre data-lang="typescript"><code>setupEventDelegation(): Search</code></pre>
 
-<p>Configura la delegación de eventos en el contenedor principal <code>&lt;search&gt;</code>. Todos los eventos de interacción (focus, blur, click, keyboard) se manejan en el contenedor usando event delegation.</p>
+<p>Configura la delegación de eventos en el contenedor principal <code>&lt;search&gt;</code> creando una instancia interna de <code>InteractionManager</code>. Todos los listeners de interacción (focus, click, teclado e interacción con el panel) se registran bajo un único <code>AbortController</code>, de modo que <code>destroy()</code> puede desmontarlos de forma atómica con <code>detach()</code> (antes eran 5 <code>removeEventListener</code> dispersos).</p>
 
-<p>Este método se llama automáticamente desde <code>init()</code>, pero puede reinvocarse si se modifica el DOM externamente.</p>
+<p>Este método se llama automáticamente desde <code>init()</code>.</p>
 
 <p>Comportamiento:</p>
 <ul>
     <li><strong>focusin</strong> en el input: abre el panel si hay items</li>
-    <li><strong>click</strong> fuera del contenedor: cierra el panel</li>
-    <li><strong>click</strong> en un item: selecciona, limpia el input y cierra el panel</li>
+    <li><strong>click</strong> fuera del contenedor: cierra el panel y resetea el scroll del listbox (los clics internos se ignoran)</li>
+    <li><strong>click</strong> en un item: selecciona y cierra el panel (solo si hay listeners registrados para <code>itemSelected</code>)</li>
+    <li><strong>keydown Escape</strong>: cierra el panel — siempre activo, no requiere <code>keyboardEnabled</code></li>
     <li><strong>keydown</strong> (solo si <code>keyboardEnabled: true</code>): ArrowUp/ArrowDown navega, Enter selecciona</li>
+    <li><strong>pointer/focus/touch sobre el panel</strong>: mantiene abierto el panel durante la interacción</li>
 </ul>
 
-<pre data-lang="javascript"><code>// Se llama automáticamente al hacer init()
-search.init(); // internamente llama setupEventDelegation()
+<p>Cada evento del DOM se traduce en una <em>intención</em> tipada (<code>Types.Intention</code>: <code>open</code>, <code>close</code>, <code>navigate</code>, <code>select</code>, <code>sticky</code>) que se enruta a <code>VisibilityManager.handleIntention()</code> o a la navegación/selección interna de <code>Search</code>.</p>
 
-// O re-invocar si se necesita
-search.setupEventDelegation();</code></pre>
+<pre data-lang="javascript"><code>// Se llama automáticamente al hacer init()
+search.init(); // internamente llama setupEventDelegation()</code></pre>
 
 <h3>processInfiniteScroll()</h3>
 
@@ -126,7 +129,7 @@ search.setupEventDelegation();</code></pre>
 
 <pre data-lang="typescript"><code>destroy(): void</code></pre>
 
-<p>Destruye la instancia, limpiando todos los event listeners, observer de scroll y referencias internas. Las propiedades se re-inicializan en lugar de nullificarse para evitar errores de referencia nula. También llama a <code>renderer.destroy()</code> para limpiar timeouts y referencias del DOM.</p>
+<p>Destruye la instancia, limpiando todos los event listeners, observer de scroll y referencias internas. Los listeners de interacción se desmontan de forma atómica mediante <code>InteractionManager.detach()</code> (<code>AbortController.abort()</code>). Las propiedades se re-inicializan en lugar de nullificarse para evitar errores de referencia nula. También llama a <code>renderer.destroy()</code> para limpiar timeouts y referencias del DOM.</p>
 
 <pre data-lang="javascript"><code>search.destroy(); // Limpia todo</code></pre>
 
@@ -145,7 +148,7 @@ search.setupEventDelegation();</code></pre>
     textPagination: '{{from}} - {{to}} de {{total}}'
 });</code></pre>
 
-<p><em>Los métodos <code>showResults()</code>, <code>hideResults()</code>, <code>toggleResults()</code> y <code>hideResultsWithDelay()</code> fueron reemplazados por <code>renderer.visibility</code> (VisibilityManager). Ver más abajo.</em></p>
+<p><em>Los métodos <code>showResults()</code>, <code>hideResults()</code>, <code>toggleResults()</code> y <code>hideResultsWithDelay()</code> fueron reemplazados por <code>search.visibility</code> (VisibilityManager). Ver más abajo.</em></p>
 
 <h3>renderer.destroy()</h3>
 
@@ -153,11 +156,11 @@ search.setupEventDelegation();</code></pre>
 
 <p>Limpia timeouts de animación, hideTimeout y reinicia las referencias del DOM. Se llama automáticamente desde <code>search.destroy()</code>.</p>
 
-<h3>renderer.visibility</h3>
+<h3>search.visibility</h3>
 
-<p>Propiedad de solo lectura que expone la instancia de <code>VisibilityManager</code>, la máquina de estados que controla la apertura/cierre del panel de resultados.</p>
+<p>Propiedad pública de <code>Search</code> que expone la instancia de <code>VisibilityManager</code>, la máquina de estados que controla la apertura/cierre del panel de resultados. Está disponible una vez llamado <code>init()</code>.</p>
 
-<pre data-lang="typescript"><code>readonly visibility: VisibilityManager</code></pre>
+<pre data-lang="typescript"><code>visibility: VisibilityManager | undefined // undefined hasta init()</code></pre>
 
 <h4>Métodos del VisibilityManager</h4>
 
@@ -167,6 +170,7 @@ visibility.toggle(): void
 visibility.stickForInteraction(): void
 visibility.cancelPendingClose(): void
 visibility.refresh(): void
+visibility.handleIntention(intention: Intention): void
 visibility.destroy(): void</code></pre>
 
 <table>
@@ -202,8 +206,12 @@ visibility.destroy(): void</code></pre>
             <td>Re-sincroniza el DOM desde la fase actual</td>
         </tr>
         <tr>
+            <td><code>handleIntention(intention)</code></td>
+            <td>Aplica una intención del <code>InteractionManager</code> (<code>open</code>, <code>close</code>, <code>sticky</code>). Es el canal único entre la interacción del usuario y la FSM de visibilidad</td>
+        </tr>
+        <tr>
             <td><code>destroy()</code></td>
-            <td>Limpia timers, listeners y estado interno</td>
+            <td>Limpia timers y estado interno (los listeners de DOM ya no los gestiona él mismo)</td>
         </tr>
     </tbody>
 </table>

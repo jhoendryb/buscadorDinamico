@@ -26,11 +26,13 @@
     SearchError,
     EventEmitter,
     VisibilityManager,
+    InteractionManager,
     VisibilityManagerOptions,
     CloseOptions,
     DropdownPhase,
     OpenReason,
-    CloseReason
+    CloseReason,
+    Intention
 } from '@jhoendryb/buscador-dinamico';</code></pre>
 
 <h2>Interfaz SearchParams</h2>
@@ -123,6 +125,17 @@ interface CloseOptions {
     reason?: CloseReason;
     immediate?: boolean;
 }</code></pre>
+
+<h2>Tipo Intention (InteractionManager)</h2>
+
+<p>El <code>InteractionManager</code> traduce los eventos del DOM en <em>intenciones</em> tipadas. <code>Search</code> las enruta a la navegación/selección interna o a <code>VisibilityManager.handleIntention()</code>:</p>
+
+<pre data-lang="typescript"><code>type Intention =
+    | { type: 'open'; source: OpenReason }
+    | { type: 'close'; reason: CloseReason; immediate?: boolean; resetScroll?: boolean }
+    | { type: 'navigate'; delta: 1 | -1 }
+    | { type: 'select'; index?: number }
+    | { type: 'sticky'; region: 'pointer' | 'focus' | 'interaction'; on: boolean };</code></pre>
 
 <h2>SearchEventMap — Mapa tipado de eventos</h2>
 

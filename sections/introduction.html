@@ -8,7 +8,7 @@
 
 <p>
     Disponible en npm como <a href="https://www.npmjs.com/package/@jhoendryb/buscador-dinamico"><code>@jhoendryb/buscador-dinamico</code></a>
-    (v1.0.0). Instálalo con <code>npm install @jhoendryb/buscador-dinamico</code>.
+    (<span data-doc-version>v1.0.2</span>). Instálalo con <code>npm install @jhoendryb/buscador-dinamico</code>.
 </p>
 
 <div class="doc-callout doc-callout--info">
@@ -37,7 +37,7 @@
 
 <h2>Arquitectura</h2>
 
-<p>El componente sigue un patrón de composición OOP con 9 módulos principales:</p>
+<p>El componente sigue un patrón de composición OOP con 10 módulos principales:</p>
 
 <table>
     <thead>
@@ -58,6 +58,10 @@
         <tr>
             <td><code>VisibilityManager</code></td>
             <td>Gestión de estados de visibilidad del panel (FSM: closed → opening → open → closing)</td>
+        </tr>
+        <tr>
+            <td><code>InteractionManager</code></td>
+            <td>Delegación de eventos de interacción (focus, click, teclado, panel) con <code>AbortController</code>, traducidos en intenciones tipadas</td>
         </tr>
         <tr>
             <td><code>SearchingLocal</code></td>
