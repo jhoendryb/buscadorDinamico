@@ -23,6 +23,10 @@ var e = Object.defineProperty, t = (t, n) => {
 					let t = this.renderer.body.renderItems;
 					if (!t) break;
 					let n = t.querySelectorAll(".items");
+					if (n.length === 0) {
+						this.selectedIndex = -1;
+						break;
+					}
 					e.delta === 1 ? this.selectedIndex = Math.min(this.selectedIndex + 1, n.length - 1) : this.selectedIndex = Math.max(this.selectedIndex - 1, 0), this.#d(n);
 					break;
 				}
@@ -31,10 +35,10 @@ var e = Object.defineProperty, t = (t, n) => {
 					if (!t) break;
 					let n = t.querySelectorAll(".items");
 					if (typeof e.index == "number") {
-						if (this.events.listenerCount("itemSelected") === 0) break;
+						if (this.events.listenerCount("itemSelected") === 0 || n.length === 0 || !n[e.index]) break;
 						this.selectedIndex = e.index, this.#d(n), this.#f(n[e.index]);
 					} else {
-						if (this.selectedIndex < 0) break;
+						if (n.length === 0 || this.selectedIndex < 0) break;
 						this.#f(n[this.selectedIndex]);
 					}
 					this.visibility?.close({
@@ -260,7 +264,7 @@ var e = Object.defineProperty, t = (t, n) => {
 		});
 	}
 	#f(e) {
-		this.events.emit("itemSelected", {
+		!e || e.classList?.contains("search-no-results") || this.events.emit("itemSelected", {
 			item: e,
 			index: this.selectedIndex
 		});
@@ -806,7 +810,7 @@ var i = class {
 			tabindex: "0",
 			attributes: { role: "option" }
 		};
-		if (s.children.length === 0 && (!e || e.length === 0)) return c.textContent = n, s.appendChild(r(c)), !1;
+		if (s.children.length === 0 && (!e || e.length === 0) && c) return delete c.tabindex, c.attributes && (c.attributes.role = "status"), c.className = "search-no-results", c.textContent = n, s.appendChild(r(c)), !1;
 		let l = this.body.renderItems?.children.length, d = l ? l - 1 : 0, f = document.createDocumentFragment(), p = new u();
 		return e.forEach((e) => {
 			c.id = this.getUniqueClassName(`items-${d++}`);
@@ -1123,7 +1127,7 @@ var i = class {
 		let n = this.#e.signal;
 		e.addEventListener("focusin", (e) => {
 			let t = this.#t.input();
-			e.target === t && ((this.#t.listbox()?.querySelectorAll(".items").length ?? 0) > 0 && this.#i({
+			e.target === t && ((this.#t.listbox()?.querySelectorAll(".items, .search-no-results").length ?? 0) > 0 && this.#i({
 				type: "open",
 				source: "focus"
 			}), document.addEventListener("click", this.#a, { signal: n }));
