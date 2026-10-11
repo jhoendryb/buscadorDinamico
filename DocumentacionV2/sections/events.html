@@ -65,7 +65,7 @@ interface SearchEventInit {
 
 <h3>resultsCleared</h3>
 
-<p>Se emite cuando cambia el término de búsqueda y se limpian los resultados anteriores.</p>
+<p>Se emite cuando se limpian los resultados anteriores: al cambiar el término de búsqueda o al buscar con un término vacío (<code>''</code>). Se dispara después de resetear la lista, la paginación (página 1), el scroll del listbox y la selección actual.</p>
 
 <pre data-lang="typescript"><code>interface ResultsClearedEventData {
     previousSearchTerm: string;
@@ -101,7 +101,7 @@ interface SearchEventInit {
 
 <h3>itemSelected</h3>
 
-<p>Se emite cuando el usuario selecciona un item (clic o Enter).</p>
+<p>Se emite cuando el usuario selecciona un item (clic en el item, o Enter con <code>keyboardEnabled: true</code>). El panel se cierra inmediatamente después de la selección.</p>
 
 <pre data-lang="typescript"><code>interface ItemSelectedEventData {
     item: HTMLElement;
@@ -135,7 +135,7 @@ interface SearchEventInit {
 
 <h3>destroy</h3>
 
-<p>Se emite justo antes de destruir la instancia.</p>
+<p>Se emite justo antes de destruir la instancia. Después de emitirlo, se desmontan todos los listeners de interacción (<code>InteractionManager.detach()</code> vía <code>AbortController</code>).</p>
 
 <pre data-lang="typescript"><code>interface DestroyEventData {
     timestamp: string;
