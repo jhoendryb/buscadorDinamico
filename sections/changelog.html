@@ -29,6 +29,15 @@
     <li>El evento <code>resultsCleared</code> se emite <em>después</em> de limpiar la lista, paginación, scroll y selección, y también cuando el término de búsqueda es vacío (<code>''</code>)</li>
     <li>El indicador de carga solo se muestra al renderizar la página 1 (<code>showLoading && page &lt;= 1</code>), evitando parpadeos durante el scroll infinito</li>
     <li>Clic fuera del contenedor resetea el scroll del listbox antes de cerrar el panel</li>
+    <li><code>stickForInteraction()</code> y <code>cancelPendingClose()</code> son internos (<code>#stickForInteraction</code> / <code>#cancelPendingClose</code>): el comportamiento de permanencia se controla exclusivamente vía intenciones <code>sticky</code> de <code>handleIntention()</code></li>
+    <li><code>search.destroy()</code> ahora destruye también el <code>VisibilityManager</code> (<code>visibility.destroy()</code>), limpiando timers y estado del panel</li>
+</ul>
+
+<h3 id="eliminado-sin-publicar">Eliminado</h3>
+
+<ul>
+    <li><code>VisibilityManager.toggle()</code> — sin usos reales; alternar se puede hacer con <code>open()</code>/<code>close()</code></li>
+    <li><code>VisibilityManager.refresh()</code> — "escape hatch" de re-sincronización de DOM sin usos</li>
 </ul>
 
 <h3 id="corregido-sin-publicar">Corregido</h3>
