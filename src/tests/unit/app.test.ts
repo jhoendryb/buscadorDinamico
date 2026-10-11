@@ -10,7 +10,7 @@ import { Search } from '../../js/app';
         // Simular que el elemento no es visible para no activar scroll infinito en tests
         (this as any).callback([{ isIntersecting: false, target }]);
     }
-    unobserve(target: any) {
+    unobserve(_target: any) {
         // No hacer nada
     }
     disconnect() {

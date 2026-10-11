@@ -37,13 +37,6 @@ const DEFAULT_DATA = Array.from({ length: 2 }, (_, i) => ({
     description: `Description item ${i}`
 }));
 
-const DEFAULT_RESPONSE_ADAPTER = (response: any): any => {
-    return {
-        data: response.items,
-        countPage: response.count
-    }
-};
-
 function copiarCodigo(boton: HTMLElement) {
     const contenedor = boton.parentElement as HTMLElement;
     const codigo = contenedor.querySelector("code") as HTMLElement;

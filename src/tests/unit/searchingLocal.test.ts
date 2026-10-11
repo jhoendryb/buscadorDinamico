@@ -1,13 +1,10 @@
 import { SearchingLocal } from '../../js/searching/searchingLocal';
-import { ErrorHandler } from '../../js/error-handler';
 
 describe('SearchingLocal', () => {
     let searchingLocal: SearchingLocal;
     let mockSearchInstance: any;
-    let errorHandler: ErrorHandler;
 
     beforeEach(() => {
-        errorHandler = ErrorHandler.getInstance(true);
         mockSearchInstance = {
             data: [],
             searchTerm: '',

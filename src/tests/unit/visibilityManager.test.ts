@@ -26,6 +26,7 @@ describe('VisibilityManager', () => {
             onClosed: jest.fn()
         };
         manager = new VisibilityManager({
+            parent: () => document.body,
             panel: () => panel,
             control: () => control,
             listbox: () => listbox,
@@ -224,7 +225,7 @@ describe('VisibilityManager', () => {
     test('T9: dos instancias son completamente independientes', () => {
         const otherPanel = document.createElement('div');
         document.body.appendChild(otherPanel);
-        const other = new VisibilityManager({ panel: () => otherPanel });
+        const other = new VisibilityManager({ parent: () => document.body, panel: () => otherPanel });
 
         try {
             manager.open();
