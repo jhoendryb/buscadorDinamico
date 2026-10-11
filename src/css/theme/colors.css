@@ -28,6 +28,7 @@
     color: var(--search-placeholder-color);
 }
 
+.items-search .search-no-results,
 .items-search .items {
     background-color: var(--search-item-bg-color);
     color: var(--search-text-color-items);

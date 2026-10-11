@@ -40,7 +40,7 @@ export class InteractionManager {
             const input = this.#targets.input();
             if (e.target !== input) return;
             const listbox = this.#targets.listbox();
-            const count = listbox?.querySelectorAll('.items').length ?? 0;
+            const count = listbox?.querySelectorAll('.items, .search-no-results').length ?? 0;
             if (count > 0) this.#emit({ type: 'open', source: 'focus' });
             document.addEventListener('click', this.#onOutsideClick, { signal });
         }, { signal });

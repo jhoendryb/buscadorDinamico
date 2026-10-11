@@ -484,4 +484,96 @@ describe('Search', () => {
         expect(search.sortOrder).toBe('desc');
     });
 
+    // ISSUE #30: el mensaje de "sin resultados" no debe ser seleccionable
+
+    test('#30: el mensaje de sin resultados no debe ser una opción seleccionable', async () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Alpha' }],
+            keyboardEnabled: true
+        });
+        search.init();
+        await search.draw('zzzz', false);
+
+        const listbox = search.renderer.body.renderItems;
+        const message = listbox?.querySelector('.search-no-results');
+
+        expect(message).toBeTruthy();
+        expect(message?.getAttribute('role')).toBe('status');
+        expect(listbox?.querySelectorAll('.items').length).toBe(0);
+        expect(listbox?.querySelectorAll('[role="option"]').length).toBe(0);
+    });
+
+    test('#30: flechas con lista vacía no deben marcar ninguna opción', async () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Alpha' }],
+            keyboardEnabled: true
+        });
+        search.init();
+        await search.draw('zzzz', false);
+
+        const content = search.renderer.body.content as HTMLElement;
+        content.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+        content.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+
+        expect(search.selectedIndex).toBe(-1);
+        expect(search.renderer.body.renderItems?.querySelector('.selected')).toBeNull();
+        expect(search.renderer.body.renderItems?.getAttribute('aria-activedescendant')).toBeFalsy();
+    });
+
+    test('#30: Enter con lista vacía no debe emitir itemSelected', async () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Alpha' }],
+            keyboardEnabled: true
+        });
+        search.init();
+        await search.draw('zzzz', false);
+
+        const onSelected = jest.fn();
+        search.on('itemSelected', onSelected);
+
+        const content = search.renderer.body.content as HTMLElement;
+        content.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+        content.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+        expect(onSelected).not.toHaveBeenCalled();
+        expect(search.selectedIndex).toBe(-1);
+    });
+
+    test('#30: clic en el mensaje de sin resultados no debe emitir itemSelected', async () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Alpha' }],
+            keyboardEnabled: true
+        });
+        search.init();
+        await search.draw('zzzz', false);
+
+        const onSelected = jest.fn();
+        search.on('itemSelected', onSelected);
+
+        const message = search.renderer.body.renderItems?.querySelector('.search-no-results');
+        expect(message).toBeTruthy();
+        message?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+        expect(onSelected).not.toHaveBeenCalled();
+    });
+
+    test('#30: focusin con solo el mensaje de sin resultados debe abrir el panel', async () => {
+        const search = new Search({
+            element: '.test',
+            data: [{ name: 'Alpha' }],
+            keyboardEnabled: true
+        });
+        search.init();
+        await search.draw('zzzz', false);
+
+        const input = search.renderer.body.inputSearch as HTMLElement;
+        input.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+
+        expect(search.visibility?.isOpen).toBe(true);
+    });
+
 });

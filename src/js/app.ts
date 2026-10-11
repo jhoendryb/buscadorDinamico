@@ -561,6 +561,10 @@ class Search {
                 const listbox = this.renderer.body.renderItems;
                 if (!listbox) break;
                 const items = listbox.querySelectorAll('.items');
+                if (items.length === 0) {
+                    this.selectedIndex = Constants.NO_SELECTION;
+                    break;
+                }
                 if (i.delta === 1) {
                     this.selectedIndex = Math.min(this.selectedIndex + 1, items.length - 1);
                 } else {
@@ -577,11 +581,12 @@ class Search {
 
                 if (typeof i.index === 'number') {
                     if (this.events.listenerCount('itemSelected') === 0) break;
+                    if (items.length === 0 || !items[i.index]) break;
                     this.selectedIndex = i.index;
                     this.#highlightItem(items);
                     this.#selectItem(items[i.index]);
                 } else {
-                    if (this.selectedIndex < 0) break;
+                    if (items.length === 0 || this.selectedIndex < 0) break;
                     this.#selectItem(items[this.selectedIndex]);
                 }
                 this.visibility?.close({ reason: 'blur', immediate: true });
@@ -626,6 +631,7 @@ class Search {
      * this.#selectItem(items[0]);
      */
     #selectItem(item: Record<string, any>): void {
+        if (!item || item.classList?.contains('search-no-results')) return;
         this.events.emit('itemSelected', { item, index: this.selectedIndex } as Types.ItemSelectedEventData);
     }
     clear(): Search {

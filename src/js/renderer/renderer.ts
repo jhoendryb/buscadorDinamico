@@ -274,7 +274,10 @@ export class SearchRenderer {
         };
 
         // Si es la primera carga y no hay items, mostrar mensaje
-        if (container.children.length === 0 && (!data || data.length === 0)) {
+        if (container.children.length === 0 && (!data || data.length === 0) && jsonItem) {
+            delete jsonItem.tabindex;
+            if(jsonItem.attributes) jsonItem.attributes.role = "status";
+            jsonItem.className = "search-no-results";
             jsonItem.textContent = noResults;
             container.appendChild(createElement(jsonItem));
             return false;

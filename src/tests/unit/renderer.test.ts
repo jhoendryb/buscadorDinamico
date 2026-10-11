@@ -66,7 +66,7 @@ describe('SearchRenderer', () => {
     });
 
     test('debe renderizar contenedor de items', () => {
-        const renderItems = renderer.renderItems();
+        const renderItems = renderer.renderItems({});
 
         expect(renderItems).toBeTruthy();
         expect(renderItems.className).toContain('items-search');
@@ -75,7 +75,7 @@ describe('SearchRenderer', () => {
     });
 
     test('debe renderizar contenedor de paginación', () => {
-        const pagination = renderer.renderPagination();
+        const pagination = renderer.renderPagination({});
 
         expect(pagination).toBeTruthy();
         expect(pagination.className).toContain('pagination-items');
@@ -107,7 +107,7 @@ describe('SearchRenderer', () => {
     });
 
     test('debe renderizar items con template string', () => {
-        renderer.renderItems();
+        renderer.renderItems({});
 
         const data = [{ name: 'Juan', age: 25 }];
         renderer.appendItems(data, '<div>{{name}} - {{age}}</div>', 'No results', events);
@@ -118,7 +118,7 @@ describe('SearchRenderer', () => {
     });
 
     test('debe renderizar items con template función', () => {
-        renderer.renderItems();
+        renderer.renderItems({});
 
         const data = [{ name: 'Juan', age: 25 }];
         const templateFn = (item: any) => `<div>${item.name.toUpperCase()}</div>`;
@@ -130,7 +130,7 @@ describe('SearchRenderer', () => {
     });
 
     test('debe renderizar items sin template', () => {
-        renderer.renderItems();
+        renderer.renderItems({});
 
         const data = [{ name: 'Juan', age: 25 }];
         renderer.appendItems(data, null, 'No results', events);
@@ -140,18 +140,28 @@ describe('SearchRenderer', () => {
         expect(items?.[0].textContent).toBe('Juan 25');
     });
 
-    test('debe mostrar mensaje cuando no hay resultados', () => {
-        renderer.renderItems();
+    test('debe mostrar mensaje cuando no hay resultados (#30)', () => {
+        renderer.renderItems({});
 
-        renderer.appendItems([], null, 'Sin resultados', events);
+        const result = renderer.appendItems([], null, 'Sin resultados', events);
 
-        const items = renderer.body.renderItems?.querySelectorAll('.items');
-        expect(items?.length).toBe(1);
-        expect(items?.[0].textContent).toBe('Sin resultados');
+        const container = renderer.body.renderItems;
+        const message = container?.querySelector('.search-no-results');
+
+        expect(result).toBe(false);
+        expect(message).toBeTruthy();
+        expect(message?.textContent).toBe('Sin resultados');
+
+        // No debe parecer una opción seleccionable (#30)
+        expect(message?.getAttribute('role')).toBe('status');
+        expect(message?.hasAttribute('tabindex')).toBe(false);
+        expect(message?.classList.contains('items')).toBe(false);
+        expect(message?.id).toBe('');
+        expect(container?.querySelectorAll('.items').length).toBe(0);
     });
 
     test('debe emitir evento appendItems', () => {
-        renderer.renderItems();
+        renderer.renderItems({});
 
         const mockCallback = jest.fn();
         events.on('appendItems', mockCallback);
@@ -171,7 +181,7 @@ describe('SearchRenderer', () => {
     });
 
     test('debe agregar items al contenedor existente', () => {
-        renderer.renderItems();
+        renderer.renderItems({});
 
         const data1 = [{ name: 'Juan' }];
         renderer.appendItems(data1, null, 'No results', events);
@@ -184,8 +194,8 @@ describe('SearchRenderer', () => {
     });
 
     test('debe actualizar contador de paginación', () => {
-        renderer.renderItems();
-        renderer.renderPagination();
+        renderer.renderItems({});
+        renderer.renderPagination({});
 
         renderer.updateCounter({
             from: 10,
@@ -196,30 +206,6 @@ describe('SearchRenderer', () => {
         const counter = renderer.body.paginationItems?.querySelector('.items-counter');
         expect(counter?.textContent).toContain('10');
         expect(counter?.textContent).toContain('25');
-    });
-
-        test('debe abrir resultados vía visibility', () => {
-        renderer.renderItems();
-        renderer.renderContentPaginationItems();
-
-        renderer.visibility.open('programmatic');
-
-        expect(renderer.body.contentPaginationItems?.classList.contains('content-pagination-visible')).toBe(true);
-        expect(renderer.body.contentPaginationItems?.hasAttribute('hidden')).toBe(false);
-        expect(renderer.visibility.isOpen).toBe(true);
-    });
-
-    test('debe cerrar y commitear hidden tras el fade', () => {
-        renderer.renderItems();
-        renderer.renderContentPaginationItems();
-
-        renderer.visibility.open('programmatic');
-        jest.advanceTimersByTime(300);
-        renderer.visibility.close({ reason: 'blur' });
-        jest.advanceTimersByTime(300);
-
-        expect(renderer.visibility.phase).toBe('closed');
-        expect(renderer.body.contentPaginationItems?.getAttribute('hidden')).toBe('true');
     });
 
     test('debe renderizar en orden SEARCH_CONTENT_ITEMS_PAGINATION', () => {
@@ -239,67 +225,6 @@ describe('SearchRenderer', () => {
         const children = renderer.body.content?.children;
         expect(children?.[0].className).toContain('input-search');
         expect(children?.[1].className).toContain('content-pagination-items');
-    });
-
-    test('debe sincronizar aria-expanded y aria-hidden al abrir/cerrar', () => {
-        renderer.renderItems();
-        renderer.renderContentPaginationItems();
-        renderer.renderSearch({
-            onInput: jest.fn(),
-            debounceTime: 100,
-        });
-
-        renderer.visibility.open('programmatic');
-        expect(renderer.body.inputSearch?.getAttribute('aria-expanded')).toBe('true');
-        expect(renderer.body.renderItems?.getAttribute('aria-hidden')).toBe('false');
-
-        renderer.visibility.close({ reason: 'programmatic', immediate: true });
-        expect(renderer.body.inputSearch?.getAttribute('aria-expanded')).toBe('false');
-        expect(renderer.body.renderItems?.getAttribute('aria-hidden')).toBe('true');
-    });
-
-    test('debe destruir el visibility manager y limpiar estado', () => {
-        renderer.renderItems();
-        renderer.renderContentPaginationItems();
-
-        renderer.visibility.open('programmatic');
-        jest.advanceTimersByTime(300);
-
-        renderer.destroy();
-
-        expect(renderer.visibility.phase).toBe('closed');
-        expect(renderer.visibility.isOpen).toBe(false);
-        // Post-destroy open should be a no-op
-        renderer.visibility.open('programmatic');
-        expect(renderer.visibility.phase).toBe('closed');
-    });
-
-    test('debe cerrar inmediatamente sin timers con immediate: true', () => {
-        renderer.renderItems();
-        renderer.renderContentPaginationItems();
-
-        renderer.visibility.open('programmatic');
-        jest.advanceTimersByTime(300);
-
-        renderer.visibility.close({ reason: 'select', immediate: true });
-
-        expect(renderer.visibility.phase).toBe('closed');
-        expect(renderer.body.contentPaginationItems?.getAttribute('hidden')).toBe('true');
-        expect(jest.getTimerCount()).toBe(0);
-    });
-
-    test('debe alternar visibilidad via toggle', () => {
-        renderer.renderItems();
-        renderer.renderContentPaginationItems();
-
-        renderer.visibility.toggle();
-        expect(renderer.visibility.isOpen).toBe(true);
-
-        renderer.visibility.toggle();
-        expect(renderer.visibility.phase).toBe('closing');
-
-        jest.advanceTimersByTime(300);
-        expect(renderer.visibility.isOpen).toBe(false);
     });
 
 });

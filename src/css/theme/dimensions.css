@@ -7,6 +7,7 @@
     gap: var(--search-padding);
 }
 
+.items-search .search-no-results,
 .items-search .items {
     padding: var(--search-item-padding);
     border-left: 4px solid transparent;
