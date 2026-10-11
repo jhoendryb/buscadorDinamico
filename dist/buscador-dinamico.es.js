@@ -273,7 +273,7 @@ var e = Object.defineProperty, t = (t, n) => {
 		return this._destroyed ? this : (this.searchTerm = "", this.renderer.body.inputSearch && (this.renderer.body.inputSearch.value = this.searchTerm), this.renderer.body.renderItems && (this.renderer.body.renderItems.innerHTML = ""), this.sortBy !== null && this.clearSort(), this.cache.clear(), this.pagination.goToPage(1), this.draw(this.searchTerm, !0), this.selectedIndex = -1, this);
 	}
 	destroy() {
-		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.interaction?.detach(), this.interaction = void 0, this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
+		if (this._destroyed = !0, this.events.emit("destroy", { timestamp: (/* @__PURE__ */ new Date()).toISOString() }), this.interaction?.detach(), this.interaction = void 0, this.visibility?.destroy(), this.visibility = void 0, this.scrollObserver &&= (this.#o(), null), this.renderer.body.inputSearch) {
 			let e = this.renderer.body.inputSearch.cloneNode(!0);
 			this.renderer.body.inputSearch.parentNode && this.renderer.body.inputSearch.parentNode.replaceChild(e, this.renderer.body.inputSearch);
 		}
@@ -1015,72 +1015,66 @@ var i = class {
 		return this.#t === "open" || this.#t === "opening";
 	}
 	open(e = "programmatic") {
-		this.#c || this.isOpen || (this.#r++, this.#h(), this.#l(e));
+		this.#c || this.isOpen || (this.#r++, this.#_(), this.#d(e));
 	}
 	close(e = {}) {
 		if (this.#c || this.#t === "closed" || !e.immediate && this.#t === "closing") return;
 		let t = e.reason ?? "programmatic";
-		this.#n = t, this.#r++, this.#h(), this.#s = 0;
-		let n = this.#g();
+		this.#n = t, this.#r++, this.#_(), this.#s = 0;
+		let n = this.#v();
 		if (e.immediate || n <= 0) {
-			this.#e.hooks.onClose?.(t), this.#d(t);
+			this.#e.hooks.onClose?.(t), this.#p(t);
 			return;
 		}
-		this.#t = "closing", this.#v(), this.#m(() => this.#f(), n);
+		this.#t = "closing", this.#b(), this.#g(() => this.#m(), n);
 	}
-	toggle() {
-		this.isOpen ? this.close({ reason: "toggle" }) : this.open("toggle");
+	#l() {
+		this.#c || (this.#s = Date.now() + this.#e.hideDelayMs, this.#u());
 	}
-	stickForInteraction() {
-		this.#c || (this.#s = Date.now() + this.#e.hideDelayMs, this.cancelPendingClose());
-	}
-	cancelPendingClose() {
-		this.#c || this.#t !== "closing" || (this.#h(), this.#l("focus"));
-	}
-	refresh() {
-		this.#c || this.#v();
+	#u() {
+		this.#c || this.#t !== "closing" || (this.#_(), this.#d("focus"));
 	}
 	destroy() {
-		this.#c = !0, this.#r++, this.#h(), this.#a = !1, this.#o = !1, this.#s = 0, this.#t = "closed";
-	}
-	#l(e) {
-		this.#t = "opening", this.#v(), this.#e.hooks.onOpen?.(e);
-		let t = this.#g();
-		t <= 0 ? this.#u(e) : this.#m(() => this.#u(e), t);
-	}
-	#u(e) {
-		this.#c || !this.isOpen || (this.#t = "open", this.#v(), this.#e.hooks.onOpened?.(e));
+		this.#c = !0, this.#r++, this.#_(), this.#a = !1, this.#o = !1, this.#s = 0, this.#t = "closed";
 	}
 	#d(e) {
-		this.#t = "closed", this.#v(), this.#e.hooks.onClosed?.(e);
+		this.#t = "opening", this.#b(), this.#e.hooks.onOpen?.(e);
+		let t = this.#v();
+		t <= 0 ? this.#f(e) : this.#g(() => this.#f(e), t);
 	}
-	#f() {
+	#f(e) {
+		this.#c || !this.isOpen || (this.#t = "open", this.#b(), this.#e.hooks.onOpened?.(e));
+	}
+	#p(e) {
+		this.#t = "closed", this.#b(), this.#e.hooks.onClosed?.(e);
+	}
+	#m() {
 		if (this.#t === "closing") {
-			if (this.#p()) {
-				this.cancelPendingClose();
+			if (this.#h()) {
+				this.#u();
 				return;
 			}
-			this.#e.hooks.onClose?.(this.#n), this.#d(this.#n);
+			this.#e.hooks.onClose?.(this.#n), this.#p(this.#n);
 		}
 	}
-	#p() {
+	#h() {
 		if (this.#a || this.#o || Date.now() < this.#s) return !0;
 		let e = this.#e.panel(), t = typeof document < "u" ? document.activeElement : null;
 		return !!e && !!t && t !== document.body && e.contains(t);
 	}
-	#m(e, t) {
+	#g(e, t) {
 		let n = ++this.#r;
-		this.#h(), this.#i = setTimeout(() => {
+		this.#_(), this.#i = setTimeout(() => {
 			n === this.#r && e();
 		}, t);
 	}
-	#h() {
+	#_() {
 		this.#i !== null && (clearTimeout(this.#i), this.#i = null);
 	}
-	#g() {
-		return this.#_() ? this.#e.reducedMotionMs : this.#e.hideDelayMs;
+	#v() {
+		return this.#y() ? this.#e.reducedMotionMs : this.#e.hideDelayMs;
 	}
-	#_() {
+	#y() {
 		try {
 			return typeof matchMedia == "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 		} catch {
@@ -1099,12 +1093,12 @@ var i = class {
 				});
 				break;
 			case "sticky":
-				e.region === "pointer" ? this.#a = e.on : e.region === "focus" ? this.#o = e.on : e.on && this.stickForInteraction();
+				e.region === "pointer" ? this.#a = e.on : e.region === "focus" ? this.#o = e.on : e.on && this.#l();
 				break;
 			default: break;
 		}
 	}
-	#v() {
+	#b() {
 		let e = this.#e.panel();
 		if (!e) return;
 		let t = this.#t === "open" || this.#t === "opening";
