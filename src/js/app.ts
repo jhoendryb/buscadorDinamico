@@ -670,6 +670,8 @@ class Search {
 
         this.interaction?.detach();
         this.interaction = undefined;
+        this.visibility?.destroy();
+        this.visibility = undefined;
 
         if (this.scrollObserver) {
             this.#cleanupScrollDetection();

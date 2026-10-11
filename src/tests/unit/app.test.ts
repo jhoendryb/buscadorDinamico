@@ -237,6 +237,7 @@ describe('Search', () => {
         expect(mockCallback).toHaveBeenCalled();
         expect(search._data).toBeNull();
         expect(search.data).toEqual([]);
+        expect(search.visibility).toBeUndefined();
         expect(search.renderer.body.contentPaginationItems).toBeUndefined();
         expect(search.events.listenerCount('destroy')).toBe(0);
         expect(typeof search.pagination.setCountFunction).toBe('function');

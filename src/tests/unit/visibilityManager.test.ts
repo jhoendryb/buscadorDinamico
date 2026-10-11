@@ -69,13 +69,13 @@ describe('VisibilityManager', () => {
         expect(hooks.onClosed).toHaveBeenCalledTimes(1);
     });
 
-    test('T2: stickForInteraction a mitad de fade revierte a abierto; sin stick commitea cierre', () => {
+    test('T2: intención sticky de interacción a mitad de fade revierte a abierto; sin sticky commitea cierre', () => {
         manager.open();
         jest.advanceTimersByTime(300); // open
         manager.close({ reason: 'blur' });
         jest.advanceTimersByTime(100); // mid-fade, fase closing
 
-        manager.stickForInteraction();
+        manager.handleIntention({ type: 'sticky', region: 'interaction', on: true });
 
         expect(manager.phase).toBe('opening');
         jest.advanceTimersByTime(300);
@@ -105,20 +105,20 @@ describe('VisibilityManager', () => {
         expect(jest.getTimerCount()).toBe(0);
     });
 
-    test('T4: matriz de toggle cubre las cuatro fases', () => {
-        manager.toggle(); // closed -> opening
+    test('T4: matriz de fases open/close cubre las cuatro fases', () => {
+        manager.open('focus'); // closed -> opening
         expect(manager.phase).toBe('opening');
 
-        manager.toggle(); // opening -> closing
+        manager.close({ reason: 'blur' }); // opening -> closing
         expect(manager.phase).toBe('closing');
 
-        manager.toggle(); // closing -> reopening (mata el timer del close)
+        manager.open('focus'); // closing -> reopening (mata el timer del close)
         expect(manager.phase).toBe('opening');
 
         jest.advanceTimersByTime(300);
         expect(manager.phase).toBe('open');
 
-        manager.toggle(); // open -> closing
+        manager.close({ reason: 'blur' }); // open -> closing
         expect(manager.phase).toBe('closing');
 
         jest.advanceTimersByTime(300);

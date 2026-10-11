@@ -35,7 +35,6 @@ export class InteractionManager {
         this.#abort = new AbortController();
         const signal = this.#abort.signal;
 
-        // HOY: app.ts L555-562 (focusin) + L541-552 (outside click)
         content.addEventListener('focusin', (e) => {
             const input = this.#targets.input();
             if (e.target !== input) return;
@@ -45,7 +44,6 @@ export class InteractionManager {
             document.addEventListener('click', this.#onOutsideClick, { signal });
         }, { signal });
 
-        // HOY: app.ts L565-582 (click en item)
         content.addEventListener('click', (e) => {
             const listbox = this.#targets.listbox();
             if (!listbox) return;
@@ -55,7 +53,6 @@ export class InteractionManager {
             this.#emit({ type: 'select', index: Array.from(items).indexOf(item as Element) });
         }, { signal });
 
-        // HOY: visibilityManager.ts L226-234 (Escape) + app.ts L586-604 (flechas/Enter)
         content.addEventListener('keydown', (e) => {
             const key = (e as KeyboardEvent).key;
             if (key === 'Escape') {
@@ -77,7 +74,6 @@ export class InteractionManager {
             }
         }, { signal });
 
-        // HOY: visibilityManager.ts L235-266 (pointer/focus/touch del panel)
         panel.addEventListener('pointerenter', () => this.#emit({ type: 'sticky', region: 'pointer', on: true }), { signal });
         panel.addEventListener('pointerleave', () => this.#emit({ type: 'sticky', region: 'pointer', on: false }), { signal });
         panel.addEventListener('pointerdown', () => this.#emit({ type: 'sticky', region: 'interaction', on: true }), { signal });
@@ -90,7 +86,6 @@ export class InteractionManager {
         }, { signal });
     }
 
-    // ANTES: 5 removeEventListener dispersos en destroy() de app.ts
     detach(): void {
         this.#abort?.abort();
         this.#abort = null;

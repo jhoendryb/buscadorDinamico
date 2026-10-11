@@ -65,35 +65,21 @@ export class VisibilityManager {
         this.#schedule(() => this.#resolveClosing(), duration);
     }
 
-    toggle(): void {
-        if (this.isOpen) {
-            this.close({ reason: 'toggle' });
-        } else {
-            this.open('toggle');
-        }
-    }
-
     /**
      * Indica que hay una interacción en vuelo sobre el panel (click).
      * Suple el antiguo hack de mutar _isVisible desde appendItems.
      */
-    stickForInteraction(): void {
+    #stickForInteraction(): void {
         if (this.#destroyed) return;
         this.#stickyUntil = Date.now() + this.#opts.hideDelayMs;
-        this.cancelPendingClose();
+        this.#cancelPendingClose();
     }
 
     /** Revierte un cierre en curso (usado por pointerenter/focusin del panel). */
-    cancelPendingClose(): void {
+    #cancelPendingClose(): void {
         if (this.#destroyed || this.#phase !== 'closing') return;
         this.#clearTimer();
         this.#enterOpening('focus');
-    }
-
-    /** Re-sincroniza DOM desde la fase actual (escape hatch). */
-    refresh(): void {
-        if (this.#destroyed) return;
-        this.#syncDom();
     }
 
     destroy(): void {
@@ -139,7 +125,7 @@ export class VisibilityManager {
     #resolveClosing(): void {
         if (this.#phase !== 'closing') return;
         if (this.#shouldStayOpen()) {
-            this.cancelPendingClose();
+            this.#cancelPendingClose();
             return;
         }
         this.#opts.hooks.onClose?.(this.#lastCloseReason);
@@ -202,7 +188,7 @@ export class VisibilityManager {
             case 'sticky':
                 if (intention.region === 'pointer') this.#pointerInside = intention.on;
                 else if (intention.region === 'focus') this.#focusInside = intention.on;
-                else if (intention.on) this.stickForInteraction();
+                else if (intention.on) this.#stickForInteraction();
                 break;
             default:
                 break;
