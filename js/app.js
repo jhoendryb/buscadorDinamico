@@ -17,7 +17,7 @@ const App = {
         this.setupPreload();
 
         console.log('%c🔍 Buscador Dinámico Docs', 'font-size: 14px; font-weight: bold; color: #6366f1;');
-        console.log('%cDocumentación v1.0.2', 'font-size: 11px; color: #878d9e;');
+        console.log('%cDocumentación v1.1.0', 'font-size: 11px; color: #878d9e;');
     },
 
     setupThemeSync() {
