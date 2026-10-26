@@ -215,6 +215,8 @@ const DocSearch = {
     pendingScrollTo: null,
     /** Observer para detectar carga de nuevo contenido */
     contentObserver: null,
+    /** Bandera para inicializar el buscador una sola vez */
+    searchInitialized: false,
 
     /**
      * Punto de entrada. Crea el contenedor, inicializa el componente
@@ -225,10 +227,19 @@ const DocSearch = {
         if (!this.container) return;
 
         this.createSearchContainer();
-        this.initializeSearch();
         this.setupContentObserver();
         this.setupHashScrollListener();
         this.setupKeyboardShortcut();
+    },
+
+    /**
+     * Inicializa la instancia del componente Search.
+     * Se llama cuando el contenedor es visible (al hacer clic en el botón de búsqueda).
+     */
+    ensureInitialized() {
+        if (this.searchInitialized) return;
+        this.searchInitialized = true;
+        this.initializeSearch();
     },
 
     /**
@@ -277,7 +288,14 @@ const DocSearch = {
         this.instance.on('itemSelected', ({ item, close }) => {
             console.log(item);
             this.handleResultSelection(item);
-            // close();
+
+            // Cerrar el panel de búsqueda en móvil tras seleccionar
+            const headerCenter = this.container?.parentElement;
+            if (headerCenter) {
+                headerCenter.classList.remove('search-open');
+                document.body.style.overflow = '';
+            }
+            close();
         });
     },
 

@@ -38,7 +38,7 @@
     }
 
     .doc-header__center {
-        display: none;
+        display: block;
         position: absolute;
         top: 100%;
         left: 0;
@@ -50,26 +50,80 @@
         padding: var(--doc-spacing-md);
         box-shadow: var(--doc-shadow-lg);
         z-index: var(--doc-z-dropdown);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity var(--doc-transition-fast), visibility var(--doc-transition-fast);
+        pointer-events: none;
     }
 
     .doc-header__center.search-open {
-        display: block;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .doc-header__center .doc-search {
+        width: 100%;
     }
 
     .doc-header__center .app-search {
         width: 100%;
         max-width: none;
+        display: flex;
+        flex-direction: column;
     }
 
     .doc-header__center .input-search {
         width: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    .doc-header__center .input-search input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid var(--doc-border-primary);
+        border-radius: var(--doc-radius-md);
+        background: var(--doc-bg-secondary);
+        color: var(--doc-text-primary);
+        font-size: var(--doc-font-size-sm);
+        outline: none;
+        transition: border-color var(--doc-transition-fast), box-shadow var(--doc-transition-fast);
+    }
+
+    .doc-header__center .input-search input:focus {
+        border-color: var(--doc-accent-primary);
+        box-shadow: 0 0 0 3px var(--doc-accent-light);
+        background: var(--doc-bg-primary);
     }
 
     .doc-header__center .app-search .content-pagination-items {
         position: static;
         max-height: 60vh;
+        overflow-y: auto;
         border-radius: var(--doc-radius-lg);
         box-shadow: var(--doc-shadow-lg);
+        background: var(--doc-bg-primary);
+        margin-top: var(--doc-spacing-xs);
+    }
+
+    .doc-header__center .app-search .items-search {
+        padding: 0;
+    }
+
+    .doc-header__center .app-search .items-search .items {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--doc-border-primary);
+        cursor: pointer;
+        transition: background var(--doc-transition-fast);
+    }
+
+    .doc-header__center .app-search .items-search .items:hover {
+        background: var(--doc-bg-hover);
+    }
+
+    .doc-header__center .app-search .items-search .items.selected {
+        background: var(--doc-accent-light);
     }
 
     .doc-header__brand {
