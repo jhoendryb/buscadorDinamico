@@ -2,15 +2,24 @@ const Navigation = {
     sidebar: null,
     overlay: null,
     menuBtn: null,
+    searchBtn: null,
+    searchContainer: null,
     isOpen: false,
+    isSearchOpen: false,
     mediaQuery: null,
 
     init() {
         this.sidebar = document.getElementById('doc-sidebar');
         this.overlay = document.getElementById('sidebar-overlay');
         this.menuBtn = document.getElementById('menu-toggle');
+        this.searchBtn = document.getElementById('search-toggle');
+        this.searchContainer = document.getElementById('doc-search-container');
 
         if (!this.sidebar || !this.overlay || !this.menuBtn) return;
+
+        if (this.searchBtn && this.searchContainer) {
+            this.bindSearchEvents();
+        }
 
         this.mediaQuery = window.matchMedia('(max-width: 768px)');
 
@@ -37,7 +46,79 @@ const Navigation = {
             if (e.key === 'Escape' && this.isOpen) {
                 this.close();
             }
+            if (e.key === 'Escape' && this.isSearchOpen) {
+                this.closeSearch();
+            }
         });
+    },
+
+    bindSearchEvents() {
+        this.searchBtn.addEventListener('click', () => {
+            if (this.isSearchOpen) {
+                this.closeSearch();
+            } else {
+                this.openSearch();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                if (this.isSearchOpen) {
+                    this.closeSearch();
+                } else {
+                    this.openSearch();
+                }
+            }
+        });
+    },
+
+    openSearch() {
+        this.isSearchOpen = true;
+        this.searchBtn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+        this.searchBtn.classList.add('active');
+        this.focusSearchInput();
+
+        // Close sidebar if open
+        if (this.isOpen) {
+            this.close();
+        }
+    },
+
+    closeSearch() {
+        this.isSearchOpen = false;
+        this.searchBtn.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+        this.searchBtn.classList.remove('active');
+        this.clearFocus();
+
+        // Close any open search results
+        if (this.searchContainer) {
+            const results = this.searchContainer.querySelector('.app-search .content-pagination-items');
+            if (results) {
+                results.classList.remove('content-pagination-visible');
+            }
+        }
+    },
+
+    focusSearchInput() {
+        setTimeout(() => {
+            const input = this.searchContainer?.querySelector('.input-search input');
+            if (input) {
+                input.focus();
+                input.select();
+            }
+        }, 50);
+    },
+
+    clearFocus() {
+        setTimeout(() => {
+            const activeEl = document.activeElement;
+            if (activeEl && activeEl.blur) {
+                activeEl.blur();
+            }
+        }, 0);
     },
 
     handleMediaChange() {
