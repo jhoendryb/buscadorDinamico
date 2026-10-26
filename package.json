@@ -44,5 +44,8 @@
     "src/css",
     "README.md",
     "LICENSE"
-  ]
+  ],
+  "dependencies": {
+    "@jhoendryb/buscador-dinamico": "^1.0.2"
+  }
 }
