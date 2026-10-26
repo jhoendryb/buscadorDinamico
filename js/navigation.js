@@ -1,3 +1,5 @@
+import DocSearch from './search.js';
+
 const Navigation = {
     sidebar: null,
     overlay: null,
@@ -32,7 +34,21 @@ const Navigation = {
     bindEvents() {
         this.menuBtn.addEventListener('click', () => this.toggle());
 
-        this.overlay.addEventListener('click', () => this.close());
+        this.overlay.addEventListener('click', () => {
+            this.close();
+            if (this.isSearchOpen) {
+                this.closeSearch();
+            }
+        });
+
+        // Cerrar búsqueda al hacer clic fuera del header
+        document.addEventListener('click', (e) => {
+            if (!this.isSearchOpen) return;
+            const header = document.querySelector('.doc-header');
+            if (header && !header.contains(e.target)) {
+                this.closeSearch();
+            }
+        });
 
         this.sidebar.querySelectorAll('.doc-sidebar__link').forEach(link => {
             link.addEventListener('click', (e) => {
@@ -78,6 +94,16 @@ const Navigation = {
         this.searchBtn.setAttribute('aria-expanded', 'true');
         document.body.style.overflow = 'hidden';
         this.searchBtn.classList.add('active');
+
+        // Add search-open class to parent container
+        const headerCenter = this.searchContainer?.parentElement;
+        if (headerCenter) {
+            headerCenter.classList.add('search-open');
+        }
+
+        // Initialize search component when container becomes visible
+        DocSearch.ensureInitialized();
+
         this.focusSearchInput();
 
         // Close sidebar if open
@@ -91,6 +117,13 @@ const Navigation = {
         this.searchBtn.setAttribute('aria-expanded', 'false');
         document.body.style.overflow = '';
         this.searchBtn.classList.remove('active');
+
+        // Remove search-open class from parent container
+        const headerCenter = this.searchContainer?.parentElement;
+        if (headerCenter) {
+            headerCenter.classList.remove('search-open');
+        }
+
         this.clearFocus();
 
         // Close any open search results
@@ -104,12 +137,12 @@ const Navigation = {
 
     focusSearchInput() {
         setTimeout(() => {
-            const input = this.searchContainer?.querySelector('.input-search input');
+            const input = this.searchContainer?.querySelector('.app-search input');
             if (input) {
                 input.focus();
                 input.select();
             }
-        }, 50);
+        }, 100);
     },
 
     clearFocus() {
