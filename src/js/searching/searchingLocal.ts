@@ -17,6 +17,7 @@ export class SearchingLocal {
                 }
             });
             dataItem.children = item.innerHTML.trim();
+            item.remove();
             return dataItem;
         });
     }

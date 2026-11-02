@@ -90,7 +90,7 @@ function reactionSearch({ form, search, emit = null }: Record<string, any>): Sea
             if (typeof value === 'function') {
                 return value.toString();
             }
-            
+
             if (key == "template") {
                 return String(value).replace(/</g, '&lt;').replace(/>/g, '&gt;');
             }
