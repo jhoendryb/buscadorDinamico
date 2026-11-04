@@ -83,6 +83,7 @@ function reactionSearch({ form, search, emit = null }: Record<string, any>): Sea
     values["procesServer"] = true;
     if (!values["procesServer"]) delete values["fetch"];
     values["keyboardEnabled"] = true;
+    values["developmentMode"] = true;
 
     const code: HTMLElement | null = document.querySelector(".code-prepareSearch");
     if (code) {
