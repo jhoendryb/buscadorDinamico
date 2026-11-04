@@ -427,12 +427,16 @@ class Search {
         if (showLoading && page <= 1) {
             this.renderer.showLoading(this.t.loading || '');
         }
-
-        const result = await loadFetch();
-        if (result) {
-            this._ajaxResponse.success = { countPage: result.countPage };
+        try {
+            const result = await loadFetch();
+            if (result) {
+                this._ajaxResponse.success = { countPage: result.countPage };
+            }
+            return result;
+        } catch {
+            this._ajaxResponse.success = { countPage: 0 };
+            return { data: [], countPage: 0 };
         }
-        return result;
     }
     #renderCurrentPage(firstLoad: boolean = false): void {
         const next = this.pagination.getPageItems(this.procesServer ? null : this._data);
