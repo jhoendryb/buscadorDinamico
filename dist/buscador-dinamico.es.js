@@ -206,8 +206,15 @@ var e = Object.defineProperty, t = (t, n) => {
 			return this.cacheEnabled && this.cache.set(r, n), n;
 		};
 		n && t <= 1 && this.renderer.showLoading(this.t.loading || "");
-		let a = await i();
-		return a && (this._ajaxResponse.success = { countPage: a.countPage }), a;
+		try {
+			let e = await i();
+			return e && (this._ajaxResponse.success = { countPage: e.countPage }), e;
+		} catch {
+			return this._ajaxResponse.success = { countPage: 0 }, {
+				data: [],
+				countPage: 0
+			};
+		}
 	}
 	#l(e = !1) {
 		let t = this.pagination.getPageItems(this.procesServer ? null : this._data);
@@ -879,7 +886,7 @@ var i = class {
 			let t = {};
 			return Array.from(e.attributes).forEach((e) => {
 				e.name.startsWith("data-") && (t[e.name.replace("data-", "")] = e.value.trim());
-			}), t.children = e.innerHTML.trim(), t;
+			}), t.children = e.innerHTML.trim(), e.remove(), t;
 		});
 	}
 	search(e, t, n, r) {

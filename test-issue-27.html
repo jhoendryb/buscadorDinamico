@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Issue #27</title>
+    <link rel="stylesheet" href="./src/css/index.css">
+</head>
+<body>
+    <div class="app-search"></div>
+
+    <script type="module">
+        import { Search } from './src/js/index.js';
+
+        const search = new Search({
+            element: '.app-search',
+            procesServer: true,
+            fetch: {
+                url: 'https://httpstat.us/500', // Endpoint que siempre retorna 500
+                method: 'GET'
+            },
+            keyboardEnabled: true,
+            itemsPerPage: 10
+        });
+
+        search.init();
+
+        // Simular entrada después de que cargue
+        setTimeout(() => {
+            const input = document.querySelector('#filter-search');
+            if (input) {
+                input.value = 'test';
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
