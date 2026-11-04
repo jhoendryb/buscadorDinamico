@@ -230,9 +230,6 @@ const DocSearch = {
         this.setupContentObserver();
         this.setupHashScrollListener();
         this.setupKeyboardShortcut();
-
-        // Inicializar el buscador siempre para que funcione en desktop y móvil
-        this.ensureInitialized();
     },
 
     /**
