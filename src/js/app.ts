@@ -78,6 +78,10 @@ class Search {
         this.element = undefined as unknown as string;
         this.searchTerm = "";
         this.data = [];
+        this._data = [];
+        this._ajaxResponse = {};
+        this.t = {};
+        this.scrollObserver = null;
         this.procesServer = false;
         this.keyboardEnabled = false;
         this.cacheEnabled = false;
@@ -103,9 +107,6 @@ class Search {
 
         try {
             this.#validateParameters()
-
-            this.scrollObserver = null;
-            this._ajaxResponse = {};
 
             this.t = { ...Search.#defaultTranslations, ...translation };
 
@@ -141,10 +142,7 @@ class Search {
             this.visibility = undefined;
             this.interaction = undefined;
         } catch (error) {
-            if (error instanceof SearchError) {
-                this.errorHandler.logError(error, this.events);
-            }
-            throw error;
+            this.#handleError(error, true);
         }
     }
     /**
@@ -213,24 +211,21 @@ class Search {
 
             return this;
         } catch (error) {
-            if (error instanceof SearchError) {
-                this.errorHandler.logError(error);
-            }
-            throw error;
+            this.#handleError(error);
+            return this;
         }
     }
     #validateParameters(): void {
         this.errorHandler.validateRequired(this.element, 'element', ErrorCode.ELEMENT_REQUIRED);
         this.errorHandler.validateType(this.element, 'string', 'element', ErrorCode.ELEMENT_TYPE_INVALID);
 
-        const isBoolean = {
-            procesServer: this.procesServer, keyboardEnabled: this.keyboardEnabled,
-            cacheEnabled: this.cacheEnabled, developmentMode: this.developmentMode,
-            highlightEnabled: this.highlightEnabled
-        }
+        const booleanProps: (keyof Search)[] = [
+            'procesServer', 'keyboardEnabled', 'cacheEnabled',
+            'developmentMode', 'highlightEnabled'
+        ];
 
-        Object.keys(isBoolean).forEach(key => {
-            this.errorHandler.validateType(isBoolean[key as keyof typeof isBoolean], 'boolean', key, ErrorCode.INVALID_TYPE_FORMAT);
+        booleanProps.forEach(key => {
+            this.errorHandler.validateType(this[key], 'boolean', String(key), ErrorCode.INVALID_TYPE_FORMAT);
         });
 
         if (this.procesServer) {
@@ -252,15 +247,34 @@ class Search {
         const regex = new RegExp(`(${escaped})`, 'gi');
         return text.replace(regex, `<span class="${['search-highlight', this.highlightClass].filter(cls => cls).join(' ')}">$1</span>`);
     }
-    async #executeSearch(searchTerm: string, showLoading: boolean = false): Promise<Types.SearchResult | null> {
+    async #executeSearch(searchTerm: string, showLoading: boolean = false, page: number = this.pagination.getCurrentPage()): Promise<Types.SearchResult | null> {
         this.abortController?.abort();
         this.abortController = new AbortController();
 
         if (this.procesServer) {
-            return await this.#fetchFromServer(searchTerm, this.pagination.getCurrentPage(), showLoading);
+            return await this.#fetchFromServer(searchTerm, page, showLoading);
         }
+
         const filtered = this.searchingLocal.search(searchTerm, this.data, this.sortBy, this.sortOrder);
         return { data: filtered };
+    }
+    #resetSearchState(newSearchTerm: string): void {
+        if (this.renderer.body.renderItems && (newSearchTerm !== this.searchTerm || newSearchTerm === "")) {
+            this.renderer.body.renderItems.scrollTop = 0;
+            this.renderer.body.renderItems.innerHTML = '';
+            this.renderer.body.renderItems.removeAttribute('aria-activedescendant');
+            this.pagination.goToPage(1);
+            this.selectedIndex = Constants.NO_SELECTION;
+            if (newSearchTerm !== this.searchTerm) {
+                this.events.emit('resultsCleared', { previousSearchTerm: this.searchTerm } as Types.ResultsClearedEventData);
+            }
+        }
+    }
+    #handleError(error: unknown, emitEvents: boolean = false): void {
+        if (error instanceof SearchError) {
+            this.errorHandler.logError(error, emitEvents ? this.events : undefined);
+        }
+        throw error;
     }
     /**
      * Ejecuta una búsqueda y renderiza los resultados.
@@ -271,14 +285,8 @@ class Search {
     async draw(searchTerm: string = this.searchTerm, isEvent: boolean = false): Promise<Search> {
         if (this._destroyed) return this;
         const drawId = ++this.currentDrawId;
-        if (this.renderer.body.renderItems && (searchTerm !== this.searchTerm || searchTerm === "")) {
-            this.renderer.body.renderItems.scrollTop = 0;
-            this.renderer.body.renderItems.innerHTML = '';
-            this.renderer.body.renderItems.removeAttribute('aria-activedescendant');
-            this.pagination.goToPage(1);
-            this.selectedIndex = -1;
-            this.events.emit('resultsCleared', { previousSearchTerm: this.searchTerm } as Types.ResultsClearedEventData);
-        }
+
+        this.#resetSearchState(searchTerm);
 
         const searchResult = await this.#executeSearch(searchTerm, true);
 
@@ -375,7 +383,7 @@ class Search {
             const nextPage = this.pagination.loadNextPage();
             if (this.procesServer) {
                 let searchResult: Types.SearchResult | null = null;
-                searchResult = await this.#fetchFromServer(this.searchTerm, nextPage);
+                searchResult = await this.#executeSearch(this.searchTerm, true, nextPage);
                 this._data = searchResult?.data || [];
             }
             this.#renderCurrentPage(this.pagination.getCurrentPage() === 1);
@@ -640,20 +648,19 @@ class Search {
     }
     clear(): Search {
         if (this._destroyed) return this;
-        this.searchTerm = "";
 
-        if (this.renderer.body.inputSearch) {
-            (this.renderer.body.inputSearch as HTMLInputElement).value = this.searchTerm;
-        }
-        if (this.renderer.body.renderItems) {
-            this.renderer.body.renderItems.innerHTML = "";
-        }
         if (this.sortBy !== null) this.clearSort();
 
+        if (!this.renderer.body.inputSearch) return this;
+
         this.cache.clear();
-        this.pagination.goToPage(1);
+
+        this.searchTerm = "";
+        (this.renderer.body.inputSearch as HTMLInputElement).value = this.searchTerm;
+
+        this.#resetSearchState(this.searchTerm);
+
         this.draw(this.searchTerm, true);
-        this.selectedIndex = Constants.NO_SELECTION;
         return this;
     }
     /**
